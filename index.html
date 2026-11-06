@@ -1,0 +1,959 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>カンペ先生 ドバイ編</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&display=swap">
+<style>
+/* 構図: 夜の空港の暗い窓(カンペ先生グアム編と同じ作り)。場所マップ → 場所の絵+黒い会話窓 → 大きなカンペ → 単語3択 → 日本語で答え合わせ。1つの見た目に決め打ち(単一テーマ) */
+:root{--bg:#0d1226;--win:#05070f;--line:#f4f1e8;--ink:#10131f;--paper:#fff6d8;--gold:#ffc72c;--hot:#ff5a3c;--ok:#34d27b;--mute:#9aa6c4;--strong:#d6362a;--navy:#27325a;--brown:#2a1a10;--info:#6cc0f5;--bad:#ff8a7a;color-scheme:dark}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;box-sizing:border-box;background:var(--bg);color:var(--line);font-family:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN","Hiragino Sans",system-ui,sans-serif;font-size:14px;padding-block:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));overflow:hidden;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+#app{position:relative;height:100%;max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:8px;min-height:0}
+#app.shake{animation:shk .32s}
+@keyframes shk{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+/* ---- マップ ---- */
+#mapView{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}
+.mapbar{display:flex;align-items:center;justify-content:space-between;gap:8px;flex:none}
+.mapbar h1{margin:0;font-size:16px;font-weight:800;line-height:1.25;text-wrap:balance}
+.mapbar h1 small{display:block;font-size:11px;font-weight:500;color:var(--mute)}
+.badge{flex:none;font-size:11px;font-weight:800;color:var(--bg);background:var(--gold);border-radius:6px;padding:2px 8px}
+#pips{display:flex;gap:4px;flex-wrap:wrap;flex:none}
+#pips i{width:12px;height:12px;border:2px solid var(--line);border-radius:3px;background:var(--win)}
+#pips i.on{background:var(--gold);border-color:var(--gold)}
+#map{position:relative;flex:1;min-height:0;border:3px solid var(--line);border-radius:6px;overflow:hidden;background-color:#efe6d2;box-shadow:0 0 0 2px var(--win),0 0 0 4px #5b6690}
+#paths{position:absolute;inset:0;width:100%;height:100%}
+#paths line{stroke:#b98b4a;stroke-width:8;stroke-linecap:butt;stroke-dasharray:8 8;vector-effect:non-scaling-stroke}
+.node{position:absolute;width:66px;height:66px;margin:-33px 0 0 -33px;padding:0;font:inherit;background:var(--paper);border:3px solid var(--brown);border-radius:6px;box-shadow:0 5px 0 var(--brown);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2}
+.node .ico{font-size:34px;line-height:1}
+.node:active{transform:translateY(3px);box-shadow:0 2px 0 var(--brown)}
+.node .nm{position:absolute;top:70px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:11px;font-weight:800;color:var(--ink);background:rgba(255,246,216,.92);border:2px solid var(--brown);border-radius:6px;padding:0 6px}
+.node .star{position:absolute;top:-11px;right:-9px;font-size:20px;color:var(--gold);text-shadow:0 2px 0 var(--brown);display:none}
+.node.done .star{display:block}
+.node .dots{position:absolute;bottom:-14px;left:0;right:0;display:flex;gap:4px;justify-content:center}
+.node .dots i{width:9px;height:9px;border-radius:2px;border:2px solid var(--brown);background:#fff6d8}
+.node .dots i.on{background:var(--gold)}
+.walker{position:absolute;z-index:4;pointer-events:none;transition:left .75s ease-in-out,top .75s ease-in-out}
+#hero{transform:translate(-50%,16px)}
+#buddy{transform:translate(-135%,26px);transition-duration:.95s}
+#hero canvas,#buddy canvas{display:block;image-rendering:pixelated}
+.foot{margin:0;font-size:11px;line-height:1.6;color:var(--mute);flex:none}
+/* ---- 場面 ---- */
+#sceneView{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;position:relative}
+.stage{position:relative;flex:none}
+#scene{display:block;width:100%;aspect-ratio:320/150;image-rendering:pixelated;border:3px solid var(--line);border-radius:6px;background:#222}
+#exitBtn{position:absolute;top:6px;right:6px;width:38px;height:38px;border-radius:10px;border:2px solid var(--line);background:rgba(5,7,15,.75);color:var(--line);font:inherit;font-size:18px;font-weight:800;cursor:pointer;z-index:3;padding:0}
+#tip{position:absolute;left:6px;top:6px;max-width:72%;background:rgba(5,7,15,.85);border:2px solid var(--line);border-radius:8px;padding:3px 8px;font-size:12px;font-weight:800;line-height:1.35;pointer-events:none}
+#tip small{display:block;font-weight:500;color:var(--gold);font-size:11px}
+.win{flex:none;position:relative;background:var(--win);border:3px solid var(--line);border-radius:6px;padding:12px 14px 10px;min-height:76px;box-shadow:0 0 0 2px var(--win),0 0 0 4px #5b6690}
+.win .who{position:absolute;top:-12px;left:12px;background:var(--win);border:2px solid var(--line);border-radius:4px;padding:0 8px;font-size:12px;font-weight:800;letter-spacing:.04em;max-width:calc(100% - 140px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.win .who:empty{display:none}
+.win .tag{position:absolute;top:-12px;right:12px;border-radius:4px;padding:0 8px;font-size:12px;font-weight:800;border:2px solid var(--line);background:var(--win)}
+.win .tag.good{color:var(--ok);border-color:var(--ok)}.win .tag.bad{color:var(--bad);border-color:var(--bad)}.win .tag.info{color:var(--info);border-color:var(--info)}.win .tag.tbd{color:var(--mute);border-color:var(--mute)}
+.win .tag:empty{display:none}
+.win p{margin:0;font-size:18px;line-height:1.5;font-weight:800;min-height:54px}
+.win .tap{position:absolute;right:8px;bottom:4px;font-size:10px;color:var(--mute)}
+#panel{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+.cue{background:var(--paper);color:var(--ink);border:3px solid var(--brown);border-radius:10px;padding:12px 12px 10px;display:flex;flex-wrap:wrap;gap:2px 10px;align-items:baseline;align-content:center;flex:1;min-height:0;position:relative}
+.cue .w{font-weight:800;font-size:18px;color:#6b6552;transition:transform .12s,color .12s}
+.cue .w.s{font-size:31px;line-height:1.15;color:var(--strong)}
+.cue .w.on{transform:scale(1.15);color:#0a7c4a}
+.cue .lab{position:absolute;top:5px;right:10px;font-size:11px;color:#8a7b55;font-weight:800;letter-spacing:.06em}
+.row{display:flex;gap:8px;flex:none}
+.btn{font:inherit;font-weight:800;color:#fff;background:var(--hot);border:3px solid var(--brown);border-radius:14px;padding:12px;box-shadow:0 5px 0 var(--brown);cursor:pointer;min-height:56px;font-size:20px;flex:1;touch-action:none}
+.btn:active,.btn.down{transform:translateY(3px);box-shadow:0 2px 0 var(--brown)}
+.btn.sub{background:var(--navy);font-size:14px;flex:none;padding:8px 14px;min-height:44px}
+.btn[disabled]{opacity:.45}
+.stat{min-height:20px;font-size:13px;font-weight:800;color:var(--mute);text-align:center;flex:none}
+.stat.ok{color:var(--ok)}.stat.ng{color:var(--bad)}
+.choices{display:flex;flex-direction:column;gap:8px;flex:1;min-height:0}
+.ch{font:inherit;font-weight:800;font-size:24px;color:var(--ink);background:var(--paper);border:3px solid var(--brown);border-radius:12px;padding:8px;box-shadow:0 4px 0 var(--brown);cursor:pointer;flex:1;min-height:52px}
+.ch:active{transform:translateY(3px);box-shadow:0 1px 0 var(--brown)}
+.ch.good{background:#baf5d0}.ch.bad{background:#ffb9ae}
+.prompt{position:relative;background:var(--win);border:3px solid var(--line);border-radius:10px;padding:10px 14px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:96px;flex:none}
+.prompt .en{font-size:44px;font-weight:800;line-height:1.1;color:#fff;text-wrap:balance;overflow-wrap:anywhere}
+.prompt .ipa{font-family:"Noto Sans","Segoe UI",system-ui,sans-serif;font-size:21px;font-weight:500;color:var(--gold)}
+.prompt .combo{position:absolute;top:6px;right:10px;font-size:20px;font-weight:800;color:var(--hot)}
+.dots{display:flex;gap:5px;flex:none}
+.dots i{flex:1;height:8px;border-radius:4px;background:#1a2142}
+.dots i.on{background:var(--ok)}
+.bar{height:10px;background:#1a2142;border-radius:5px;overflow:hidden;flex:none}
+.bar i{display:block;height:100%;width:100%;background:var(--gold)}
+.reveal{background:var(--win);border:3px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:12px;flex:1;min-height:0;overflow:auto}
+.reveal .en{font-size:22px;color:#fff;font-weight:800;line-height:1.35;text-wrap:balance}
+.reveal .jp{font-size:16px;color:var(--gold);font-weight:800;line-height:1.5}
+.reveal .who2{font-size:11px;color:var(--gold);font-weight:800;letter-spacing:.08em}
+.note{margin:0;font-size:11px;font-weight:500;color:var(--mute);line-height:1.5;flex:none}
+/* 発音チェック: 聞こえた文字・赤表示 */
+.cue{padding-bottom:44px}
+.cue .heard{position:absolute;left:12px;right:12px;bottom:8px;font-size:15px;font-weight:800;line-height:1.3;color:#5a5340;max-height:38px;overflow:hidden}
+.cue .heard.live{color:#8a7b55}
+.cue .heard b{color:#e11d2e}
+.cue.ev .w,.cue.ev .w.s{color:#0a7c4a}
+.cue.ev .w.bad,.cue.ev .w.s.bad{color:#e11d2e;text-decoration:underline wavy #e11d2e;text-underline-offset:5px}
+.cue.ev .w em{font-style:normal;color:#e11d2e;text-decoration:underline wavy #e11d2e;text-underline-offset:5px}
+/* 羽田 発音教室 */
+.boothbtn{flex:none;font:inherit;font-weight:800;font-size:14px;color:var(--ink);background:var(--paper);border:3px solid var(--brown);border-radius:12px;padding:10px;box-shadow:0 4px 0 var(--brown);cursor:pointer}
+.boothbtn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--brown)}
+#boothView{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}
+#boothBody{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;overflow:hidden}
+.tabs{display:flex;gap:8px;flex:none}
+.tab{flex:1;font:inherit;font-weight:800;font-size:14px;color:var(--line);background:#161d3a;border:2px solid #2c3a6e;border-radius:10px;padding:8px}
+.tab.on{background:var(--navy);border-color:var(--gold)}
+.blist{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+.brow{font:inherit;text-align:left;color:var(--line);background:#161d3a;border:2px solid #2c3a6e;border-radius:10px;padding:8px 10px;cursor:pointer}
+.btop{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.bw{font-size:20px;font-weight:800;word-break:break-word}
+.bn{font-size:12px;color:var(--mute);flex:none}
+.bsub{font-size:13px;color:var(--mute);margin-top:2px}
+.chip{color:#ff6b78;font-weight:800}
+.bp{color:var(--ok);font-weight:800}
+.bempty{color:var(--mute);font-size:13px;line-height:1.6;margin:8px 4px}
+.atts{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:5px}
+.att{display:flex;gap:8px;align-items:center;background:#161d3a;border:2px solid #2c3a6e;border-radius:8px;padding:6px 8px;font-size:14px;font-weight:800}
+.att.good{border-color:var(--ok);background:#12301f}
+.att .an{color:var(--mute);flex:none}
+.att .ah{flex:1;min-width:0;word-break:break-word}
+.att .ah b{color:#ff6b78}
+.bd{flex:none;font-size:12px}.bd.ok{color:var(--ok)}.bd.mid{color:#ffc72c}.bd.ng{color:#ff6b78}
+:focus-visible{outline:3px solid #fff;outline-offset:2px}
+@media (max-height:700px){.cue .w.s{font-size:27px}.cue .w{font-size:16px}.win p{font-size:16px;min-height:46px}.win{min-height:64px}.prompt .en{font-size:38px}.prompt{min-height:84px}}
+@media (prefers-reduced-motion:reduce){#app.shake{animation:none}}
+</style>
+
+<div id="app">
+  <div id="mapView">
+    <div class="mapbar"><h1>ドバイ国際空港 ターミナル3<small>コンコースB・カンペ先生 試作</small></h1><span class="badge">私用</span></div>
+    <div id="pips" aria-label="進み具合"></div>
+    <div id="map"><svg id="paths" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg></div>
+    <button id="boothBtn" class="boothbtn" type="button">✈ 羽田空港 発音教室</button>
+  </div>
+  <div id="boothView" hidden>
+    <div class="mapbar"><h1>羽田空港 発音教室<small id="boothSub"></small></h1><button id="boothBack" class="btn sub" type="button" aria-label="マップにもどる">✕</button></div>
+    <div id="boothBody"></div>
+  </div>
+  <div id="sceneView" hidden>
+    <div class="stage">
+      <canvas id="scene" width="320" height="150" aria-label="場面"></canvas>
+      <button id="exitBtn" type="button" aria-label="マップにもどる">✕</button>
+    </div>
+    <div class="win" id="msg"><span class="who" id="who"></span><p id="msgText"></p><span class="tap" id="tapHint"></span></div>
+    <div id="panel"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+var $=function(i){return document.getElementById(i)};
+var FONT='"M PLUS Rounded 1c","Hiragino Maru Gothic ProN",system-ui,sans-serif';
+var W=1800,VW=320,VH=150,PX=3,GY=122;
+var cv=$('scene'),c=cv.getContext('2d');
+c.imageSmoothingEnabled=false;
+function R(col,x,y,w,h){c.fillStyle=col;c.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h))}
+function T(s,x,y,sz,col,al){c.fillStyle=col||'#fff';c.font='800 '+(sz||8)+'px '+FONT;c.textAlign=al||'center';c.textBaseline='middle';c.fillText(s,Math.round(x),Math.round(y))}
+function shade(hex,f){var n=parseInt(hex.slice(1),16),r=Math.round(((n>>16)&255)*f),g=Math.round(((n>>8)&255)*f),b=Math.round((n&255)*f);return '#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1)}
+function spr(map,pal,x,y){for(var r=0;r<map.length;r++){var row=map[r];for(var k=0;k<row.length;k++){var ch=row.charAt(k);if(ch!=='.'){c.fillStyle=pal[ch]||'#f0f';c.fillRect(Math.round(x+k*PX),Math.round(y+r*PX),PX,PX)}}}}
+
+/* ---------- ドット絵: ゲーム本体のキングとルルをそのまま使う ---------- */
+var HEROMAP=['...hhhhhh...','..hhhhhhhh..','..hssssssh..','..hsessesh..','..hssssssh..','...ssssss...','..bbbbbbbb..','.sbbbaabbbs.','.sbbbaabbbs.','..bbbbbbbb..','..dd....dd..','..dd....dd..'];
+var HPAL={h:'#2b2b2b',s:'#f2c9a0',e:'#1c2230',b:'#2f5bea',a:'#f2b705',d:'#333a4d'};
+var BUDDYMAP=['.tt....tt.','tttttttttt','ttettttett','tpttttttpt','tttttttttt','aaaaaaaaaa','.tttttttt.','.ff....ff.'];
+var BPAL={t:'#5fd6c3',e:'#10131f',p:'#ff9aa8',a:'#ffc72c',f:'#2f8f82'};
+
+/* ---------- ドット絵: 人物(幅12×高さ14) ---------- */
+var SK=['#f4cfa8','#e6b88a','#c98e5a','#a8703f','#7c4b2a','#573220'];
+function P(sk,x){var p={s:SK[sk],S:shade(SK[sk],.8),e:'#1c2230',B:'#2f7de1',h:'#241a14',g:'#f7f4ea',G:'#d9d4c6',a:'#14141a',w:'#f8f8f3',W:'#ccd2df',k:'#1b1b24',K:'#363648',c:'#f7f4ea',l:'#101018',x:'#2b2b34',o:'#e0503c',O:'#b83a2c',p:'#2f4b7a',q:'#3b2a1f',y:'#ffc72c'};if(x){for(var k in x)p[k]=x[k];if(x.o&&!x.O)p.O=shade(x.o,.8)}return p}
+var KB=['.wwwWwwwWww.','.wwwWwwwWww.','swwwwwwwwwws','.wwwwwwwwww.','.wwwwwwwwww.','..qq....qq..'];
+/* 白いカンドゥーラ+頭の白い布(ゲトラ)+黒い輪(イガール) */
+function kanG(o){return [o.agal===false?'...gggggg...':'...aaaaaa...','..gggggggg..','..gssssssg..','..gsessesg..','..gssssssg..',o.beard?'..gghhhhgg..':'..ggssssgg..','...ggwwgg...','.gwwwwwwwwg.'].concat(KB)}
+/* 白いカンドゥーラ+白い帽子(ガフィーヤ) */
+function kanC(o){return ['...cccccc...','..cccccccc..','..hssssssh..',o.glasses?'..llllllll..':'..hsessesh..','..ssssssss..',o.beard?'...shhhhs...':'...ssssss...','...wwwwww...','.wwwwwwwwww.'].concat(KB)}
+/* 黒いアバヤとニカブ(目だけ見える) */
+var NQ=['...kkkkkk...','..kkkkkkkk..','..kkkkkkkk..','..sBBssBBs..','..kkkkkkkk..','..kkkkkkkk..','...kkkkkk...','.kkkkkkkkkk.','.kkKkkkkKkk.','kkkKkkkkKkkk','kkkkkkkkkkkk','kkkKkkkkKkkk','.kkkkkkkkkk.','..qq....qq..'];
+/* スカーフ(ヒジャブ)+長いワンピース。顔は見える */
+var HJ=['...xxxxxx...','..xxxxxxxx..','..xssssssx..','..xsessesx..','..xssssssx..','..xxssssxx..','...xxxxxx...','.oooooooooo.','.ooOooooOoo.','soooooooooos','.oooooooooo.','.oooooooooo.','.oooooooooo.','..qq....qq..'];
+function trav(o){var r=['...hhhhhh...','..hhhhhhhh..','..hssssssh..','..hsessesh..','..hssssssh..','...ssssss...','..oooooooo..','.soooooooos.','.sooooyooos.','..oooooooo..','..pppppppp..','..pppppppp..','..pp....pp..','..qq....qq..'];
+ if(o.hair==='long'){r[5]='..hhsssshh..';r[6]='.hhoooooohh.';r[7]='.hsoooooosh.'}
+ if(o.hair==='curly'){r[0]='..h.hhhh.h..';r[1]='.hhhhhhhhhh.'}
+ if(o.hair==='cap'){r[0]='...cccccc...';r[1]='..cccccccc..'}
+ if(o.pack){r[7]='ysoooooooosy'}
+ if(o.shorts){r[11]='..ss....ss..';r[12]='..ss....ss..'}
+ return r}
+function walkB(map){var m=map.slice();for(var i=m.length-2;i<m.length;i++){m[i]=m[i].replace('..qq....qq..','...qq..qq...').replace('..pp....pp..','...pp..pp...').replace('..ss....ss..','...ss..ss...').replace('..dd....dd..','...dd..dd...')}return m}
+
+/* ---------- 会話(口コミの内容を自作の英文で再現・創作でふくらませた。1本=5往復) ---------- */
+/* n=相手 y=キング(*強く読む語*) */
+var DLG={
+ staff:{who:'空港スタッフ',lines:[
+  {n:"Hello! Can I help you?",jp:"こんにちは。お手伝いしましょうか。"},
+  {y:"*Yes*. *How* do I *get* to *Gates* *A*?",jp:"はい。Aゲートへはどう行きますか。"},
+  {n:"Take the airport train. It's a short ride. Gates B and C are connected by a walking path.",jp:"空港の電車に乗ってください。短い乗車です。BゲートとCゲートは歩いて行けます。"},
+  {y:"*Thank* you! *Is* it *far* from *here*?",jp:"ありがとう。ここから遠いですか。"},
+  {n:"No, the train station is just past the shops. Follow the yellow signs.",jp:"いいえ、電車の駅は店の少し先です。黄色い案内に従ってください。"},
+  {y:"*Okay*. *How* *often* does the *train* *come*?",jp:"わかりました。電車はどのくらいの間隔で来ますか。"},
+  {n:"It comes often, so you won't wait long. What time is your flight?",jp:"よく来るので、長くは待ちません。フライトは何時ですか。"},
+  {y:"*My* *flight* is at *nine*. *Do* I *have* *time*?",jp:"9時のフライトです。時間はありますか。"},
+  {n:"Yes, you have plenty of time. Have a good flight!",jp:"はい、たっぷりあります。よいフライトを。"},
+  {y:"*Thank* you *so* *much*. *Have* a *nice* *day*!",jp:"ありがとうございます。よい一日を。"}],
+  words:[["train","/treɪn/","電車"],["short ride","/ʃɔːrt raɪd/","短い乗車"],["connected","/kəˈnɛktɪd/","つながっている"],["follow","/ˈfɑːloʊ/","従う"],["often","/ˈɔːfən/","よく・たびたび"],["plenty of","/ˈplɛnti əv/","たくさんの"]]},
+ greet1:{who:'旅行者',lines:[
+  {n:"Welcome to Dubai! Is this your first time here?",jp:"ドバイへようこそ。ここは初めてですか。"},
+  {y:"*Yes*, it *is*. It's *so* *big*!",jp:"はい。とても大きいですね。"},
+  {n:"Yes, it is very big. Where are you flying to?",jp:"ええ、とても大きいです。どちらへ飛びますか。"},
+  {y:"*I'm* *going* to *London*. *I* *have* a *long* *wait*.",jp:"ロンドンへ行きます。待ち時間が長いんです。"},
+  {n:"How long is your wait?",jp:"どのくらい待つんですか。"},
+  {y:"*Six* *hours*. *What* *should* I *do*?",jp:"6時間です。何をすればいいですか。"},
+  {n:"Try the cafés on Concourse B. Many people like them. You can also walk and look at the shops.",jp:"コンコースBのカフェに行ってみて。人気ですよ。歩いて店を見るのもいいです。"},
+  {y:"*Good* *idea*. *Is* it *quiet* *there*?",jp:"いい考えですね。そこは静かですか。"},
+  {n:"Some places are quiet. Enjoy your trip, my friend.",jp:"静かな場所もありますよ。よい旅を、友よ。"},
+  {y:"*Thank* you. *Have* a *wonderful* *day*!",jp:"ありがとう。すてきな一日を。"}],
+  words:[["welcome","/ˈwɛlkəm/","ようこそ"],["first time","/fɜːrst taɪm/","初めて"],["wait","/weɪt/","待ち時間・待つ"],["quiet","/ˈkwaɪət/","静かな"],["enjoy","/ɪnˈdʒɔɪ/","楽しむ"]]},
+ greet2:{who:'旅行者',lines:[
+  {n:"Hey! Nice scarf on your green friend.",jp:"やあ！緑の友だち、すてきなスカーフだね。"},
+  {y:"*Thanks*! *Her* *name* is *Lulu*.",jp:"ありがとう。名前はルルです。"},
+  {n:"Lulu! Cool name. Is she traveling with you?",jp:"ルル！いい名前。いっしょに旅行してるの？"},
+  {y:"*Yes*. *We* *travel* *together* *everywhere*.",jp:"はい。どこへでもいっしょに旅します。"},
+  {n:"That's awesome. I'm going home after a long trip. I'm so tired.",jp:"すてきだね。長い旅のあとで帰るところ。とても疲れたよ。"},
+  {y:"*Oh*. *Where* *were* you?",jp:"ああ。どこにいたんですか。"},
+  {n:"I was in Asia for two weeks. Great food, but too many flights.",jp:"アジアに2週間いたよ。食べ物は最高だったけど、フライトが多すぎた。"},
+  {y:"*Two* *weeks*! *What* was your *favorite* *food*?",jp:"2週間も。いちばん好きな食べ物は何でしたか。"},
+  {n:"Noodles! I ate noodles every day. Have a great flight!",jp:"麺！毎日食べたよ。よいフライトを。"},
+  {y:"*Sounds* *good*. *You* *too*, *see* *you*!",jp:"おいしそう。あなたも。またね。"}],
+  words:[["scarf","/skɑːrf/","スカーフ"],["travel","/ˈtrævəl/","旅行する"],["tired","/ˈtaɪərd/","疲れた"],["favorite","/ˈfeɪvərɪt/","いちばん好きな"],["noodles","/ˈnuːdəlz/","麺"]]},
+ veranda_good:{who:'Veranda Cafe & Patisserie',lines:[
+  {n:"Hi! This is my favorite café in Terminal 3. I dropped my sandwich, and they made a new one right away!",jp:"こんにちは！ここはターミナル3で一番好きなカフェ。サンドイッチを落としたら、すぐ作り直してくれたの。"},
+  {y:"*Wow*, that's *kind*! Is the *coffee* *good*?",jp:"わあ、親切ですね。コーヒーはおいしいですか。"},
+  {n:"Yes, the best coffee I've had in weeks. But it's expensive. A cappuccino was about ten dollars.",jp:"うん、ここ数週間で一番のコーヒー。でも高いの。カプチーノが約10ドル。"},
+  {y:"*Ten* *dollars*? *Well*, I'll *try* *one*.",jp:"10ドル？まあ、1杯飲んでみます。"},
+  {n:"Good idea. Try the pastries too. The croissant is warm and fresh.",jp:"いいね。ペストリーも食べてみて。クロワッサンは温かくて作りたてよ。"},
+  {y:"*Which* *one* do you *like* *best*?",jp:"どれがいちばん好きですか。"},
+  {n:"I like the almond one. It's sweet, but not too sweet.",jp:"私はアーモンドのが好き。甘いけど、甘すぎないの。"},
+  {y:"*Sounds* *delicious*. *Can* I *sit* *here*?",jp:"おいしそう。ここに座っていいですか。"},
+  {n:"Of course. Take your time. The seats are comfortable.",jp:"もちろん。ゆっくりどうぞ。席は座り心地がいいわよ。"},
+  {y:"*Thank* you! *I'll* *order* *now*.",jp:"ありがとう。いま注文します。"}],
+  words:[["dropped","/drɑːpt/","落とした"],["right away","/raɪt əˈweɪ/","すぐに"],["expensive","/ɪkˈspɛnsɪv/","高い"],["cappuccino","/ˌkæpəˈtʃiːnoʊ/","カプチーノ"],["pastry","/ˈpeɪstri/","ペストリー"],["comfortable","/ˈkʌmftərbəl/","座り心地のよい"]]},
+ veranda_bad:{who:'Veranda Cafe & Patisserie',lines:[
+  {n:"We ordered two cappuccinos here, but the coffee was too weak. Then one more cup cost twenty-one dirhams!",jp:"ここでカプチーノを2つ頼んだけど、味が薄すぎた。その上、もう1杯が21ディルハムもしたんだ。"},
+  {y:"*Twenty-one*? That's *a* *lot*. *Did* they *ask* if you *like* it *strong*?",jp:"21ディルハム？高いですね。濃いのが好きか聞いてくれましたか。"},
+  {n:"No, they didn't. I was disappointed.",jp:"いいや、聞かれなかった。がっかりしたよ。"},
+  {y:"*I'm* *sorry*. *Did* you *tell* the *staff*?",jp:"それは残念。店員さんに言いましたか。"},
+  {n:"Yes, but they just said sorry. I didn't want to wait again.",jp:"言ったけど、謝られただけ。もう一度待ちたくなかったんだ。"},
+  {y:"*That's* *too* *bad*. *Was* the *place* *busy*?",jp:"それはひどいですね。店は混んでいましたか。"},
+  {n:"Not really. Maybe it was just a bad day.",jp:"それほどでも。たまたま悪い日だったのかも。"},
+  {y:"*Maybe*. *I'll* *try* it *anyway*.",jp:"かもしれませんね。とにかく試してみます。"},
+  {n:"Good luck. Ask for a strong one!",jp:"がんばって。濃いのを頼んでね！"},
+  {y:"*Thanks* for the *tip*. *I'll* *ask*.",jp:"教えてくれてありがとう。頼んでみます。"}],
+  words:[["weak","/wiːk/","薄い"],["strong","/strɔːŋ/","濃い"],["disappointed","/ˌdɪsəˈpɔɪntɪd/","がっかりした"],["busy","/ˈbɪzi/","混んでいる"],["anyway","/ˈɛniweɪ/","とにかく"],["tip","/tɪp/","ヒント・助言"]]},
+ s34_good:{who:'S34',lines:[
+  {n:"S34 is open twenty-four hours. It's quiet, so I can work here.",jp:"S34は24時間営業。静かだから、ここで仕事ができるの。"},
+  {y:"*Nice*! What did you *eat*?",jp:"いいですね。何を食べたの？"},
+  {n:"Cheese flatbread, fresh and hot. And a strong Kadak chai. Perfect!",jp:"チーズのフラットブレッドで、焼きたて。それと濃いカダックチャイ。最高！"},
+  {y:"*That* *sounds* *perfect*. *Is* it a *big* *portion*?",jp:"最高ですね。量は多いですか。"},
+  {n:"The size is good. One is enough for lunch.",jp:"ちょうどいい量。1つでお昼に足りるよ。"},
+  {y:"*Good*. *Can* I *use* my *laptop* *there*?",jp:"いいですね。そこでパソコンを使えますか。"},
+  {n:"Yes, there are plugs near the tables. I charged my phone there.",jp:"うん、テーブルの近くにコンセントがあるよ。そこで携帯を充電した。"},
+  {y:"*Great*. *I* *need* to *charge* *mine*.",jp:"よかった。私も充電が必要なんです。"},
+  {n:"Sit by the wall. It's the quietest spot.",jp:"壁ぎわに座って。いちばん静かな場所だよ。"},
+  {y:"*Thanks*! *I'll* *go* *now*.",jp:"ありがとう。いま行きます。"}],
+  words:[["twenty-four hours","/ˌtwɛnti fɔːr ˈaʊərz/","24時間"],["fresh","/frɛʃ/","できたての"],["flatbread","/ˈflætbrɛd/","フラットブレッド"],["portion","/ˈpɔːrʃən/","1人前の量"],["charge","/tʃɑːrdʒ/","充電する"],["plug","/plʌɡ/","コンセント"]]},
+ s34_bad:{who:'S34',lines:[
+  {n:"The food was just okay. The menu is small.",jp:"料理はまあまあ。メニューが少ないんだ。"},
+  {y:"*Really*? Is it *like* a *restaurant*?",jp:"そうなんですか。レストランみたいですか。"},
+  {n:"Not really. It's more like a café. The service is fast, though.",jp:"いや、どちらかというとカフェだね。でも、提供は速いよ。"},
+  {y:"*Fast* is *good*. *What* did you *order*?",jp:"速いのはいいですね。何を頼みましたか。"},
+  {n:"A sandwich. It was cold in the middle.",jp:"サンドイッチ。真ん中が冷たかったんだ。"},
+  {y:"*Oh* *no*. *Did* you *ask* for a *hot* *one*?",jp:"それは困りましたね。温かいのを頼みましたか。"},
+  {n:"I did. They changed it quickly. So I can't complain.",jp:"頼んだよ。すぐ替えてくれた。だから文句は言えないな。"},
+  {y:"*That's* *nice*. *Was* the *tea* *good*?",jp:"それはいいですね。紅茶はおいしかったですか。"},
+  {n:"The tea was good. I'd go back for tea.",jp:"紅茶はおいしかった。紅茶のためならまた行くよ。"},
+  {y:"*Okay*. *I'll* *try* the *tea*.",jp:"わかりました。紅茶を試します。"}],
+  words:[["menu","/ˈmɛnjuː/","メニュー"],["service","/ˈsɜːrvɪs/","接客・サービス"],["though","/ðoʊ/","でも"],["cold","/koʊld/","冷たい"],["complain","/kəmˈpleɪn/","文句を言う"]]},
+ costa_good:{who:'Costa Coffee',lines:[
+  {n:"I love this little coffee corner. It's quiet, and the staff are fast.",jp:"この小さなコーヒーコーナーが好き。静かだし、店員さんも速いの。"},
+  {y:"*Do* they have *food*?",jp:"食べ物もありますか。"},
+  {n:"Yes! Salads, hot paninis, and cakes. There are even a couple of sofas.",jp:"あるよ！サラダ、温かいパニーニ、ケーキ。ソファも2つあるんだ。"},
+  {y:"*Sofas*! *Can* I *rest* *here*?",jp:"ソファ！ここで休めますか。"},
+  {n:"Sure. It's near the Lego store. Kids love looking at it.",jp:"もちろん。レゴの店の近くだよ。子どもたちが見るのが大好きなんだ。"},
+  {y:"*Nice*. *My* *legs* are *tired*.",jp:"いいですね。足が疲れました。"},
+  {n:"Then sit for a while. I read a book here for an hour.",jp:"じゃあ少し座って。私はここで1時間、本を読んだよ。"},
+  {y:"*An* *hour*! *That's* *long*.",jp:"1時間も。長いですね。"},
+  {n:"I had time before my flight. Enjoy your coffee!",jp:"フライトの前に時間があったからね。コーヒーを楽しんで！"},
+  {y:"*Thank* you. *Good* *luck*!",jp:"ありがとう。がんばって。"}],
+  words:[["salad","/ˈsæləd/","サラダ"],["a couple of","/ə ˈkʌpəl əv/","2つほどの"],["sofa","/ˈsoʊfə/","ソファ"],["rest","/rɛst/","休む"],["for a while","/fər ə waɪl/","しばらく"]]},
+ costa_bad:{who:'Costa Coffee',lines:[
+  {n:"The tables were dirty, and they brought me the wrong order.",jp:"テーブルが汚くて、注文も間違えられた。"},
+  {y:"*Oh* *no*. What did you *order*?",jp:"それは困りましたね。何を頼んだんですか。"},
+  {n:"A small coffee. I got a large one.",jp:"小さいコーヒーを頼んだのに、大きいのが来たんだ。"},
+  {y:"*Did* you *tell* *them*?",jp:"お店の人に言いましたか。"},
+  {n:"Yes. They said sorry, but they didn't change it.",jp:"言ったよ。謝られたけど、替えてくれなかった。"},
+  {y:"*That's* *not* *good*. *Did* you *drink* it?",jp:"それはよくないですね。飲みましたか。"},
+  {n:"A little. Then I threw it away. It was too sweet.",jp:"少しだけ。それから捨てた。甘すぎたんだ。"},
+  {y:"*I'm* *sorry*. *Where* *should* I *go* *instead*?",jp:"お気の毒に。かわりにどこへ行けばいいですか。"},
+  {n:"Try the café down the hall. It looked cleaner.",jp:"通路の先のカフェを試してみて。もっと清潔そうだったよ。"},
+  {y:"*Thanks*. *I'll* *check* it *out*.",jp:"ありがとう。見てみます。"}],
+  words:[["dirty","/ˈdɜːrti/","汚い"],["wrong","/rɔːŋ/","間違った"],["order","/ˈɔːrdər/","注文"],["throw away","/θroʊ əˈweɪ/","捨てる"],["instead","/ɪnˈstɛd/","かわりに"],["hall","/hɔːl/","通路・広間"]]},
+ costa_bad2:{who:'Costa Coffee',lines:[
+  {n:"I used my airline's food voucher during a seven-hour layover. The cashier was rude to me.",jp:"7時間の乗り継ぎ中に、航空会社の食事クーポンを使ったら、レジの人に失礼な態度をされたよ。"},
+  {y:"*Seven* *hours*? That's *long*.",jp:"7時間？長いですね。"},
+  {n:"Yes. I was tired and hungry. And the cashier looked angry.",jp:"うん。疲れておなかもすいていた。しかもレジの人は怒っているように見えた。"},
+  {y:"*That's* *terrible*. What *happened*?",jp:"それはひどい。何があったんですか。"},
+  {n:"I showed the voucher. He sighed and said it was too much trouble.",jp:"クーポンを見せたら、ため息をついて、面倒だと言われたんだ。"},
+  {y:"*That's* *not* *polite*. *Did* you *get* *food*?",jp:"礼儀正しくないですね。食べ物は買えましたか。"},
+  {n:"Yes, in the end. A sandwich and water. But I felt bad.",jp:"うん、結局ね。サンドイッチと水。でも嫌な気分だった。"},
+  {y:"*I'm* *sorry*. *Please* *sit* and *rest*.",jp:"お気の毒に。座って休んでください。"},
+  {n:"Thank you. Maybe a smile is the best way to start.",jp:"ありがとう。たぶん、笑顔がいちばんの始まりだね。"},
+  {y:"*You're* *right*. *Take* *care*!",jp:"その通りですね。お気をつけて。"}],
+  words:[["layover","/ˈleɪoʊvər/","乗り継ぎの待ち時間"],["voucher","/ˈvaʊtʃər/","クーポン"],["rude","/ruːd/","失礼な"],["cashier","/kæˈʃɪr/","レジ係"],["polite","/pəˈlaɪt/","礼儀正しい"],["in the end","/ɪn ði ɛnd/","結局"]]},
+ ahlan_good:{who:'Ahlan Lounge',lines:[
+  {n:"This lounge is great! I got a recliner with a footrest by the glass wall.",jp:"このラウンジ最高！ガラスの壁の横で、足置きつきのリクライニング席に座れたよ。"},
+  {y:"*Was* the *food* *good*?",jp:"料理はどうでしたか。"},
+  {n:"Very good, and always fresh. The bathrooms were spotless too. Checking in with my lounge pass was quick.",jp:"とてもおいしくて、いつも新しいの。トイレもピカピカ。ラウンジのパスでの受付も早かったよ。"},
+  {y:"*Wow*. *Can* I *sleep* *there*?",jp:"わあ。そこで眠れますか。"},
+  {n:"Yes, the recliners are comfortable. I slept for two hours.",jp:"うん、リクライニング席は快適。2時間寝たよ。"},
+  {y:"*Two* *hours*! *Did* you *miss* your *flight*?",jp:"2時間も！フライトに乗り遅れませんでしたか。"},
+  {n:"No! I set an alarm. And a screen shows the gate time.",jp:"ううん！アラームをかけたの。それに画面でゲートの時間も分かるし。"},
+  {y:"*Smart*. *What* *about* *drinks*?",jp:"賢いですね。飲み物はどうですか。"},
+  {n:"Tea, juice, coffee. All free. Go and enjoy!",jp:"紅茶、ジュース、コーヒー。全部無料。行って楽しんで！"},
+  {y:"*Thank* you. *I'll* *go* *now*.",jp:"ありがとう。いま行きます。"}],
+  words:[["lounge","/laʊndʒ/","ラウンジ"],["recliner","/rɪˈklaɪnər/","リクライニング席"],["footrest","/ˈfʊtrɛst/","足置き"],["spotless","/ˈspɑːtləs/","ピカピカの"],["alarm","/əˈlɑːrm/","アラーム"],["free","/friː/","無料の"]]},
+ ahlan_bad:{who:'Ahlan Lounge',lines:[
+  {n:"The shower was a problem. I had to make a reservation at the front desk, and the shower area was a ten-minute walk away.",jp:"シャワーが問題でね。受付で予約が必要で、シャワー室は歩いて10分も離れていたんだ。"},
+  {y:"*Ten* *minutes*? Was the *water* *hot*?",jp:"10分も？お湯は熱かったですか。"},
+  {n:"No. It was a little cool.",jp:"いや。ちょっとぬるかったよ。"},
+  {y:"*That's* *too* *bad*. *Was* it *clean*?",jp:"それは残念。きれいでしたか。"},
+  {n:"Yes, it was clean. But I waited thirty minutes for my turn.",jp:"うん、きれいだった。でも順番を30分待ったんだ。"},
+  {y:"*Thirty* *minutes*! *Did* you *have* *time*?",jp:"30分も！時間は足りましたか。"},
+  {n:"Just enough. I ran to my gate after that.",jp:"ぎりぎり。そのあとゲートまで走ったよ。"},
+  {y:"*Oh* *no*. *Were* you *late*?",jp:"それは大変。遅れましたか。"},
+  {n:"A little, but I made it. Reserve early next time!",jp:"少しね、でも間に合った。次は早めに予約してね！"},
+  {y:"*Good* *advice*. *Thank* you!",jp:"いい助言です。ありがとう。"}],
+  words:[["reservation","/ˌrɛzərˈveɪʃən/","予約"],["front desk","/frʌnt dɛsk/","受付"],["shower","/ˈʃaʊər/","シャワー"],["turn","/tɜːrn/","順番"],["make it","/meɪk ɪt/","間に合う"],["advice","/ədˈvaɪs/","助言"]]},
+ t3_good:{who:'ターミナル3の旅行者',lines:[
+  {n:"This terminal is huge, but it's clean and well organized. The signs are clear!",jp:"このターミナルは巨大だけど、清潔でよく整理されているの。案内表示も分かりやすい。"},
+  {y:"*Great*! I was *nervous*.",jp:"よかった。緊張していたんです。"},
+  {n:"Don't worry. There are lots of chairs, and the staff are helpful.",jp:"大丈夫。椅子もたくさんあるし、スタッフも親切よ。"},
+  {y:"*Where* is the *best* *place* to *wait*?",jp:"待つのにいちばんいい場所はどこですか。"},
+  {n:"Near the big windows. You can watch the planes.",jp:"大きな窓の近く。飛行機が見られるわよ。"},
+  {y:"*That* *sounds* *fun*. *Is* it *far*?",jp:"楽しそうですね。遠いですか。"},
+  {n:"Ten minutes on foot. Follow the red and blue pillars.",jp:"歩いて10分。赤と青の柱をたどって。"},
+  {y:"*Red* and *blue*? *I* *see* *them*!",jp:"赤と青？見えました。"},
+  {n:"Yes! Those are easy to find. Enjoy Dubai!",jp:"そう！見つけやすいでしょ。ドバイを楽しんでね。"},
+  {y:"*Thank* you. *I'll* *walk* *there*.",jp:"ありがとう。そこまで歩きます。"}],
+  words:[["organized","/ˈɔːrɡənaɪzd/","整理された"],["signs","/saɪnz/","案内表示"],["helpful","/ˈhɛlpfəl/","親切な"],["nervous","/ˈnɜːrvəs/","緊張した"],["pillar","/ˈpɪlər/","柱"],["on foot","/ɑːn fʊt/","徒歩で"]]},
+ t3_queue:{who:'ターミナル3の旅行者',lines:[
+  {n:"Earlier, at check-in, only three of the twenty counters were open. People waited in line for hours.",jp:"さっきのチェックインで、20あるカウンターのうち3つしか開いてなかった。みんな何時間も並んでたよ。"},
+  {y:"*Hours*? That's *crazy*!",jp:"何時間も？ひどい。"},
+  {n:"I know. The airport is wonderful, but that day the service was bad.",jp:"そうなんだ。空港は素晴らしいのに、その日はサービスが最悪だった。"},
+  {y:"*Did* you *miss* your *flight*?",jp:"フライトに乗り遅れましたか。"},
+  {n:"No, but I almost did. I ran to the gate.",jp:"いや、でももう少しだった。ゲートまで走ったよ。"},
+  {y:"*Oh* *no*. *Was* it *far*?",jp:"それは大変。遠かったですか。"},
+  {n:"Very far. My legs hurt for a day.",jp:"すごく遠い。足が1日じゅう痛かった。"},
+  {y:"*I'll* *go* *early*. *Thanks* for the *warning*.",jp:"早めに行きます。教えてくれてありがとう。"},
+  {n:"Good idea. Arrive three hours before. Good luck!",jp:"いい考え。3時間前に着くといいよ。がんばって！"},
+  {y:"*Thank* you. *Have* a *safe* *trip*!",jp:"ありがとう。気をつけて旅してください。"}],
+  words:[["counter","/ˈkaʊntər/","カウンター"],["line","/laɪn/","列"],["crazy","/ˈkreɪzi/","ひどい"],["almost","/ˈɔːlmoʊst/","もう少しで"],["hurt","/hɜːrt/","痛む"],["warning","/ˈwɔːrnɪŋ/","警告"]]},
+ t3_bus:{who:'ターミナル3の旅行者',lines:[
+  {n:"From my gate, I had to take a bus to the plane. It was packed and slow.",jp:"ゲートから飛行機まではバスだったの。ぎゅうぎゅうで、のろのろだった。"},
+  {y:"*Packed*? I *hope* I *get* a *seat*.",jp:"ぎゅうぎゅう？座れるといいな。"},
+  {n:"Probably not. I stood for fifteen minutes.",jp:"たぶん無理ね。私は15分立っていたわ。"},
+  {y:"*Fifteen* *minutes*? *That's* *long*.",jp:"15分も？長いですね。"},
+  {n:"Yes, and my bag was heavy too. Keep your bag small.",jp:"そう、しかも荷物も重かった。荷物は小さくしておいてね。"},
+  {y:"*Good* *tip*. *I* *have* a *small* *bag*.",jp:"いい助言ですね。小さいバッグです。"},
+  {n:"Then you'll be fine. Hold the pole tightly.",jp:"それなら大丈夫。ポールをしっかりつかんで。"},
+  {y:"*Okay*. *I'll* *hold* it *tight*.",jp:"わかりました。しっかりつかみます。"},
+  {n:"See you on the plane. Have a good flight!",jp:"飛行機でね。よいフライトを！"},
+  {y:"*You* *too*. *See* *you*!",jp:"あなたも。またね。"}],
+  words:[["packed","/pækt/","ぎゅうぎゅうの"],["slow","/sloʊ/","遅い"],["seat","/siːt/","席"],["heavy","/ˈhɛvi/","重い"],["pole","/poʊl/","ポール・棒"],["tightly","/ˈtaɪtli/","しっかり"]]},
+ t3_metro:{who:'ターミナル3の旅行者',lines:[
+  {n:"A tip for Friday: a traveler wrote that the metro didn't run in the morning. Check the time first.",jp:"金曜日のヒント。旅行者の話では、午前中はメトロが動いていなかった。先に時間を確認してね。"},
+  {y:"*Thanks*! *I'll* *check* the *time*.",jp:"ありがとう。時間を確認します。"},
+  {n:"And on Sunday, the metro starts at eight. The cards are sold from eight too.",jp:"それと日曜日は、メトロが8時から。カードの販売も8時からだよ。"},
+  {y:"*I* *see*. *Do* I *need* a *card*?",jp:"なるほど。カードは必要ですか。"},
+  {n:"Yes, a Nol card. Buy one before you ride.",jp:"うん、Nolカード。乗る前に買ってね。"},
+  {y:"*Okay*. *Where* *do* I *buy* it?",jp:"わかりました。どこで買いますか。"},
+  {n:"Look for the ticket machines at the station. Check the price on the screen.",jp:"駅の券売機を探して。値段は画面で確認してね。"},
+  {y:"*Good* *idea*. *Is* the *station* *near*?",jp:"いい考えですね。駅は近いですか。"},
+  {n:"Yes, follow the signs. Enjoy the city!",jp:"うん、案内に従って。街を楽しんでね。"},
+  {y:"*Thank* you. *Have* a *nice* *day*!",jp:"ありがとう。よい一日を。"}],
+  words:[["metro","/ˈmɛtroʊ/","地下鉄"],["Friday","/ˈfraɪdeɪ/","金曜日"],["check","/tʃɛk/","確認する"],["ticket machine","/ˈtɪkɪt məˈʃiːn/","券売機"],["price","/praɪs/","値段"],["station","/ˈsteɪʃən/","駅"]]},
+ group:{who:'黒い服の一団',lines:[
+  {n:"Excuse me. Is this the way to the gates?",jp:"すみません。搭乗口はこちらですか。"},
+  {y:"*Sorry*, I'm *not* *sure*. *Let's* *check* the *sign*.",jp:"すみません、わかりません。案内板を見ましょう。"},
+  {n:"Thank you. We are looking for Gate B twenty-five.",jp:"ありがとう。B25ゲートを探しています。"},
+  {y:"*Gate* *B* *twenty-five*. *It's* *this* *way*.",jp:"B25ゲートですね。こちらです。"},
+  {n:"Is it far from here?",jp:"ここから遠いですか。"},
+  {y:"*Not* *far*. *About* *five* *minutes*.",jp:"遠くないです。5分くらいです。"},
+  {n:"Good. Our flight is in an hour.",jp:"よかった。フライトは1時間後です。"},
+  {y:"*Then* you have *time*. *Walk* *slowly*.",jp:"それなら時間がありますね。ゆっくり歩いてください。"},
+  {n:"Thank you for your help. Have a good trip.",jp:"助けてくれてありがとう。よい旅を。"},
+  {y:"*You're* *welcome*. *Have* a *safe* *flight*!",jp:"どういたしまして。安全なフライトを。"}],
+  words:[["excuse me","/ɪkˈskjuːz miː/","すみません"],["sure","/ʃʊr/","確かな"],["sign","/saɪn/","案内板"],["far","/fɑːr/","遠い"],["slowly","/ˈsloʊli/","ゆっくり"],["safe","/seɪf/","安全な"]]}
+};
+/* ---------- 背景 ---------- */
+function ceiling(){
+ R('#e4dfd3',0,0,VW,34);
+ for(var wx=Math.floor(cam/60)*60;wx<cam+VW+60;wx+=60){var sx=wx-cam;R('#d3cdbf',sx,0,2,34);R('#fff6d2',sx+22,12,16,4);R('#f3dd96',sx+19,14,22,3);R('#fff6d2',sx+22,18,16,2)}
+ R('#cfc8b6',0,28,VW,3);R('#c9a45c',0,31,VW,2);R('#a98443',0,33,VW,2)}
+function wall(){
+ R('#cdc6b6',0,35,VW,12);R('#e6dfcf',0,47,VW,51);
+ for(var wx=Math.floor(cam/40)*40;wx<cam+VW+40;wx+=40){R('#d9d1bd',wx-cam,47,1,51)}
+ R('#b9ad92',0,96,VW,2)}
+function floor(){
+ R('#efe6d2',0,98,VW,52);R('#d8ccb2',0,98,VW,4);
+ R('#c9a05a',0,108,VW,2);R('#c9a05a',0,126,VW,2);R('#b98b4a',0,144,VW,2);
+ for(var wx=Math.floor(cam/48)*48;wx<cam+VW+48;wx+=48){R('#e3d7bc',wx-cam,102,1,48)}
+}
+function column(wx){var x=wx-cam;if(x<-20||x>VW+20)return;
+ R('#d9d0bc',x-10,18,20,80);R('#efe9dc',x-9,18,18,78);R('#cfc6b0',x-10,94,20,4);
+ R('#c8182a',x-9,50,18,9);
+ R('#143fb0',x-9,59,18,32);
+ var a=Math.floor((t*18)%32);R('#4f86ff',x-7,59+a%32>90?59:59+a,14,3);R('#7fa8ff',x-7,59+((a+14)%32),14,2);
+ R('#fff',x-9,59,1,32);R('#0c2a80',x+8,59,1,32);
+ c.globalAlpha=.16;R('#c8182a',x-9,100,18,10);R('#143fb0',x-9,110,18,22);c.globalAlpha=1}
+function palm(wx){var x=wx-cam;if(x<-30||x>VW+30)return;var sw=Math.round(Math.sin(t*1.3+wx)*2);
+ R('#7a5a3a',x-14,90,28,10);R('#946d44',x-12,88,24,3);R('#6b4a2f',x-14,97,28,3);
+ R('#7a4b2a',x-2,58,5,32);R('#5a3a1a',x-1,66,3,2);R('#5a3a1a',x-1,76,3,2);
+ R('#2e8b57',x-18+sw,52,38,6);R('#2e8b57',x-10+sw,46,22,6);R('#3aa56a',x-26+sw*2,58,18,5);R('#3aa56a',x+10+sw*2,58,18,5);R('#2a7a4a',x-6+sw,42,14,5)}
+function hanging(wx,txt,col){var x=wx-cam;if(x<-80||x>VW+80)return;R('#8a8a94',x-1,6,2,10);R('#8a8a94',x+49,6,2,10);R(col||'#f2c200',x-8,14,70,12);R('#14141a',x-8,14,70,1);R('#14141a',x-8,25,70,1);T(txt,x+27,20,7.5,'#14141a')}
+function shop(s){var x=s.x-cam;if(x>VW||x+s.w<0)return;var w=s.w;
+ R('#2b2418',x-2,37,w+4,62);
+ var sign={cafe:'#2d2a22',s34:'#123a38',duty:'#0f2a6b',costa:'#4a1a22',ahlan:'#241a40'}[s.k];
+ var inner={cafe:'#f6e9c8',s34:'#1f4d4a',duty:'#f2ecdc',costa:'#7a3a3a',ahlan:'#35275c'}[s.k];
+ R(sign,x,39,w,12);T(s.name,x+w/2,45,7.5,'#ffd36a');
+ R(inner,x+3,52,w-6,44);
+ if(s.k==='cafe'){R('#d9c79a',x+6,52,w-12,3);for(var i=0;i<5;i++){R('#f7d56a',x+20+i*38,56,6,6);R('#8a6a30',x+22+i*38,52,2,4)}R('#cfe8ee',x+8,72,w-16,12);R('#e9dcc0',x+6,84,w-12,12);R('#b88a4a',x+6,94,w-12,2);var cc=['#e8a0b0','#d6a050','#8a5a3a','#f4e0a0','#a06a8a'];for(i=0;i<12;i++){R(cc[i%5],x+14+i*13,75,8,6)}}
+ if(s.k==='s34'){R('#7a4b2a',x+6,60,w-12,3);R('#7a4b2a',x+6,74,w-12,3);for(i=0;i<9;i++){R(['#d9a441','#c46a3a','#e8d09a'][i%3],x+12+i*20,64,12,8)}for(i=0;i<3;i++){R('#f3c15a',x+30+i*60,54,4,6);R('#2b2418',x+31+i*60,52,2,2)}R('#5a3a22',x+8,86,w-16,10);R('#e9d6a0',x+20,84,30,3);R('#e9d6a0',x+110,84,30,3)}
+ if(s.k==='duty'){for(var sy=0;sy<3;sy++){R('#8a7a5a',x+6,60+sy*13,w-12,2);for(i=0;i<16;i++){R(['#2a5aa0','#a02a3a','#d6a020','#3a8a5a','#7a3a8a'][(i+sy)%5],x+10+i*13,52+sy*13+(sy?0:2),7,sy?9:7)}}R('#14141a',x+6,92,w-12,4)}
+ if(s.k==='costa'){R('#4a2a1a',x+6,60,w-12,3);R('#d6c090',x+10,72,w-20,3);R('#8a4b3a',x+12,82,44,12);R('#8a4b3a',x+66,82,44,12);R('#6a3a2a',x+12,80,44,3);R('#6a3a2a',x+66,80,44,3);for(i=0;i<5;i++){R(['#e8d09a','#c99a60','#8a5a3a'][i%3],x+20+i*26,63,14,7)}R('#f3e4c0',x+122,80,40,16)}
+ if(s.k==='ahlan'){R('#4a3a7a',x+6,52,w-12,3);R('#d6b0ff',x+30,60,4,6);R('#d6b0ff',x+90,60,4,6);R('#d6b0ff',x+150,60,4,6);R('#5a4a90',x+10,78,52,18);R('#5a4a90',x+70,78,52,18);R('#7a6ab0',x+10,74,52,5);R('#7a6ab0',x+70,74,52,5);R('#2a2048',x+140,56,44,40);R('#b0a0e0',x+144,60,36,36);R('#d9cff5',x+158,60,1,36);R('#ffd36a',x+164,74,6,4)}
+ R('#2b2418',x-2,96,w+4,3);
+ if(s.k==='ahlan'){T('GATE B26',x+w-26,33,6.5,'#14141a')}}
+function windows(x0,x1){var a=x0-cam,b=x1-cam;if(b<0||a>VW)return;
+ R('#2b2418',a-2,37,b-a+4,62);var g=c.createLinearGradient(0,40,0,96);g.addColorStop(0,'#5ec8f2');g.addColorStop(1,'#e4f6ff');c.fillStyle=g;c.fillRect(Math.round(a),40,Math.round(b-a),54);
+ R('#9aa4b0',a,86,b-a,10);R('#7d8794',a,92,b-a,4);
+ var px=a+60+((t*6)%40);R('#fff',px,64,86,10);R('#f4f6fa',px+60,57,22,16);R('#d9dde6',px+70,60,26,3);R('#e8e8ee',px+14,72,50,2);R('#2a5aa0',px+78,57,6,6);R('#7ea0c8',px+10,66,54,3);for(var i=0;i<12;i++){R('#7ea0c8',px+14+i*5,67,3,2)}
+ R('#e8452c',px+84,66,3,3);
+ for(var m=Math.ceil((x0)/60)*60;m<x1;m+=60){R('#2b2418',m-cam-1,40,3,56)}
+ T('B25',a+22,45,7,'#2b2418')}
+function trainDoor(){var x=34-cam;if(x<-130||x>VW)return;
+ R('#2b2418',x-2,38,92,60);R('#27325a',x,40,88,56);R('#3d4e86',x+4,44,80,48);
+ R('#c6ccda',x+10,52,68,22);for(var i=0;i<5;i++){R('#7ac0f0',x+14+i*13,56,9,8)}R('#8a93a8',x+10,72,68,3);R('#e8452c',x+10,66,68,2);
+ R('#f2c200',x+4,44,80,7);T('TRAIN TO GATES A',x+44,47.5,6,'#14141a');R('#14141a',x+10,80,68,2)}
+function bg(){
+ ceiling();wall();
+ hanging(86,'GATES A TRAIN ◀','#f2c200');hanging(560,'GATES B ▶','#f2c200');hanging(1090,'B25-B32 ▶','#f2c200');hanging(1500,'GATE B25 ▶','#f2c200');
+ trainDoor();
+ for(var i=0;i<SHOPS.length;i++)shop(SHOPS[i]);
+ windows(1442,1758);
+ COLS.forEach(column);PALMS.forEach(palm);
+ floor()}
+
+/* ---------- 会話の仕上げ: 最後が相手の言葉で終わる会話には、キングの返事を1つ足す ---------- */
+var CLOSERS=[
+ {y:"*Thanks* for *telling* me. *Have* a *good* *day*!",jp:"教えてくれてありがとう。よい一日を。"},
+ {y:"*Good* to *know*. *Thank* you *so* *much*!",jp:"いいことを聞きました。ありがとうございます。"},
+ {y:"*I* *see*. *Thanks* for *the* *tip*!",jp:"なるほど。教えてくれてありがとう。"}];
+Object.keys(DLG).forEach(function(k,i){var L=DLG[k].lines;if(L.length&&L[L.length-1].n&&L[L.length-1].n!=='…')L.push(CLOSERS[i%CLOSERS.length])});
+
+/* ---------- お店・柱・ヤシ ---------- */
+var SHOPS=[
+ {k:'cafe',name:'Veranda Cafe & Patisserie',x:212,w:196},
+ {k:'s34',name:'S34',x:452,w:206},
+ {k:'duty',name:'Dubai Duty Free',x:702,w:226},
+ {k:'costa',name:'Costa Coffee',x:972,w:176},
+ {k:'ahlan',name:'Ahlan Lounge',x:1192,w:206}
+];
+var COLS=[190,430,950,1420,1780],PALMS=[680,1170];
+
+/* ---------- 場所(元のゲームと同じ: 場所をえらぶ → 毎回ちがう人が来る) ---------- */
+var PLACES=[
+ {id:'info',name:'案内・電車',cam:0,tip:['Dubai Airports 公式案内','電車は空港内(コンコース間)の移動用'],v:['staff','greet1','greet2']},
+ {id:'cafe',name:'Veranda',cam:150,tip:['Veranda Cafe & Patisserie','Googleマップ ★4.7 (241件) ・ コンコースB・24時間'],v:['veranda_good','veranda_bad']},
+ {id:'s34',name:'S34',cam:395,tip:['S34','Googleマップ ★4.8 (397件) ・ コンコースB・24時間'],v:['s34_good','s34_bad']},
+ {id:'costa',name:'Costa Coffee',cam:900,tip:['Costa Coffee','Googleマップ ★3.4 (73件) ・ ゲートB27そば'],v:['costa_good','costa_bad','costa_bad2']},
+ {id:'ahlan',name:'Ahlan Lounge',cam:1135,tip:['Ahlan Lounge','Googleマップ ★4.3 (1,511件) ・ ゲートB26'],v:['ahlan_good','ahlan_bad']},
+ {id:'hall',name:'広間・窓ぎわ',cam:1480,tip:['ターミナル3','Googleマップ ★4.6 (3,222件)'],v:['t3_good','t3_queue','t3_bus','t3_metro','group']}
+];
+/* 相手の見た目(個人名なし)。pitch は読み上げの声の高さ */
+var BEARD={beard:true},BK={w:'#1b1b24',W:'#363648',c:'#1b1b24'};
+var SP={
+ staff:{pitch:1,m:[[trav({}),P(1,{o:'#7a1f2b',p:'#2a2a33'})]]},
+ greet1:{pitch:.85,m:[[kanG(BEARD),P(2)]]},
+ greet2:{pitch:.9,m:[[kanC({glasses:true}),P(2)]]},
+ veranda_good:{pitch:1.25,m:[[HJ,P(1,{x:'#2d8f8a',o:'#f0e8d8'})]]},
+ veranda_bad:{pitch:1,m:[[trav({}),P(0,{o:'#6a7a2a',p:'#44464f',h:'#6a5a3a'})]]},
+ s34_good:{pitch:1.25,m:[[trav({hair:'long'}),P(3,{o:'#d9a441',p:'#3a2f2a'})]]},
+ s34_bad:{pitch:.95,m:[[trav({pack:true}),P(4,{o:'#4a6f9a',p:'#2b2b33'})]]},
+ costa_good:{pitch:1.15,m:[[trav({}),P(5,{o:'#d06a2a',p:'#2a3a5a'})]]},
+ costa_bad:{pitch:.9,m:[[trav({}),P(2,{o:'#555a66',p:'#2b2b33'})]]},
+ costa_bad2:{pitch:1,m:[[trav({hair:'cap',shorts:true}),P(1,{o:'#2f7a4a',p:'#2a3a5a'})]]},
+ ahlan_good:{pitch:1.05,m:[[trav({}),P(0,{o:'#ddd8cc',p:'#3a3a48',h:'#8a6a3a'})]]},
+ ahlan_bad:{pitch:1.2,m:[[trav({hair:'curly'}),P(4,{o:'#a04a6a',p:'#2b2b33'})]]},
+ t3_good:{pitch:1.25,m:[[trav({hair:'long'}),P(2,{o:'#3a8f7a',p:'#2a3a5a'})]]},
+ t3_queue:{pitch:.95,m:[[trav({hair:'curly',pack:true}),P(3,{o:'#8a8a99',p:'#40404a'})]]},
+ t3_bus:{pitch:1.25,m:[[trav({hair:'long'}),P(0,{o:'#c08ad8',p:'#2a3a5a'})]]},
+ t3_metro:{pitch:.85,m:[[kanG(BEARD),P(3)]]},
+ group:{pitch:.9,m:[[kanC(BEARD),P(2,BK)],[kanC({}),P(3,BK)],[HJ,P(1,{x:'#1b1b24',o:'#1b1b24'})]]}
+};
+
+/* ---------- 背景の人々(話しかけられない。たくさん歩いている) ---------- */
+function rng(seed){return function(){seed=(seed+0x6D2B79F5)|0;var t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+var CROWD=[],rnd=rng(20261106);
+(function(){
+ var hc=['#7a1f2b','#3a8f7a','#d9a441','#4a6f9a','#d06a2a','#a04a6a','#5a9ad8','#c8402a','#2f7a4a','#c08ad8'];
+ var hjc=['#2d8f8a','#e0b040','#8a5a9a','#c0504a','#2a4a8a'];
+ var counts={kandura:0,cap:0,nq:0,hijab:0,black:0,other:0};
+ for(var i=0;i<46;i++){
+  var r=rnd(),x=30+i*38+rnd()*20,y=104+Math.floor(rnd()*4)*6,map,pal,kind;
+  var sk=Math.floor(rnd()*6),beard=rnd()<.5;
+  if(r<.36){kind='kandura';map=kanG({beard:beard,agal:rnd()<.75});pal=P(Math.min(sk,3))}
+  else if(r<.48){kind='cap';map=kanC({beard:beard,glasses:rnd()<.4});pal=P(Math.min(sk,3))}
+  else if(r<.58){kind='nq';map=NQ;pal=P(Math.floor(rnd()*3),{B:rnd()<.8?'#2f7de1':'#5a3a22'})}
+  else if(r<.64){kind='hijab';map=HJ;pal=P(Math.floor(rnd()*4),{x:hjc[i%hjc.length],o:hc[(i*3)%hc.length]})}
+  else if(r<.69){kind='black';map=kanC({beard:beard});pal=P(Math.min(sk,3),BK)}
+  else{kind='other';var hair=['long','curly','cap',undefined][Math.floor(rnd()*4)];map=trav({hair:hair,pack:rnd()<.4,shorts:rnd()<.2});pal=P(sk,{o:hc[i%hc.length],p:['#2a3a5a','#2b2b33','#6a5a4a','#44464f'][i%4],h:['#241a14','#6a5a3a','#8a6a3a','#d9c07a'][i%4]})}
+  counts[kind]++;
+  CROWD.push({map:map,map2:walkB(map),pal:pal,x0:x,y:y,amp:8+rnd()*26,sp:.25+rnd()*.4,ph:rnd()*6,kind:kind});
+ }
+ window.__crowdCounts=counts;
+})();
+
+/* ---------- マップ上の位置とアイコン(ターミナル3の見取り図ふう) ---------- */
+var MAPPOS={info:{x:20,y:16,ico:'🚆'},cafe:{x:72,y:26,ico:'🥐'},s34:{x:28,y:44,ico:'🥙'},costa:{x:74,y:60,ico:'☕'},ahlan:{x:26,y:76,ico:'🛋️'},hall:{x:70,y:90,ico:'✈️'}};
+var PBY={};PLACES.forEach(function(p){PBY[p.id]=p;p.x=MAPPOS[p.id].x;p.y=MAPPOS[p.id].y;p.ico=MAPPOS[p.id].ico});
+var TOTALV=PLACES.reduce(function(a,p){return a+p.v.length},0);
+
+/* ---------- 状態 ---------- */
+var $m=function(i){return document.getElementById(i)};
+var cam=0,t=0,speaker=null,spX=360,spSay=false,lastId=null,LIMIT=5000;
+var G={view:'map',at:'info',scene:null,ti:0,tries:0,phase:'idle',sid:0,timers:[],typeTimer:0};
+var save={seen:{}},SAVEKEY='kanpe-dubai-save-v2';
+try{var s0=JSON.parse(localStorage.getItem(SAVEKEY)||'null');if(s0&&s0.seen&&typeof s0.seen==='object')save.seen=s0.seen}catch(e){}
+function storeSave(){try{localStorage.setItem(SAVEKEY,JSON.stringify(save))}catch(e){}}
+function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),x=a[i];a[i]=a[j];a[j]=x}return a}
+function later(ms,fn){var s=G.sid;var id=setTimeout(function(){if(G.sid===s)fn()},ms);G.timers.push(id);return id}
+function gd(fn){var s=G.sid;return function(){if(G.sid===s)return fn.apply(this,arguments)}}
+function clearTimers(){G.timers.forEach(clearTimeout);G.timers=[];clearInterval(G.typeTimer)}
+var panel=$m('panel'),msgText=$m('msgText'),who=$m('who');
+function clearPanel(){panel.textContent=''}
+function typeText(text,cb){clearInterval(G.typeTimer);var i=0,s=G.sid;G.typeTimer=setInterval(function(){if(G.sid!==s){clearInterval(G.typeTimer);return}i++;msgText.textContent=text.slice(0,i);if(i>=text.length){clearInterval(G.typeTimer);if(cb)cb()}},26)}
+function setMsg(text,w){who.textContent=w||'';msgText.textContent='';typeText(text)}
+function setMsgInstant(text,w){clearInterval(G.typeTimer);who.textContent=w||'';msgText.textContent=text}
+var sayTok=0;
+function say(text,rate,pitch,done){
+ var my=++sayTok,fired=false;function fin(){if(fired||my!==sayTok)return;fired=true;if(done)done()}
+ try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(text);u.lang='en-US';u.rate=rate||.95;u.pitch=pitch||1;u.onend=fin;u.onerror=fin;speechSynthesis.speak(u)}catch(e){}
+ setTimeout(fin,text.length*85+2200)}
+function stopSay(){sayTok++;try{speechSynthesis.cancel()}catch(e){}}
+function cueText(c){return c.replace(/\*/g,'')}
+function parseCue(c){return c.split(' ').map(function(k){return {txt:k.replace(/\*/g,''),s:k.indexOf('*')>=0}})}
+function turnsOf(id){var L=DLG[id].lines,T=[],i=0;while(i<L.length){var n=L[i];if(n.n&&L[i+1]&&L[i+1].y){T.push({npc:n.n,npcJp:n.jp,cue:L[i+1].y,cueJp:L[i+1].jp});i+=2}else i++}return T}
+
+/* ---------- 描く(場面) ---------- */
+function sp2(map,pal,x,y,px){for(var r=0;r<map.length;r++){var row=map[r];for(var k=0;k<row.length;k++){var ch=row.charAt(k);if(ch!=='.'){c.fillStyle=pal[ch]||'#f0f';c.fillRect(Math.round(x+k*px),Math.round(y+r*px),px,px)}}}}
+function drawCrowd(){
+ var L=CROWD.slice().sort(function(a,b){return a.y-b.y});
+ L.forEach(function(n){
+  var off=Math.sin(t*n.sp+n.ph)*n.amp,wx=n.x0+off,x=wx-cam-18;if(x<-40||x>VW+10)return;
+  var moving=Math.abs(Math.cos(t*n.sp+n.ph))>.15,m=moving&&Math.floor(t*5+n.ph)%2?n.map2:n.map;
+  c.globalAlpha=.18;R('#000',x+3,n.y-2,30,3);c.globalAlpha=1;
+  sp2(m,n.pal,x,n.y-m.length*3,3)})}
+function drawFront(){
+ var bob=spSay&&Math.floor(t*6)%2?-1:0;
+ var hx=24,hy=147-12*4;c.globalAlpha=.22;R('#000',hx+4,145,44,4);c.globalAlpha=1;sp2(HEROMAP,HPAL,hx,hy,4);
+ var by=147-BUDDYMAP.length*4+(Math.floor(t*2)%2?0:1);c.globalAlpha=.22;R('#000',hx+54,145,36,4);c.globalAlpha=1;sp2(BUDDYMAP,BPAL,hx+52,by,4);
+ if(speaker){var n=speaker.m.length,gap=n>1?52:0,baseX=(n>1?150:206)+spX;
+  for(var i=0;i<n;i++){var map=speaker.m[i][0],pal=speaker.m[i][1],x=baseX+i*gap,y=147-map.length*4+(i===0?bob:0);
+   c.globalAlpha=.22;R('#000',x+4,145,44,4);c.globalAlpha=1;sp2(map,pal,x,y,4)}
+  if(spSay){var bx=baseX+22,by2=147-speaker.m[0][0].length*4-10;R('#05070f',bx-8,by2-1,17,12);R('#f4f1e8',bx-7,by2,15,10);T('…',bx,by2+4,8,'#05070f')}}}
+
+/* ---------- マップ ---------- */
+var mapEl=$m('map'),pathsEl=$m('paths'),nodeEls={},heroEl,buddyEl;
+function mkWalker(id,map,pal,px){var d=el('div','walker');d.id=id;var cc=document.createElement('canvas');cc.width=map[0].length*px;cc.height=map.length*px;sp2c(cc.getContext('2d'),map,pal,px);d.appendChild(cc);return d}
+function sp2c(g,map,pal,px){for(var r=0;r<map.length;r++)for(var k=0;k<map[r].length;k++){var ch=map[r].charAt(k);if(ch!=='.'){g.fillStyle=pal[ch];g.fillRect(k*px,r*px,px,px)}}}
+function drawMapBg(){
+ var cv2=document.getElementById('mapbg');
+ if(!cv2){cv2=document.createElement('canvas');cv2.id='mapbg';cv2.style.cssText='position:absolute;left:0;top:0;width:100%;height:100%;image-rendering:pixelated;z-index:0;pointer-events:none';mapEl.insertBefore(cv2,mapEl.firstChild)}
+ var W2=mapEl.clientWidth,H2=mapEl.clientHeight;if(!W2||!H2)return;
+ var U=4,cw=Math.ceil(W2/U),ch=Math.ceil(H2/U);cv2.width=cw;cv2.height=ch;var g=cv2.getContext('2d');
+ g.fillStyle='#efe6d2';g.fillRect(0,0,cw,ch);
+ g.fillStyle='#e3d7bc';for(var x=0;x<cw;x+=12)g.fillRect(x,0,1,ch);for(var y=0;y<ch;y+=12)g.fillRect(0,y,cw,1);
+ g.fillStyle='#c9a05a';for(var k=1;k<=3;k++)g.fillRect(0,Math.round(ch*k/4),cw,2);
+ /* 赤と青の柱(ターミナル3の柱)を縁に */
+ g.fillStyle='#143fb0';g.fillRect(0,0,5,ch);g.fillRect(cw-5,0,5,ch);g.fillStyle='#c8182a';for(var y2=0;y2<ch;y2+=40){g.fillRect(0,y2,5,8);g.fillRect(cw-5,y2,5,8)}
+}
+function buildMap(){
+ mapEl.querySelectorAll('.node,.walker').forEach(function(n){n.remove()});pathsEl.textContent='';nodeEls={};
+ for(var i=1;i<PLACES.length;i++){var a=PLACES[i-1],b=PLACES[i],ln=document.createElementNS('http://www.w3.org/2000/svg','line');ln.setAttribute('x1',a.x);ln.setAttribute('y1',a.y);ln.setAttribute('x2',b.x);ln.setAttribute('y2',b.y);pathsEl.appendChild(ln)}
+ PLACES.forEach(function(p){
+  var n=el('button','node');n.type='button';n.dataset.id=p.id;n.style.left=p.x+'%';n.style.top=p.y+'%';n.setAttribute('aria-label',p.name);
+  n.appendChild(el('span','ico',p.ico));n.appendChild(el('span','star','★'));n.appendChild(el('span','nm',p.name));
+  var dd=el('span','dots');p.v.forEach(function(){dd.appendChild(el('i'))});n.appendChild(dd);
+  n.addEventListener('click',function(){onNode(p.id)});mapEl.appendChild(n);nodeEls[p.id]=n});
+ heroEl=mkWalker('hero',HEROMAP,HPAL,3);buddyEl=mkWalker('buddy',BUDDYMAP,BPAL,3);mapEl.appendChild(buddyEl);mapEl.appendChild(heroEl);placeWalkers(G.at,true)}
+function placeWalkers(id,instant){var p=PBY[id];[heroEl,buddyEl].forEach(function(w){if(instant)w.style.transition='none';w.style.left=p.x+'%';w.style.top=p.y+'%'});if(instant){void heroEl.offsetWidth;heroEl.style.transition='';buddyEl.style.transition=''}}
+function refreshMap(){
+ PLACES.forEach(function(p){var n=nodeEls[p.id],dots=n.querySelectorAll('.dots i'),c0=0;
+  p.v.forEach(function(v,i){var on=(save.seen[v]||0)>0;dots[i].classList.toggle('on',on);if(on)c0++});n.classList.toggle('done',c0===p.v.length)});
+ var pips=$m('pips');pips.textContent='';var d=0;PLACES.forEach(function(p){p.v.forEach(function(v){if(save.seen[v])d++})});for(var i=0;i<TOTALV;i++)pips.appendChild(el('i',i<d?'on':''))}
+function showMap(){
+ G.view='map';G.sid++;clearTimers();stopSay();G.scene=null;G.phase='idle';speaker=null;
+ $m('sceneView').hidden=true;$m('boothView').hidden=true;$m('mapView').hidden=false;refreshBoothBtn();
+ if(!heroEl||!heroEl.isConnected)buildMap();refreshMap();drawMapBg();placeWalkers(G.at,true)}
+function onNode(id){
+ if(G.view!=='map')return;
+ if(G.at===id){enterPlace(id);return}
+ G.view='walk';G.at=id;placeWalkers(id,false);setTimeout(function(){enterPlace(id)},800)}
+
+/* ---------- 場面の進行(グアム編と同じ: すすむ → 相手 → カンペ → 単語バトル → 日本語で答え合わせ) ---------- */
+function pickV(pl){
+ var ids=pl.v,min=1e9;ids.forEach(function(i){min=Math.min(min,save.seen[i]||0)});
+ var pool=ids.filter(function(i){return (save.seen[i]||0)===min&&i!==lastId});
+ if(!pool.length)pool=ids.filter(function(i){return i!==lastId});
+ if(!pool.length)pool=ids.slice();
+ return pool[Math.floor(Math.random()*pool.length)]}
+function enterPlace(id){
+ var pl=PBY[id],vid=pickV(pl),d=DLG[vid];lastId=vid;
+ G.sid++;clearTimers();
+ G.scene={id:id,vid:vid,pl:pl,d:d,turns:turnsOf(vid),words:d.words,pitch:SP[vid].pitch};
+ cam=pl.cam;speaker=SP[vid];spX=360;spSay=false;
+ G.view='scene';G.ti=0;G.tries=0;$m('mapView').hidden=true;$m('sceneView').hidden=false;
+ startScene()}
+function startScene(){
+ clearPanel();var S=G.scene;
+ setMsgInstant(S.pl.tip[0],'');$m('tapHint').textContent='';
+ var b=el('button','btn','すすむ');b.type='button';panel.appendChild(b);
+ b.addEventListener('click',function(){npcTurn()})}
+function npcTurn(){
+ clearPanel();G.phase='npc';var S=G.scene,T=S.turns[G.ti];
+ who.textContent=S.d.who;
+ msgText.textContent='';typeText(T.npc);
+ spSay=true;panel.appendChild(el('div','stat',''));
+ say(T.npc,.95,S.pitch,gd(function(){spSay=false;if(G.phase==='npc')later(250,showCue)}))}
+$m('msg').addEventListener('click',function(){if(!G.scene||G.phase==='idle'||G.phase==='words'||G.phase==='reveal')return;var T=G.scene.turns[G.ti];if(T){spSay=true;say(T.npc,.95,G.scene.pitch,gd(function(){spSay=false}))}});
+$m('exitBtn').addEventListener('click',function(){showMap()});
+function showCue(){
+ G.phase='cue';clearPanel();var T=G.scene.turns[G.ti],toks=parseCue(T.cue);clearInterval(G.typeTimer);msgText.textContent=T.npc;
+ var card=el('div','cue');card.appendChild(el('span','lab','カンペ'));
+ var spans=toks.map(function(k){var s=el('span','w'+(k.s?' s':''),k.txt);card.appendChild(s);return s});
+ panel.appendChild(card);var stat=el('div','stat','');panel.appendChild(stat);
+ var row=el('div','row');var demo=el('button','btn sub','おてほん');demo.type='button';row.appendChild(demo);
+ demo.addEventListener('click',function(){say(cueText(T.cue),.8,1)});
+ var act=el('button','btn','おして よむ');act.type='button';row.appendChild(act);panel.appendChild(row);
+ setupAction(act,stat,toks,spans,T)}
+/* ---------- 発音チェック: 目標の文と「聞こえた文字」を単語ごとに比べる ---------- */
+var ONES=['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+var TENS=['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+function numWords(n){if(n<20)return [ONES[n]];if(n<100)return [TENS[Math.floor(n/10)]].concat(n%10?[ONES[n%10]]:[]);
+ if(n<1000)return [ONES[Math.floor(n/100)],'hundred'].concat(n%100?numWords(n%100):[]);return null}
+var CT={"i'm":['i','am'],"it's":['it','is'],"that's":['that','is'],"what's":['what','is'],"there's":['there','is'],"he's":['he','is'],"she's":['she','is'],"here's":['here','is'],"where's":['where','is'],"who's":['who','is'],"how's":['how','is'],"let's":['let','us'],"you're":['you','are'],"we're":['we','are'],"they're":['they','are'],"i've":['i','have'],"you've":['you','have'],"we've":['we','have'],"they've":['they','have'],"i'll":['i','will'],"you'll":['you','will'],"we'll":['we','will'],"they'll":['they','will'],"he'll":['he','will'],"she'll":['she','will'],"it'll":['it','will'],"can't":['can','not'],"cannot":['can','not'],"won't":['will','not'],"don't":['do','not'],"doesn't":['does','not'],"didn't":['did','not'],"isn't":['is','not'],"aren't":['are','not'],"wasn't":['was','not'],"weren't":['were','not'],"couldn't":['could','not'],"wouldn't":['would','not'],"shouldn't":['should','not'],"haven't":['have','not'],"hasn't":['has','not'],"hadn't":['had','not']};
+(function(){var amb={its:1,hes:1,shes:1,ill:1,well:1,were:1,lets:1,hell:1,shell:1,whos:1};Object.keys(CT).forEach(function(k){var s=k.replace(/'/g,'');if(s!==k&&!amb[s]&&!CT[s])CT[s]=CT[k]})})();
+function expandTok(raw){
+ var s=String(raw).toLowerCase().replace(/[’‘`]/g,"'"),out=[];
+ s.split(/[-‐-―]+/).forEach(function(p){
+  p=p.replace(/[^a-z0-9']/g,'');if(!p)return;
+  if(/^[0-9]+$/.test(p)){var nw=numWords(parseInt(p,10));if(nw){out=out.concat(nw);return}out.push(p);return}
+  if(CT[p]){out=out.concat(CT[p]);return}
+  p=p.replace(/'/g,'');if(p)out.push(p)});
+ return out}
+function alignWords(tg,hd){
+ var n=tg.length,m=hd.length,d=[],i,j;
+ for(i=0;i<=n;i++){d.push([]);for(j=0;j<=m;j++)d[i].push(0)}
+ for(i=n-1;i>=0;i--)for(j=m-1;j>=0;j--)d[i][j]=tg[i]===hd[j]?d[i+1][j+1]+1:Math.max(d[i+1][j],d[i][j+1]);
+ var rt=[],rh=[],gt=[],gh=[];
+ for(i=0;i<n;i++)rt.push({ok:false,hj:-1});for(j=0;j<m;j++)rh.push('bad');
+ function flush(){var k=Math.min(gt.length,gh.length),q;for(q=0;q<k;q++)rt[gt[q]].hj=gh[q];gt=[];gh=[]}
+ i=0;j=0;
+ while(i<n&&j<m){
+  if(tg[i]===hd[j]){flush();rt[i].ok=true;rt[i].hj=j;rh[j]='ok';i++;j++}
+  else if(d[i+1][j]>=d[i][j+1]){gt.push(i);i++}
+  else{gh.push(j);j++}}
+ while(i<n){gt.push(i);i++}while(j<m){gh.push(j);j++}
+ flush();
+ return {t:rt,h:rh}}
+function kindOf(t,h){
+ if(h==null)return {k:'miss'};
+ if(h.length>=2&&t.length>h.length&&t.indexOf(h)===0)return {k:'tail',keep:h.length};
+ if(t.length>=2&&h.length>t.length&&h.indexOf(t)===0)return {k:'extra'};
+ return {k:'diff'}}
+/* tgToks: 画面に出ている単語(句読点つき) / heardText: 聞こえた文字 → 単語ごとの結果 */
+function analyze(tgToks,heardText){
+ var tg=[],own=[],i;
+ tgToks.forEach(function(t,q){expandTok(t).forEach(function(w){tg.push(w);own.push(q)})});
+ /* 目標に it's / we're などがあるときだけ、聞こえた its / were を「it is」「we are」として扱う */
+ var tc={};tgToks.forEach(function(t){var key=String(t).toLowerCase().replace(/[’‘`]/g,"'").replace(/[^a-z0-9']/g,'');if(key.indexOf("'")>0&&CT[key])tc[key.replace(/'/g,'')]=CT[key]});
+ var rawH=String(heardText||'').trim().split(/\s+/).filter(Boolean),hd=[],hown=[];
+ rawH.forEach(function(t,j){var e=expandTok(t);if(e.length===1&&tc[e[0]])e=tc[e[0]];e.forEach(function(w){hd.push(w);hown.push(j)})});
+ var al=alignWords(tg,hd),parts=tgToks.map(function(){return []});
+ al.t.forEach(function(r,q){parts[own[q]].push({w:tg[q],ok:r.ok,hj:r.hj})});
+ var words=[],n=0,okN=0;
+ tgToks.forEach(function(t,q){
+  var ps=parts[q],w={t:t,ok:true,k:'ok',h:null};
+  if(!ps.length){words.push(w);return}
+  n++;
+  var allOk=ps.every(function(p){return p.ok});
+  if(allOk){okN++;w.h=ps.map(function(p){return hd[p.hj]}).join(' ');words.push(w);return}
+  w.ok=false;
+  if(ps.length===1){var p=ps[0],h=p.hj>=0?hd[p.hj]:null,kk=kindOf(p.w,h);w.k=kk.k;w.h=h;if(kk.keep)w.keep=kk.keep}
+  else{var hs=ps.filter(function(p){return p.hj>=0}).map(function(p){return hd[p.hj]});w.k=hs.length?'diff':'miss';w.h=hs.length?hs.join(' '):null}
+  words.push(w)});
+ var hflags=rawH.map(function(){return 'ok'});
+ al.h.forEach(function(f,k){if(f==='bad')hflags[hown[k]]='bad'});
+ return {words:words,n:n,okN:okN,ratio:n?okN/n:0,heardRaw:rawH,hflags:hflags}}
+
+/* ---------- 発音チェック: ブラウザ標準の音声認識で「聞こえた文字」を出す(音声は保存も送信もしない) ---------- */
+var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+var PLOG='kanpe-pron-v1';
+function plogLoad(){try{var a=JSON.parse(localStorage.getItem(PLOG)||'[]');return Array.isArray(a)?a:[]}catch(e){return []}}
+function plogAdd(r){var a=plogLoad();a.push(r);if(a.length>600)a=a.slice(-600);try{localStorage.setItem(PLOG,JSON.stringify(a))}catch(e){}}
+function missKey(s){return String(s).replace(/[^A-Za-z']/g,'').toLowerCase()}
+function renderEval(card,spans,toks,res,heardEl){
+ card.classList.add('ev');
+ res.words.forEach(function(w,i){
+  var s=spans[i],txt=toks[i].txt;s.textContent='';s.classList.remove('on','bad');
+  if(w.ok){s.textContent=txt;return}
+  if(w.k==='tail'){
+   var good='',badp='',punct='',cnt=0;
+   for(var q=0;q<txt.length;q++){var ch=txt.charAt(q),isA=/[A-Za-z0-9]/.test(ch);
+    if(isA){cnt++;if(cnt>w.keep)badp+=ch;else good+=ch}else if(badp)punct+=ch;else good+=ch}
+   s.appendChild(document.createTextNode(good));var em=document.createElement('em');em.textContent=badp;s.appendChild(em);
+   if(punct)s.appendChild(document.createTextNode(punct));return}
+  s.classList.add('bad');s.textContent=txt});
+ heardEl.className='heard';heardEl.textContent='';heardEl.appendChild(document.createTextNode('🎤 '));
+ if(!res.heardRaw.length){heardEl.appendChild(document.createTextNode('…'));return}
+ res.heardRaw.forEach(function(h,j){var e=document.createElement(res.hflags[j]==='bad'?'b':'span');e.textContent=h+' ';heardEl.appendChild(e)})}
+function setupAction(act,stat,toks,spans,T){
+ var card=spans.length?spans[0].parentNode:null;
+ if(!SR||!card){setupActionTimer(act,stat,toks,spans,T);if(card)card.appendChild(el('div','heard','このブラウザは音声認識なし(時間だけで判定)'));return}
+ var heardEl=el('div','heard','🎤');card.appendChild(heardEl);
+ var tgToks=toks.map(function(k){return k.txt}),sid=G.sid,rec=null,listening=false,got=false,lastInt='',errCode='',mode='say',IDLE='おして よむ';
+ function alive(){return G.sid===sid&&G.view==='scene'}
+ function label(){return mode==='next'?'つぎへ':(mode==='skip'?'マイクなしで すすむ':IDLE)}
+ function setIdle(){listening=false;act.classList.remove('down');act.textContent=label()}
+ function resetCard(){card.classList.remove('ev');spans.forEach(function(s,i){s.classList.remove('on','bad');s.textContent=toks[i].txt})}
+ function blocked(msg){mode='skip';setIdle();stat.className='stat ng';stat.textContent=msg}
+ var rb=null,noHear=0;
+ function dropRb(){if(rb){rb.remove();rb=null}}
+ function showNext(){
+  mode='next';act.textContent=label();dropRb();
+  var row=act.parentNode;rb=el('button','btn sub','もう一度');rb.type='button';row.insertBefore(rb,act);
+  rb.addEventListener('click',function(){dropRb();mode='say';act.textContent=label();start()})}
+ function finish(txt,conf){
+  var res=analyze(tgToks,txt);renderEval(card,spans,toks,res,heardEl);
+  plogAdd({ts:Date.now(),v:G.scene?G.scene.vid:'',tg:tgToks.join(' '),hd:String(txt||'').slice(0,200),cf:conf||0,ok:res.okN,n:res.n,
+   miss:res.words.filter(function(w){return !w.ok}).map(function(w){return {t:missKey(w.t),h:w.h,k:w.k}})});
+  noHear=0;
+  var pct=Math.round(res.ratio*100),cnt=res.okN+'/'+res.n+'語 '+pct+'%';
+  if(res.okN===res.n){stat.className='stat ok';stat.textContent='Nice!  '+cnt;onPass();return}
+  /* 7割未満でも会話は止めない。赤い語は記録に入り、羽田の発音教室で練習する */
+  var hi=res.ratio>=0.7;stat.className=hi?'stat ok':'stat ng';
+  stat.textContent=cnt+(hi?'  7割以上 聞こえた':'  7割未満');showNext()}
+ function start(){
+  stopSay();resetCard();heardEl.className='heard live';heardEl.textContent='🎤 …';stat.className='stat';stat.textContent='';
+  var r;try{r=new SR()}catch(e){blocked('マイクが使えません');return}
+  rec=r;r.lang='en-US';r.interimResults=true;r.maxAlternatives=3;r.continuous=false;got=false;lastInt='';errCode='';
+  r.onresult=function(ev){
+   if(rec!==r)return;if(!alive()){try{r.abort()}catch(e){}return}
+   var rs=ev.results[ev.results.length-1],alt=rs[0];
+   if(rs.isFinal){got=true;finish(alt.transcript,alt.confidence)}
+   else{lastInt=alt.transcript;heardEl.textContent='🎤 '+lastInt}};
+  r.onerror=function(ev){errCode=(ev&&ev.error)||'error'};
+  r.onend=function(){
+   if(rec!==r)return;rec=null;if(!alive())return;
+   if(errCode==='not-allowed'||errCode==='service-not-allowed'){blocked('マイクが許可されていません');return}
+   if(errCode==='audio-capture'){blocked('マイクが見つかりません');return}
+   setIdle();if(got)return;
+   if(errCode==='network'){stat.className='stat ng';stat.textContent='ネットワークエラー';return}
+   if(lastInt){finish(lastInt,0);return}
+   heardEl.textContent='🎤 …';stat.className='stat ng';stat.textContent='きこえませんでした';noHear++;if(noHear>=2)showNext()};
+  try{r.start();listening=true;act.classList.add('down');act.textContent='きいてます…';
+   later(15000,function(){if(rec===r){try{r.stop()}catch(e){}}})}
+  catch(e){blocked('マイクが使えません')}}
+ act.addEventListener('click',function(){
+  if(mode==='skip'||mode==='next'){onPass();return}
+  if(listening){try{if(rec)rec.stop()}catch(e){}return}
+  start()});
+ act.addEventListener('contextmenu',function(e){e.preventDefault()});
+ stat.className='stat';stat.textContent=''}
+
+/* ---------- 羽田空港 発音教室: 自分の記録から、言えなかった単語・文を何度も練習する ---------- */
+var PRAC='kanpe-pron-prac-v1';
+function pracLoad(){try{var o=JSON.parse(localStorage.getItem(PRAC)||'{}');return o&&typeof o==='object'?o:{}}catch(e){return {}}}
+function pracAdd(key,ok){var o=pracLoad(),r=o[key]||{a:0,ok:0};r.a++;if(ok)r.ok++;o[key]=r;try{localStorage.setItem(PRAC,JSON.stringify(o))}catch(e){}}
+function lev(a,b){var m=a.length,n=b.length,d=[],i,j;for(i=0;i<=m;i++){d.push([i])}for(j=1;j<=n;j++)d[0][j]=j;
+ for(i=1;i<=m;i++)for(j=1;j<=n;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a.charAt(i-1)===b.charAt(j-1)?0:1));return d[m][n]}
+function boothStats(){
+ var a=plogLoad(),Wd={},Sn={};
+ a.forEach(function(r){
+  String(r.tg||'').split(' ').forEach(function(tk){var k=missKey(tk);if(!k)return;(Wd[k]=Wd[k]||{w:k,a:0,m:0,hs:{}}).a++});
+  (r.miss||[]).forEach(function(m){var k=m.t;if(!k)return;var e=Wd[k]=Wd[k]||{w:k,a:0,m:0,hs:{}};e.m++;var h=m.h==null?'(聞こえず)':m.h;e.hs[h]=(e.hs[h]||0)+1});
+  var tg=String(r.tg||'');if(tg){var s=Sn[tg]=Sn[tg]||{tg:tg,a:0,m:0};s.a++;if(r.ok<r.n)s.m++}});
+ var words=Object.keys(Wd).map(function(k){return Wd[k]}).filter(function(e){return e.m>0});
+ var sents=Object.keys(Sn).map(function(k){return Sn[k]}).filter(function(e){return e.m>0});
+ function cmp(x,y){return (y.m-x.m)||((y.m/y.a)-(x.m/x.a))}
+ words.sort(function(x,y){return cmp(x,y)||(x.w<y.w?-1:1)});sents.sort(cmp);
+ return {words:words.slice(0,80),sents:sents.slice(0,40),total:a.length}}
+function boothCount(){try{return boothStats().words.length}catch(e){return 0}}
+
+var boothTab='w';
+function boothHeardChips(hs){return Object.keys(hs).sort(function(x,y){return hs[y]-hs[x]}).slice(0,3).map(function(h){var b=el('b','chip',h);return b})}
+function showBooth(){
+ G.view='booth';G.sid++;clearTimers();stopSay();
+ $m('mapView').hidden=true;$m('sceneView').hidden=true;$m('boothView').hidden=false;boothList()}
+function boothList(){
+ var body=$m('boothBody');body.textContent='';var st=boothStats(),prac=pracLoad();
+ $m('boothSub').textContent='自分の記録から、言えなかったものを練習';
+ var tabs=el('div','tabs'),tw=el('button','tab'+(boothTab==='w'?' on':''),'単語 '+st.words.length),ts=el('button','tab'+(boothTab==='s'?' on':''),'文 '+st.sents.length);
+ tw.type='button';ts.type='button';tabs.appendChild(tw);tabs.appendChild(ts);body.appendChild(tabs);
+ tw.addEventListener('click',function(){boothTab='w';boothList()});ts.addEventListener('click',function(){boothTab='s';boothList()});
+ var list=el('div','blist');body.appendChild(list);
+ var rows=boothTab==='w'?st.words:st.sents;
+ if(!rows.length){list.appendChild(el('p','bempty',st.total?'言えなかった'+(boothTab==='w'?'単語':'文')+'はまだありません。':'まだ記録がありません。ドバイの会話で「おして よむ」を使うと、赤くなった言葉がここに並びます。'));return}
+ rows.forEach(function(r){
+  var key=boothTab==='w'?r.w:r.tg.toLowerCase(),pr=prac[key],row=el('button','brow');row.type='button';
+  var top=el('div','btop');top.appendChild(el('span','bw',boothTab==='w'?r.w:r.tg));top.appendChild(el('span','bn','ミス '+r.m+'/'+r.a+'回'));row.appendChild(top);
+  var sub=el('div','bsub');
+  if(boothTab==='w'){sub.appendChild(document.createTextNode('聞こえた→ '));boothHeardChips(r.hs).forEach(function(c){sub.appendChild(c);sub.appendChild(document.createTextNode(' '))})}
+  if(pr)sub.appendChild(el('span','bp','  練習 ✓'+pr.ok+'/'+pr.a));
+  row.appendChild(sub);list.appendChild(row);
+  row.addEventListener('click',function(){boothPractice(boothTab==='w'?[r.w]:r.tg.split(' '),key)})})}
+
+function boothPractice(tokens,key){
+ var body=$m('boothBody');body.textContent='';$m('boothSub').textContent='同じものを何度も言って、どれが伝わったか見る';
+ var back=el('button','btn sub','← 一覧');back.type='button';
+ var toks=tokens.map(function(t){return {txt:t,s:false}});
+ var card=el('div','cue');card.appendChild(el('span','lab','れんしゅう'));
+ var spans=toks.map(function(k){var s=el('span','w',k.txt);card.appendChild(s);return s});
+ var heardEl=el('div','heard','🎤');card.appendChild(heardEl);
+ var sum=el('div','stat','');var atts=el('div','atts');
+ var row=el('div','row'),demo=el('button','btn sub','おてほん'),act=el('button','btn','おして よむ');
+ demo.type='button';act.type='button';row.appendChild(demo);row.appendChild(act);
+ body.appendChild(back);body.appendChild(card);body.appendChild(sum);body.appendChild(atts);body.appendChild(row);
+ back.addEventListener('click',function(){stopRec();boothList()});
+ demo.addEventListener('click',function(){say(tokens.join(' '),.8,1)});
+ var n=0,good=0,rec=null,listening=false;
+ function stopRec(){var r=rec;rec=null;listening=false;try{if(r)r.abort()}catch(e){}}
+ function upd(){sum.className='stat'+(good?' ok':'');sum.textContent=n?('✓ 完璧に伝わった '+good+' / '+n+'回'):''}
+ function addRow(res,txt){
+  n++;var r=el('div','att');r.appendChild(el('span','an','#'+n));
+  var h=el('span','ah');if(res.heardRaw.length){res.heardRaw.forEach(function(w,j){var e=el(res.hflags[j]==='bad'?'b':'span',null,w+' ');h.appendChild(e)})}else h.textContent='…';r.appendChild(h);
+  var ratio=res.ratio;
+  if(tokens.length===1&&res.words[0]&&!res.words[0].ok){var hw=res.words[0].h;ratio=hw?Math.max(0,1-lev(missKey(tokens[0]),String(hw).replace(/[^a-z']/g,''))/Math.max(missKey(tokens[0]).length,1)):0}
+  var perfect=res.okN===res.n,badge;
+  if(perfect){good++;badge=el('span','bd ok','✓ 伝わった');r.classList.add('good')}
+  else{var hi=ratio>=0.7;badge=el('span','bd '+(hi?'mid':'ng'),Math.round(ratio*100)+'% '+(hi?'7割以上':'7割未満'))}
+  r.appendChild(badge);atts.insertBefore(r,atts.firstChild);pracAdd(key,perfect);upd()}
+ function listen(){
+  stopSay();heardEl.className='heard live';heardEl.textContent='🎤 …';
+  var r;try{r=new SR()}catch(e){sum.className='stat ng';sum.textContent='マイクが使えません';return}
+  rec=r;listening=true;act.textContent='きいてます…';act.classList.add('down');
+  r.lang='en-US';r.interimResults=true;r.maxAlternatives=3;r.continuous=false;
+  var got=false,last='',err='';
+  function done(txt){
+   if(rec!==r)return;rec=null;listening=false;act.classList.remove('down');act.textContent='おして よむ';
+   if(err==='not-allowed'||err==='service-not-allowed'){sum.className='stat ng';sum.textContent='マイクが許可されていません';return}
+   if(err==='audio-capture'){sum.className='stat ng';sum.textContent='マイクが見つかりません';return}
+   if(err==='network'){sum.className='stat ng';sum.textContent='ネットワークエラー';return}
+   if(!txt){heardEl.textContent='🎤 …';sum.className='stat ng';sum.textContent='きこえませんでした';return}
+   var res=analyze(tokens,txt);renderEval(card,spans,toks,res,heardEl);addRow(res,txt)}
+  r.onresult=function(ev){if(rec!==r)return;var rs=ev.results[ev.results.length-1],alt=rs[0];if(rs.isFinal){got=true;done(alt.transcript)}else{last=alt.transcript;heardEl.textContent='🎤 '+last}};
+  r.onerror=function(ev){err=(ev&&ev.error)||'error'};
+  r.onend=function(){if(rec!==r)return;done(got?'':last)};
+  try{r.start();setTimeout(function(){if(rec===r){try{r.stop()}catch(e){}}},12000)}catch(e){rec=null;listening=false;act.classList.remove('down');act.textContent='おして よむ';sum.className='stat ng';sum.textContent='マイクが使えません'}}
+ act.addEventListener('click',function(){
+  if(!SR){sum.className='stat ng';sum.textContent='このブラウザは音声認識がありません';return}
+  if(listening){try{if(rec)rec.stop()}catch(e){}return}
+  listen()});
+ act.addEventListener('contextmenu',function(e){e.preventDefault()})}
+function refreshBoothBtn(){var n=boothCount();$m('boothBtn').textContent='✈ 羽田空港 発音教室  ・ 言えなかった単語 '+n+'語'}
+$m('boothBtn').addEventListener('click',function(){if(G.view==='map')showBooth()});
+$m('boothBack').addEventListener('click',function(){showMap()});
+
+function syl(w){return Math.max(1,(w.match(/[aeiouy]+/gi)||[]).length)}
+function setupActionTimer(act,stat,toks,spans,T){
+ var sy=toks.map(function(k){return syl(k.txt.replace(/[^A-Za-z']/g,''))}),tot=sy.reduce(function(a,b){return a+b},0),Tm=tot*0.26+0.7;
+ var cum=[0];sy.forEach(function(n,i){cum.push(cum[i]+n)});
+ var raf=0,t0=0,pressed=false;
+ function loop(){if(!pressed)return;var e0=(performance.now()-t0)/1000,f=e0/Tm,idx=-1;for(var i=0;i<toks.length;i++){if(f*tot>=cum[i])idx=i}
+  spans.forEach(function(s,i){s.classList.toggle('on',i===idx)});raf=requestAnimationFrame(loop)}
+ function down(e){e.preventDefault();if(pressed)return;try{act.setPointerCapture(e.pointerId)}catch(x){}pressed=true;t0=performance.now();act.classList.add('down');stat.className='stat';stat.textContent='よんで…';stopSay();raf=requestAnimationFrame(loop)}
+ function up(e){if(!pressed)return;e.preventDefault();pressed=false;cancelAnimationFrame(raf);act.classList.remove('down');spans.forEach(function(s){s.classList.remove('on')});
+  var d=(performance.now()-t0)/1000;
+  if(d<Tm*0.6){stat.className='stat ng';stat.textContent='Too short';onFail()}
+  else if(d>Tm*2.4){stat.className='stat ng';stat.textContent='Too long';onFail()}
+  else{stat.className='stat ok';stat.textContent='Nice!';onPass()}}
+ var lastUp=0,fake={preventDefault:function(){},pointerId:0};
+ act.addEventListener('click',function(){if(Date.now()-lastUp<500)return;if(!pressed)down(fake);else up(fake)});
+ stat.className='stat';stat.textContent='';
+ act.addEventListener('pointerdown',down);act.addEventListener('pointerup',function(e){lastUp=Date.now();up(e)});act.addEventListener('pointercancel',function(e){lastUp=Date.now();up(e)});act.addEventListener('pointerleave',function(e){if(pressed)up(e)});
+ act.addEventListener('contextmenu',function(e){e.preventDefault()})}
+var RETRY=["Sorry, one more time?","Could you say that again, please?","Pardon? Once more, please."];
+var THANKS=["Okay.","Sure.","I see.","Right.","Got it.","Of course."];
+function onFail(){
+ A_shake();G.tries++;
+ if(G.tries>=3){G.phase='assist';var T=G.scene.turns[G.ti];setMsgInstant('Listen, then try again.',G.scene.d.who);say(cueText(T.cue),.6,1,gd(function(){G.tries=0;later(300,function(){var st=panel.querySelector('.stat');if(st){st.className='stat';st.textContent=''}})}));return}
+ G.phase='retry';var line=RETRY[Math.min(G.tries-1,RETRY.length-1)];setMsg(line,G.scene.d.who);say(line,.9,G.scene.pitch)}
+function A_shake(){var a=$m('app');a.classList.remove('shake');void a.offsetWidth;a.classList.add('shake')}
+function onPass(){
+ G.phase='pass';G.tries=0;var th=THANKS[Math.floor(Math.random()*THANKS.length)];setMsg(th,G.scene.d.who);spSay=true;
+ say(th,1,G.scene.pitch,gd(function(){spSay=false;later(350,function(){G.ti++;if(G.ti>=G.scene.turns.length)startWords();else npcTurn()})}))}
+
+/* ---------- 単語バトル(英語+発音記号 → 日本語を3択) ---------- */
+function startWords(){
+ G.phase='words';clearPanel();stopSay();var S=G.scene;setMsgInstant('Word Battle','');$m('tapHint').textContent='';
+ var queue=shuffle(S.words.slice()),done=0,total=S.words.length,combo=0;
+ var allJp=[];Object.keys(DLG).forEach(function(k){DLG[k].words.forEach(function(w){allJp.push(w[2])})});
+ function next(){
+  clearPanel();if(!queue.length){wordsClear();return}
+  var q=queue[0],answered=false;
+  var dots=el('div','dots');for(var i=0;i<total;i++)dots.appendChild(el('i',i<done?'on':''));panel.appendChild(dots);
+  var prompt=el('div','prompt');prompt.appendChild(el('span','en',q[0]));prompt.appendChild(el('span','ipa',q[1]));
+  if(combo>=2)prompt.appendChild(el('span','combo','×'+combo));
+  prompt.addEventListener('click',function(){say(q[0],.9,1)});panel.appendChild(prompt);
+  var bar=el('div','bar'),fill=el('i');bar.appendChild(fill);panel.appendChild(bar);
+  var wrong=shuffle(allJp.filter(function(x){return x!==q[2]})).slice(0,2),opts=shuffle([q[2]].concat(wrong)),box=el('div','choices'),btns=[],tmo;
+  function lock(){answered=true;clearTimeout(tmo);btns.forEach(function(x){x.disabled=true})}
+  function miss(b){lock();combo=0;queue.push(queue.shift());A_shake();btns.forEach(function(x){if(x.textContent===q[2])x.classList.add('good')});if(b)b.classList.add('bad');say(q[0],.9,1);later(900,next)}
+  opts.forEach(function(o){var b=el('button','ch',o);b.type='button';btns.push(b);b.addEventListener('click',function(){if(answered)return;
+   if(o===q[2]){lock();combo++;b.classList.add('good');queue.shift();done++;later(380,next)}else miss(b)});box.appendChild(b)});
+  panel.appendChild(box);say(q[0],.9,1);
+  fill.style.transition='none';fill.style.width='100%';void fill.offsetWidth;fill.style.transition='width '+LIMIT+'ms linear';fill.style.width='0%';
+  tmo=later(LIMIT,function(){if(!answered)miss(null)})}
+ next()}
+function wordsClear(){later(700,startReveal)}
+
+/* ---------- 5秒だけ日本語(全部読んでくれる) ---------- */
+function startReveal(){
+ G.phase='reveal';var S=G.scene,i=0,tok=0;stopSay();$m('tapHint').textContent='';
+ function one(){
+  clearPanel();if(i>=S.turns.length){finishScene();return}
+  var my=++tok,T=S.turns[i],box=el('div','reveal');
+  box.appendChild(el('div','who2',S.d.who.toUpperCase()));box.appendChild(el('div','en',T.npc));box.appendChild(el('div','jp',T.npcJp));
+  box.appendChild(el('div','who2','YOU'));box.appendChild(el('div','en',cueText(T.cue)));box.appendChild(el('div','jp',T.cueJp));
+  panel.appendChild(box);var bar=el('div','bar'),f=el('i');bar.appendChild(f);panel.appendChild(bar);
+  var skip=el('button','btn sub','つぎへ');skip.type='button';panel.appendChild(skip);
+  setMsgInstant('Meaning!  '+(i+1)+' / '+S.turns.length,'');
+  f.style.transition='none';f.style.width='100%';void f.offsetWidth;f.style.transition='width 5s linear';f.style.width='0%';
+  var spoken=false,timed=false;
+  function adv(){if(my!==tok||!spoken||!timed)return;box.querySelectorAll('.jp').forEach(function(n){n.textContent='…'});later(500,function(){if(my!==tok)return;i++;one()})}
+  later(5000,function(){timed=true;adv()});
+  say(T.npc,.95,S.pitch,function(){if(my!==tok)return;later(200,function(){if(my!==tok)return;say(cueText(T.cue),.9,1,function(){if(my!==tok)return;spoken=true;adv()})})});
+  skip.addEventListener('click',function(){tok++;i++;one()})}
+ one()}
+function finishScene(){
+ var S=G.scene;save.seen[S.vid]=(save.seen[S.vid]||0)+1;storeSave();showMap()}
+
+/* ---------- ループ ---------- */
+var last=0;
+function frame(ts){
+ var dt=Math.min(.05,(ts-last)/1000||0);last=ts;t+=dt;
+ if(G.view==='scene'){if(speaker&&spX>0)spX=Math.max(0,spX-dt*520);bg();drawCrowd();drawFront()}
+ requestAnimationFrame(frame)}
+window.addEventListener('resize',function(){if(G.view==='map')drawMapBg()});
+showMap();
+requestAnimationFrame(frame);
+})();
+</script>
+
+</body></html>
