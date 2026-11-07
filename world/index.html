@@ -41,7 +41,35 @@ button{font:inherit;color:inherit;cursor:pointer}
 .gwin{position:absolute;left:24px;right:24px;top:44px;height:128px;border:4px solid #5b6690;background:#3b6bb0;overflow:hidden}
 .gwin .sand{position:absolute;left:0;right:0;bottom:0;height:34px;background:#f2a65a}
 .gwin .road{position:absolute;left:0;right:0;bottom:0;height:14px;background:#6b6f80}
-.gwin svg{position:absolute;left:50%;top:22px;width:190px;transform:translateX(-50%);shape-rendering:crispEdges}
+.gsky{position:absolute;inset:0}
+.gwin.t-morning{background:linear-gradient(#6aa7e8,#ffc9a0 70%,#ffe6b8)}
+.gwin.t-day{background:linear-gradient(#4aa9ee,#8fd0ff 70%,#d4f0ff)}
+.gwin.t-eve{background:linear-gradient(#3b4a8f,#ff8a5c 72%,#ffc27a)}
+.gwin.t-night{background:linear-gradient(#070b22,#1c2a5e)}
+.t-morning .sand{background:#e8b077}.t-eve .sand{background:#d98a4e}.t-night .sand{background:#3a3550}
+.t-night .road{background:#2c2f3f}.t-eve .road{background:#585a70}
+.sun,.moon{position:absolute;width:20px;height:20px;clip-path:polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%)}
+.sun{background:#ffe27a}
+.t-morning .sun{left:16%;bottom:46px;background:#ffb35a}
+.t-day .sun{right:12%;top:10px}
+.t-eve .sun{right:5%;bottom:44px;background:#ff7a3c}
+.moon{right:12%;top:10px;background:#fff6d8}
+.moon i{position:absolute;left:6px;top:-3px;width:18px;height:18px;background:#0b1030;clip-path:inherit}
+.star{position:absolute;width:2px;height:2px;background:#fff;animation:twk 2.2s steps(1,end) infinite}
+.gcl{position:absolute;left:0;animation:cdrift linear infinite}
+.gcl svg{display:block;width:100%}
+@keyframes cdrift{from{transform:translateX(-90px)}to{transform:translateX(430px)}}
+.gls{position:absolute;left:0;right:0;bottom:0;height:14px}
+.gls i{position:absolute;bottom:5px;width:4px;height:3px;background:#ffd84a;animation:lgt 1.4s steps(1,end) infinite}
+@keyframes lgt{50%{opacity:.15}}
+.gwin #gatePlane{position:absolute;left:50%;top:22px;width:190px;margin-left:-95px;animation:pbob 2.4s steps(2,end) infinite}
+.gwin #gatePlane svg{display:block;width:100%;shape-rendering:crispEdges}
+@keyframes pbob{50%{transform:translateY(-2px)}}
+.blk{position:absolute;width:5px;height:5px;animation:lgt 1.1s steps(1,end) infinite}
+.gtruck{position:absolute;left:calc(50% - 150px);bottom:3px;width:84px;animation:tdrive 5.6s cubic-bezier(.45,0,.9,.5) 1.6s both}
+.gtruck svg{display:block;width:100%;shape-rendering:crispEdges;animation:tbump .24s steps(2,end) 1.6s infinite}
+@keyframes tdrive{from{transform:translateX(0)}to{transform:translateX(-340px)}}
+@keyframes tbump{50%{transform:translateY(-1px)}}
 .gtag{position:absolute;left:50%;top:0;transform:translateX(-50%);background:#05070f;border:3px solid #ffc72c;border-top:0;border-radius:0 0 8px 8px;padding:5px 18px 6px;font-size:18px;color:#ffc72c;letter-spacing:.12em;white-space:nowrap}
 .gfloor{position:absolute;left:0;right:0;bottom:0;height:40px;background:#0a0e22}
 .body{flex:1;min-height:0;padding:18px 16px 18px;display:flex;flex-direction:column;gap:16px}
@@ -52,13 +80,14 @@ button{font:inherit;color:inherit;cursor:pointer}
 .say .jp{margin-top:4px;font-size:13px;color:#9aa6c4}
 .opts{background:#05070f;border:5px double #f4f1e8;border-radius:6px;padding:8px 10px;display:flex;flex-direction:column;gap:2px}
 .opt{background:none;border:0;text-align:left;min-height:56px;padding:8px 6px 8px 30px;position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px;color:#fff}
-.opt .cur{position:absolute;left:6px;font-size:16px;visibility:hidden}
-.opt:hover .cur,.opt:focus-visible .cur{visibility:visible}
-.opt:focus-visible{outline:2px solid #ffc72c;outline-offset:-2px}
+.opt .cur{position:absolute;left:6px;font-size:20px;visibility:hidden;color:#fff}
+.opt.sel .cur{visibility:visible;animation:blink 1.1s steps(1,end) infinite}
+.opt:focus-visible{outline:none}
 .opt .nm{font-size:24px}
 .opt .nm small{font-size:12px;color:#ffc72c}
 .opt .dist{font-size:13px;color:#9aa6c4;text-align:right}
-.opt.quit{color:#9aa6c4;font-size:20px}
+.opt.quit .nm{font-size:22px;color:#9aa6c4}
+.opt.quit.sel .nm{color:#fff}
 .note{font-size:12px;line-height:1.7;color:#9aa6c4;text-align:center}
 .bar{height:12px;background:#1a2142;border:2px solid #5b6690;border-radius:6px;overflow:hidden}
 .bar i{display:block;height:100%;width:0;background:#ffc72c}
@@ -108,7 +137,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .sg button[aria-pressed="true"]{background:#ffc72c;border-color:#ffc72c;color:#05070f}
 .sg button[aria-pressed="true"]::before{content:'▶ '}
 .sg button:focus-visible{outline:2px solid #fff;outline-offset:2px}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.gtruck{display:none}}
 </style>
 </head>
 <body>
@@ -181,18 +210,18 @@ button{font:inherit;color:inherit;cursor:pointer}
 <!-- 2 搭乗ゲート -->
 <main class="screen" id="sGate" hidden>
  <div class="gscene">
-  <div class="gwin"><div class="sand"></div><div class="road"></div><div id="gatePlane"></div></div>
+  <div class="gwin" id="gWin"><div class="gsky" id="gSky"></div><div class="sand"></div><div class="road"></div><div class="gls" id="gLs"></div><div id="gatePlane"></div><div class="gtruck" id="gTruck"></div></div>
   <div class="gtag">GATE 7</div>
   <div class="gfloor"></div>
  </div>
  <div class="body">
-  <div class="say">
+  <div class="say" id="gSay" role="button" tabindex="0" aria-label="もういちど きく">
    <span class="who">Gate Agent</span>
    <p class="en">Where would you like to fly next?</p>
-   <p class="jp">つぎは どこへ 飛びますか。</p>
+   <p class="jp">どこに 飛びますか。</p>
   </div>
   <div class="opts" id="opts"></div>
-  <div class="note" id="gateNote">？は、着くまで 国の名前が 見えません。</div>
+  <div class="note" id="gateNote">？？の国は、着くまで 名前が 見えません。</div>
  </div>
 </main>
 
@@ -384,29 +413,106 @@ function renderMap(){
 }
 
 /* ---------- 画面の切りかえ ---------- */
-function show(id){['sTitle','sMap','sSet','sGate','sFlight'].forEach(function(k){$(k).hidden=(k!==id)});window.scrollTo(0,0);titleCtl(id==='sTitle')}
+function show(id){['sTitle','sMap','sSet','sGate','sFlight'].forEach(function(k){$(k).hidden=(k!==id)});window.scrollTo(0,0);if(id!=='sGate')gateOff();titleCtl(id==='sTitle')}
 
 /* ---------- 搭乗ゲート ---------- */
+var GATE_EN='Where would you like to fly next?';
+function div(cls,css){var e=document.createElement('div');if(cls)e.className=cls;if(css)e.style.cssText=css;return e}
+/* 空の色は、端末の時刻で決まります(朝5-8時 / 昼8-16時 / 夕16-18時 / 夜) */
+function skyKind(){var d=new Date(),h=d.getHours()+d.getMinutes()/60;return h>=5&&h<8?'morning':h>=8&&h<16?'day':h>=16&&h<18?'eve':'night'}
+var GCLOUD={day:{W:'#ffffff',s:'#d6ecff'},morning:{W:'#fff2e4',s:'#ffd2b0'},eve:{W:'#ffd9bd',s:'#f2a080'}};
+function buildTruck(){
+ var s=se('svg',{viewBox:'0 -2 30 18','shape-rendering':'crispEdges'});
+ function rc(x,y,w,h,f){s.appendChild(se('rect',{x:x,y:y,width:w,height:h,fill:f}))}
+ for(var i=0;i<6;i++){var x=11+i*3,y=8-i*1.5;rc(x,y,3,9-y,'#aab6d0');rc(x,y,3,.8,'#f4f7ff')}
+ rc(25,.5,5,1,'#ffc72c');rc(25,-2,5,.8,'#e34a3a');rc(29,-2,1,3,'#e34a3a');
+ rc(0,3,10,7,'#1d2a4d');rc(1,4,8,5,'#ffc72c');rc(2,5,4,3,'#bfe8ff');rc(4,2,2,1,'#ff5a3c');
+ rc(0,9,28,5,'#1d2a4d');rc(1,10,26,3,'#ffc72c');rc(1,12,26,1,'#e34a3a');
+ rc(3,12,5,4,'#2a1a10');rc(4.5,13.5,2,1.5,'#aab6d0');rc(19,12,5,4,'#2a1a10');rc(20.5,13.5,2,1.5,'#aab6d0');
+ return s}
+function buildGate(){
+ var k=skyKind(),gw=$('gWin'),sky=$('gSky'),gp=$('gatePlane'),tr=$('gTruck'),ls=$('gLs');
+ gw.className='gwin t-'+k;sky.textContent='';ls.textContent='';
+ if(k==='night'){
+  var seed=11;var r=function(){seed=(seed*1103515245+12345)&0x7fffffff;return seed/0x7fffffff};
+  for(var i=0;i<18;i++)sky.appendChild(div('star','left:'+(r()*96+2).toFixed(1)+'%;top:'+(r()*52+3).toFixed(1)+'%;animation-delay:'+(r()*2.2).toFixed(2)+'s'));
+  var m=div('moon');m.appendChild(document.createElement('i'));sky.appendChild(m)
+ }else{
+  sky.appendChild(div('sun'));
+  [[10,58,52,-14],[44,40,70,-40]].forEach(function(c){
+   var w=div('gcl','top:'+c[0]+'px;width:'+c[1]+'px;animation-duration:'+c[2]+'s;animation-delay:'+c[3]+'s');
+   w.appendChild(pix(CLOUD_ROWS,GCLOUD[k]));sky.appendChild(w)})
+ }
+ if(k==='eve'||k==='night'){for(var j=0;j<9;j++){var l=document.createElement('i');l.style.left=(4+j*11)+'%';l.style.animationDelay=(j%3*.3)+'s';ls.appendChild(l)}}
+ gp.textContent='';gp.appendChild(pix(PLANE_ROWS,PLANE_PAL));
+ var b1=div('blk','left:161px;top:2px;background:#ff3b30'),b2=div('blk','left:98px;top:79px;background:#fff;animation-delay:.5s');gp.appendChild(b1);gp.appendChild(b2);
+ tr.textContent='';tr.appendChild(buildTruck())}
+
+/* ---------- 搭乗ゲートの音(エンジンと空港のざわめき) と 英語の発音 ---------- */
+function noiseBuf(a,sec){var n=Math.floor(a.sampleRate*sec),b=a.createBuffer(1,n,a.sampleRate),d=b.getChannelData(0);for(var i=0;i<n;i++)d[i]=Math.random()*2-1;return b}
+function gateGraph(a,dest,vol){
+ var T=a.currentTime,ns=[],m=a.createGain();m.gain.value=0;m.connect(dest);
+ function osc(type,f){var o=a.createOscillator();o.type=type;o.frequency.value=f;o.start(T);ns.push(o);return o}
+ function nz(){var s=a.createBufferSource();s.buffer=noiseBuf(a,2);s.loop=true;s.start(T);ns.push(s);return s}
+ function bq(type,f,q){var b=a.createBiquadFilter();b.type=type;b.frequency.value=f;if(q)b.Q.value=q;return b}
+ function gn(v){var g=a.createGain();g.gain.value=v;return g}
+ /* エンジン: ひくい うなり + ゴォーという 風の音(スマホのスピーカーでも 聞こえる高さ) */
+ var lp=bq('lowpass',420),eg=gn(.12);osc('sawtooth',88).connect(lp);osc('sawtooth',89.7).connect(lp);lp.connect(eg);eg.connect(m);
+ var l1=osc('sine',.22),l1g=gn(.03);l1.connect(l1g);l1g.connect(eg.gain);
+ var rb=bq('bandpass',700,.5),rg=gn(.55);nz().connect(rb);rb.connect(rg);rg.connect(m);
+ var l2=osc('sine',.17),l2g=gn(.12);l2.connect(l2g);l2g.connect(rg.gain);
+ var wg=gn(.004);osc('sine',640).connect(wg);osc('sine',646).connect(wg);wg.connect(m);
+ /* 空港の ざわざわ(人の声のような すこし高い ゆれる音) */
+ var mb=bq('bandpass',1100,.6),mg=gn(.22);nz().connect(mb);mb.connect(mg);mg.connect(m);
+ var l3=osc('sine',.11),l3g=gn(.1);l3.connect(l3g);l3g.connect(mg.gain);
+ m.gain.linearRampToValueAtTime(vol,T+2.5);
+ return {m:m,stop:function(){var t=a.currentTime;try{m.gain.cancelScheduledValues(t);m.gain.setValueAtTime(m.gain.value,t);m.gain.linearRampToValueAtTime(0,t+.4)}catch(e){}
+  setTimeout(function(){ns.forEach(function(n){try{n.stop()}catch(e){}});try{m.disconnect()}catch(e){}},600)}}}
+var GS=null,GCH=0,GC1=0,GSP=0;
+function gateOff(){
+ if(GS){GS.stop();GS=null}
+ clearInterval(GCH);GCH=0;clearTimeout(GC1);GC1=0;clearTimeout(GSP);GSP=0;
+ try{if('speechSynthesis' in window)speechSynthesis.cancel()}catch(e){}}
+function sayEn(t){
+ try{if(!('speechSynthesis' in window))return;speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.lang='en-US';u.rate=.95;speechSynthesis.speak(u)}catch(e){}}
+function gateOn(){
+ gateOff();
+ var d=setLoad(),a=ac();
+ if(a){
+  if(d.amb==='on'){try{GS=gateGraph(a,a.destination,.3)}catch(e){GS=null}}
+  if(d.bgm==='on'){var chime=function(){if(!sndOn())return;tone(659.25,0,.9,'sine',.022);tone(523.25,.5,1.3,'sine',.022)};GC1=setTimeout(chime,4200);GCH=setInterval(chime,11000)}
+ }
+ GSP=setTimeout(function(){sayEn(GATE_EN)},350)}
+$('gSay').addEventListener('click',function(){sayEn(GATE_EN)});
+$('gSay').addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();sayEn(GATE_EN)}});
+document.addEventListener('visibilitychange',function(){if(document.hidden)gateOff()});
+
 function openGate(){
  S=load();
- var box=$('opts');box.textContent='';var anyQ=false;
+ var box=$('opts');box.textContent='';var anyQ=false,btns=[],cur=0;
+ function sel(i){cur=i;btns.forEach(function(b,j){b.classList.toggle('sel',j===i)})}
+ function mk(cls,name){
+  var b=document.createElement('button');b.type='button';b.className=cls;
+  var c=document.createElement('span');c.className='cur';c.textContent='▶';b.appendChild(c);
+  var nm=document.createElement('span');nm.className='nm';nm.textContent=name;b.appendChild(nm);
+  box.appendChild(b);btns.push(b);return {b:b,nm:nm}}
  var dests=NEI[S.at].filter(function(id){return S.cleared[id]||isOpen(S,id)});
  dests.forEach(function(id){
   var g=geo(AP[S.at],AP[id]),cl=!!S.cleared[id],known=cl||S.seen[id];if(!known)anyQ=true;
-  var b=document.createElement('button');b.type='button';b.className='opt';
-  var cur=document.createElement('span');cur.className='cur';cur.textContent='▶';b.appendChild(cur);
-  var nm=document.createElement('span');nm.className='nm';nm.textContent=known?AP[id].n:'？';
-  if(cl){var sm=document.createElement('small');sm.textContent=' クリア済み';nm.appendChild(sm)}
-  b.appendChild(nm);
-  var ds=document.createElement('span');ds.className='dist';ds.textContent=g.dir+'へ　約'+g.km.toLocaleString('ja-JP')+' km';b.appendChild(ds);
-  b.addEventListener('click',function(){fly(id)});
-  box.appendChild(b)});
- var q=document.createElement('button');q.type='button';q.className='opt quit';q.textContent='やめる';
- q.addEventListener('click',function(){renderMap();show('sMap')});box.appendChild(q);
+  var o=mk('opt',known?AP[id].n:'？？の国');
+  if(cl){var sm=document.createElement('small');sm.textContent=' クリア済み';o.nm.appendChild(sm)}
+  var ds=document.createElement('span');ds.className='dist';ds.textContent=g.dir+'へ　約'+g.km.toLocaleString('ja-JP')+' km';o.b.appendChild(ds);
+  o.b.addEventListener('click',function(){fly(id)})});
+ var q=mk('opt quit','やめる');
+ q.b.addEventListener('click',function(){renderMap();show('sMap')});
+ btns.forEach(function(b,i){['focus','pointerenter','pointerdown'].forEach(function(ev){b.addEventListener(ev,function(){sel(i)})})});
+ box.onkeydown=function(e){if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();var n=(cur+(e.key==='ArrowDown'?1:btns.length-1))%btns.length;sel(n);btns[n].focus({preventScroll:true})}};
+ sel(0);
  $('gateNote').style.display=anyQ?'':'none';
- var gp=$('gatePlane');gp.textContent='';gp.appendChild(pix(PLANE_ROWS,PLANE_PAL));
+ buildGate();
  show('sGate');
- var first=box.querySelector('button');if(first)first.focus({preventScroll:true})}
+ gateOn();
+ btns[0].focus({preventScroll:true})}
 
 /* ---------- 飛行中 ---------- */
 var flyTimer=0;
@@ -451,7 +557,7 @@ $('setBack').addEventListener('click',function(){blip();renderMap();show('sMap')
 /* ---------- しゅっぱつ準備(環境せってい。どの空港のゲームも、ここの記録を読みます) ---------- */
 var SKEY='kanpe-set-v1';
 var SETDEF=[
- {k:'vmode',t:'声の とりかた',o:[['hold','長押しで読む'],['mic','マイク'],['pick','声は出さない']]},
+ {k:'vmode',t:'声の とりかた',o:[['mic','マイク'],['hold','長押しで読む'],['pick','声は出さない']]},
  {k:'npc',t:'相手の ことば',o:[['show','文字も出す'],['hide','音だけ']]},
  {k:'tick',t:'リズム音',o:[['on','あり'],['off','なし']]},
  {k:'amb',t:'場所の ざわめき',o:[['on','あり'],['off','なし']]},

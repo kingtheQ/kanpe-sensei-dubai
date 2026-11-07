@@ -179,7 +179,7 @@ body{margin:0;box-sizing:border-box;background:var(--bg);color:var(--line);font-
     <p>飛行機を降りたところから、入国審査、手荷物、税関を通って空港の外へ。相手の英語を聞いて、<b>強く読む語だけ大きい</b>カンペを声に出す。そのあと単語バトル。クリアすると地図が広がる。ホテルへ向かう途中でビーチにも寄れる。そのあと空港にもどって、買い物と食事もできる。ビーチのあとに出るホテルでは、夜も遊べる。受付のあとで、部屋で眠って夢の中で単語を復習するか、プールサイドへ行くかを選べる。到着ゲートのそばには、ハガンとファニヒとスタッフの出迎えテーブルがある。時間帯（朝・昼・夕方・夜）で、会話とアニメーションが変わる。夕方のビーチでは夕日のイベントがある。</p>
     <div class="set"><span>アイテムボックス</span><div class="ibox" id="itemBox"></div></div>
     <div class="set"><span>声のとり方</span>
-      <div class="seg" data-key="vmode"><button type="button" data-v="hold" aria-pressed="true">長押しで読む</button><button type="button" data-v="mic">マイク（未検証）</button><button type="button" data-v="pick">声は出さない</button></div></div>
+      <div class="seg" data-key="vmode"><button type="button" data-v="mic" aria-pressed="true">マイク（未検証）</button><button type="button" data-v="hold">長押しで読む</button><button type="button" data-v="pick">声は出さない</button></div></div>
     <div class="set"><span>相手の言葉</span>
       <div class="seg" data-key="npc"><button type="button" data-v="show" aria-pressed="true">文字も出す</button><button type="button" data-v="hide">音だけ</button></div></div>
     <div class="set"><span>リズム音（強い語でコッと鳴る）</span>
@@ -418,7 +418,7 @@ var FONT='"M PLUS Rounded 1c","Hiragino Maru Gothic ProN","Hiragino Sans",system
 var PLACE_EN={gate:'Arrival Gate',immigration:'Immigration (CBP)',baggage:'Baggage Claim',customs:'Guam Customs',lobby:'Airport Welcome Center',ground:'Taxi & Tour Counters',staff:'Staff Only',beach:'Ypao Beach Park (Tumon Bay)',dep:'Departures · Check-in',lotte:'Lotte Duty Free',bk:'Burger King',denny:"Denny's of Guam",hotel:'Hotel · Front Desk',hotel_dream:'Dream',hotel_pool:'Poolside'};
 var OPEN24={ground:1,staff:1,beach:1,lotte:1,hotel:1,hotel_dream:1,hotel_pool:1},AWAKE={ground:1,beach:1,lotte:1,hotel:1,hotel_dream:1,hotel_pool:1};
 var LIMIT=3000;
-var set={vmode:'hold',npc:'show',tick:'on',amb:'on',bgm:'on',tmode:'auto',tmin:720};
+var set={vmode:'mic',npc:'show',tick:'on',amb:'on',bgm:'on',tmode:'auto',tmin:720};
 var SAVEKEY='kanpe-guam-v1',save={vc:{},clears:{},secret:false,items:{},missed:[]};
 function loadSave(){try{var s=JSON.parse(localStorage.getItem(SAVEKEY)||'null');if(s&&s.clears){save={vc:(s.vc&&typeof s.vc==='object')?s.vc:{},clears:s.clears,secret:!!s.secret,out:!!s.out,items:(s.items&&typeof s.items==='object')?s.items:{},missed:Array.isArray(s.missed)?s.missed.filter(function(w){return Array.isArray(w)&&w.length===3&&typeof w[0]==='string'}).slice(0,16):[]}}}catch(e){}}
 function storeSave(){try{localStorage.setItem(SAVEKEY,JSON.stringify(save))}catch(e){}}
