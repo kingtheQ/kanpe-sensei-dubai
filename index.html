@@ -648,6 +648,10 @@ var G={view:'map',at:'info',scene:null,ti:0,tries:0,phase:'idle',sid:0,timers:[]
 var save={seen:{}},SAVEKEY='kanpe-dubai-save-v2';
 try{var s0=JSON.parse(localStorage.getItem(SAVEKEY)||'null');if(s0&&s0.seen&&typeof s0.seen==='object')save.seen=s0.seen}catch(e){}
 function storeSave(){try{localStorage.setItem(SAVEKEY,JSON.stringify(save))}catch(e){}}
+/* 世界マップへ「クリア」を伝える: 6つの場所を、それぞれ1回以上あそんだら */
+function worldMark(k){try{var w=JSON.parse(localStorage.getItem('kanpe-world-v1')||'null');if(!w||typeof w!=='object')w={v:1,at:'haneda',seen:{haneda:1},cleared:{haneda:1}};w.seen=w.seen&&typeof w.seen==='object'?w.seen:{};w.cleared=w.cleared&&typeof w.cleared==='object'?w.cleared:{};w.seen[k]=1;w.cleared[k]=1;localStorage.setItem('kanpe-world-v1',JSON.stringify(w))}catch(e){}}
+function worldSync(){try{if(PLACES.every(function(p){return p.v.some(function(v){return save.seen[v]>0})}))worldMark('dubai')}catch(e){}}
+setTimeout(worldSync,0);
 function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e}
 function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),x=a[i];a[i]=a[j];a[j]=x}return a}
 function later(ms,fn){var s=G.sid;var id=setTimeout(function(){if(G.sid===s)fn()},ms);G.timers.push(id);return id}
@@ -1060,7 +1064,7 @@ function startReveal(){
   skip.addEventListener('click',function(){tok++;i++;one()})}
  one()}
 function finishScene(){
- var S=G.scene;save.seen[S.vid]=(save.seen[S.vid]||0)+1;storeSave();showMap()}
+ var S=G.scene;save.seen[S.vid]=(save.seen[S.vid]||0)+1;storeSave();worldSync();showMap()}
 
 /* ---------- お店の中(Veranda・S34・Costa・Ahlan): 入るたびに、食べている人と相手がかわる ---------- */
 var INSIDE={cafe:1,s34:1,costa:1,ahlan:1};

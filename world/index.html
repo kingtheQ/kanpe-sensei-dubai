@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>カンペ先生 せかい</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=M+PLUS+Rounded+1c:wght@500;800&display=swap">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;background:#0d1226;color:#f4f1e8;font-family:'DotGothic16','M PLUS Rounded 1c',sans-serif;-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;cursor:pointer}
+.screen{max-width:430px;margin:0 auto;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+.screen[hidden]{display:none}
+.top{height:56px;flex:none;padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.ttl{font-size:20px;color:#ffc72c;letter-spacing:.08em}
+.pips{display:flex;gap:3px;margin-top:5px}
+.pips i{width:9px;height:9px;border-radius:2px;background:#05070f;border:1px solid #5b6690}
+.pips i.on{background:#ffc72c;border-color:#ffc72c}
+.mapbox{position:relative;flex:1 1 auto;min-height:300px;max-height:460px;background:#3a9be6;overflow:hidden}
+.mapbox svg.map{display:block;width:100%;height:100%}
+.land{stroke:#2d7a2c;stroke-width:.55;stroke-linejoin:round;shape-rendering:crispEdges}
+.grid{stroke:#fff;stroke-opacity:.16;stroke-width:.25;fill:none}
+.shore{filter:drop-shadow(0 0 1px #d8f4ff) drop-shadow(0 0 2px #7ccbfa)}
+.nd{cursor:pointer;outline:none}
+.nd:focus-visible rect.main{stroke:#fff;stroke-width:1.6}
+.nlabel{font-size:3.7px;fill:#f4f1e8;paint-order:stroke;stroke:#0d1226;stroke-width:1.1px;stroke-linejoin:round;text-anchor:middle}
+.nglyph{text-anchor:middle;dominant-baseline:central;font-size:7px}
+.lower{flex:none;padding:14px 16px 18px;display:flex;flex-direction:column;gap:12px}
+.card{background:#05070f;border:4px double #f4f1e8;border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.row{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.dim{color:#9aa6c4}
+.small{font-size:12px}
+.mid{font-size:13px;line-height:1.7}
+.place{font-size:24px}
+.big{font:inherit;font-size:20px;color:#fff;background:#ff5a3c;border:3px solid #2a1a10;border-radius:14px;padding:12px;box-shadow:0 5px 0 #2a1a10;min-height:56px}
+.big:active{transform:translateY(3px);box-shadow:0 2px 0 #2a1a10}
+.legend{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.sw{display:inline-block;width:14px;height:14px;border:2px solid #2a1a10;border-radius:3px;vertical-align:-3px}
+/* 搭乗ゲート */
+.gscene{position:relative;height:236px;flex:none;background:#1a2145;overflow:hidden}
+.gwin{position:absolute;left:24px;right:24px;top:44px;height:128px;border:4px solid #5b6690;background:#3b6bb0;overflow:hidden}
+.gwin .sand{position:absolute;left:0;right:0;bottom:0;height:34px;background:#f2a65a}
+.gwin .road{position:absolute;left:0;right:0;bottom:0;height:14px;background:#6b6f80}
+.gwin svg{position:absolute;left:50%;top:22px;width:190px;transform:translateX(-50%);shape-rendering:crispEdges}
+.gtag{position:absolute;left:50%;top:0;transform:translateX(-50%);background:#05070f;border:3px solid #ffc72c;border-top:0;border-radius:0 0 8px 8px;padding:5px 18px 6px;font-size:18px;color:#ffc72c;letter-spacing:.12em;white-space:nowrap}
+.gfloor{position:absolute;left:0;right:0;bottom:0;height:40px;background:#0a0e22}
+.body{flex:1;min-height:0;padding:18px 16px 18px;display:flex;flex-direction:column;gap:16px}
+.say{position:relative;background:#05070f;border:3px solid #f4f1e8;border-radius:6px;padding:16px 14px 12px;box-shadow:0 0 0 2px #05070f,0 0 0 4px #5b6690}
+.say .who{position:absolute;top:-12px;left:12px;background:#05070f;border:2px solid #f4f1e8;border-radius:4px;padding:0 8px;font-size:12px;letter-spacing:.06em}
+.say p{margin:0}
+.say .en{font-family:'M PLUS Rounded 1c',sans-serif;font-weight:800;font-size:18px;line-height:1.5}
+.say .jp{margin-top:4px;font-size:13px;color:#9aa6c4}
+.opts{background:#05070f;border:5px double #f4f1e8;border-radius:6px;padding:8px 10px;display:flex;flex-direction:column;gap:2px}
+.opt{background:none;border:0;text-align:left;min-height:56px;padding:8px 6px 8px 30px;position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px;color:#fff}
+.opt .cur{position:absolute;left:6px;font-size:16px;visibility:hidden}
+.opt:hover .cur,.opt:focus-visible .cur{visibility:visible}
+.opt:focus-visible{outline:2px solid #ffc72c;outline-offset:-2px}
+.opt .nm{font-size:24px}
+.opt .nm small{font-size:12px;color:#ffc72c}
+.opt .dist{font-size:13px;color:#9aa6c4;text-align:right}
+.opt.quit{color:#9aa6c4;font-size:20px}
+.note{font-size:12px;line-height:1.7;color:#9aa6c4;text-align:center}
+.bar{height:12px;background:#1a2142;border:2px solid #5b6690;border-radius:6px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:#ffc72c}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- 1 世界マップ -->
+<main class="screen" id="sMap">
+ <div class="top">
+  <div><div class="ttl">せかい</div><div class="pips" id="pips"></div></div>
+ </div>
+ <div class="mapbox" id="mapBox"></div>
+ <div class="lower">
+  <div class="card">
+   <div class="row">
+    <div><div class="small dim">いまの ばしょ</div><div class="place" id="curName"></div></div>
+    <div class="mid" style="text-align:right"><div id="cntClear"></div><div id="cntOpen"></div></div>
+   </div>
+   <div class="mid dim">？を おすと、つぎの 行き先を えらべます。</div>
+  </div>
+  <button type="button" class="big" id="btnMain"></button>
+  <div class="legend small dim">
+   <span><span class="sw" style="background:#ffc72c"></span> クリア</span>
+   <span><span class="sw" style="background:#ff5a3c"></span> いま いる</span>
+   <span><span class="sw" style="background:#fff6d8"></span> いける ？</span>
+  </div>
+ </div>
+</main>
+
+<!-- 2 搭乗ゲート -->
+<main class="screen" id="sGate" hidden>
+ <div class="gscene">
+  <div class="gwin"><div class="sand"></div><div class="road"></div><div id="gatePlane"></div></div>
+  <div class="gtag">GATE 7</div>
+  <div class="gfloor"></div>
+ </div>
+ <div class="body">
+  <div class="say">
+   <span class="who">Gate Agent</span>
+   <p class="en">Where would you like to fly next?</p>
+   <p class="jp">つぎは どこへ 飛びますか。</p>
+  </div>
+  <div class="opts" id="opts"></div>
+  <div class="note" id="gateNote">？は、着くまで 国の名前が 見えません。</div>
+ </div>
+</main>
+
+<!-- 3 飛行中 -->
+<main class="screen" id="sFlight" hidden>
+ <div class="top">
+  <div class="ttl">ひこうちゅう</div>
+  <div class="dim" style="font-size:14px" id="flRoute"></div>
+ </div>
+ <div class="mapbox" id="flBox"></div>
+ <div class="body">
+  <div class="say">
+   <span class="who">Captain</span>
+   <p class="en">Fasten your seat belts. We will land soon.</p>
+   <p class="jp">シートベルトを しめて ください。まもなく とうちゃくです。</p>
+  </div>
+  <div class="bar" role="progressbar" aria-label="飛行の進み具合" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="flBar"><i id="flFill"></i></div>
+  <div class="note">着くと、到着場面から はじまります。</div>
+ </div>
+</main>
+
+<script>
+(function(){
+'use strict';
+var KEY='kanpe-world-v1';
+/* lon/lat は空港の公開座標(小数2桁)。地図上の y は -lat */
+var AP={
+ haneda:{n:'羽田',en:'Haneda',lon:139.78,lat:35.55,url:null},
+ guam:{n:'グアム',en:'Guam',lon:144.80,lat:13.48,url:'../guam/'},
+ dubai:{n:'ドバイ',en:'Dubai',lon:55.37,lat:25.25,url:'../'}
+};
+/* 第1版: 羽田-グアム、グアム-ドバイ(臨時の線。20か所が揃ったら見本の地図に直す) */
+var NEI={haneda:['guam'],guam:['haneda','dubai'],dubai:['guam']};
+var TOTAL=20;
+var VB={x:46,y:-66,w:112,h:126.4};
+var has=function(o,k){return Object.prototype.hasOwnProperty.call(o,k)};
+var NS='http://www.w3.org/2000/svg';
+function se(tag,attrs){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);return e}
+function $(id){return document.getElementById(id)}
+
+/* ---------- 保存(クリアした空港の名前だけ。個人情報なし) ---------- */
+function load(){
+ var s={at:'haneda',seen:{haneda:1},cleared:{haneda:1}};
+ try{
+  var r=JSON.parse(localStorage.getItem(KEY)||'null');
+  if(r&&typeof r==='object'){
+   if(typeof r.at==='string'&&has(AP,r.at))s.at=r.at;
+   ['seen','cleared'].forEach(function(k){
+    if(r[k]&&typeof r[k]==='object')Object.keys(r[k]).forEach(function(id){if(has(AP,id)&&r[k][id])s[k][id]=1})})
+  }
+ }catch(e){}
+ s.seen.haneda=1;s.cleared.haneda=1;
+ if(s.cleared[s.at])s.seen[s.at]=1;
+ return s}
+function store(s){try{localStorage.setItem(KEY,JSON.stringify({v:1,at:s.at,seen:s.seen,cleared:s.cleared}))}catch(e){}}
+
+/* ---------- 距離と方角(大圏距離。実際の航路とはずれます) ---------- */
+function geo(a,b){
+ var R=6371,t=Math.PI/180,p1=a.lat*t,p2=b.lat*t,dl=(b.lon-a.lon)*t,dp=p2-p1;
+ var h=Math.pow(Math.sin(dp/2),2)+Math.cos(p1)*Math.cos(p2)*Math.pow(Math.sin(dl/2),2);
+ var d=2*R*Math.asin(Math.sqrt(h));
+ var y=Math.sin(dl)*Math.cos(p2),x=Math.cos(p1)*Math.sin(p2)-Math.sin(p1)*Math.cos(p2)*Math.cos(dl);
+ var br=(Math.atan2(y,x)/t+360)%360;
+ var dirs=['北','北東','東','南東','南','南西','西','北西'];
+ return {km:Math.round(d/10)*10,dir:dirs[Math.round(br/45)%8]}}
+
+/* ---------- ドット絵 ---------- */
+var LAND='<polygon class="land" points="-168,-66 -162,-70 -155,-71 -141,-70 -128,-70 -115,-68 -95,-72 -80,-70 -65,-62 -62,-58 -57,-52 -53,-47 -60,-46 -66,-44.5 -70,-43.5 -70,-41.5 -74,-40.5 -76,-37 -76,-35 -81,-31 -80,-25 -82,-26.5 -83,-29.5 -89,-30 -94,-29.5 -97.5,-27.5 -97.5,-22 -95.5,-18.5 -90.5,-21 -87,-21.5 -87.5,-17.5 -84,-15.5 -83.5,-10.5 -80,-9 -77.5,-8.5 -81.5,-8 -86,-11 -91,-14 -96,-15.8 -105,-20 -107,-24 -110,-27 -114,-31 -117,-32.5 -120.5,-34.5 -124,-40 -124,-46 -124.5,-48.5 -127,-51 -131,-54.5 -136,-58.5 -141,-60 -148,-60.5 -152,-59 -156,-57 -162,-55 -164,-54.7 -158,-58.5 -162,-59.5 -165,-62 -166,-64"/><polygon class="land" points="-77.5,-8.5 -76,-9 -72,-12 -70,-12 -64,-10.5 -58,-7 -52,-5 -50,0 -44,2 -40,3 -35,5 -35,9 -38.5,13 -39,17 -41,22 -44,23 -48,25.5 -48.5,28 -53,33.5 -57,35 -58,38 -62,39 -65,41 -65,45 -68,47 -68,54.5 -72,53 -75,50 -73.5,43 -71.5,36 -71.5,30 -70.5,22 -70.3,18 -75,14 -77,12 -81,5 -80,0 -77.5,-4"/><polygon class="land" points="-73,-78 -60,-82 -30,-83.5 -20,-80 -18,-76 -22,-70 -40,-65 -44,-60 -50,-62 -54,-68 -58,-75"/><polygon class="land" points="-24,-64 -22,-66.5 -15,-66 -13.5,-65 -18,-63.4 -22.5,-63.7"/><polygon class="land" points="-5,-50 1.5,-51 1.7,-53 0,-55 -2,-57.5 -3,-58.6 -5,-58.5 -6,-56.5 -3.5,-54.5 -4.5,-53 -4.5,-51.5"/><polygon class="land" points="-10,-52 -6,-52 -6,-54.5 -8,-55 -10,-54"/><polygon class="land" points="5,-59 5.5,-62 12,-66 17,-69 25,-71 30,-70 29,-66 25,-65 22,-63 18,-61 16,-57 12,-56 10,-59 8,-58"/><polygon class="land" points="-9,-37 -9,-43 -1.5,-43.5 -1.5,-46 -4.5,-48 -1,-49 2,-51 5,-53 8,-54 8.5,-57.5 10.5,-57.5 12,-55 15,-54.5 21,-55 22,-57 24,-59.5 30,-60 35,-66 42,-66.5 44,-68 60,-69 68,-69 72,-73 80,-73 90,-76 105,-77.5 113,-74 130,-71 140,-72 160,-70 170,-69.5 180,-68.5 180,-65 172,-61 163,-60 160,-54 156,-51 158,-53 156,-57 143,-59 137,-54 141,-49 135,-43.5 131,-42.5 129.5,-41 128,-39 129.5,-36 129,-35 126.5,-34.5 126,-37 125,-39.5 121.5,-39.5 119,-39 117.5,-38.5 119,-37 122.5,-37 120,-35 122.3,-31.4 122,-29 120,-26 117,-23.5 113.5,-22 110.5,-20.5 108.5,-21.5 106.5,-20 106,-17 108.5,-15.5 109.3,-12 107,-10.5 105,-9 104,-10.5 100.5,-13.5 99.5,-10 100.5,-6.5 103.5,-2 104,-1.3 101.5,-2.8 100.3,-5.4 98.5,-9 98.2,-14 97.8,-16 94.5,-17 93.5,-20 92.3,-21 90,-22 88,-22 86.5,-20.5 83,-17.5 80.5,-15.5 80,-11 79.5,-9.5 78,-8 76,-9.5 74,-15.5 72.8,-19 72.5,-21 70,-21 68.5,-23.5 66.5,-25.5 61.5,-25 57.5,-25.8 56.5,-27 54,-26.5 51,-28 50,-30 48,-30 49.5,-27 50.5,-26 51.2,-24.5 52,-24 54,-24.3 56.2,-26.2 56.5,-24.5 59.5,-22.5 58.5,-20 55,-17 52,-16 49,-14.5 45,-12.8 43,-12.7 42.8,-15.5 41,-19 39,-22 37,-25 35,-28.2 34.5,-29.5 35,-33 36,-34.5 35.5,-36 33,-36.5 30,-36.5 27,-37 26.5,-39 24,-38 22,-37 21,-40 19.5,-41 18.5,-43 14,-45.5 13,-43 18,-40.5 16,-38 12.5,-41.5 10.5,-43.5 8.5,-44.3 6,-43.2 3,-43 3.2,-42 0.5,-39.5 -0.5,-38 -2,-36.7 -5.5,-36"/><polygon class="land" points="-17,-21 -17.5,-14.7 -13,-9 -8,-4.5 -2,-5 8,-4.5 9.5,-3.5 9,0 12,5 13.5,12 12,17 15,27 18,34 27,34 31,30 33,26 35.5,19 40,15 40.5,5 43,0 51,-11.8 43,-11.5 39,-17 37,-22 33.5,-27.5 32.5,-30 32,-31.2 29.8,-31 25,-31.6 20,-32.5 19.5,-30.3 15,-32.3 11,-33 10.3,-37 5,-36.8 -2,-35.2 -6,-35.8 -10,-30 -13,-28 -16,-24"/><polygon class="land" points="131,12 136,12 135.5,15 140,17.5 142.5,11 143.5,14 146,19 150,22.5 153,27 153,32 150.2,36.5 147,38.5 141,38 138,35 135,34.5 131,31.5 124,33.8 118,35 115,34.3 115,31 113.5,26 114,22 122,18 126,14 129,14.8"/><polygon class="land" points="140.4,-41.4 141.6,-40 141.9,-38.3 140.9,-35.7 139.8,-35 137.2,-34.6 135.8,-33.6 135,-34.6 132.5,-34.2 131,-34 132.3,-35.5 135.5,-35.7 137,-37 138.8,-38 140,-40"/><polygon class="land" points="140,-42 142,-45.5 145.5,-43.2 143,-42 141,-41.5"/><polygon class="land" points="130,-33.6 131.7,-33.6 131.9,-32.3 131,-31 130.2,-31.4 129.6,-32.8"/><polygon class="land" points="132.7,-34 134.5,-34.3 134.4,-33.4 133,-33 132.5,-33.7"/><polygon class="land" points="119.8,-18.3 121.2,-18.6 122.4,-17 122.1,-15.4 123.9,-13.4 123.2,-13 121.6,-13.9 120.6,-14.2 120.2,-15.6 119.8,-16.6"/><polygon class="land" points="122,-8 126.5,-9.5 126.2,-6.5 124,-6.2"/><polygon class="land" points="95.3,-5.6 98.5,-3.5 101,-1.7 103.4,-0.2 106,3.5 106,5.9 103.5,4.5 101,1 98.5,-1.5 96,-3.5"/><polygon class="land" points="109,0 110,-2 114,-4 117,-7 119,-5 118,-1 116,3 111,4 109,2"/><polygon class="land" points="105.5,6.8 108,6.5 112,8 114.5,8.5 114,7.7 110,7.9 106,7.4"/><polygon class="land" points="131,1 134,2 138,2 141,3 144,4 147,6 150,10 147,9.5 143,8 141,9 138,8 135,4 132.5,2.5"/>';
+var PLANE_ROWS=[
+"........................................................................",
+".........................................................KKKKKKKKKKKK...",
+"........................................................KBBBBBBBBBBBBK..",
+".......................................................KBBBBBBBBBBBBK...",
+"......................................................KBBBBBBBBBBBBBK...",
+"......................................................KBBBBBBBBBBBBBK...",
+".....................................................KBBBBBBBBBBBBBK....",
+".....................................................KBBBBBBBBBBBBBK....",
+"....................................................KBBBBBBBBBBBBBK.....",
+"....................................................KBBBBBBBBBBBBBK.....",
+"...................................................KBBBBBBBBBBBBBK......",
+"...................................................KBBBBBBBBBBBBBK......",
+".............KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKBBBBBBBBBBBBBK.......",
+".........KKKKwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwBBBBBBBBBBBBBK.......",
+"........KWWWWWKKKKKKKKKKKKKWWKKKKKKKKKKKKKWWWWWWWWWWWWWKKKKKKKKK........",
+".......KWWWWWWKSShhhhhhSSSKWWKSSSSSSSSSSSKWWWWWWWWWWWWWWWKKK.KK.........",
+"......KWCCCCCWKShhhhhhhhSSKWWKSttSSSSttSSKWWWWKKWKKWKKWKKWKKKKKK........",
+".....KWWCCCCCWKShsssssshSSKWWKttttttttttSKWWWWKKWKKWKKWKKWKKWKKKKKKKK...",
+".....KWWWWWWWWKShsesseshSSKWWKttettttettSKWWWWWWWWWWWWWWWWWWwwwwwwwwwK..",
+".....KWWWWWWWWKShsssssshSSKWWKtpttttttptSKWWWWWWWWWWWWWWWWGGGGGGGGGGGGK.",
+".....KWWWWWWWWKSSssssssSSSKWWKttttttttttSKWWWWWWWWWWWWWWWWGGGGGGGGGGGGK.",
+".....KLLLLLLLLKSbbbbbbbbSSKLLKaaaaaaaaaaSKLLLLLLLLLLLLLLLLLLLLLLLLLKKK..",
+".....KBBBBBBBBKsbbbaabbbsCKBBKCttttttttCCKBBBBBBBBBBBBBBBBBBBBBBBBBK....",
+"......KBBBBBBBKKKKKKKKKKKKKBBKKKKKKKKKKKKKBBBBBBBBBBBBBBBBBBBBBBBBBK....",
+".......KBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBK....",
+"........KBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBKKKKKKK.....",
+".........KKKKBBBBBBBBBwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwKKKKKKK............",
+".............KKKKKKKGGGGGGGGGGwwwwwwwwwwwwwwwwwwwwwKK...................",
+".................KKKKWWDDDDDDDGGGGGGGGGGGGGGGGGGGGK.....................",
+".................KKKKWWDDDDDDDGGGGGGGGGGGGGGGGGGGK......................",
+".................KKKKWWDDDDDDDGGGGGGGGGGGGGGGGGKK.......................",
+"..................KKDDDDDDDDDDKKGGGGGGGGGGGGGGK.........................",
+"....................KKKKKKKKKK..KKKKKKKKKKKKKK..........................",
+"........................................................................"
+];
+var PLANE_PAL={W:'#f4f7ff',w:'#cfd9ee',G:'#aab6d0',K:'#1d2a4d',B:'#1f5fae',L:'#5aa9f0',C:'#bfe8ff',S:'#7ec8f5',D:'#6c7896',h:'#2b2b2b',s:'#f2c9a0',e:'#1c2230',b:'#2f5bea',a:'#f2b705',t:'#5fd6c3',p:'#ff9aa8'};
+var WALK_ROWS=[
+"...hhhhhh..............",
+"..hhhhhhhh.............",
+"..hssssssh.............",
+"..hsessesh.............",
+"..hssssssh....tt....tt.",
+"...ssssss....tttttttttt",
+"..bbbbbbbb...ttettttett",
+".sbbbaabbbs..tpttttttpt",
+".sbbbaabbbs..tttttttttt",
+"..bbbbbbbb...gggggggggg",
+"..dd....dd....tttttttt.",
+"..dd....dd....ff....ff."
+];
+var WALK_PAL={h:'#2b2b2b',s:'#f2c9a0',e:'#1c2230',b:'#2f5bea',a:'#f2b705',d:'#333a4d',t:'#5fd6c3',p:'#ff9aa8',f:'#2f8f82',g:'#ffc72c'};
+function pix(rows,pal){
+ var by={};
+ rows.forEach(function(r,y){var x=0;while(x<r.length){var c=r[x];if(c==='.'){x++;continue}var n=1;while(x+n<r.length&&r[x+n]===c)n++;by[c]=(by[c]||'')+'M'+x+' '+y+'h'+n+'v1h-'+n+'z';x+=n}});
+ var s=se('svg',{viewBox:'0 0 '+rows[0].length+' '+rows.length,'shape-rendering':'crispEdges'});
+ Object.keys(by).forEach(function(k){s.appendChild(se('path',{fill:pal[k],d:by[k]}))});
+ return s}
+
+/* ---------- 地図の土台 ---------- */
+var uidN=0;
+function baseMap(){
+ var uid='kp'+(++uidN);
+ var svg=se('svg',{'class':'map',viewBox:VB.x+' '+VB.y+' '+VB.w+' '+VB.h,preserveAspectRatio:'xMidYMid meet','aria-hidden':'true'});
+ svg.innerHTML='<defs><pattern id="'+uid+'" width="3" height="3" patternUnits="userSpaceOnUse"><rect width="3" height="3" fill="#86d957"/><rect x=".4" y=".4" width="1" height="1" fill="#6cc84a"/><rect x="1.9" y="1.9" width="1" height="1" fill="#6cc84a"/></pattern></defs>'+
+ '<path class="grid" d="M-180 -60H180M-180 -30H180M-180 0H180M-180 30H180M-180 60H180M-150 -90V90M-120 -90V90M-90 -90V90M-60 -90V90M-30 -90V90M0 -90V90M30 -90V90M60 -90V90M90 -90V90M120 -90V90M150 -90V90"/>'+
+ '<g class="shore">'+LAND.replace(/class="land"/g,'class="land" fill="url(#'+uid+')"')+'</g>';
+ return svg}
+function xy(id){return {x:AP[id].lon,y:-AP[id].lat}}
+
+/* ---------- 状態から見える空港 ---------- */
+function visibleSet(s){
+ var v={};
+ Object.keys(AP).forEach(function(id){
+  if(s.cleared[id]||s.seen[id]||s.at===id)v[id]=1;
+  else if(NEI[id].some(function(n){return s.cleared[n]}))v[id]=1});
+ return v}
+function isOpen(s,id){return !s.cleared[id]&&NEI[id].some(function(n){return s.cleared[n]})}
+
+function node(s,id,onTap){
+ var p=xy(id),cur=s.at===id,cl=!!s.cleared[id];
+ var g=se('g',{'class':'nd',transform:'translate('+p.x+' '+p.y+')',role:'button',tabindex:'0'});
+ var known=cl||s.seen[id]||cur;
+ g.setAttribute('aria-label',(known?AP[id].n:'？')+(cl?' クリア済み':cur?' いま いる':' いける'));
+ var fill=cl?'#ffc72c':(cur?'#ff5a3c':'#fff6d8'),ink=cl?'#2a1a10':(cur?'#fff':'#27325a');
+ g.appendChild(se('rect',{x:-6,y:-4.9,width:12,height:12,rx:1.6,fill:'#2a1a10'}));
+ g.appendChild(se('rect',{'class':'main',x:-6,y:-6,width:12,height:12,rx:1.6,fill:fill,stroke:'#2a1a10','stroke-width':.9}));
+ var t=se('text',{'class':'nglyph',x:0,y:.4,fill:ink});t.textContent=cl?'✓':(cur?'▶':'？');g.appendChild(t);
+ if(known){var l=se('text',{'class':'nlabel',x:0,y:10.2});l.textContent=AP[id].n;g.appendChild(l)}
+ if(cur){var w=pix(WALK_ROWS,WALK_PAL);w.setAttribute('x',-28);w.setAttribute('y',-5.4);w.setAttribute('width',20.7);w.setAttribute('height',10.8);g.appendChild(w)}
+ g.addEventListener('click',onTap);
+ g.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();onTap()}});
+ return g}
+
+function drawEdges(svg,pairs,s){
+ pairs.forEach(function(p){
+  var a=xy(p[0]),b=xy(p[1]),solid=s.cleared[p[0]]&&s.cleared[p[1]];
+  svg.appendChild(se('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:solid?'#ffc72c':'#f4f1e8','stroke-width':solid?1.1:.9,'stroke-dasharray':solid?'none':'2 1.6',opacity:solid?1:.85}))})}
+
+var S=load();
+
+function renderMap(){
+ S=load();
+ var vis=visibleSet(S),box=$('mapBox');box.textContent='';
+ var svg=baseMap(),pairs=[],seen={};
+ Object.keys(vis).forEach(function(a){NEI[a].forEach(function(b){
+  if(!vis[b])return;if(!(S.cleared[a]||S.cleared[b]))return;
+  var k=[a,b].sort().join('-');if(seen[k])return;seen[k]=1;pairs.push([a,b])})});
+ drawEdges(svg,pairs,S);
+ Object.keys(vis).forEach(function(id){svg.appendChild(node(S,id,openGate))});
+ box.appendChild(svg);
+ var nC=Object.keys(S.cleared).length,nO=Object.keys(vis).filter(function(id){return isOpen(S,id)}).length;
+ $('curName').textContent='';
+ var cn=document.createElement('span');cn.textContent=AP[S.at].n;$('curName').appendChild(cn);
+ var en=document.createElement('span');en.className='small dim';en.textContent=' '+AP[S.at].en;$('curName').appendChild(en);
+ $('cntClear').textContent='クリア　'+nC+' / '+TOTAL;
+ $('cntOpen').textContent='いける　？ '+nO+'か所';
+ var pips=$('pips');pips.textContent='';
+ for(var i=0;i<TOTAL;i++){var d=document.createElement('i');if(i<nC)d.className='on';pips.appendChild(d)}
+ var b=$('btnMain');
+ b.textContent=AP[S.at].url?'くうこうに もどる':'とうじょうゲートへ';
+}
+
+/* ---------- 画面の切りかえ ---------- */
+function show(id){['sMap','sGate','sFlight'].forEach(function(k){$(k).hidden=(k!==id)});window.scrollTo(0,0)}
+
+/* ---------- 搭乗ゲート ---------- */
+function openGate(){
+ S=load();
+ var box=$('opts');box.textContent='';var anyQ=false;
+ var dests=NEI[S.at].filter(function(id){return S.cleared[id]||isOpen(S,id)});
+ dests.forEach(function(id){
+  var g=geo(AP[S.at],AP[id]),cl=!!S.cleared[id],known=cl||S.seen[id];if(!known)anyQ=true;
+  var b=document.createElement('button');b.type='button';b.className='opt';
+  var cur=document.createElement('span');cur.className='cur';cur.textContent='▶';b.appendChild(cur);
+  var nm=document.createElement('span');nm.className='nm';nm.textContent=known?AP[id].n:'？';
+  if(cl){var sm=document.createElement('small');sm.textContent=' クリア済み';nm.appendChild(sm)}
+  b.appendChild(nm);
+  var ds=document.createElement('span');ds.className='dist';ds.textContent=g.dir+'へ　約'+g.km.toLocaleString('ja-JP')+' km';b.appendChild(ds);
+  b.addEventListener('click',function(){fly(id)});
+  box.appendChild(b)});
+ var q=document.createElement('button');q.type='button';q.className='opt quit';q.textContent='やめる';
+ q.addEventListener('click',function(){renderMap();show('sMap')});box.appendChild(q);
+ $('gateNote').style.display=anyQ?'':'none';
+ var gp=$('gatePlane');gp.textContent='';gp.appendChild(pix(PLANE_ROWS,PLANE_PAL));
+ show('sGate');
+ var first=box.querySelector('button');if(first)first.focus({preventScroll:true})}
+
+/* ---------- 飛行中 ---------- */
+var flyTimer=0;
+function fly(to){
+ S=load();
+ var from=S.at,knownTo=S.cleared[to]||S.seen[to];
+ $('flRoute').textContent=AP[from].n+' → '+(knownTo?AP[to].n:'？');
+ S.at=to;S.seen[to]=1;store(S);
+ var box=$('flBox');box.textContent='';
+ var svg=baseMap(),a=xy(from),b=xy(to);
+ svg.appendChild(se('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:'#f4f1e8','stroke-width':.9,'stroke-dasharray':'2 1.6',opacity:.85}));
+ [[from,true],[to,false]].forEach(function(o){
+  var id=o[0],p=xy(id),cl=!!S.cleared[id];
+  var g=se('g',{transform:'translate('+p.x+' '+p.y+')','aria-hidden':'true'});
+  g.appendChild(se('rect',{x:-6,y:-4.9,width:12,height:12,rx:1.6,fill:'#2a1a10'}));
+  g.appendChild(se('rect',{x:-6,y:-6,width:12,height:12,rx:1.6,fill:cl?'#ffc72c':'#fff6d8',stroke:'#2a1a10','stroke-width':.9}));
+  var t=se('text',{'class':'nglyph',x:0,y:.4,fill:cl?'#2a1a10':'#27325a'});t.textContent=cl?'✓':'？';g.appendChild(t);
+  if(cl||S.seen[id]&&id===from){var l=se('text',{'class':'nlabel',x:0,y:10.2});l.textContent=AP[id].n;g.appendChild(l)}
+  svg.appendChild(g)});
+ var pl=pix(PLANE_ROWS,PLANE_PAL),PW=34,PH=PW*PLANE_ROWS.length/PLANE_ROWS[0].length;
+ pl.setAttribute('width',PW);pl.setAttribute('height',PH);
+ var flip=b.x>a.x;
+ var wrap=se('g',{});var inner=se('g',{});inner.appendChild(pl);wrap.appendChild(inner);svg.appendChild(wrap);
+ box.appendChild(svg);
+ show('sFlight');
+ var T=5500,t0=performance.now(),bar=$('flBar'),fill=$('flFill');
+ cancelAnimationFrame(flyTimer);
+ function step(now){
+  var p=Math.min(1,(now-t0)/T),cx=a.x+(b.x-a.x)*p,cy=a.y+(b.y-a.y)*p-4+Math.sin(now/260)*.8;
+  wrap.setAttribute('transform','translate('+(cx-PW/2)+' '+(cy-PH/2)+')');
+  inner.setAttribute('transform',flip?'translate('+PW+' 0) scale(-1 1)':'');
+  fill.style.width=(p*100)+'%';bar.setAttribute('aria-valuenow',Math.round(p*100));
+  if(p<1){flyTimer=requestAnimationFrame(step);return}
+  if(AP[to].url){location.href=AP[to].url}else{renderMap();show('sMap')}}
+ flyTimer=requestAnimationFrame(step)}
+
+$('btnMain').addEventListener('click',function(){
+ S=load();
+ if(AP[S.at].url)location.href=AP[S.at].url;else openGate()});
+window.addEventListener('pageshow',function(){cancelAnimationFrame(flyTimer);renderMap();show('sMap')});
+renderMap();show('sMap');
+})();
+</script>
+</body>
+</html>

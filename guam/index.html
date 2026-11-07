@@ -422,6 +422,10 @@ var set={vmode:'hold',npc:'show',tick:'on',amb:'on',bgm:'on',tmode:'auto',tmin:7
 var SAVEKEY='kanpe-guam-v1',save={vc:{},clears:{},secret:false,items:{},missed:[]};
 function loadSave(){try{var s=JSON.parse(localStorage.getItem(SAVEKEY)||'null');if(s&&s.clears){save={vc:(s.vc&&typeof s.vc==='object')?s.vc:{},clears:s.clears,secret:!!s.secret,out:!!s.out,items:(s.items&&typeof s.items==='object')?s.items:{},missed:Array.isArray(s.missed)?s.missed.filter(function(w){return Array.isArray(w)&&w.length===3&&typeof w[0]==='string'}).slice(0,16):[]}}}catch(e){}}
 function storeSave(){try{localStorage.setItem(SAVEKEY,JSON.stringify(save))}catch(e){}}
+/* 世界マップへ「クリア」を伝える: 全場面クリアしたら */
+function worldMark(k){try{var w=JSON.parse(localStorage.getItem('kanpe-world-v1')||'null');if(!w||typeof w!=='object')w={v:1,at:'haneda',seen:{haneda:1},cleared:{haneda:1}};w.seen=w.seen&&typeof w.seen==='object'?w.seen:{};w.cleared=w.cleared&&typeof w.cleared==='object'?w.cleared:{};w.seen[k]=1;w.cleared[k]=1;localStorage.setItem('kanpe-world-v1',JSON.stringify(w))}catch(e){}}
+function worldSync(){try{if(allDone())worldMark('guam')}catch(e){}}
+setTimeout(worldSync,0);
 function $(id){return document.getElementById(id)}
 function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e}
 function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
@@ -1305,7 +1309,7 @@ function finishScene(){
  if(!save.secret&&distinctCleared()>=4)save.secret=true;
  var gotItem=false;if(id==='beach'&&!save.items.mia){save.items.mia={meet:meetStamp()};gotItem=true}
  if(id==='hotel_dream'){var dw={};S0.words.forEach(function(w){dw[w[0]]=1});save.missed=(save.missed||[]).filter(function(w){return !dw[w[0]]})}
- storeSave();
+ storeSave();worldSync();
  if(id==='hotel_dream'){showWake();return}
  if(id==='hotel'){showHotelMenu();return}
  var newly=PLACES.filter(function(p){return !before[p.id]&&isUnlocked(p.id)}).map(function(p){return p.id});
