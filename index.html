@@ -199,30 +199,30 @@ var Snd=(function(){
    amb:function(){loopNoise(300,.5,.02,.1,.01,'lowpass')},
    st:function(s,t,e){var n=MEL[s%32];if(n>=0)pluck(hz(H[n]),t,e*2.2,ngt?.09:.14);
     if(s%16===0){tone(hz(38),t,e*16,'sine',.1,.5);tone(hz(45),t,e*16,'sine',.05,.5)}
-    if(!ngt){var q=s%8;if(q===0||q===4)dum(t,.28);if(q===2||q===6)tak(t,.07);if(q===3)tak(t,.035)}}},
+    if(!ngt){var q=s%8;if(q===0||q===4)dum(t,.28);}}},
   info:{bpm:function(){return 60},
-   amb:function(){loopNoise(900,1.3,.022,3.1,.012);loopNoise(1800,2,.008,5.3,.005);loopNoise(70,.6,.035,0,0,'lowpass')},
+   amb:function(){loopNoise(900,1.3,.022,3.1,.012);loopNoise(70,.6,.035,0,0,'lowpass')},
    st:function(s,t,e){if(Math.random()<.035)chime(t,.07);if(Math.random()<.03)ding(t);if(Math.random()<.02)train(t)}},
   cafe:{bpm:function(){return 76},
-   amb:function(){loopNoise(700,.8,.05,2.7,.02);loopNoise(1800,1.2,.015,4.1,.008)},
+   amb:function(){loopNoise(700,.8,.05,2.7,.02)},
    st:function(s,t,e){var n=MEL[(s*1)%32];if(s%2===0&&n>=0&&Math.random()<.8)pluck(hz(H[n]-12),t,e*2.6,.11);
     if(s%16===0)tone(hz(38),t,e*16,'sine',.07,.5);if(Math.random()<.06)clink(t)}},
   costa:{bpm:function(){return 92},
-   amb:function(){loopNoise(700,.8,.055,2.7,.02);loopNoise(1800,1.2,.02,4.1,.008)},
+   amb:function(){loopNoise(700,.8,.055,2.7,.02)},
    st:function(s,t,e){var CH=[[62,66,69,73],[59,62,66,69],[55,59,62,66],[57,61,64,67]];
     if(s%16===0)CH[(s/16|0)%4].forEach(function(m,i){pad(hz(m),t+i*.05,e*15,.04)});
-    if(Math.random()<.07)noise(t,.9,.05,5000,'highpass');if(Math.random()<.06)clink(t)}},
+    if(Math.random()<.06)clink(t)}},
   s34:{bpm:function(){return 54},
    amb:function(){loopNoise(300,.5,.05,0,0,'lowpass');loopNoise(90,.4,.05,0,0,'lowpass');send.gain.value=.5},
    st:function(s,t,e){if(s%16===0){tone(hz(38),t,e*16,'sine',.1,.8);tone(hz(45),t,e*16,'sine',.05,.8)}
     if(s%4===0&&Math.random()<.5)pluck(hz(H[(Math.random()*8)|0]+24),t,e*3,.06)}},
   ahlan:{bpm:function(){return 66},
-   amb:function(){loopNoise(2600,1.5,.012,.7,.006);loopNoise(260,.5,.03,0,0,'lowpass')},
+   amb:function(){loopNoise(260,.5,.03,0,0,'lowpass')},
    st:function(s,t,e){var CH=[[50,54,57],[51,55,58],[48,51,55],[50,54,57]];
     if(s%16===0)CH[(s/16|0)%4].forEach(function(m){pad(hz(m),t,e*16,.05)});
     if(s%8===4&&Math.random()<.6)pluck(hz(H[(Math.random()*6)|0]),t,e*3,.08)}},
   hall:{bpm:function(){return 60},
-   amb:function(){loopNoise(150,.5,.05,0,0,'lowpass');loopNoise(2400,3,.005,0,0)},
+   amb:function(){loopNoise(150,.5,.05,0,0,'lowpass');},
    st:function(s,t,e){if(Math.random()<.04)chime(t,.06);if(Math.random()<.025)jet(t,5)}}
  };
  function fade(g){if(!g)return;try{g.gain.cancelScheduledValues(AC.currentTime);g.gain.setValueAtTime(Math.max(.0001,g.gain.value),AC.currentTime);g.gain.linearRampToValueAtTime(.0001,AC.currentTime+.3)}catch(e){}
@@ -237,13 +237,13 @@ var Snd=(function(){
  function begin(kind){
   halt();if(!AC||!on||document.hidden||!K[kind])return;
   ngt=nightNow();send.gain.value=.16;
-  kg=AC.createGain();kg.gain.setValueAtTime(.0001,AC.currentTime);kg.gain.linearRampToValueAtTime(.55,AC.currentTime+.5);kg.connect(master);kg.connect(send);
+  kg=AC.createGain();kg.gain.setValueAtTime(.0001,AC.currentTime);kg.gain.linearRampToValueAtTime(.3,AC.currentTime+.5);kg.connect(master);kg.connect(send);
   cur=kind;step=0;next=AC.currentTime+.08;K[kind].amb();tm=setInterval(sched,100);sched()}
  function nightNow(){try{var h=+new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Dubai',hour:'2-digit',hourCycle:'h23'}).format(new Date());return h>=19||h<5}catch(e){return false}}
  function go(kind){want=kind||null;if(!AC)return;if(want)begin(want);else halt()}
  function duck(flag){                       /* マイクで聞いているあいだは音を止める(BGMがマイクに入らないように) */
   if(!AC)return;clearTimeout(duckT);
-  if(flag){master.gain.cancelScheduledValues(AC.currentTime);master.gain.setValueAtTime(master.gain.value,AC.currentTime);master.gain.linearRampToValueAtTime(.0001,AC.currentTime+.08);duckT=setTimeout(function(){duck(0)},20000)}
+  if(flag){master.gain.cancelScheduledValues(AC.currentTime);master.gain.setValueAtTime(master.gain.value,AC.currentTime);master.gain.linearRampToValueAtTime(.0001,AC.currentTime+.08);master.gain.value=.0001;try{AC.suspend()}catch(e){}duckT=setTimeout(function(){duck(0)},20000)}
   else{try{AC.resume()}catch(e){}master.gain.cancelScheduledValues(AC.currentTime);master.gain.setValueAtTime(Math.max(.0001,master.gain.value),AC.currentTime);master.gain.linearRampToValueAtTime(.85,AC.currentTime+.5)}}
  function setOn(v){on=v;try{localStorage.setItem('kd_snd',v?'on':'off')}catch(e){}if(v){if(init())go(want)}else if(AC)halt();label()}
  var btn=document.getElementById('sndBtn');
