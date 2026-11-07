@@ -94,6 +94,20 @@ button{font:inherit;color:inherit;cursor:pointer}
 .ask{font-size:16px;line-height:1.7;padding:6px 6px 4px}
 .row2{display:flex;gap:6px}
 .row2 .copt{flex:1;justify-content:center;padding-left:6px}
+.cmdmap .copt .cur{visibility:visible;color:#ffc72c}
+.cmdmap .copt{font-size:22px}
+.cmdmap .copt.sub{font-size:16px;color:#9aa6c4;min-height:40px}
+/* しゅっぱつ準備 */
+.setwrap{padding:calc(env(safe-area-inset-top,0px) + 22px) 16px 22px;display:flex;flex-direction:column;gap:16px;flex:1}
+.settl{margin:0;font-weight:400;font-size:26px;color:#ffc72c;letter-spacing:.06em;text-align:center}
+.setsub{margin:0;font-size:13px;line-height:1.7;color:#9aa6c4;text-align:center}
+.setwin{gap:14px;padding:14px 12px}
+.sgrp .sl{font-size:14px;color:#9aa6c4;margin:0 0 6px 4px}
+.sg{display:flex;flex-wrap:wrap;gap:6px}
+.sg button{flex:1 1 auto;min-height:48px;padding:6px 12px;background:#0d1226;border:2px solid #5b6690;border-radius:6px;font-size:17px;color:#f4f1e8}
+.sg button[aria-pressed="true"]{background:#ffc72c;border-color:#ffc72c;color:#05070f}
+.sg button[aria-pressed="true"]::before{content:'▶ '}
+.sg button:focus-visible{outline:2px solid #fff;outline-offset:2px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -141,12 +155,26 @@ button{font:inherit;color:inherit;cursor:pointer}
    </div>
    <div class="mid dim">？を おすと、つぎの 行き先を えらべます。</div>
   </div>
-  <button type="button" class="big" id="btnMain"></button>
+  <div class="cmdwin cmdmap" id="mapCmd">
+   <button type="button" class="copt" id="mSet"><span class="cur">▶</span>しゅっぱつ準備する</button>
+   <button type="button" class="copt" id="mGate"><span class="cur">▶</span>搭乗ゲートにいく</button>
+   <button type="button" class="copt sub" id="mBack" hidden><span class="cur">▶</span>くうこうに もどる</button>
+  </div>
   <div class="legend small dim">
    <span><span class="sw" style="background:#ffc72c"></span> クリア</span>
    <span><span class="sw" style="background:#ff5a3c"></span> いま いる</span>
    <span><span class="sw" style="background:#fff6d8"></span> いける ？</span>
   </div>
+ </div>
+</main>
+
+<!-- 1b しゅっぱつ準備 -->
+<main class="screen" id="sSet" hidden>
+ <div class="setwrap">
+  <h2 class="settl">しゅっぱつ準備をしよう</h2>
+  <p class="setsub">きめた ことは、どの空港でも つかわれます。</p>
+  <div class="cmdwin setwin" id="setWin"></div>
+  <div class="cmdwin cmdmap"><button type="button" class="copt" id="setBack"><span class="cur">▶</span>もどる</button></div>
  </div>
 </main>
 
@@ -352,12 +380,11 @@ function renderMap(){
  $('cntOpen').textContent='いける　？ '+nO+'か所';
  var pips=$('pips');pips.textContent='';
  for(var i=0;i<TOTAL;i++){var d=document.createElement('i');if(i<nC)d.className='on';pips.appendChild(d)}
- var b=$('btnMain');
- b.textContent=AP[S.at].url?'くうこうに もどる':'とうじょうゲートへ';
+ $('mBack').hidden=!AP[S.at].url;
 }
 
 /* ---------- 画面の切りかえ ---------- */
-function show(id){['sTitle','sMap','sGate','sFlight'].forEach(function(k){$(k).hidden=(k!==id)});window.scrollTo(0,0);titleCtl(id==='sTitle')}
+function show(id){['sTitle','sMap','sSet','sGate','sFlight'].forEach(function(k){$(k).hidden=(k!==id)});window.scrollTo(0,0);titleCtl(id==='sTitle')}
 
 /* ---------- 搭乗ゲート ---------- */
 function openGate(){
@@ -413,12 +440,36 @@ function fly(to){
   inner.setAttribute('transform',flip?'translate('+PW+' 0) scale(-1 1)':'');
   fill.style.width=(p*100)+'%';bar.setAttribute('aria-valuenow',Math.round(p*100));
   if(p<1){flyTimer=requestAnimationFrame(step);return}
-  if(AP[to].url){location.href=AP[to].url}else{renderMap();show('sMap')}}
+  if(AP[to].url){location.href=AP[to].url+'#w=1'}else{renderMap();show('sMap')}}
  flyTimer=requestAnimationFrame(step)}
 
-$('btnMain').addEventListener('click',function(){
- S=load();
- if(AP[S.at].url)location.href=AP[S.at].url;else openGate()});
+$('mGate').addEventListener('click',function(){blip();openGate()});
+$('mBack').addEventListener('click',function(){S=load();if(AP[S.at].url)location.href=AP[S.at].url+'#w=1'});
+$('mSet').addEventListener('click',function(){blip();openSet()});
+$('setBack').addEventListener('click',function(){blip();renderMap();show('sMap')});
+
+/* ---------- しゅっぱつ準備(環境せってい。どの空港のゲームも、ここの記録を読みます) ---------- */
+var SKEY='kanpe-set-v1';
+var SETDEF=[
+ {k:'vmode',t:'声の とりかた',o:[['hold','長押しで読む'],['mic','マイク'],['pick','声は出さない']]},
+ {k:'npc',t:'相手の ことば',o:[['show','文字も出す'],['hide','音だけ']]},
+ {k:'tick',t:'リズム音',o:[['on','あり'],['off','なし']]},
+ {k:'amb',t:'場所の ざわめき',o:[['on','あり'],['off','なし']]},
+ {k:'bgm',t:'音楽',o:[['on','あり'],['off','なし']]}];
+function setLoad(){var d={v:1};SETDEF.forEach(function(g){d[g.k]=g.o[0][0]});
+ try{var x=JSON.parse(localStorage.getItem(SKEY)||'null');if(x&&typeof x==='object')SETDEF.forEach(function(g){if(g.o.some(function(o){return o[0]===x[g.k]}))d[g.k]=x[g.k]})}catch(e){}return d}
+function setStore(d){try{localStorage.setItem(SKEY,JSON.stringify(d))}catch(e){}}
+function openSet(){
+ var d=setLoad(),w=$('setWin');w.textContent='';
+ SETDEF.forEach(function(g){
+  var grp=document.createElement('div');grp.className='sgrp';
+  var l=document.createElement('p');l.className='sl';l.textContent=g.t;grp.appendChild(l);
+  var sg=document.createElement('div');sg.className='sg';
+  g.o.forEach(function(o){var b=document.createElement('button');b.type='button';b.textContent=o[1];b.setAttribute('aria-pressed',d[g.k]===o[0]?'true':'false');
+   b.addEventListener('click',function(){d[g.k]=o[0];setStore(d);blip();Array.prototype.forEach.call(sg.children,function(x){x.setAttribute('aria-pressed',x===b?'true':'false')})});
+   sg.appendChild(b)});
+  grp.appendChild(sg);w.appendChild(grp)});
+ show('sSet')}
 
 /* ---------- オープニング: 昼の空港(すべて、このページの中で描いています) ---------- */
 var TT={t0:performance.now(),raf:0,on:false,built:false,reduce:false};

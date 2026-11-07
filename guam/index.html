@@ -646,7 +646,11 @@ function applyTime(){
  if(buddyEl)buddyEl.classList.toggle('sleep',G.tp==='late');
  if(old&&old!==G.tp&&mus.g&&G.view==='map')musicStart()}
 function syncSeg(key){var sg=document.querySelector('.seg[data-key="'+key+'"]');if(!sg)return;Array.prototype.forEach.call(sg.querySelectorAll('button'),function(x){x.setAttribute('aria-pressed',x.dataset.v===set[key]?'true':'false')})}
+var SHK={vmode:['hold','mic','pick'],npc:['show','hide'],tick:['on','off'],amb:['on','off'],bgm:['on','off']};
+function shLoad(){try{var x=JSON.parse(localStorage.getItem('kanpe-set-v1')||'null');if(x&&typeof x==='object'){Object.keys(SHK).forEach(function(k){if(SHK[k].indexOf(x[k])>=0){set[k]=x[k];syncSeg(k)}});return x}}catch(e){}return null}
+function shStore(key){if(!SHK[key])return;try{var x=JSON.parse(localStorage.getItem('kanpe-set-v1')||'null');if(!x||typeof x!=='object')x={v:1};x[key]=set[key];localStorage.setItem('kanpe-set-v1',JSON.stringify(x))}catch(e){}}
 function onSet(key){
+ shStore(key);
  if(key==='bgm'){if(set.bgm==='on'&&G.view==='map')musicStart();else musicStop()}
  if(key==='tmode'){if(set.tmode==='man')set.tmin=+$('tRange').value;applyTime()}}
 $('tRange').addEventListener('input',function(){set.tmode='man';set.tmin=+$('tRange').value;syncSeg('tmode');applyTime()});
@@ -1401,6 +1405,11 @@ loadSave();renderItems();G.stat.t0=performance.now();
 (function(){var am=/[#&]ap=([a-z]+)/.exec(location.hash);if(am&&AP[am[1]])G.ap=am[1];var hm=/[#&]t=(\d{1,4})/.exec(location.hash);if(hm){set.tmode='man';set.tmin=Math.min(1439,+hm[1]);syncSeg('tmode');$('tRange').value=Math.floor(set.tmin/30)*30}
  for(var i=0;i<10;i++){var f=el('i','ff');f.style.left=(6+Math.random()*88)+'%';f.style.top=(6+Math.random()*88)+'%';f.style.animationDuration=(4+Math.random()*4)+'s';f.style.animationDelay=(-Math.random()*5)+'s';mapEl.appendChild(f)}
  fetchWx();applyTime();setInterval(function(){fetchWx();applyTime()},20000)})();
+/* 世界マップから来たとき: しゅっぱつ準備の設定を読み、開始画面を飛ばしてすぐ地図へ */
+shLoad();
+if(/[#&]w=1/.test(location.hash)){$('ovStart').hidden=true;
+ var g1=function(){document.removeEventListener('pointerdown',g1,true);document.removeEventListener('keydown',g1,true);initAudio();if(G.view==='map'&&set.bgm==='on')musicStart()};
+ document.addEventListener('pointerdown',g1,true);document.addEventListener('keydown',g1,true);showMap()}
 var last=0;function frame(ts){var dt=Math.min(.05,(ts-last)/1000||.016);last=ts;if(G.view==='scene')draw(dt);fxStep(dt);requestAnimationFrame(frame)}
 fxResize();window.addEventListener('resize',function(){fxResize();if(G.view==='map')drawMapBg()});requestAnimationFrame(frame);
 window.__dbg=function(){return {G:G,set:set,save:save,PLACES:PLACES,enter:enterPlace,wx:wxNow,WX:WX,runAnim:runAnim,showRoom:showRoom,showWake:showWake,showHotelMenu:showHotelMenu,showMap:showMap}};
