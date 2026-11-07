@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html lang="ja" translate="no"><head><meta charset=utf8><meta name="google" content="notranslate"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 
 <title>カンペ先生 グアム編 時計版</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -1393,7 +1393,7 @@ $('getOk').addEventListener('click',function(){$('ovGet').hidden=true});
 Array.prototype.forEach.call(document.querySelectorAll('.seg[data-key]'),function(seg){seg.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
  Array.prototype.forEach.call(seg.querySelectorAll('button'),function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});set[seg.dataset.key]=b.dataset.v;onSet(seg.dataset.key)})});
 $('goBtn').addEventListener('click',function(){initAudio();$('ovStart').hidden=true;if(G.view==='none'||G.view==='map'){showMap()}});
-$('setBtn').addEventListener('click',function(){renderItems();$('ovStart').hidden=false});
+$('setBtn').addEventListener('click',function(){location.href='../world/#set&from=guam'});
 $('again').addEventListener('click',function(){$('ovEnd').hidden=true});
 var rst=$('resetBtn'),rstArm=false;
 rst.addEventListener('click',function(){
@@ -1409,7 +1409,9 @@ loadSave();renderItems();G.stat.t0=performance.now();
 shLoad();
 if(/[#&]w=1/.test(location.hash)){$('ovStart').hidden=true;
  var g1=function(){document.removeEventListener('pointerdown',g1,true);document.removeEventListener('keydown',g1,true);initAudio();if(G.view==='map'&&set.bgm==='on')musicStart()};
- document.addEventListener('pointerdown',g1,true);document.addEventListener('keydown',g1,true);showMap()}
+ document.addEventListener('pointerdown',g1,true);document.addEventListener('keydown',g1,true);showMap();
+ /* 新しい設定画面(世界の しゅっぱつ準備)から: グアム専用の もの(アイテム・時間・リセット・メモ)を見る */
+ if(/[#&]info=1/.test(location.hash)){renderItems();$('ovStart').hidden=false}}
 var last=0;function frame(ts){var dt=Math.min(.05,(ts-last)/1000||.016);last=ts;if(G.view==='scene')draw(dt);fxStep(dt);requestAnimationFrame(frame)}
 fxResize();window.addEventListener('resize',function(){fxResize();if(G.view==='map')drawMapBg()});requestAnimationFrame(frame);
 window.__dbg=function(){return {G:G,set:set,save:save,PLACES:PLACES,enter:enterPlace,wx:wxNow,WX:WX,runAnim:runAnim,showRoom:showRoom,showWake:showWake,showHotelMenu:showHotelMenu,showMap:showMap}};
