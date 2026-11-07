@@ -21,7 +21,7 @@ jobs:
       - uses: actions/configure-pages@v5
         with:
           enablement: true
-      - run: mkdir _site && cp index.html _site/
+      - run: mkdir -p _site/guam && cp index.html _site/ && cp guam/index.html _site/guam/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

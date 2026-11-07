@@ -1,0 +1,1408 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+
+<title>カンペ先生 グアム編 時計版</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&display=swap">
+<style>
+/* 構図: 夜の空港の暗い窓。マップ（ドラクエ風の草原）→ 場所の絵＋黒い会話窓 → 大きなカンペ → 3択バトル。1つの見た目に決め打ち（単一テーマ） */
+:root{--bg:#0d1226;--win:#05070f;--line:#f4f1e8;--ink:#10131f;--paper:#fff6d8;--gold:#ffc72c;--hot:#ff5a3c;--ok:#34d27b;--mute:#9aa6c4;--strong:#d6362a;--navy:#27325a;--brown:#2a1a10;color-scheme:dark}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;box-sizing:border-box;background:var(--bg);color:var(--line);font-family:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN","Hiragino Sans",system-ui,sans-serif;font-size:14px;padding-block:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));overflow:hidden;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+#app{position:relative;height:100%;max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:8px;min-height:0}
+#app.shake{animation:shk .32s}
+@keyframes shk{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:7;border-radius:6px}
+#flash.go{animation:fl .3s ease-out}
+@keyframes fl{0%{opacity:.5}100%{opacity:0}}
+#fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:8}
+
+/* ---- マップ ---- */
+#mapView{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}
+.mapbar{display:flex;align-items:center;justify-content:space-between;gap:8px;flex:none}
+#pips{display:flex;gap:5px;flex-wrap:wrap}
+#pips i{width:14px;height:14px;border:2px solid var(--line);border-radius:3px;background:var(--win)}
+#pips i.on{background:var(--gold);border-color:var(--gold)}
+#map{position:relative;flex:1;min-height:0;border:3px solid var(--line);border-radius:6px;overflow:hidden;background-color:#e9d49b;
+ box-shadow:0 0 0 2px var(--win),0 0 0 4px #5b6690}
+#paths{position:absolute;inset:0;width:100%;height:100%}
+#paths line{stroke:#9b6b3e;stroke-width:8;stroke-linecap:butt;stroke-dasharray:8 8;vector-effect:non-scaling-stroke;opacity:0;transition:opacity 1s}
+#paths line.on{opacity:1}
+.node{position:absolute;width:66px;height:66px;margin:-33px 0 0 -33px;padding:0;font:inherit;background:var(--paper);border:3px solid var(--brown);border-radius:6px;box-shadow:0 5px 0 var(--brown);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2}
+.node .ico{font-size:34px;line-height:1}
+.node:active{transform:translateY(3px);box-shadow:0 2px 0 var(--brown)}
+.node.closed{background:#46507a;border-color:#2b3358;box-shadow:0 5px 0 #2b3358}.node.closed .ico{filter:brightness(.7)}
+.node.passed{background:#a3a3a3;border-color:#5a5a5a;box-shadow:0 5px 0 #5a5a5a;cursor:default}.node.passed .ico{filter:grayscale(1) brightness(.8);opacity:.6}
+.node.locked{background:#3b4468;border-color:#222a48;box-shadow:inset 0 0 0 3px #56628f,0 5px 0 #222a48;cursor:default}
+.node.locked .ico{display:none}
+.node .q{display:none}
+.node.locked .q{display:block;font-size:44px;line-height:1;font-weight:800;color:#fff;text-shadow:0 3px 0 #222a48;animation:qb 1.6s ease-in-out infinite}
+@keyframes qb{50%{transform:translateY(-3px)}}
+.node .tag{position:absolute;top:-19px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:10px;font-weight:800;padding:1px 6px;border-radius:6px;border:2px solid var(--brown);color:#fff}
+.node .tag:empty,.node.locked .tag{display:none}.node .tag.cl{background:#7a1f1f}.node .tag.op{background:#145a32;color:#c9ffe0}
+.node .star{position:absolute;top:-11px;right:-9px;font-size:20px;color:var(--gold);text-shadow:0 2px 0 var(--brown);display:none}
+.node.done .star{display:block}
+.node .dots{position:absolute;bottom:-14px;left:0;right:0;display:flex;gap:4px;justify-content:center}
+.node .dots i{width:9px;height:9px;border-radius:2px;border:2px solid var(--brown);background:#fff6d8}
+.node .dots i.on{background:var(--gold)}
+.node.pop{animation:pop .7s ease-out}
+@keyframes pop{0%{transform:scale(.2)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
+.node.drop{animation:drop .9s cubic-bezier(.3,1.4,.5,1)}
+@keyframes drop{0%{transform:translateY(-140px) scale(1.4)}70%{transform:translateY(0)}100%{transform:translateY(0) scale(1)}}
+.walker{position:absolute;z-index:4;pointer-events:none;transition:left .75s ease-in-out,top .75s ease-in-out}
+#hero{transform:translate(-50%,16px)}
+#buddy{transform:translate(-135%,26px);transition-duration:.95s}
+#hero canvas,#buddy canvas{display:block;image-rendering:pixelated}
+
+/* ---- 場面 ---- */
+#sceneView{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;position:relative}
+#scene{display:block;width:100%;aspect-ratio:320/150;image-rendering:pixelated;border:3px solid var(--line);border-radius:6px;background:#222;flex:none}
+#exitBtn{position:absolute;top:6px;right:6px;width:38px;height:38px;border-radius:10px;border:2px solid var(--line);background:rgba(5,7,15,.75);color:var(--line);font:inherit;font-size:18px;font-weight:800;cursor:pointer;z-index:3;padding:0}
+.win{flex:none;position:relative;background:var(--win);border:3px solid var(--line);border-radius:6px;padding:12px 14px 10px;min-height:76px;box-shadow:0 0 0 2px var(--win),0 0 0 4px #5b6690}
+.win .who{position:absolute;top:-12px;left:12px;background:var(--win);border:2px solid var(--line);border-radius:4px;padding:0 8px;font-size:12px;font-weight:800;letter-spacing:.06em}
+.win .who:empty{display:none}
+.win p{margin:0;font-size:18px;line-height:1.5;font-weight:800;min-height:54px}
+.win .tap{position:absolute;right:8px;bottom:4px;font-size:10px;color:var(--mute)}
+#panel{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+.cue{background:var(--paper);color:var(--ink);border:3px solid var(--brown);border-radius:10px;padding:12px 12px 10px;display:flex;flex-wrap:wrap;gap:2px 10px;align-items:baseline;align-content:center;flex:1;min-height:0;position:relative}
+.cue .w{font-weight:800;font-size:18px;color:#6b6552;transition:transform .12s,color .12s}
+.cue .w.s{font-size:31px;line-height:1.15;color:var(--strong)}
+.cue .w.on{transform:scale(1.15);color:#0a7c4a}
+.cue .lab{position:absolute;top:5px;right:10px;font-size:11px;color:#8a7b55;font-weight:800;letter-spacing:.06em}
+.row{display:flex;gap:8px;flex:none}
+.btn{font:inherit;font-weight:800;color:#fff;background:var(--hot);border:3px solid var(--brown);border-radius:14px;padding:12px;box-shadow:0 5px 0 var(--brown);cursor:pointer;min-height:56px;font-size:20px;flex:1;touch-action:none}
+.btn:active,.btn.down{transform:translateY(3px);box-shadow:0 2px 0 var(--brown)}
+.btn.sub{background:var(--navy);font-size:14px;flex:none;padding:8px 14px;min-height:44px}
+.btn[disabled]{opacity:.45}
+.stat{min-height:20px;font-size:13px;font-weight:800;color:var(--mute);text-align:center;flex:none}
+.stat.ok{color:var(--ok)}.stat.ng{color:#ff8a7a}
+.choices{display:flex;flex-direction:column;gap:8px;flex:1;min-height:0}
+.ch{font:inherit;font-weight:800;font-size:24px;color:var(--ink);background:var(--paper);border:3px solid var(--brown);border-radius:12px;padding:8px;box-shadow:0 4px 0 var(--brown);cursor:pointer;flex:1;min-height:52px}
+.ch:active{transform:translateY(3px);box-shadow:0 1px 0 var(--brown)}
+.dq{flex:none;display:flex;flex-direction:column;justify-content:center;gap:4px;background:#05071a;border:5px double #fff;border-radius:6px;padding:10px 14px}
+.dqo{font:inherit;font-size:24px;font-weight:800;color:#fff;background:none;border:0;text-align:left;padding:8px 6px 8px 34px;position:relative;cursor:pointer;min-height:52px;letter-spacing:.08em}
+.dqo::before{content:'▶';position:absolute;left:8px;top:50%;transform:translateY(-50%);opacity:0;font-size:18px}
+.dqo:first-child::before,.dqo:hover::before,.dqo:focus-visible::before,.dqo.on::before{opacity:1}
+.dq:hover .dqo:first-child:not(:hover):not(.on)::before{opacity:0}
+.dqo.on::before{animation:dqb .25s steps(2) 3}
+@keyframes dqb{50%{opacity:0}}
+.ch.cardc{font-size:17px;text-align:left;line-height:1.3}
+.ch.cardc b{font-size:22px;color:var(--strong)}
+.ch.good{background:#baf5d0}.ch.bad{background:#ffb9ae}
+.prompt{position:relative;background:var(--win);border:3px solid var(--line);border-radius:10px;padding:10px 14px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:96px;flex:none}
+.prompt .en{font-size:44px;font-weight:800;line-height:1.1;color:#fff;text-wrap:balance;overflow-wrap:anywhere}
+.prompt .ipa{font-family:"Noto Sans","Segoe UI",system-ui,sans-serif;font-size:21px;font-weight:500;color:var(--gold)}
+.prompt .combo{position:absolute;top:6px;right:10px;font-size:20px;font-weight:800;color:var(--hot)}
+.dots{display:flex;gap:5px;flex:none}
+.dots i{flex:1;height:8px;border-radius:4px;background:#1a2142}
+.dots i.on{background:var(--ok)}
+.bar{height:10px;background:#1a2142;border-radius:5px;overflow:hidden;flex:none}
+.bar i{display:block;height:100%;width:100%;background:var(--gold)}
+.reveal{background:var(--win);border:3px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:12px;flex:1;min-height:0;overflow:auto}
+.reveal .en{font-size:22px;color:#fff;font-weight:800;line-height:1.35;text-wrap:balance}
+.reveal .jp{font-size:16px;color:var(--gold);font-weight:800;line-height:1.5}
+.reveal .who2{font-size:11px;color:var(--gold);font-weight:800;letter-spacing:.08em}
+
+/* ---- 重ね画面 ---- */
+.ov{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-start;gap:11px;padding:18px;background:rgba(8,11,26,.95);overflow:auto;-webkit-overflow-scrolling:touch;box-sizing:border-box;z-index:9;border-radius:6px}
+.ov>:first-child{margin-top:auto}.ov>:last-child{margin-bottom:auto}
+.ov h1,.ov h2{margin:0;font-size:28px;font-weight:800;line-height:1.2;color:var(--gold);text-wrap:balance}
+.ov p{margin:0;font-size:14px;line-height:1.7;color:#e6ebf5}
+.ov .note{font-size:12px;color:var(--mute)}
+.set{display:flex;flex-direction:column;gap:5px}
+.set>span{font-size:12px;color:var(--mute);letter-spacing:.08em}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{font:inherit;font-size:13px;font-weight:800;color:#e6ebf5;background:#1c2540;border:2px solid #34416a;border-radius:10px;padding:8px 12px;cursor:pointer;min-height:40px}
+.seg button[aria-pressed="true"]{background:var(--gold);color:var(--brown);border-color:var(--gold)}
+.go{font:inherit;font-size:22px;font-weight:800;color:#fff;background:var(--hot);border:3px solid var(--brown);border-radius:14px;padding:14px;box-shadow:0 5px 0 var(--brown);cursor:pointer;min-height:56px}
+.linkbtn{font:inherit;font-size:13px;font-weight:800;color:var(--mute);background:none;border:0;padding:10px;cursor:pointer}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stats div{background:#1c2540;border-radius:10px;padding:8px 10px;font-size:12px;color:var(--mute)}
+.stats b{display:block;font-size:20px;color:#fff;font-variant-numeric:tabular-nums}
+:focus-visible{outline:3px solid #fff;outline-offset:2px}
+@media (max-height:700px){.cue .w.s{font-size:27px}.cue .w{font-size:16px}.win p{font-size:16px;min-height:46px}.win{min-height:64px}.prompt .en{font-size:38px}.prompt{min-height:84px}}
+@media (prefers-reduced-motion:reduce){#app.shake{animation:none}.node.pop,.node.drop{animation:none}}
+
+/* ---- 時間・空・BGM ---- */
+#sky{position:absolute;inset:0;z-index:1;pointer-events:none;transition:background 2s}
+#map[data-tp=morning] #sky{background:rgba(255,205,130,.16)}
+#map[data-tp=dusk] #sky{background:rgba(255,115,55,.28)}
+#map[data-tp=night] #sky{background:rgba(20,30,90,.5)}
+#map[data-tp=late] #sky{background:rgba(8,12,50,.66)}
+.cl{position:absolute;left:0;z-index:1;pointer-events:none;width:48px;height:12px;background:#fafcff;box-shadow:12px -12px 0 0 #fafcff,24px -12px 0 0 #fafcff,-12px 0 0 0 #fafcff,60px 0 0 0 #fafcff,12px 12px 0 0 #d3deec,24px 12px 0 0 #d3deec;animation:cld 60s linear infinite;transition:opacity 2s}
+@keyframes cld{from{transform:translateX(-140px)}to{transform:translateX(560px)}}
+#map[data-tp=night] .cl,#map[data-tp=late] .cl{opacity:0}
+.ff{position:absolute;z-index:1;width:5px;height:5px;background:#fff59a;box-shadow:0 0 0 2px rgba(255,245,150,.45);pointer-events:none;opacity:0;transition:opacity 2s;animation:ffl 5s ease-in-out infinite}
+@keyframes ffl{0%,100%{transform:translate(0,0)}50%{transform:translate(14px,-18px)}}
+#map[data-tp=night] .ff,#map[data-tp=late] .ff{opacity:.9}
+#clock{position:absolute;left:8px;top:8px;z-index:6;background:rgba(14,18,34,.8);color:#fff;border:2px solid #5b6690;border-radius:8px;padding:3px 8px;font-size:12px;font-weight:800;pointer-events:none}
+.walker.sleep::after{content:'zZ';position:absolute;left:28px;top:-14px;font-weight:800;font-size:13px;color:#fff;animation:zz 2s ease-in-out infinite}
+@keyframes zz{50%{transform:translateY(-6px);opacity:.5}}
+#tRange{width:100%;accent-color:#ffc72c;margin:6px 0}
+@media (prefers-reduced-motion:reduce){.cl,.ff,.node .q,.walker.sleep::after{animation:none}}
+#clock{white-space:nowrap}
+#wx{position:absolute;left:6px;top:6px;z-index:3;background:rgba(5,7,15,.8);border:2px solid var(--line);border-radius:8px;padding:3px 8px;font-size:12px;font-weight:800;line-height:1.35;pointer-events:none;max-width:72%}
+#wx small{display:block;font-weight:500;color:var(--mute);font-size:10px}
+.ibox{display:flex;flex-direction:column;gap:8px}
+.icard{display:flex;align-items:center;gap:10px;background:#1c2540;border:2px solid #34416a;border-radius:12px;padding:8px 10px}
+.icard canvas{flex:none;border-radius:8px;border:2px solid #5b6690;background:#2a3a6b;image-rendering:pixelated}
+.icard .nm{flex:1;font-size:17px;font-weight:800;color:#fff;line-height:1.3}
+.icard .nm small{display:block;font-size:11px;font-weight:500;color:var(--mute)}
+.icard .btn.sub{min-height:40px;padding:6px 12px;font-size:13px}
+.ibox .empty{font-size:12px;color:var(--mute)}
+.cardface{align-self:center;width:144px;height:96px;border-radius:12px;border:3px solid var(--gold);background:#2a3a6b;image-rendering:pixelated}
+.ov .ctr{text-align:center}
+/* v10: 重ね画面は一番下の文章まで上に持ち上げて読めるよう、末尾に余白（端末のバーなどで隠れても読める） */
+.ov{overscroll-behavior:contain;padding-bottom:calc(18px + max(96px,env(safe-area-inset-bottom,0px)))}
+#ovStart{padding-bottom:calc(18px + max(140px,env(safe-area-inset-bottom,0px)))}
+</style>
+
+<div id="app">
+  <div id="mapView" hidden>
+    <div class="mapbar"><div id="pips" aria-label="進み具合"></div><button class="btn sub" id="setBtn" type="button" aria-label="設定">⚙</button></div>
+    <div id="map"><svg id="paths" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg><div id="sky"></div><i class="cl" style="top:12%"></i><i class="cl" style="top:46%;animation-duration:80s;animation-delay:-30s"></i><i class="cl" style="top:80%;animation-duration:70s;animation-delay:-50s"></i><div id="clock" aria-live="off"></div></div>
+  </div>
+
+  <div id="sceneView" hidden>
+    <canvas id="scene" width="320" height="150" aria-label="場面"></canvas>
+    <button id="exitBtn" type="button" aria-label="マップにもどる">✕</button>
+    <div id="wx" hidden></div>
+    <div class="win" id="msg"><span class="who" id="who"></span><p id="msgText"></p><span class="tap" id="tapHint"></span></div>
+    <div id="panel"></div>
+  </div>
+
+  <div id="flash"></div>
+  <canvas id="fx"></canvas>
+
+  <div class="ov" id="ovStart">
+    <h1>カンペ先生 グアム編</h1>
+    <p>飛行機を降りたところから、入国審査、手荷物、税関を通って空港の外へ。相手の英語を聞いて、<b>強く読む語だけ大きい</b>カンペを声に出す。そのあと単語バトル。クリアすると地図が広がる。ホテルへ向かう途中でビーチにも寄れる。そのあと空港にもどって、買い物と食事もできる。ビーチのあとに出るホテルでは、夜も遊べる。受付のあとで、部屋で眠って夢の中で単語を復習するか、プールサイドへ行くかを選べる。到着ゲートのそばには、ハガンとファニヒとスタッフの出迎えテーブルがある。時間帯（朝・昼・夕方・夜）で、会話とアニメーションが変わる。夕方のビーチでは夕日のイベントがある。</p>
+    <div class="set"><span>アイテムボックス</span><div class="ibox" id="itemBox"></div></div>
+    <div class="set"><span>声のとり方</span>
+      <div class="seg" data-key="vmode"><button type="button" data-v="hold" aria-pressed="true">長押しで読む</button><button type="button" data-v="mic">マイク（未検証）</button><button type="button" data-v="pick">声は出さない</button></div></div>
+    <div class="set"><span>相手の言葉</span>
+      <div class="seg" data-key="npc"><button type="button" data-v="show" aria-pressed="true">文字も出す</button><button type="button" data-v="hide">音だけ</button></div></div>
+    <div class="set"><span>リズム音（強い語でコッと鳴る）</span>
+      <div class="seg" data-key="tick"><button type="button" data-v="on" aria-pressed="true">あり</button><button type="button" data-v="off">なし</button></div></div>
+    <div class="set"><span>場所のざわめき</span>
+      <div class="seg" data-key="amb"><button type="button" data-v="on" aria-pressed="true">あり</button><button type="button" data-v="off">なし</button></div></div>
+    <div class="set"><span>時間（グアム現地時間 UTC+10）<b id="tLab"></b></span>
+      <input type="range" id="tRange" min="0" max="1410" step="30" aria-label="時間">
+      <div class="seg" data-key="tmode"><button type="button" data-v="auto" aria-pressed="true">いまの時間で動かす</button><button type="button" data-v="man">スライダーで決める</button></div></div>
+    <div class="set"><span>マップの音楽</span>
+      <div class="seg" data-key="bgm"><button type="button" data-v="on" aria-pressed="true">あり</button><button type="button" data-v="off">なし</button></div></div>
+    <button class="go" id="goBtn" type="button">マップへ</button>
+    <button class="linkbtn" id="resetBtn" type="button">はじめからやり直す</button>
+    <p class="note">空港の施設名、お店の名前、郷土料理の名前は、2026年11月4日に公式資料などで確認できたものだけを使っています。お店や手続きは変わることがあるので、旅の前に公式の案内を確認してください。会話と事件、夜の営業時間は創作です。時間はグアム現地時間（UTC+10）です。相手の声と効果音は、端末の読み上げ機能とこのページ内で作った音です。長押しは声の長さだけを見ていて、言った中身までは判定できません。発音記号は米国式で、辞書での確認はしていません。進み具合はこの端末のブラウザにだけ保存されます。</p>
+    <p class="note">ビーチはグアム観光局などで紹介されている Ypao Beach Park です（確認日2026-11-05）。ビーチの気温と湿度は、Open-Meteo の現在値が取れたときはその値、取れないときは月ごとの平均（timeanddate の気候平均）から時刻に合わせて推定した値です。Mia は創作のキャラクターです。ハガン（ウミガメ）とファニヒ（オオコウモリ）も、このアプリのためにつくった創作の着ぐるみキャラクターで、実在の空港や観光局のマスコットとは関係ありません。名前はチャモロ語の一般的な単語（Guampedia の用語集、確認日2026-11-05）から借りました。あいさつの Hafa Adai は、グアムで使われるあいさつです。Biba Guåhan は「グアムばんざい」のかけ声のつもりで使っています。この綴りは、空港公式アカウントのSNS投稿の画像（キングが提供）で確認しました。空港の店は、空港公式の一覧（2026年版）にある Burger King と Denny's of Guam、ロッテ免税店を使っています。ロッテ免税店は2026年12月20日までの契約延長中と報じられていて（Moodie Davitt Report、2026-09-04）、その後は変わる可能性があります。店の中の会話、メニュー、営業時間は創作です。ホテルとプールサイドは創作の場所で、実在のホテルや店とは関係ありません。プールサイドのトムとラニも、このアプリのための創作の大人の人物です。夢のクイズには、この端末に保存された「最近まちがえた単語」を使います（ブラウザ内だけに保存）。</p>
+    <p class="note">時間帯（朝・昼・夕方・夜）で、会話とアニメーションが変わります。夕方のビーチは夕日のイベントで、チャモロの人々が使った石の柱「ラッテストーン」（Guampedia で確認、2026-11-06）と、7月21日の解放記念日（1944年、Wikipedia で確認、2026-11-06）の話が出ます。空港の出迎えテーブルの2人（ハガンとファニヒ）とスタッフ、ホテルのプールの人たちはすべて創作の登場人物で、実在の団体や人物とは関係ありません。</p>
+  </div>
+
+  <div class="ov" id="ovEnd" hidden>
+    <h2>グアムの空港を、ぬけた</h2>
+    <div class="stats" id="endStats"></div>
+    <button class="go" id="again" type="button">マップにもどる</button>
+  </div>
+
+  <div class="ov" id="ovGet" hidden>
+    <h2 class="ctr">アイテムをゲット！</h2>
+    <canvas id="getFace" class="cardface" width="96" height="64" aria-label="出会った人の顔"></canvas>
+    <p class="ctr" id="getName" style="font-size:18px;font-weight:800;color:#fff"></p>
+    <p class="note ctr">アイテムボックスに入りました。マップの ⚙ から見られます。</p>
+    <button class="go" id="getOk" type="button">マップへ</button>
+  </div>
+
+  <div class="ov" id="ovCard" hidden>
+    <canvas id="cardFace" class="cardface" width="96" height="64" aria-label="顔"></canvas>
+    <h2 class="ctr" id="cardName"></h2>
+    <p id="cardInfo"></p>
+    <p class="note">このカードは、このアプリの中のキャラクターのカードです（創作）。実在の人の連絡先ではなく、電話もメッセージも会うこともできません。将来の構想として、各国のグッズを交換する形を考えています（いまは未実装）。</p>
+    <button class="go" id="cardOk" type="button">とじる</button>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+/* 人柄カード（グアム）2026-11-05。会話の直しはこの5項目に合わせた。
+   1 接し方: ゆったり、家族のように。急かさず、まず笑顔であいさつ（Take your time / No rush / friend）。
+   2 口調と挨拶の癖: 最初は「Hafa Adai!」。やわらかい短文。「Biba Guåhan!」は送り出しで1回だけ（ground 1つ目の最終ターン）。現地語はこの2つだけ。
+   3 空間の特徴: 暖かい空気、ヤシ、開けた空、ゆるい時間。案内役にオリジナルのハガンとファニヒ。
+   4 到着直後の困りごと: SIM・両替・現金が減る・ホテル名を忘れる・Wi-Fi。
+   5 外に出た瞬間: 暖かい空気の解放感と、タクシー代への小さな不安（ground）。
+   直したのは24ターン（gate4 baggage2 lobby5 ground4 staff1 beach1 dep2 lotte2 bk2 denny1）。移民・税関は公的な手続きなので変えていない。 */
+/* グアム到着編。実名は確認日2026-11-04に公式資料などで確認できたものだけ（出典は引き継ぎまとめに記載）。
+   事件・会話は創作。*でかこんだ語が強く読む語（クロの判断）。発音記号はクロが手で書いた米式（辞書で未確認）。 */
+var PLACES=[
+ {id:'gate',icon:'🛬',who:'Attendant',pitch:1.15,bg:'arrgate',amb:'hall',npcX:200,x:14,y:82,req:null,
+  pal:{c:'#1d3a8a',h:'#3a2a1c',b:'#1d3a8a',a:'#e8452c'},
+  variants:[{turns:[
+   {npc:"Hafa Adai! Welcome to Guam. Thank you for flying with us.",npcJp:"ハファ・アダイ（こんにちは）！グアムへようこそ。ご搭乗ありがとうございました。",cue:"*Thank* you! It was a *great* *flight*.",cueJp:"ありがとうございます。いいフライトでした。"},
+   {npc:"Take your time, friend. Do you need help with your bag?",npcJp:"ゆっくりで大丈夫ですよ。お荷物のお手伝いは必要ですか。",cue:"*No*, *thanks*. I can *carry* it *myself*.",cueJp:"いえ、大丈夫です。自分で持てます。"},
+   {npc:"No rush. Follow the signs to Immigration. The arrival hall is just ahead.",npcJp:"急がなくて大丈夫ですよ。入国審査の案内表示に従ってください。到着ホールはこの先です。",cue:"*Okay*. Is it *far* from *here*?",cueJp:"わかりました。ここから遠いですか。"},
+   {npc:"No, it's down this hallway. Do you have your passport ready?",npcJp:"いいえ、この通路の先です。パスポートはすぐ出せますか。",cue:"*Yes*. I have my *passport* and my *ESTA*.",cueJp:"はい。パスポートとESTAがあります。"},
+   {npc:"Perfect. Have a wonderful stay with us in Guam.",npcJp:"けっこうです。私たちのグアムで、すてきな滞在を。",cue:"*Thank* you *so* *much*. *Have* a *good* *day*!",cueJp:"ありがとうございます。よい一日を。"}],
+  words:[["arrival","/əˈraɪvəl/","到着"],["welcome","/ˈwɛlkəm/","ようこそ"],["hallway","/ˈhɔːlˌweɪ/","通路"],["signs","/saɪnz/","案内表示"],["passport","/ˈpæsˌpɔːrt/","パスポート"],["stay","/steɪ/","滞在"],["carry","/ˈkæri/","運ぶ"],["ready","/ˈrɛdi/","準備ができた"]]}]},
+
+ {id:'immigration',icon:'🛂',who:'CBP Officer',pitch:0.8,bg:'imm',amb:'sec',npcX:236,x:36,y:64,req:'gate',
+  pal:{c:'#2b4a3a',h:'#2b2b2b',b:'#2b4a3a',a:'#f2b705'},
+  variants:[
+   {turns:[
+    {npc:"Next, please. Passport, please.",npcJp:"次の方、どうぞ。パスポートをお願いします。",cue:"*Here* you *are*. *Good* *afternoon*.",cueJp:"どうぞ。こんにちは。"},
+    {npc:"Thank you. What is the purpose of your visit to Guam?",npcJp:"ありがとうございます。グアムへの訪問の目的は何ですか。",cue:"I'm here for a *vacation*. *Sightseeing* and *shopping*.",cueJp:"休暇で来ました。観光と買い物です。"},
+    {npc:"How long will you stay? Where are you staying?",npcJp:"何日滞在しますか。どこに泊まりますか。",cue:"*Four* *days*. At a *hotel* in *Tumon*.",cueJp:"4日間です。タモンのホテルです。"},
+    {npc:"Do you have a return ticket? Please look at the camera.",npcJp:"帰りの航空券はありますか。カメラを見てください。",cue:"*Yes*, I do. *Here* is my *return* *ticket*.",cueJp:"はい。帰りの航空券です。"},
+    {npc:"Place your fingers on the scanner, please. Okay, welcome to Guam.",npcJp:"指をスキャナーに置いてください。はい、グアムへようこそ。",cue:"*Thank* you. *Where* is the *baggage* *claim*?",cueJp:"ありがとう。手荷物受取所はどこですか。"}],
+   words:[["purpose","/ˈpɜːrpəs/","目的"],["vacation","/veɪˈkeɪʃən/","休暇"],["sightseeing","/ˈsaɪtˌsiːɪŋ/","観光"],["hotel","/hoʊˈtɛl/","ホテル"],["return","/rɪˈtɜːrn/","帰りの"],["camera","/ˈkæmrə/","カメラ"],["fingers","/ˈfɪŋɡərz/","指"],["scanner","/ˈskænər/","スキャナー"]]},
+   {turns:[
+    {npc:"Good afternoon. Is this your first time on Guam?",npcJp:"こんにちは。グアムは初めてですか。",cue:"*Yes*, it's my *first* *time*. I'm a *little* *nervous*.",cueJp:"はい、初めてです。少し緊張しています。"},
+    {npc:"No problem. Where will you stay? What's the hotel name?",npcJp:"大丈夫ですよ。どこに泊まりますか。ホテルの名前は何ですか。",cue:"*Hmm*, I *forgot* the *name*. Can I *check* my *phone*?",cueJp:"えっと、名前を忘れました。スマホを見てもいいですか。"},
+    {npc:"Sure, take your time. Do you have a booking confirmation?",npcJp:"どうぞ、ゆっくりで大丈夫です。予約確認書はありますか。",cue:"*Yes*. *Here's* my *booking* *confirmation*. *Four* *nights*.",cueJp:"はい。予約確認書です。4泊です。"},
+    {npc:"Okay. Are you traveling alone, or with someone?",npcJp:"わかりました。おひとりですか、それとも誰かと一緒ですか。",cue:"*With* a *friend*. *Her* *name* is *Lulu*.",cueJp:"友だちと一緒です。名前はルルです。"},
+    {npc:"Thank you. Please look at the camera. Welcome to Guam.",npcJp:"ありがとうございます。カメラを見てください。グアムへようこそ。",cue:"*Thanks*! *Which* way to the *baggage* *claim*?",cueJp:"ありがとう。手荷物受取所はどちらですか。"}],
+   words:[["first","/fɜːrst/","初めての"],["nervous","/ˈnɜːrvəs/","緊張した"],["forgot","/fərˈɡɑːt/","忘れた"],["booking","/ˈbʊkɪŋ/","予約"],["confirmation","/ˌkɑːnfərˈmeɪʃən/","確認書"],["nights","/naɪts/","〜泊"],["alone","/əˈloʊn/","ひとりで"],["friend","/frɛnd/","友だち"]]}
+  ]},
+
+ {id:'baggage',icon:'🧳',who:'Staff',pitch:1.0,bg:'bag',amb:'bag',npcX:222,x:60,y:78,req:'immigration',
+  pal:{c:'#f08a00',h:'#3a2a1c',b:'#f08a00',a:'#f2f2f2'},
+  variants:[
+   {turns:[
+    {npc:"Hafa Adai! Are you looking for your baggage?",npcJp:"ハファ・アダイ！お荷物をお探しですか。",cue:"*Yes*. *Which* *carousel* is for my *flight*?",cueJp:"はい。私の便はどのターンテーブルですか。"},
+    {npc:"Which flight were you on? Please check the screen above.",npcJp:"どの便でしたか。上の画面を確認してください。",cue:"It's the *flight* from *Tokyo*. *Oh*, *carousel* *three*!",cueJp:"東京からの便です。あ、3番ターンテーブルだ。"},
+    {npc:"Yes, that's the one. Do you need a cart?",npcJp:"はい、そこです。カートは必要ですか。",cue:"*Yes*, *please*. My *bag* is *blue*, with a *red* *tag*.",cueJp:"はい、お願いします。青いバッグで、赤いタグがついています。"},
+    {npc:"I see it coming. Is that your suitcase?",npcJp:"流れてきましたね。あれがあなたのスーツケースですか。",cue:"*Yes*, that's *mine*! *Could* you *help* me *lift* it?",cueJp:"はい、私のです。持ち上げるのを手伝ってもらえますか。"},
+    {npc:"Sure. Here you go. Customs is straight ahead.",npcJp:"もちろん。どうぞ。税関はまっすぐ先です。",cue:"*Thank* you *so* *much*. *Have* a *nice* *day*.",cueJp:"ありがとうございます。よい一日を。"}],
+   words:[["baggage","/ˈbæɡɪdʒ/","手荷物"],["carousel","/ˌkærəˈsɛl/","ターンテーブル"],["screen","/skriːn/","画面"],["cart","/kɑːrt/","カート"],["tag","/tæɡ/","タグ"],["lift","/lɪft/","持ち上げる"],["suitcase","/ˈsuːtˌkeɪs/","スーツケース"],["ahead","/əˈhɛd/","前方に"]]},
+   {turns:[
+    {npc:"Hello. You look worried. Is something wrong?",npcJp:"こんにちは。心配そうですね。何かありましたか。",cue:"*Yes*. My *bag* is *missing*. I *waited* *twenty* *minutes*.",cueJp:"はい。荷物が見つかりません。20分待ちました。"},
+    {npc:"I'm sorry about that, but don't worry. Please go to your airline's baggage service office.",npcJp:"申し訳ありません。でも心配しないでください。ご利用の航空会社の手荷物サービス窓口へ行ってください。",cue:"*Thank* you. *Do* I *need* a *claim* *tag*?",cueJp:"ありがとう。預かり証が必要ですか。"},
+    {npc:"Yes, show your claim tag and passport. What does your bag look like?",npcJp:"はい、預かり証とパスポートを見せてください。バッグはどんな見た目ですか。",cue:"It's a *large* *black* *suitcase* with a *yellow* *ribbon*.",cueJp:"大きな黒いスーツケースで、黄色いリボンがついています。"},
+    {npc:"Okay. Where should we deliver it? Do you have your hotel address?",npcJp:"わかりました。どちらへお届けしますか。ホテルの住所はありますか。",cue:"*Please* *send* it to my *hotel* in *Tumon*. *Here's* the *address*.",cueJp:"タモンのホテルに送ってください。これが住所です。"},
+    {npc:"We'll call you when it comes. Is this phone number correct?",npcJp:"届いたらお電話します。この電話番号で合っていますか。",cue:"*Yes*, *that's* *right*. *How* *long* will it *take*?",cueJp:"はい、合っています。どのくらいかかりますか。"}],
+   words:[["worried","/ˈwɜːrid/","心配な"],["missing","/ˈmɪsɪŋ/","見つからない"],["claim","/kleɪm/","預かり証の請求"],["ribbon","/ˈrɪbən/","リボン"],["deliver","/dɪˈlɪvər/","届ける"],["address","/əˈdrɛs/","住所"],["airline","/ˈɛrˌlaɪn/","航空会社"],["yellow","/ˈjɛloʊ/","黄色の"]]}
+  ]},
+
+ {id:'customs',icon:'🛃',who:'Customs Officer',pitch:0.85,bg:'customs',amb:'sec',npcX:230,x:82,y:60,req:'baggage',
+  pal:{c:'#14533f',h:'#2b2b2b',b:'#14533f',a:'#cfd6e4'},
+  variants:[
+   {turns:[
+    {npc:"Good afternoon. Do you have your customs declaration?",npcJp:"こんにちは。税関申告書はお持ちですか。",cue:"*Yes*. I *filled* it *out* *online* *before* my *flight*.",cueJp:"はい。搭乗前にオンラインで入力しました。"},
+    {npc:"Thank you. Are you bringing any food or plants?",npcJp:"ありがとうございます。食べ物や植物は持ち込んでいますか。",cue:"*Just* *some* *snacks*. *Chocolate* and *rice* *crackers*.",cueJp:"お菓子だけです。チョコレートとおせんべいです。"},
+    {npc:"Any meat products? Beef jerky or sausage, for example?",npcJp:"肉製品はありますか。たとえばビーフジャーキーやソーセージです。",cue:"*Oh*, I *have* *beef* *jerky*. *Should* I *declare* it?",cueJp:"あ、ビーフジャーキーがあります。申告すべきですか。"},
+    {npc:"Yes. Meat products are not allowed. I'll have to keep it.",npcJp:"はい。肉製品は持ち込めません。こちらで預かります。",cue:"*I* *see*. *Sorry*, I *didn't* *know* *that*.",cueJp:"わかりました。知らなくてすみません。"},
+    {npc:"No problem. Thanks for telling me. Enjoy your trip!",npcJp:"大丈夫ですよ。教えてくれてありがとう。旅を楽しんで。",cue:"*Thank* you. *Is* the *exit* *this* *way*?",cueJp:"ありがとう。出口はこちらですか。"}],
+   words:[["customs","/ˈkʌstəmz/","税関"],["declaration","/ˌdɛkləˈreɪʃən/","申告書"],["online","/ˌɑːnˈlaɪn/","オンラインで"],["snacks","/snæks/","お菓子"],["jerky","/ˈdʒɜːrki/","ジャーキー"],["meat","/miːt/","肉"],["declare","/dɪˈklɛr/","申告する"],["allowed","/əˈlaʊd/","許可された"]]},
+   {turns:[
+    {npc:"Hello. Do you have your electronic customs form?",npcJp:"こんにちは。電子の税関申告書はお持ちですか。",cue:"*No*, *not* *yet*. *Can* I *do* it *now*?",cueJp:"いいえ、まだです。いまできますか。"},
+    {npc:"Yes, use the airport Wi-Fi in the baggage claim area. It only takes a few minutes.",npcJp:"はい、手荷物受取所のエリアにある空港のWi-Fiを使ってください。数分で終わります。",cue:"*Okay*. *How* do I *connect* to the *Wi-Fi*?",cueJp:"わかりました。Wi-Fiにはどうつなぎますか。"},
+    {npc:"Choose the airport network and follow the screen. Then show me the result.",npcJp:"空港のネットワークを選んで、画面の指示に従ってください。それから結果を見せてください。",cue:"*Done*! *Here's* the *result* *page*.",cueJp:"できました。これが結果のページです。"},
+    {npc:"Thank you. Are you carrying any medicine?",npcJp:"ありがとうございます。薬は持っていますか。",cue:"*Yes*, *some* *medicine* and *pills*. I have an *English* *letter*.",cueJp:"はい、薬と錠剤があります。英文の証明書もあります。"},
+    {npc:"That's fine. You may go. Welcome to Guam.",npcJp:"けっこうです。どうぞ。グアムへようこそ。",cue:"*Thanks*! *Where* can I *get* a *SIM* *card*?",cueJp:"ありがとう。SIMカードはどこで買えますか。"}],
+   words:[["form","/fɔːrm/","申告書の用紙"],["electronic","/ɪˌlɛkˈtrɑːnɪk/","電子の"],["network","/ˈnɛtˌwɜːrk/","ネットワーク"],["connect","/kəˈnɛkt/","つなぐ"],["medicine","/ˈmɛdɪsən/","薬"],["letter","/ˈlɛtər/","証明書"],["pills","/pɪlz/","錠剤"],["Wi-Fi","/ˈwaɪˌfaɪ/","無線LAN"]]}
+  ]},
+
+ {id:'lobby',icon:'💁',who:'Guide',pitch:1.1,bg:'lobby',amb:'info',npcX:218,x:62,y:38,req:'customs',
+  pal:{c:'#1f7a8c',h:'#5a3a22',b:'#1f7a8c',a:'#ffffff'},
+  variants:[
+   {turns:[
+    {npc:"Hafa Adai! Welcome. How can I help?",npcJp:"ハファ・アダイ！ようこそ。どうなさいましたか。",cue:"*Hi*. *How* can I *get* to my *hotel* in *Tumon*?",cueJp:"こんにちは。タモンのホテルにはどう行けばいいですか。"},
+    {npc:"You can take a taxi or join a tour shuttle. Which do you prefer?",npcJp:"タクシーに乗るか、ツアーのシャトルに参加できます。どちらがいいですか。",cue:"*What's* the *difference*? I *want* the *easiest* *way*.",cueJp:"何が違いますか。いちばん楽な方法がいいです。"},
+    {npc:"A taxi goes straight to your hotel. The taxi counter is outside the West Arrival building.",npcJp:"タクシーはホテルまで直行します。タクシーカウンターはウエスト・アライバル棟の外にあります。",cue:"*West* *Arrival*? *Which* *door* do I *use*?",cueJp:"ウエスト・アライバルですか。どのドアを使いますか。"},
+    {npc:"Please follow the signs for West Arrival. The staff at the counter will call the next taxi.",npcJp:"ウエスト・アライバルの案内表示に従ってください。カウンターの係員が次のタクシーを呼びます。",cue:"*Got* it. *Also*, I *need* some *cash*. Where can I *exchange* *yen*?",cueJp:"わかりました。あと、現金が必要です。円はどこで両替できますか。"},
+    {npc:"The counter staff can point you in the right direction. Here's a free map, friend. Enjoy Guam!",npcJp:"カウンターのスタッフが行き先を教えてくれますよ。無料の地図もどうぞ。グアムを楽しんでくださいね。",cue:"*Wonderful*! *Thanks* for your *help*.",cueJp:"すばらしい。助けてくれてありがとう。"}],
+   words:[["taxi","/ˈtæksi/","タクシー"],["shuttle","/ˈʃʌtəl/","送迎バス"],["prefer","/prɪˈfɜːr/","〜のほうを好む"],["difference","/ˈdɪfrəns/","違い"],["counter","/ˈkaʊntər/","カウンター"],["outside","/ˌaʊtˈsaɪd/","外に"],["free","/friː/","無料の"],["map","/mæp/","地図"]]},
+   {turns:[
+    {npc:"Hafa Adai! Are you hungry? We can suggest some places to eat.",npcJp:"ハファ・アダイ！おなかはすいていますか。食べる場所をご案内できます。",cue:"*Yes*, I'm *starving*! I *want* to *try* *local* *food*.",cueJp:"はい、ぺこぺこです。地元の料理を食べてみたいです。"},
+    {npc:"Try Chamorro food. Red rice and chicken kelaguen are traditional favorites.",npcJp:"チャモロ料理をどうぞ。レッドライスとチキンケラグエンは昔からの定番です。",cue:"*What's* *red* *rice*? And *what's* *kelaguen*?",cueJp:"レッドライスって何ですか。ケラグエンって何ですか。"},
+    {npc:"Red rice is colored with achote seeds. Kelaguen is chopped chicken with lemon, coconut, and pepper.",npcJp:"レッドライスはアチョテの種で色をつけたお米です。ケラグエンは刻んだ鶏肉をレモン、ココナッツ、唐辛子で和えたものです。",cue:"*Sounds* *delicious*! Is it *spicy*?",cueJp:"おいしそう。辛いですか。"},
+    {npc:"A little. Finadene is a sauce with soy sauce, lemon, and onions. It's great on BBQ ribs.",npcJp:"少しだけ。フィナデーネは、しょうゆ、レモン、玉ねぎのソースです。BBQリブによく合います。",cue:"*Great*! I'll *try* the *ribs* with *finadene*.",cueJp:"いいですね。リブをフィナデーネで食べてみます。"},
+    {npc:"Good choice. Before you fly home, the airport also has Burger King and Denny's.",npcJp:"いい選択です。帰る前に、空港には Burger King や Denny's もあります。",cue:"*Nice*, but I *want* *local* *food* *first*!",cueJp:"いいですね。でも、まず地元の料理がいいです。"}],
+   words:[["hungry","/ˈhʌŋɡri/","空腹の"],["local","/ˈloʊkəl/","地元の"],["rice","/raɪs/","お米"],["coconut","/ˈkoʊkəˌnʌt/","ココナッツ"],["ribs","/rɪbz/","スペアリブ"],["sauce","/sɔːs/","ソース"],["spicy","/ˈspaɪsi/","辛い"],["lemon","/ˈlɛmən/","レモン"]]}
+  ]},
+
+ {id:'ground',icon:'🚕',who:'Dispatcher',pitch:0.95,bg:'ground',amb:'out',npcX:226,x:36,y:22,req:'lobby',
+  pal:{c:'#e8a020',h:'#2b2b2b',b:'#e8a020',a:'#f2f2f2'},
+  variants:[
+   {turns:[
+    {npc:"Hafa Adai! Welcome to the island. Please wait here for the next taxi.",npcJp:"ハファ・アダイ！島へようこそ。ここで次のタクシーをお待ちください。",cue:"*Wow*, the *air* is *warm*! I'm *going* to a *hotel* in *Tumon*.",cueJp:"わあ、空気があたたかい。タモンのホテルに行きます。"},
+    {npc:"Sure. How many people, and how many bags?",npcJp:"わかりました。何人で、荷物はいくつですか。",cue:"*Two* of *us*. *One* *backpack*, and *two* *bags*.",cueJp:"2人です。リュックが1つと、バッグが2つです。"},
+    {npc:"Okay. The driver will take you straight to your hotel. Enjoy the ride!",npcJp:"わかりました。運転手がホテルまで直行します。道中を楽しんで。",cue:"*How* *much* will it *cost*? Can I *pay* by *card*?",cueJp:"いくらかかりますか。カードで払えますか。"},
+    {npc:"Good question. Please ask your driver about the fare and payment. No worries!",npcJp:"いい質問ですね。運賃と支払い方法は、運転手に聞いてください。心配いりませんよ。",cue:"*Okay*, I *will*. *Thank* you for *telling* me.",cueJp:"わかりました、聞いてみます。教えてくれてありがとう。"},
+    {npc:"Here's your taxi. Watch your step. Biba Guåhan!",npcJp:"タクシーが来ました。足元に気をつけて。ビバ・グアハン！（グアムばんざい）",cue:"*Thanks*! *Could* you *put* them in the *trunk*?",cueJp:"ありがとう。トランクに入れてもらえますか。"}],
+   words:[["ride","/raɪd/","乗車"],["driver","/ˈdraɪvər/","運転手"],["fare","/fɛr/","運賃"],["cost","/kɔːst/","費用がかかる"],["pay","/peɪ/","支払う"],["wait","/weɪt/","待つ"],["backpack","/ˈbækˌpæk/","リュック"],["trunk","/trʌŋk/","トランク"]]},
+   {turns:[
+    {npc:"Hafa Adai! Which tour company are you with?",npcJp:"ハファ・アダイ！どちらのツアー会社ですか。",cue:"I'm *with* *Hana* *Tour* *Guam*. *Here's* my *voucher*.",cueJp:"ハナツアーグアムです。バウチャーです。"},
+    {npc:"Thank you. Let me check your name. Could you spell it, please?",npcJp:"ありがとうございます。お名前を確認します。綴りを言ってもらえますか。",cue:"*Sure*. It's *K*-*E*-*N*. *Ken* *Tanaka*.",cueJp:"はい。K-E-N、ケン・タナカです。"},
+    {npc:"Found you. Your shuttle bus will be at the curb in ten minutes.",npcJp:"確認できました。シャトルバスは10分後に縁石のそばへ来ます。",cue:"*Ten* *minutes*? *Where* *should* I *wait*?",cueJp:"10分後ですか。どこで待てばいいですか。"},
+    {npc:"Please wait by the sign. If you need a rental car, the rental counters are outside the baggage claim area.",npcJp:"看板のそばで待ってください。レンタカーが必要なら、レンタカーのカウンターは手荷物受取所の外にあります。",cue:"*Good* to *know*. *Can* I *rent* a *car* *later*?",cueJp:"いいことを聞きました。あとで車を借りられますか。"},
+    {npc:"Of course. Just ask at the rental counters. Enjoy your tour!",npcJp:"もちろんです。レンタルカウンターで聞いてください。ツアーを楽しんで。",cue:"*Thank* you. *See* you *later*!",cueJp:"ありがとう。またね。"}],
+   words:[["tour","/tʊr/","ツアー"],["company","/ˈkʌmpəni/","会社"],["spell","/spɛl/","綴る"],["curb","/kɜːrb/","縁石"],["rent","/rɛnt/","借りる"],["rental","/ˈrɛntəl/","レンタルの"],["sign","/saɪn/","看板"],["minutes","/ˈmɪnəts/","分"]]}
+  ]},
+
+ {id:'beach',icon:'🏖️',who:'Mia',pitch:1.2,bg:'beach',amb:'beach',npcX:226,x:14,y:12,req:'ground',
+  pal:{c:'#1a1210',h:'#1a1210',b:'#ff5aa0',a:'#ffd23f',s:'#d9a066'},
+  variants:[{turns:[
+   {npc:"Hafa Adai! Your green friend is so cute. What's her name?",npcJp:"ハファ・アダイ！緑のお友だち、かわいいですね。名前は何ですか。",cue:"*Thanks*! *Her* *name* is *Lulu*. We're on *vacation*.",cueJp:"ありがとう。名前はルルです。私たちは休暇で来ています。"},
+   {npc:"Welcome to Guam! I'm Mia. I work at a snorkel shop nearby.",npcJp:"グアムへようこそ。私はミアです。近くのシュノーケルの店で働いています。",cue:"*Nice* to *meet* you, *Mia*! *This* *beach* is *beautiful*.",cueJp:"はじめまして、ミア。この浜辺はきれいですね。"},
+   {npc:"Ypao is my favorite. The reef is close, and the water is clear.",npcJp:"イパオは私のお気に入りです。サンゴ礁が近くて、水が澄んでいます。",cue:"*Really*? *Where* is the *best* *spot* to *swim*?",cueJp:"本当ですか。泳ぐならどこがいちばんいいですか。"},
+   {npc:"Stay close to the shore, and please don't touch the coral.",npcJp:"岸の近くにいてください。それから、サンゴにはさわらないでくださいね。",cue:"*Got* it. *I'll* be *careful*. *The* *water* is *so* *warm*!",cueJp:"わかりました。気をつけます。水がとても温かいですね。"},
+   {npc:"The sea is warm all year. Do you want to watch the sunset later?",npcJp:"海は一年中あたたかいんですよ。あとで夕日を見ませんか。",cue:"*Yes*, I'd *love* to! *Let's* *take* a *photo* *together*.",cueJp:"ぜひ。いっしょに写真をとりましょう。"},
+   {npc:"Great! Let's trade contact cards in the app, so we can say hi again.",npcJp:"いいですね。またあいさつできるように、アプリで連絡先カードを交換しましょう。",cue:"*Great* *idea*! *Here's* my *card*. *See* you *again*, *Mia*!",cueJp:"いい考えですね。これが私のカードです。またね、ミア。"}],
+  words:[["beach","/biːtʃ/","浜辺"],["reef","/riːf/","サンゴ礁"],["coral","/ˈkɔːrəl/","サンゴ"],["sunset","/ˈsʌnˌsɛt/","夕日"],["shore","/ʃɔːr/","岸"],["clear","/klɪr/","澄んだ"],["warm","/wɔːrm/","温かい"],["careful","/ˈkɛrfəl/","注意深い"]]}]},
+
+ {id:'dep',icon:'🛫',who:'Agent',pitch:1.1,bg:'dep',amb:'hall',npcX:222,x:62,y:14,req:'beach',
+  pal:{c:'#1d3a8a',h:'#3a2a1c',b:'#1d3a8a',a:'#f2f2f2'},
+  variants:[{turns:[
+   {npc:"Hafa Adai. Where are you flying today?",npcJp:"ハファ・アダイ。今日はどちらへ飛びますか。",cue:"*Hi*. *To* *Tokyo*. *Here* is my *passport*.",cueJp:"こんにちは。東京です。パスポートをどうぞ。"},
+   {npc:"Thank you. Do you have any bags to check?",npcJp:"ありがとうございます。預ける荷物はありますか。",cue:"*Yes*, *one* *suitcase*. The *backpack* is my *carry-on*.",cueJp:"はい、スーツケースがひとつ。リュックは機内持ち込みです。"},
+   {npc:"Please put your suitcase on the scale. It's a little heavy.",npcJp:"スーツケースを秤にのせてください。少し重いですね。",cue:"*Oh*, *sorry*. *Is* it *over* the *limit*?",cueJp:"あ、すみません。制限を超えていますか。"},
+   {npc:"No, it's fine. Here are your boarding pass and baggage tag.",npcJp:"いいえ、大丈夫です。搭乗券と荷物のタグです。",cue:"*Thank* you. *Where* can I *buy* *souvenirs*?",cueJp:"ありがとう。お土産はどこで買えますか。"},
+   {npc:"There's a duty free shop in the terminal. Please be at your gate early. We will miss you!",npcJp:"ターミナルに免税店があります。搭乗口には早めに行ってください。みんなさびしがりますよ。",cue:"*Okay*. I'll *go* *there* *first*. *Thanks*!",cueJp:"わかりました。まずそこへ行きます。ありがとう。"}],
+  words:[["flying","/ˈflaɪɪŋ/","飛ぶ"],["check","/tʃɛk/","預ける"],["scale","/skeɪl/","秤"],["heavy","/ˈhɛvi/","重い"],["limit","/ˈlɪmɪt/","制限"],["boarding","/ˈbɔːrdɪŋ/","搭乗"],["souvenirs","/ˌsuːvəˈnɪrz/","お土産"],["gate","/ɡeɪt/","搭乗口"]]}]},
+
+ {id:'lotte',icon:'🛍️',who:'Clerk',pitch:1.2,bg:'lotte',amb:'info',npcX:220,x:88,y:12,req:'dep',
+  pal:{c:'#7a2a5c',h:'#3a2a1c',b:'#7a2a5c',a:'#ffffff'},
+  variants:[{turns:[
+   {npc:"Hafa Adai! Are you looking for something special?",npcJp:"ハファ・アダイ！何か特別なものをお探しですか。",cue:"*Hi*. I'm *looking* for a *gift* for my *family*.",cueJp:"こんにちは。家族への贈り物を探しています。"},
+   {npc:"Chocolate and local snacks are very popular. Do you want to try one?",npcJp:"チョコレートと地元のお菓子がとても人気です。ひとつ試してみますか。",cue:"*Sure*. *Which* one is the *most* *popular*?",cueJp:"ぜひ。どれがいちばん人気ですか。"},
+   {npc:"This one is popular. It's a small box, so it's easy to carry.",npcJp:"こちらが人気です。小さな箱なので、持ち運びも楽ですよ。",cue:"*Nice*. *I'll* *take* *three* *boxes*, *please*.",cueJp:"いいですね。3箱ください。"},
+   {npc:"Okay. May I see your passport and boarding pass?",npcJp:"かしこまりました。パスポートと搭乗券を見せていただけますか。",cue:"*Here* you *are*. *Can* I *pay* by *card*?",cueJp:"どうぞ。カードで払えますか。"},
+   {npc:"Yes, of course. Here's your receipt. Have a safe flight, and come back soon!",npcJp:"はい、もちろんです。レシートをどうぞ。よいフライトを。また来てくださいね。",cue:"*Thank* you *so* *much*. *Have* a *nice* *day*.",cueJp:"ありがとうございます。よい一日を。"}],
+  words:[["gift","/ɡɪft/","贈り物"],["special","/ˈspɛʃəl/","特別な"],["popular","/ˈpɑːpjələr/","人気の"],["chocolate","/ˈtʃɔːklət/","チョコレート"],["family","/ˈfæməli/","家族"],["receipt","/rɪˈsiːt/","レシート"],["safe","/seɪf/","安全な"],["flight","/flaɪt/","フライト"]]}]},
+
+ {id:'bk',icon:'🍔',who:'Cashier',pitch:0.9,bg:'bk',amb:'burger',npcX:224,x:88,y:36,req:'lotte',
+  pal:{c:'#b5471c',h:'#2b2b2b',b:'#b5471c',a:'#ffc72c'},
+  variants:[
+   {turns:[
+    {npc:"Hafa Adai! Welcome to Burger King. What can I get you?",npcJp:"ハファ・アダイ！バーガーキングへようこそ。何にしますか。",cue:"*Hi*. I'd *like* a *cheeseburger* *meal*, *please*.",cueJp:"こんにちは。チーズバーガーのセットをお願いします。"},
+    {npc:"Sure. Would you like fries or onion rings?",npcJp:"かしこまりました。フライドポテトとオニオンリングのどちらにしますか。",cue:"*Fries*, *please*. *And* a *large* *cola*.",cueJp:"ポテトでお願いします。それと、コーラのLサイズを。"},
+    {npc:"Anything else? Would you like ketchup?",npcJp:"ほかにありますか。ケチャップはいりますか。",cue:"*Yes*, *ketchup*, *please*. *That's* *all*.",cueJp:"はい、ケチャップをお願いします。以上です。"},
+    {npc:"Okay. For here or to go?",npcJp:"わかりました。店内ですか、お持ち帰りですか。",cue:"*For* *here*, *please*. *How* *much* is it?",cueJp:"店内でお願いします。いくらですか。"},
+    {npc:"Your total is on the screen. Cash or card?",npcJp:"合計は画面に出ています。現金ですか、カードですか。",cue:"*Hmm*, I *don't* have *much* *cash* *left*. I'll *pay* by *card*.",cueJp:"うーん、現金があまり残っていません。カードで払います。"}],
+   words:[["cheeseburger","/ˈtʃizˌbɜːrɡər/","チーズバーガー"],["meal","/miːl/","セット"],["fries","/fraɪz/","フライドポテト"],["large","/lɑːrdʒ/","大きい"],["cola","/ˈkoʊlə/","コーラ"],["ketchup","/ˈkɛtʃəp/","ケチャップ"],["total","/ˈtoʊtəl/","合計"],["onion","/ˈʌnjən/","玉ねぎ"]]},
+   {turns:[
+    {npc:"Number forty-two! Is this your order?",npcJp:"42番のお客さま。ご注文はこちらですか。",cue:"*Yes*, *that's* *mine*. *Thank* you.",cueJp:"はい、私のです。ありがとう。"},
+    {npc:"Here's your burger. Do you need a straw?",npcJp:"ハンバーガーです。ストローはいりますか。",cue:"*Yes*, *please*. *And* *some* *napkins*.",cueJp:"はい、お願いします。それとナプキンも。"},
+    {npc:"Sure. Careful, the burger is hot.",npcJp:"どうぞ。気をつけて、バーガーは熱いですよ。",cue:"*Oh*, *thanks*. *Can* I *have* *extra* *ketchup*?",cueJp:"あ、ありがとう。ケチャップを多めにもらえますか。"},
+    {npc:"Of course. Do you want a tray?",npcJp:"もちろんです。トレイは使いますか。",cue:"*No*, *thanks*. I'll *sit* *by* the *window*.",cueJp:"いえ、大丈夫です。窓のそばに座ります。"},
+    {npc:"Enjoy your meal. Have a safe flight!",npcJp:"どうぞ召し上がれ。よいフライトを。",cue:"*Thank* you. *I* *will*!",cueJp:"ありがとう。そうします。"}],
+   words:[["order","/ˈɔːrdər/","注文"],["straw","/strɔː/","ストロー"],["napkins","/ˈnæpkɪnz/","ナプキン"],["extra","/ˈɛkstrə/","追加の"],["hot","/hɑːt/","熱い"],["tray","/treɪ/","トレイ"],["window","/ˈwɪndoʊ/","窓"],["enjoy","/ɪnˈdʒɔɪ/","楽しむ"]]}
+  ]},
+
+ {id:'denny',icon:'🥞',who:'Server',pitch:1.05,bg:'denny',amb:'cafe',npcX:226,x:36,y:43,req:'dep',
+  pal:{c:'#8a5a2a',h:'#3a2a1c',b:'#c8402c',a:'#ffffff'},
+  variants:[{turns:[
+   {npc:"Hafa Adai! Table for one or two?",npcJp:"ハファ・アダイ！おひとりですか、おふたりですか。",cue:"*Two*, *please*. *Near* the *window*, *if* *possible*.",cueJp:"ふたりです。できれば窓の近くで。"},
+   {npc:"Right this way. Here are your menus. Would you like something to drink?",npcJp:"こちらへどうぞ。メニューです。飲み物はいかがですか。",cue:"*Coffee* for *me*. *And* a *glass* of *water*.",cueJp:"私はコーヒーを。それと水を一杯ください。"},
+   {npc:"Great. Are you ready to order, or do you need more time?",npcJp:"はい。ご注文はお決まりですか。それとももう少し時間が必要ですか。",cue:"*I* *need* a *few* *more* *minutes*. *What* do you *recommend*?",cueJp:"もう少し時間をください。おすすめは何ですか。"},
+   {npc:"Eggs and toast are always a good choice.",npcJp:"卵とトーストはいつでもいい選択ですよ。",cue:"*Sounds* *good*. *I'll* *have* the *eggs* and *toast*.",cueJp:"いいですね。卵とトーストにします。"},
+   {npc:"Perfect. I'll bring your coffee right away.",npcJp:"かしこまりました。すぐにコーヒーをお持ちします。",cue:"*Thank* you. *Could* I *have* the *bill* *later*?",cueJp:"ありがとう。会計はあとでお願いできますか。"}],
+  words:[["table","/ˈteɪbəl/","テーブル"],["menu","/ˈmɛnju/","メニュー"],["coffee","/ˈkɔːfi/","コーヒー"],["recommend","/ˌrɛkəˈmɛnd/","すすめる"],["toast","/toʊst/","トースト"],["eggs","/ɛɡz/","卵"],["drink","/drɪŋk/","飲み物"],["bill","/bɪl/","会計"]]}]},
+
+ {id:'hotel',icon:'🏨',who:'Night Clerk',pitch:1.0,bg:'hotel',amb:'info',npcX:218,x:14,y:30,req:'beach',bonus:true,pal:{c:'#0f6e6e',h:'#3a2a1c',b:'#0f6e6e',a:'#ffc72c'},variants:[{"turns":[{"npc":"Hafa Adai! Welcome to our hotel. Do you have a reservation?","npcJp":"ハファ・アダイ！ホテルへようこそ。ご予約はありますか。","cue":"*Yes*. *It's* for *four* *nights*. *Sorry*, I'm a *little* *late*.","cueJp":"はい。4泊です。少し遅くなってすみません。"},{"npc":"No problem at all. May I see your passport, please?","npcJp":"まったく問題ありません。パスポートを見せていただけますか。","cue":"*Sure*. *Here* *you* *are*.","cueJp":"もちろん。どうぞ。"},{"npc":"Thank you. Here is your key card. Your room is on the eighth floor.","npcJp":"ありがとうございます。こちらがカードキーです。お部屋は8階です。","cue":"*Thank* you. *Where* is the *elevator*?","cueJp":"ありがとう。エレベーターはどこですか。"},{"npc":"Just around the corner. Breakfast is from six to ten, and the pool is open late.","npcJp":"角を曲がってすぐです。朝食は6時から10時まで、プールは遅くまで開いています。","cue":"*Nice*. *I* *might* *swim* *tonight*.","cueJp":"いいですね。今夜、泳ぐかもしれません。"},{"npc":"Please enjoy your stay. Call the front desk if you need anything.","npcJp":"ごゆっくりどうぞ。何かあればフロントへお電話ください。","cue":"*Thank* you. *Good* *night*!","cueJp":"ありがとう。おやすみなさい。"}],"words":[["reservation","/ˌrɛzərˈveɪʃən/","予約"],["elevator","/ˈɛləˌveɪtər/","エレベーター"],["floor","/flɔːr/","階"],["corner","/ˈkɔːrnər/","角"],["breakfast","/ˈbrɛkfəst/","朝食"],["swim","/swɪm/","泳ぐ"],["tonight","/təˈnaɪt/","今夜"],["enjoy","/ɪnˈdʒɔɪ/","楽しむ"]]},{"turns":[{"npc":"Good evening. Hafa Adai! Is everything okay?","npcJp":"こんばんは。ハファ・アダイ！何かお困りですか。","cue":"*Hi*. *My* *key* *card* *doesn't* *work*.","cueJp":"こんにちは。カードキーが使えません。"},{"npc":"I'm sorry about that. What is your room number?","npcJp":"申し訳ありません。お部屋番号は何番ですか。","cue":"*It's* *eight* *oh* *five*. *I* *just* *got* *back*.","cueJp":"805です。いま戻ったところです。"},{"npc":"Let me make you a new card. It happens sometimes, so don't worry.","npcJp":"新しいカードを作りますね。ときどきあることなので、心配しないでください。","cue":"*Thank* you. *Could* I *also* *have* some *water*?","cueJp":"ありがとう。お水もいただけますか。"},{"npc":"Of course. Here is a bottle of water. Did you have a nice day?","npcJp":"もちろん。お水をどうぞ。よい一日でしたか。","cue":"*Yes*, *very* *nice*. *I* *went* to the *beach*.","cueJp":"はい、とても。ビーチに行きました。"},{"npc":"Wonderful. Enjoy the pool, or just get some rest. Good night!","npcJp":"すてきですね。プールを楽しむか、ゆっくり休んでください。おやすみなさい。","cue":"*Thank* you. *I* *think* I'll *sleep* *well*.","cueJp":"ありがとう。ぐっすり眠れそうです。"}],"words":[["card","/kɑːrd/","カード"],["number","/ˈnʌmbər/","番号"],["water","/ˈwɔːtər/","水"],["bottle","/ˈbɑːtəl/","ボトル"],["rest","/rɛst/","休む"],["sleep","/sliːp/","眠る"],["worry","/ˈwɜːri/","心配する"],["wonderful","/ˈwʌndərfəl/","すばらしい"]]}]},
+ {id:'hotel_dream',icon:'💤',who:'Haggan',pitch:.8,bg:'dream',amb:'dream',npcX:0,sub:true,bonus:true,req:null,pal:{},variants:[{"turns":[{"npc":"Hafa Adai! Shh… this is a dream. Welcome to our sky!","npcJp":"ハファ・アダイ！しーっ…ここは夢の中だよ。ぼくたちの空へようこそ！","cue":"*Oh*! *Am* I *dreaming*? *Hello*, *Fanihi*!","cueJp":"わあ！ぼく、夢を見てるの？こんにちは、ファニヒ。","who":"Fanihi","p":1.3},{"npc":"Slowly, friend. Some words ran away from you today. Let's catch them.","npcJp":"ゆっくりでいいよ、友だち。今日、にげていった単語があるんだ。つかまえに行こう。","cue":"*Okay*. *I'm* *ready*. *Please* *ask* me.","cueJp":"わかった。準備できたよ。出題して。","who":"Haggan","p":0.8},{"npc":"They float like bubbles. Pop the right one, quick quick!","npcJp":"あわみたいにふわふわ浮いてるよ。正しいのを、はやく、はやく、割ってね！","cue":"*I'll* *catch* *them* *all*!","cueJp":"ぜんぶつかまえるよ！","who":"Fanihi","p":1.3},{"npc":"Good job. Now sleep well, and see you at breakfast.","npcJp":"よくできました。ぐっすりおやすみ、朝ごはんで会おうね。","cue":"*Thank* you. *Good* *night*, *Haggan*.","cueJp":"ありがとう。おやすみ、ハガン。","who":"Haggan","p":0.8}],"words":[["bubble","/ˈbʌbəl/","あわ"],["float","/floʊt/","浮かぶ"],["dream","/driːm/","夢"],["catch","/kætʃ/","つかまえる"],["quick","/kwɪk/","はやい"],["slowly","/ˈsloʊli/","ゆっくり"],["sky","/skaɪ/","空"],["pop","/pɑːp/","割る"]]},{"turns":[{"npc":"Hafa Adai, sleepy friend. The moon is big tonight. Can you see it?","npcJp":"ハファ・アダイ、ねむそうな友だち。今夜は月が大きいよ。見えるかい。","cue":"*Yes*, *it's* *so* *bright*! *Where* *are* *we*?","cueJp":"うん、すごく明るい！ここはどこ？","who":"Haggan","p":0.8},{"npc":"We are flying over Tumon Bay. Hold on to my wing!","npcJp":"タモン湾の上を飛んでるんだ。ぼくの翼につかまって！","cue":"*Wow*! *I* *can* *see* the *whole* *island*.","cueJp":"わあ！島ぜんぶが見える。","who":"Fanihi","p":1.3},{"npc":"Take your time. Say each word once, and it will stay with you.","npcJp":"あわてなくていいよ。単語を一回ずつ言えば、きみのそばに残るよ。","cue":"*I* *will* *try*. *Can* you *give* me a *hint*?","cueJp":"やってみる。ヒントをくれる？","who":"Haggan","p":0.8},{"npc":"Of course! Now catch the last words, and then we will wake you up.","npcJp":"もちろん！さあ最後の単語をつかまえて、そしたら起こしてあげる。","cue":"*Okay*. *See* *you* *tomorrow*!","cueJp":"わかった。また明日ね！","who":"Fanihi","p":1.3}],"words":[["moon","/muːn/","月"],["bright","/braɪt/","明るい"],["island","/ˈaɪlənd/","島"],["wing","/wɪŋ/","翼"],["bay","/beɪ/","湾"],["hint","/hɪnt/","ヒント"],["tomorrow","/təˈmɑːroʊ/","明日"],["wake","/weɪk/","目をさます"]]}]},
+ {id:'hotel_pool',icon:'🏊',who:'Mr. Tom',pitch:.75,bg:'pool',amb:'pool',npcX:0,sub:true,bonus:true,req:null,pal:{},variants:[{"turns":[{"npc":"Psst. Hello, friend. You came to the pool very late. Sit down, sit down.","npcJp":"しーっ。やあ、友だち。ずいぶん遅くにプールへ来たね。さあ、座って、座って。","cue":"*Oh*, *hello*. *Is* it *okay* if I *sit* *here*?","cueJp":"あ、こんばんは。ここに座ってもいいですか。","who":"Mr. Tom","p":0.75},{"npc":"Of course! I'm Lani. This is Mr. Tom. Don't mind the sunglasses.","npcJp":"もちろん！私はラニ。こちらはトムさん。サングラスは気にしないでね。","cue":"*Nice* to *meet* *you*. *Why* *sunglasses* at *night*?","cueJp":"はじめまして。どうして夜にサングラスなんですか。","who":"Lani","p":1.25},{"npc":"Ha! It's a secret. We are practicing a magic show for tomorrow.","npcJp":"はは！それは秘密だ。明日のマジックショーの練習をしているんだよ。","cue":"*A* *magic* *show*? *That* *sounds* *fun*!","cueJp":"マジックショー？楽しそうですね。","who":"Mr. Tom","p":0.75},{"npc":"Shh, it's top secret. Pick a card, any card. Don't tell anyone.","npcJp":"しーっ、ぜったい秘密よ。カードを1枚選んで、どれでもいいわ。誰にも言わないでね。","cue":"*Okay*. *I* *won't* *tell* *anybody*.","cueJp":"わかりました。誰にも言いません。","who":"Lani","p":1.25},{"npc":"Look. Your card is the queen of hearts. Come to the show tomorrow!","npcJp":"ほら。きみのカードはハートのクイーンだ。明日ぜひショーに来てくれ！","cue":"*Amazing*! *I'll* *come*. *Good* *luck*!","cueJp":"すごい！行きます。がんばってください。","who":"Mr. Tom","p":0.75}],"words":[["magic","/ˈmædʒɪk/","手品"],["secret","/ˈsiːkrət/","秘密"],["practice","/ˈpræktɪs/","練習する"],["sunglasses","/ˈsʌnˌɡlæsɪz/","サングラス"],["card","/kɑːrd/","カード"],["queen","/kwiːn/","女王"],["pool","/puːl/","プール"],["amazing","/əˈmeɪzɪŋ/","すばらしい"]]},{"turns":[{"npc":"Hey! Are you from the hotel? We are not doing anything strange here.","npcJp":"おい！ホテルの人かい。ここでは変なことは何もしていないよ。","cue":"*No*, *no*. *I'm* just a *guest*. *I* *couldn't* *sleep*.","cueJp":"いえいえ。ただの宿泊客です。眠れなくて。","who":"Mr. Tom","p":0.75},{"npc":"Oh, good! We were just talking. I'm Lani, and this is Mr. Tom.","npcJp":"あら、よかった。ちょうどおしゃべりしていたの。私はラニ、こちらはトムさんよ。","cue":"*Nice* to *meet* you. *Do* you *work* *here*?","cueJp":"はじめまして。ここで働いているんですか。","who":"Lani","p":1.25},{"npc":"No, no. We travel and do magic shows. Lani is my assistant, and a very good one.","npcJp":"いやいや。旅をしてマジックショーをしているんだ。ラニは私の助手で、とても優秀だよ。","cue":"*I* *see*. *Is* *Guam* *your* *first* *show*?","cueJp":"なるほど。グアムは初めての公演ですか。","who":"Mr. Tom","p":0.75},{"npc":"Yes! Do you have any tips for us? Where should we go tomorrow?","npcJp":"ええ！おすすめはある？明日はどこへ行くといいかしら。","cue":"*Try* the *beach* in the *morning*. *The* *water* is *so* *clear*.","cueJp":"朝のビーチがおすすめです。水がとてもきれいですよ。","who":"Lani","p":1.25},{"npc":"Great idea. Thank you, friend. Now go and get some sleep. Good night!","npcJp":"いい考えだ。ありがとう、友だち。さあ、ゆっくり休みなさい。おやすみ！","cue":"*Thank* you. *Good* *night*, *both* of you!","cueJp":"ありがとう。おふたりともおやすみなさい。","who":"Mr. Tom","p":0.75}],"words":[["guest","/ɡɛst/","宿泊客"],["strange","/streɪndʒ/","変な"],["assistant","/əˈsɪstənt/","助手"],["travel","/ˈtrævəl/","旅をする"],["tip","/tɪp/","助言"],["clear","/klɪr/","澄んだ"],["idea","/aɪˈdiːə/","考え"],["morning","/ˈmɔːrnɪŋ/","朝"]]}]},
+
+ {id:'staff',icon:'🚪',who:'Staff',pitch:0.9,bg:'staff',amb:'hall',npcX:230,x:14,y:46,req:'secret',from:'gate',
+  pal:{c:'#5b6690',h:'#2b2b2b',b:'#5b6690',a:'#ffc72c'},
+  variants:[{turns:[
+   {npc:"Oh, hello! Sorry, but this area is for staff only.",npcJp:"あら、こんにちは。すみませんが、ここは関係者以外立ち入り禁止なんです。",cue:"*Oh*, *sorry*! I *got* *lost* *looking* for my *friend*.",cueJp:"あ、すみません。友だちを探していて迷いました。"},
+   {npc:"Your friend? What does she look like?",npcJp:"お友だちですか。どんな見た目ですか。",cue:"Her *name* is *Lulu*. *She's* *small* and *green*, with a *yellow* *scarf*.",cueJp:"名前はルルです。小さくて緑色で、黄色いスカーフをしています。"},
+   {npc:"I haven't seen her. Let me make an announcement.",npcJp:"見ていませんね。アナウンスしてみます。",cue:"*Thank* you. *She's* *very* *shy*, so *be* *kind*.",cueJp:"ありがとう。とても恥ずかしがり屋なので、やさしくお願いします。"},
+   {npc:"Good news! They found Lulu at the Welcome Center.",npcJp:"いい知らせです。ウェルカムセンターでルルさんが見つかりました。",cue:"*Really*? *That's* *great*! *Thank* you!",cueJp:"本当ですか。よかった。ありがとう。"},
+   {npc:"She was eating a snack near the counter. Please stay with your friend next time.",npcJp:"カウンターの近くでお菓子を食べていたそうです。次は友だちと一緒にいてくださいね。",cue:"*I* *will*. *Sorry* for the *trouble*. *Goodbye*!",cueJp:"そうします。お騒がせしました。さようなら。"}],
+  words:[["staff","/stæf/","係員"],["lost","/lɔːst/","迷子の"],["announcement","/əˈnaʊnsmənt/","アナウンス"],["scarf","/skɑːrf/","スカーフ"],["small","/smɔːl/","小さい"],["green","/ɡriːn/","緑の"],["trouble","/ˈtrʌbəl/","迷惑"],["shy","/ʃaɪ/","恥ずかしがり屋の"]]}]}
+];
+
+var FONT='"M PLUS Rounded 1c","Hiragino Maru Gothic ProN","Hiragino Sans",system-ui,sans-serif';
+var PLACE_EN={gate:'Arrival Gate',immigration:'Immigration (CBP)',baggage:'Baggage Claim',customs:'Guam Customs',lobby:'Airport Welcome Center',ground:'Taxi & Tour Counters',staff:'Staff Only',beach:'Ypao Beach Park (Tumon Bay)',dep:'Departures · Check-in',lotte:'Lotte Duty Free',bk:'Burger King',denny:"Denny's of Guam",hotel:'Hotel · Front Desk',hotel_dream:'Dream',hotel_pool:'Poolside'};
+var OPEN24={ground:1,staff:1,beach:1,lotte:1,hotel:1,hotel_dream:1,hotel_pool:1},AWAKE={ground:1,beach:1,lotte:1,hotel:1,hotel_dream:1,hotel_pool:1};
+var LIMIT=3000;
+var set={vmode:'hold',npc:'show',tick:'on',amb:'on',bgm:'on',tmode:'auto',tmin:720};
+var SAVEKEY='kanpe-guam-v1',save={vc:{},clears:{},secret:false,items:{},missed:[]};
+function loadSave(){try{var s=JSON.parse(localStorage.getItem(SAVEKEY)||'null');if(s&&s.clears){save={vc:(s.vc&&typeof s.vc==='object')?s.vc:{},clears:s.clears,secret:!!s.secret,out:!!s.out,items:(s.items&&typeof s.items==='object')?s.items:{},missed:Array.isArray(s.missed)?s.missed.filter(function(w){return Array.isArray(w)&&w.length===3&&typeof w[0]==='string'}).slice(0,16):[]}}}catch(e){}}
+function storeSave(){try{localStorage.setItem(SAVEKEY,JSON.stringify(save))}catch(e){}}
+function $(id){return document.getElementById(id)}
+function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+/* ---- v9: 時間帯の変化・出迎えテーブル ---- */
+var EXTRA={"gate":[{"turns":[{"npc":"Hafa Adai! Welcome to Guam. It's a late arrival, but we're happy to see you.","npcJp":"ハファ・アダイ！グアムへようこそ。遅い到着ですが、お会いできてうれしいです。","cue":"*Thank* you! It was a *long* *flight*, but I'm *happy* to be *here*.","cueJp":"ありがとう。長いフライトでしたが、着いてうれしいです。"},{"npc":"Take your time, friend. Is someone picking you up tonight?","npcJp":"ゆっくりで大丈夫ですよ。今夜、どなたかが迎えに来ますか。","cue":"*No*, *not* *tonight*. I'll *take* a *taxi* to my *hotel*.","cueJp":"いいえ、今夜は来ません。タクシーでホテルに行きます。"},{"npc":"Good plan. Do you need anything before Immigration?","npcJp":"いい計画ですね。入国審査の前に、何か必要ですか。","cue":"*Yes*, the *bathroom*, *please*. *Where* is it?","cueJp":"はい、お手洗いをお願いします。どこですか。"},{"npc":"Right there, past the water fountain. Then follow the signs to Immigration.","npcJp":"すぐそこ、噴水のそばを過ぎたところです。そのあと入国審査の案内表示に従ってください。","cue":"*Great*. *Is* the *line* *long* *tonight*?","cueJp":"よかった。今夜は列が長いですか。"},{"npc":"Not too long. Have a restful night in Guam.","npcJp":"そんなに長くありません。グアムでゆっくりお休みください。","cue":"*Thank* you *so* *much*. *Good* *night*!","cueJp":"ありがとうございます。おやすみなさい。"}],"words":[["late","/leɪt/","遅い"],["bathroom","/ˈbæθˌruːm/","お手洗い"],["fountain","/ˈfaʊntən/","噴水"],["pick up","/pɪk ʌp/","迎えに行く"],["line","/laɪn/","列"],["restful","/ˈrɛstfəl/","ゆっくり休める"],["plan","/plæn/","計画"],["tonight","/təˈnaɪt/","今夜"]],"tp":["night"]}],"immigration":[{"turns":[{"npc":"Good evening. Passport, please. You look tired.","npcJp":"こんばんは。パスポートをお願いします。お疲れのようですね。","cue":"*Good* *evening*. *Yes*, it was a *long* *trip*.","cueJp":"こんばんは。はい、長い旅でした。"},{"npc":"What is the purpose of your visit?","npcJp":"訪問の目的は何ですか。","cue":"*Vacation*. *I'm* here for *five* *days*.","cueJp":"休暇です。5日間います。"},{"npc":"Where are you staying tonight?","npcJp":"今夜はどこに泊まりますか。","cue":"*At* a *hotel* in *Tumon*. *I* have the *address* *here*.","cueJp":"タモンのホテルです。住所はここにあります。"},{"npc":"Okay. Look at the camera and place your fingers on the scanner.","npcJp":"わかりました。カメラを見て、指をスキャナーに置いてください。","cue":"*Like* *this*? *Is* it *okay*?","cueJp":"こうですか。大丈夫ですか。"},{"npc":"Perfect. Welcome to Guam. Get some rest.","npcJp":"けっこうです。グアムへようこそ。ゆっくり休んでくださいね。","cue":"*Thank* you. *Have* a *good* *night*.","cueJp":"ありがとう。おやすみなさい。"}],"words":[["tired","/ˈtaɪərd/","疲れた"],["trip","/trɪp/","旅行"],["evening","/ˈiːvnɪŋ/","夕方・晩"],["days","/deɪz/","日間"],["address","/əˈdrɛs/","住所"],["camera","/ˈkæmrə/","カメラ"],["scanner","/ˈskænər/","スキャナー"],["rest","/rɛst/","休む"]],"tp":["night"]}],"baggage":[{"turns":[{"npc":"Hafa Adai! You're on one of the last flights tonight. Looking for your bag?","npcJp":"ハファ・アダイ！今夜の最後のほうの便ですね。お荷物をお探しですか。","cue":"*Yes*, *please*. *Which* *carousel* is *it*?","cueJp":"はい。どのターンテーブルですか。"},{"npc":"Carousel two. The belt is slow at night, so please wait a moment.","npcJp":"2番です。夜はベルトが遅いので、少しお待ちください。","cue":"*No* *problem*. I'll *wait* *here*.","cueJp":"大丈夫です。ここで待ちます。"},{"npc":"Here it comes. Is it the green suitcase?","npcJp":"流れてきました。緑のスーツケースですか。","cue":"*Yes*, *that's* *mine*! *It's* *quite* *heavy*.","cueJp":"はい、私のです。けっこう重いです。"},{"npc":"I'll get a cart for you. Do you need a taxi?","npcJp":"カートを持ってきますね。タクシーは必要ですか。","cue":"*Yes*, *please*. *Where* is the *taxi* *stand*?","cueJp":"はい、お願いします。タクシー乗り場はどこですか。"},{"npc":"Straight through Customs, then outside. Welcome to Guam, friend.","npcJp":"税関をまっすぐ抜けて、外へ。グアムへようこそ、友だち。","cue":"*Thank* you. *Good* *night*!","cueJp":"ありがとう。おやすみなさい。"}],"words":[["belt","/bɛlt/","ベルト"],["moment","/ˈmoʊmənt/","少しの間"],["green","/ɡriːn/","緑の"],["heavy","/ˈhɛvi/","重い"],["stand","/stænd/","乗り場"],["straight","/streɪt/","まっすぐ"],["outside","/ˌaʊtˈsaɪd/","外"],["wait","/weɪt/","待つ"]],"tp":["night"]}],"customs":[{"turns":[{"npc":"Good evening. Do you have anything to declare?","npcJp":"こんばんは。申告するものはありますか。","cue":"*No*, *nothing*. *Just* *clothes* and *some* *snacks*.","cueJp":"いいえ、ありません。服とお菓子だけです。"},{"npc":"Any fruit, plants, or meat?","npcJp":"果物、植物、肉はありますか。","cue":"*No* *fruit*. *No* *meat*. I *checked* *twice*.","cueJp":"果物も肉もありません。2回確認しました。"},{"npc":"Good. Please put your bag on the table. I'll take a quick look.","npcJp":"けっこうです。バッグをテーブルにのせてください。さっと見ます。","cue":"*Sure*. *Do* I *open* it *myself*?","cueJp":"はい。自分で開けますか。"},{"npc":"Yes, please. Okay, everything looks fine.","npcJp":"はい、お願いします。はい、問題ありません。","cue":"*Thank* you. *Is* that *all*?","cueJp":"ありがとう。以上ですか。"},{"npc":"That's all. Enjoy the island, and sleep well tonight.","npcJp":"以上です。島を楽しんで、今夜はぐっすり眠ってください。","cue":"*I* *will*. *Good* *night*!","cueJp":"そうします。おやすみなさい。"}],"words":[["anything","/ˈɛniˌθɪŋ/","何か"],["clothes","/kloʊðz/","服"],["fruit","/fruːt/","果物"],["plants","/plænts/","植物"],["quick","/kwɪk/","さっと"],["table","/ˈteɪbəl/","テーブル"],["fine","/faɪn/","問題ない"],["island","/ˈaɪlənd/","島"]],"tp":["night"]}],"lobby":[{"turns":[{"npc":"Hafa Adai! It's a quiet night. How can I help you?","npcJp":"ハファ・アダイ！静かな夜ですね。どうなさいましたか。","cue":"*Hi*! *Is* it *easy* to *get* a *taxi* at *night*?","cueJp":"こんにちは。夜でもタクシーはつかまえやすいですか。"},{"npc":"Yes. Go to the taxi counter and the staff will call one for you.","npcJp":"はい。タクシーカウンターへ行けば、係員が呼んでくれますよ。","cue":"*Good*. *Is* *there* a *place* to *get* *water*?","cueJp":"よかった。お水をもらえる場所はありますか。"},{"npc":"There's a water cooler by the bench. And here's a free map, friend.","npcJp":"ベンチのそばにウォータークーラーがあります。無料の地図もどうぞ。","cue":"*Thanks*. *Also*, *can* I *charge* my *phone*?","cueJp":"ありがとう。あと、スマホを充電できますか。"},{"npc":"Of course. There is an outlet by the pillar. Take your time.","npcJp":"もちろん。柱のそばにコンセントがあります。ゆっくりどうぞ。","cue":"*Great*. *You're* *very* *kind*.","cueJp":"よかった。とても親切ですね。"},{"npc":"My pleasure. Sleep well and enjoy Guam!","npcJp":"どういたしまして。ゆっくり休んで、グアムを楽しんでね。","cue":"*Thank* you. *Good* *night*!","cueJp":"ありがとう。おやすみなさい。"}],"words":[["easy","/ˈiːzi/","簡単な"],["call","/kɔːl/","呼ぶ"],["cooler","/ˈkuːlər/","冷水機"],["bench","/bɛntʃ/","ベンチ"],["charge","/tʃɑːrdʒ/","充電する"],["outlet","/ˈaʊtlɛt/","コンセント"],["pillar","/ˈpɪlər/","柱"],["pleasure","/ˈplɛʒər/","喜び"]],"tp":["night"]}],"ground":[{"turns":[{"npc":"Hafa Adai! Good evening. Do you need a taxi?","npcJp":"ハファ・アダイ！こんばんは。タクシーが必要ですか。","cue":"*Yes*, *please*. *To* *Tumon*.","cueJp":"はい、お願いします。タモンまで。"},{"npc":"Sure. It's a quiet night, so no long line. How many bags?","npcJp":"わかりました。静かな夜なので、列はありません。荷物はいくつですか。","cue":"*Just* *two*. *The* *air* *feels* *so* *nice* *now*.","cueJp":"2つだけです。いま空気がとても心地いいです。"},{"npc":"It's cooler at night. Look up, you can see many stars.","npcJp":"夜は涼しいんですよ。上を見て、星がたくさん見えます。","cue":"*Wow*, *so* *many* *stars*! *Beautiful*!","cueJp":"わあ、星がたくさん。きれい。"},{"npc":"Yes, we love the sky here. Here's your taxi. Watch your step.","npcJp":"ええ、ここの空は自慢です。タクシーが来ました。足元に気をつけて。","cue":"*Thanks*. *Could* you *help* *with* the *trunk*?","cueJp":"ありがとう。トランクを手伝ってもらえますか。"},{"npc":"Sure. Have a lovely night, friend.","npcJp":"もちろん。すてきな夜を、友だち。","cue":"*Thank* you. *Good* *night*!","cueJp":"ありがとう。おやすみなさい。"}],"words":[["cooler","/ˈkuːlər/","より涼しい"],["quiet","/ˈkwaɪət/","静かな"],["stars","/stɑːrz/","星"],["sky","/skaɪ/","空"],["trunk","/trʌŋk/","トランク"],["step","/stɛp/","一歩・足元"],["lovely","/ˈlʌvli/","すてきな"],["look","/lʊk/","見る"]],"tp":["night"]}],"dep":[{"turns":[{"npc":"Good evening. Where are you flying tonight?","npcJp":"こんばんは。今夜はどちらへ飛びますか。","cue":"*To* *Tokyo*. *It's* a *late* *flight*.","cueJp":"東京です。遅い便です。"},{"npc":"Passport, please. Do you have bags to check?","npcJp":"パスポートをお願いします。預ける荷物はありますか。","cue":"*One* *suitcase*. *Here* is my *passport*.","cueJp":"スーツケースがひとつ。パスポートです。"},{"npc":"Let's hurry a little. Here is your boarding pass.","npcJp":"少し急ぎましょう。搭乗券です。","cue":"*Thank* you. *What* *time* *does* *boarding* *start*?","cueJp":"ありがとう。搭乗は何時からですか。"},{"npc":"It starts in about an hour. Please be at the gate early.","npcJp":"1時間ほどあとに始まります。搭乗口には早めに行ってください。","cue":"*Okay*. *I'll* *buy* *some* *coffee* *first*.","cueJp":"わかりました。先にコーヒーを買います。"},{"npc":"Good idea. Have a safe flight, and see you again.","npcJp":"いい考えですね。よいフライトを。また会いましょう。","cue":"*Thank* you. *See* *you*!","cueJp":"ありがとう。またね。"}],"words":[["late","/leɪt/","遅い"],["hurry","/ˈhɜːri/","急ぐ"],["boarding","/ˈbɔːrdɪŋ/","搭乗"],["hour","/ˈaʊər/","1時間"],["early","/ˈɜːrli/","早く"],["safe","/seɪf/","安全な"],["coffee","/ˈkɔːfi/","コーヒー"],["pass","/pæs/","券"]],"tp":["night"]}],"lotte":[{"turns":[{"npc":"Hafa Adai! Good evening. Last-minute shopping?","npcJp":"ハファ・アダイ！こんばんは。ぎりぎりのお買い物ですか。","cue":"*Yes*! *I* *need* a *gift* for my *friend*.","cueJp":"はい。友だちへの贈り物が必要です。"},{"npc":"How about this small box of local sweets? It's easy to carry.","npcJp":"この地元のお菓子の小箱はいかがですか。持ち運びも楽ですよ。","cue":"*Sounds* *nice*. *How* *much* is it?","cueJp":"いいですね。いくらですか。"},{"npc":"The price is on the tag. It's a popular gift.","npcJp":"値段はタグに書いてあります。人気の贈り物です。","cue":"*I* *see*. *I'll* *take* *two*, *please*.","cueJp":"なるほど。2つください。"},{"npc":"Okay. May I see your boarding pass?","npcJp":"かしこまりました。搭乗券を見せていただけますか。","cue":"*Here* you *are*. *Can* I *pay* by *card*?","cueJp":"どうぞ。カードで払えますか。"},{"npc":"Of course. Here's your bag. Have a nice flight.","npcJp":"もちろん。袋をどうぞ。よいフライトを。","cue":"*Thank* you. *Good* *night*!","cueJp":"ありがとう。おやすみなさい。"}],"words":[["shopping","/ˈʃɑːpɪŋ/","買い物"],["sweets","/swiːts/","お菓子"],["easy","/ˈiːzi/","簡単な"],["price","/praɪs/","値段"],["tag","/tæɡ/","タグ"],["popular","/ˈpɑːpjələr/","人気の"],["card","/kɑːrd/","カード"],["carry","/ˈkæri/","運ぶ"]],"tp":["night"]}],"bk":[{"turns":[{"npc":"Hafa Adai! Hungry this late? What can I get you?","npcJp":"ハファ・アダイ！こんな遅くにおなかがすきましたか。何にしますか。","cue":"*Yes*, *I'm* *hungry*. *A* *burger* and *fries*, *please*.","cueJp":"はい、おなかがすきました。バーガーとポテトをお願いします。"},{"npc":"Anything to drink? Water, cola, coffee?","npcJp":"飲み物は？水、コーラ、コーヒーがあります。","cue":"*Just* *water*, *please*. *It's* *late*.","cueJp":"水だけお願いします。もう遅いので。"},{"npc":"Sure. For here or to go?","npcJp":"わかりました。店内ですか、お持ち帰りですか。","cue":"*To* *go*. *I* *need* to *get* to my *gate*.","cueJp":"持ち帰りで。搭乗口に行かないといけません。"},{"npc":"Okay. Your order will be ready in a few minutes. Number thirty-one.","npcJp":"はい。数分でできます。31番です。","cue":"*Thirty*-*one*. *Thank* *you*.","cueJp":"31番ですね。ありがとう。"},{"npc":"Here you go. Careful, it's hot. Have a safe flight.","npcJp":"どうぞ。熱いので気をつけて。よいフライトを。","cue":"*Thanks*! *Good* *night*.","cueJp":"ありがとう。おやすみなさい。"}],"words":[["hungry","/ˈhʌŋɡri/","おなかがすいた"],["burger","/ˈbɜːrɡər/","ハンバーガー"],["water","/ˈwɔːtər/","水"],["gate","/ɡeɪt/","搭乗口"],["ready","/ˈrɛdi/","できた"],["number","/ˈnʌmbər/","番号"],["careful","/ˈkɛrfəl/","気をつけて"],["minutes","/ˈmɪnəts/","分"]],"tp":["night"]}],"denny":[{"turns":[{"npc":"Hafa Adai! Welcome. It's a quiet night. Table for one?","npcJp":"ハファ・アダイ！ようこそ。静かな夜ですね。おひとりですか。","cue":"*Yes*, *one*, *please*. *Somewhere* *quiet*.","cueJp":"はい、ひとりです。静かな席をお願いします。"},{"npc":"Right this way. Would you like to hear about the late-night menu?","npcJp":"こちらへどうぞ。夜遅いメニューをご説明しましょうか。","cue":"*Yes*. *What's* *good* *at* *night*?","cueJp":"はい。夜はどれがおすすめですか。"},{"npc":"Pancakes are popular, and the soup is warm. Both are easy on the stomach.","npcJp":"パンケーキが人気で、スープも温かいですよ。どちらも胃にやさしいです。","cue":"*Pancakes* *sound* *great*. *And* a *cup* of *tea*.","cueJp":"パンケーキがいいですね。それと紅茶を一杯。"},{"npc":"Coming right up. Do you want syrup on the side?","npcJp":"すぐお持ちします。シロップは別添えにしますか。","cue":"*Yes*, *on* the *side*. *Thank* you.","cueJp":"はい、別添えで。ありがとう。"},{"npc":"Enjoy. Take your time, no rush.","npcJp":"ごゆっくりどうぞ。急がなくて大丈夫です。","cue":"*Thank* you. *This* is a *nice* *quiet* *place*.","cueJp":"ありがとう。静かでいい場所ですね。"}],"words":[["quiet","/ˈkwaɪət/","静かな"],["pancakes","/ˈpænˌkeɪks/","パンケーキ"],["soup","/suːp/","スープ"],["syrup","/ˈsɪrəp/","シロップ"],["tea","/tiː/","紅茶"],["stomach","/ˈstʌmək/","おなか・胃"],["side","/saɪd/","別添え"],["rush","/rʌʃ/","急ぎ"]],"tp":["night"]}],"beach":[{"turns":[{"npc":"Hafa Adai! Perfect day for snorkeling. Do you want to try?","npcJp":"ハファ・アダイ！シュノーケルにぴったりの日ですね。やってみますか。","cue":"*Yes*! *I've* *never* *tried* it.","cueJp":"はい。やったことがありません。","who":"Mia","p":1.2},{"npc":"Easy. Put on the mask, breathe through the tube, and stay near the shore.","npcJp":"かんたんですよ。マスクをつけて、チューブで息をして、岸の近くにいてください。","cue":"*What* if *water* *gets* in *my* *mask*?","cueJp":"マスクに水が入ったらどうしますか。"},{"npc":"Just lift your head and wipe it. Don't panic.","npcJp":"頭を上げて、ふけばいいんです。あわてないで。","cue":"*Okay*. *I'll* *stay* *calm*.","cueJp":"わかりました。落ち着きます。"},{"npc":"Look, small colorful fish! And remember, don't touch the coral.","npcJp":"見て、小さなカラフルな魚。それと、サンゴにはさわらないでね。","cue":"*So* *many* *fish*! *They're* *beautiful*.","cueJp":"魚がたくさん。きれい。"},{"npc":"Great job. Wear sunscreen and drink water. Come back at sunset, friend!","npcJp":"よくできました。日焼け止めをぬって、水を飲んでね。夕日の時間にまた来てね。","cue":"*I* *will*. *Thanks*, *Mia*!","cueJp":"そうします。ありがとう、ミア。"}],"words":[["snorkel","/ˈsnɔːrkəl/","シュノーケル"],["mask","/mæsk/","マスク"],["tube","/tuːb/","チューブ"],["calm","/kɑːm/","落ち着いた"],["fish","/fɪʃ/","魚"],["colorful","/ˈkʌlərfəl/","カラフルな"],["panic","/ˈpænɪk/","あわてる"],["shore","/ʃɔːr/","岸"]],"tp":["day"]},{"turns":[{"npc":"Hafa Adai! You came back. Look, the sun is almost down.","npcJp":"ハファ・アダイ！戻ってきたのね。見て、太陽がもう沈むわ。","cue":"*Wow*, *it's* *so* *red*! *Can* I *sit* with *you*?","cueJp":"わあ、真っ赤。いっしょに座っていいですか。"},{"npc":"Of course. This is my favorite time. Do you know some history of this island?","npcJp":"もちろん。この時間がいちばん好き。この島の歴史を少し知ってる？","cue":"*A* *little*. *Please* *tell* *me* *more*.","cueJp":"少しだけ。もっと教えてください。"},{"npc":"Chamorro people have lived here for a very long time. They built latte stones, stone pillars with a cap on top, to hold up their houses.","npcJp":"チャモロの人々は、とても長くこの島に住んできたの。上に帽子のような石がのった石の柱、ラッテストーンで家を支えたのよ。","cue":"*Latte* *stones*? *They* *look* *like* *mushrooms*!","cueJp":"ラッテストーン？キノコみたいですね。"},{"npc":"Ha ha, yes! Many people say that. And every July 21 we remember Liberation Day, when the island was freed in 1944.","npcJp":"ふふ、そう。みんなそう言うの。それに毎年7月21日は解放記念日。1944年に島が解放された日を思い出すのよ。","cue":"*I* *see*. *That's* *an* *important* *day*.","cueJp":"なるほど。大切な日ですね。"},{"npc":"It is. History is part of every sunset here. Let's watch it together.","npcJp":"そうなの。ここでは、歴史はどの夕日にもあるのよ。いっしょに見ましょう。","cue":"*Yes*. *It's* *so* *peaceful*.","cueJp":"はい。とても穏やかですね。"},{"npc":"I'm glad you're here. Let's meet again, friend. Come back at sunset!","npcJp":"来てくれてうれしい。また会いましょうね、友だち。夕日の時間に戻ってきて。","cue":"*I'd* *love* to. *See* *you* *again*, *Mia*!","cueJp":"ぜひ。またね、ミア。"}],"words":[["sunset","/ˈsʌnˌsɛt/","夕日"],["history","/ˈhɪstəri/","歴史"],["island","/ˈaɪlənd/","島"],["pillar","/ˈpɪlər/","柱"],["mushroom","/ˈmʌʃˌruːm/","キノコ"],["important","/ɪmˈpɔːrtənt/","大切な"],["freed","/friːd/","解放された"],["together","/təˈɡɛðər/","いっしょに"]],"tp":["dusk"],"event":"sunset"},{"turns":[{"npc":"Hafa Adai! The beach is quiet at night. Look at the stars.","npcJp":"ハファ・アダイ！夜の浜辺は静かでしょ。星を見て。","cue":"*Wow*, *so* *many* *stars*! *It's* *so* *peaceful*.","cueJp":"わあ、星がたくさん。とても穏やか。","who":"Mia","p":1.2},{"npc":"The sea sounds different at night. Can you hear the waves?","npcJp":"夜は海の音が違うの。波の音が聞こえる？","cue":"*Yes*, *the* *waves* *are* *soft*. *I* *like* it.","cueJp":"はい、波がやわらかいです。好きです。"},{"npc":"Many people come here to relax after dinner. Did you eat?","npcJp":"夕食のあと、のんびりしに来る人が多いの。ごはんは食べた？","cue":"*Not* *yet*. *Is* *there* a *good* *place* to *eat*?","cueJp":"まだです。いい食事の場所はありますか。"},{"npc":"Try the hotel restaurant or a small shop in Tumon. And don't swim alone at night, okay?","npcJp":"ホテルのレストランか、タモンの小さなお店へ。それと、夜にひとりで泳がないでね。","cue":"*Okay*, I *won't*. *Thanks* for the *tip*.","cueJp":"わかりました、泳ぎません。教えてくれてありがとう。"},{"npc":"Good. Rest well, friend. See you at sunset tomorrow!","npcJp":"よかった。ゆっくり休んでね、友だち。明日、夕日の時間に会いましょう。","cue":"*Good* *night*, *Mia*. *See* *you*!","cueJp":"おやすみ、ミア。またね。"}],"words":[["stars","/stɑːrz/","星"],["peaceful","/ˈpiːsfəl/","穏やかな"],["waves","/weɪvz/","波"],["soft","/sɔːft/","やわらかい"],["relax","/rɪˈlæks/","くつろぐ"],["dinner","/ˈdɪnər/","夕食"],["alone","/əˈloʊn/","ひとりで"],["tip","/tɪp/","助言"]],"tp":["night"]}],"hotel":[{"turns":[{"npc":"{gr}! Hafa Adai! How can I help you today?","npcJp":"{gr}！ハファ・アダイ！今日はどうなさいましたか。","cue":"*{gr}*. *Where* *is* the *pool*, *please*?","cueJp":"{grJp}。プールはどこですか。"},{"npc":"The pool is behind the building. Towels are at the pool desk.","npcJp":"プールは建物の裏です。タオルはプールの受付にあります。","cue":"*Great*. *Is* the *pool* *open* *now*?","cueJp":"よかった。プールはいま開いていますか。"},{"npc":"Yes, it's open. Please take a towel and drink some water. It's hot today.","npcJp":"はい、開いています。タオルを取って、水も飲んでください。今日は暑いですよ。","cue":"*Thanks*. *I'll* *bring* *sunscreen* *too*.","cueJp":"ありがとう。日焼け止めも持っていきます。"},{"npc":"Good idea. The sun is strong here. Would you like a map of the hotel?","npcJp":"いい考えですね。ここは日ざしが強いです。ホテルの地図はいりますか。","cue":"*Yes*, *please*. *And* *a* *hat*, *if* you *have* one.","cueJp":"はい、お願いします。あれば帽子も。"},{"npc":"We have hats at the shop. Enjoy your day, friend.","npcJp":"ショップに帽子がありますよ。よい一日を、友だち。","cue":"*Thank* you. *See* *you* *later*!","cueJp":"ありがとう。またあとで。"}],"words":[["towel","/ˈtaʊəl/","タオル"],["sunscreen","/ˈsʌnˌskriːn/","日焼け止め"],["strong","/strɔːŋ/","強い"],["map","/mæp/","地図"],["hat","/hæt/","帽子"],["shop","/ʃɑːp/","店"],["behind","/bɪˈhaɪnd/","〜の裏に"],["open","/ˈoʊpən/","開いている"]],"tp":["day"]}],"hotel_pool":[{"turns":[{"npc":"Hey, friend! Nice day for a swim. Come and sit here.","npcJp":"やあ、友だち！泳ぐにはいい日だね。さあ、ここに座って。","cue":"*Hello*! *Is* it *okay* if I *sit* *here*?","cueJp":"こんにちは。ここに座ってもいいですか。","who":"Mr. Tom","p":0.75},{"npc":"Of course! I'm Lani. This is Mr. Tom. He wears sunglasses all day, don't worry.","npcJp":"もちろん！私はラニ。こちらはトムさん。一日中サングラスなの、気にしないでね。","cue":"*Nice* to *meet* *you*. *It's* *very* *sunny* *today*.","cueJp":"はじめまして。今日はとても晴れていますね。","who":"Lani","p":1.25},{"npc":"Ha! The sun is my friend. We practice our magic show here in the sun.","npcJp":"はは！太陽は友だちさ。ここで日なたでマジックショーの練習をしているんだ。","cue":"*A* *magic* *show*? *Can* I *see* *one* *trick*?","cueJp":"マジックショー？ひとつ見せてもらえますか。","who":"Mr. Tom","p":0.75},{"npc":"Shh, one small trick. Look at this coin. Now it's gone!","npcJp":"しーっ、ひとつだけね。このコインを見て。ほら、消えた！","cue":"*Wow*! *Where* did it *go*?","cueJp":"わあ！どこに行ったんですか。","who":"Lani","p":1.25},{"npc":"A magician never tells. Come to the show tonight, friend!","npcJp":"マジシャンは種明かしをしないんだ。今夜のショーにおいで、友だち！","cue":"*I* *will*. *Good* *luck*!","cueJp":"行きます。がんばってください。","who":"Mr. Tom","p":0.75}],"words":[["sunny","/ˈsʌni/","晴れた"],["trick","/trɪk/","手品の技"],["coin","/kɔɪn/","コイン"],["gone","/ɡɔːn/","なくなった"],["swim","/swɪm/","泳ぐ"],["practice","/ˈpræktɪs/","練習する"],["magician","/məˈdʒɪʃən/","マジシャン"],["tonight","/təˈnaɪt/","今夜"]],"tp":["day"]},{"turns":[{"npc":"Psst. Are you alone? Good. Sit down and don't look at the water.","npcJp":"しーっ。ひとりかい？よし。座って、水のほうは見ないでくれ。","cue":"*Okay*... *Why* *not* *look* at the *water*?","cueJp":"わかりました…。どうして水を見ないんですか。","who":"Mr. Tom","p":0.75},{"npc":"He's joking. He thinks the pool is full of secret agents.","npcJp":"冗談よ。このプールは秘密のスパイだらけだと思ってるの。","cue":"*Secret* *agents*? *In* the *pool*?","cueJp":"スパイ？プールの中に？","who":"Lani","p":1.25},{"npc":"Look at that man by the stairs. He has been swimming for an hour. Very suspicious.","npcJp":"階段のそばのあの男を見ろ。1時間も泳いでいる。実に怪しい。","cue":"*Maybe* he *just* *likes* *swimming*.","cueJp":"ただ泳ぐのが好きなだけかも。","who":"Mr. Tom","p":0.75},{"npc":"Exactly. Mr. Tom is writing a story for our magic show. Every show needs a story.","npcJp":"そのとおり。トムさんは私たちのマジックショーの物語を書いてるの。ショーには物語が必要でしょ。","cue":"*A* *story*! *That's* *so* *cool*.","cueJp":"物語ですか。すてきですね。","who":"Lani","p":1.25},{"npc":"Yes! Maybe you will be in our next story. Take care, friend.","npcJp":"そう！次の物語にきみが出るかもしれないぞ。気をつけて、友だち。","cue":"*I'd* *love* that. *See* *you*!","cueJp":"うれしいです。またね。","who":"Mr. Tom","p":0.75}],"words":[["alone","/əˈloʊn/","ひとりで"],["secret","/ˈsiːkrət/","秘密の"],["agent","/ˈeɪdʒənt/","スパイ・係員"],["stairs","/stɛrz/","階段"],["suspicious","/səˈspɪʃəs/","怪しい"],["story","/ˈstɔːri/","物語"],["joking","/ˈdʒoʊkɪŋ/","冗談を言う"],["swimming","/ˈswɪmɪŋ/","泳ぐこと"]],"tp":["day"]},{"turns":[{"npc":"Ahh, sunset at the pool. The best time for magic.","npcJp":"ああ、プールの夕暮れ。マジックにいちばんいい時間だ。","cue":"*Hello*! *The* *sky* *is* *so* *orange*.","cueJp":"こんにちは。空がまっ赤ですね。","who":"Mr. Tom","p":0.75},{"npc":"The light makes every trick look better. Come and sit.","npcJp":"この光だと、どんな手品もよく見えるの。こっちに座って。","cue":"*Thank* you. *Can* I *watch* you *practice*?","cueJp":"ありがとう。練習を見てもいいですか。","who":"Lani","p":1.25},{"npc":"Of course. Pick a card. Any card. Don't show me.","npcJp":"もちろん。カードを1枚選んで。どれでもいい。私には見せないで。","cue":"*Okay*. *I* *picked* *one*.","cueJp":"はい。選びました。","who":"Mr. Tom","p":0.75},{"npc":"Put it back. Now Mr. Tom will find it with his eyes closed!","npcJp":"戻して。さあ、トムさんが目を閉じたままで見つけるわよ！","cue":"*With* his *eyes* *closed*? *No* *way*!","cueJp":"目を閉じたままで？まさか。","who":"Lani","p":1.25},{"npc":"Is this your card? Ha! See you at the show tonight.","npcJp":"これがきみのカードかな？はは！今夜のショーで会おう。","cue":"*Yes*! *That's* *amazing*. *I'll* *be* *there*!","cueJp":"はい！すごい。行きます。","who":"Mr. Tom","p":0.75}],"words":[["sunset","/ˈsʌnˌsɛt/","夕日"],["light","/laɪt/","光"],["closed","/kloʊzd/","閉じた"],["picked","/pɪkt/","選んだ"],["find","/faɪnd/","見つける"],["orange","/ˈɔːrɪndʒ/","オレンジ色の"],["amazing","/əˈmeɪzɪŋ/","すばらしい"],["card","/kɑːrd/","カード"]],"tp":["dusk"]}]};
+var WELCOME={"id":"welcome","icon":"🥤","who":"Staff","pitch":1.0,"bg":"welcome","amb":"isle","npcX":226,"x":37,"y":90,"req":"gate","bonus":true,"pal":{"c":"#0f6e6e","h":"#3a2a1c","b":"#0f6e6e","a":"#ffc72c"},"variants":[{"turns":[{"npc":"Hafa Adai! Welcome to Guam! Would you like a free welcome drink?","npcJp":"ハファ・アダイ！グアムへようこそ！無料のウェルカムドリンクはいかがですか。","cue":"*Yes*, *please*. *What* *is* it?","cueJp":"はい、お願いします。これは何ですか。","who":"Staff","p":1.0},{"npc":"It's a sweet tropical drink. Take one little cup, friend.","npcJp":"甘いトロピカルドリンクだよ。小さなカップをひとつどうぞ、友だち。","cue":"*Thank* *you*. *It* *smells* *so* *nice*.","cueJp":"ありがとう。とてもいい香りですね。","who":"Haggan","p":0.8},{"npc":"Try it, try it! Is it sweet? Is it sour? Tell us!","npcJp":"飲んでみて、飲んでみて！甘い？すっぱい？教えてよ！","cue":"*It's* *sweet* and *a* *little* *sour*. *I* *like* it.","cueJp":"甘くて、ちょっとすっぱいです。好きです。","who":"Fanihi","p":1.3},{"npc":"Wonderful. This table is open today only. Please come again if you want more.","npcJp":"よかった。このテーブルは今日だけです。もっと飲みたければ、また来てくださいね。","cue":"*Okay*. *I'll* *come* *back* *later*.","cueJp":"わかりました。またあとで来ます。","who":"Staff","p":1.0},{"npc":"Enjoy your stay in Guam. The turtle will wait for you here.","npcJp":"グアムの滞在を楽しんでね。ウミガメはここで待っているよ。","cue":"*Thank* you. *See* *you* *later*!","cueJp":"ありがとう。またね！","who":"Haggan","p":0.8}],"words":[["welcome","/ˈwɛlkəm/","ようこそ"],["drink","/drɪŋk/","飲み物"],["tropical","/ˈtrɑːpɪkəl/","トロピカルな"],["sweet","/swiːt/","甘い"],["sour","/ˈsaʊər/","すっぱい"],["cup","/kʌp/","カップ"],["free","/friː/","無料の"],["later","/ˈleɪtər/","あとで"]]},{"turns":[{"npc":"Hafa Adai! You came back. The table is empty. All the drinks are gone.","npcJp":"ハファ・アダイ！戻ってきたね。テーブルはからっぽ。飲み物はぜんぶなくなったよ。","cue":"*Oh* *no*! *Where* *is* the *staff*?","cueJp":"えっ、そんな。スタッフの人はどこですか。","who":"Haggan","p":0.8},{"npc":"The staff went home. They said the cups were tired.","npcJp":"スタッフは帰ったよ。カップがつかれたんだって。","cue":"*Tired* *cups*? *That's* *funny*.","cueJp":"つかれたカップ？おかしいですね。","who":"Fanihi","p":1.3},{"npc":"Yes. A cup told me a secret before it left. It said, I am only a cup.","npcJp":"うん。カップは帰る前にぼくに秘密を教えてくれた。ぼくはただのカップだよ、って。","cue":"*Really*? *What* *a* *strange* *secret*.","cueJp":"ほんとうに？変わった秘密ですね。","who":"Haggan","p":0.8},{"npc":"Shh! Maybe the drink is hiding in the sky. Look up!","npcJp":"しーっ！飲み物は空にかくれているのかも。上を見て！","cue":"*I* *see* *only* *clouds*. *No* *drink*.","cueJp":"雲しか見えません。飲み物はないです。","who":"Fanihi","p":1.3},{"npc":"Then the clouds drank it. Come back tomorrow and ask them. Good luck.","npcJp":"じゃあ雲が飲んだんだ。明日また来て、雲に聞いてみて。がんばってね。","cue":"*Okay*. *I'll* *ask* *them*. *Goodbye*!","cueJp":"わかりました。聞いてみます。さようなら！","who":"Haggan","p":0.8}],"words":[["empty","/ˈɛmpti/","からっぽの"],["gone","/ɡɔːn/","なくなった"],["staff","/stæf/","スタッフ"],["tired","/ˈtaɪərd/","つかれた"],["secret","/ˈsiːkrət/","秘密"],["hiding","/ˈhaɪdɪŋ/","かくれている"],["cloud","/klaʊd/","雲"],["ask","/æsk/","たずねる"]]}]};
+PLACE_EN.welcome='Welcome Table';OPEN24.welcome=1;AWAKE.welcome=1;
+(function(){
+ PLACES.push(WELCOME);
+ PLACES.filter(function(p){return p.id==='hotel_pool'})[0].variants.forEach(function(v){v.tp=['night']});
+ PLACES.forEach(function(p){(EXTRA[p.id]||[]).forEach(function(v){p.variants.push(v)})});
+})();
+var P={};PLACES.forEach(function(p){P[p.id]=p});
+function coreN(p){return p.variants.filter(function(v){return !v.tp}).length}
+var TOTAL_PLAYS=PLACES.reduce(function(a,p){return a+coreN(p)},0);
+/* 時間帯: day(朝・昼) / dusk(夕) / night(夜・深夜)。tp のない場面はいつでも、tp つきはその時間帯だけ */
+function band(){return (G.tp==='morning'||G.tp==='day')?'day':G.tp==='dusk'?'dusk':'night'}
+var GRT={morning:['Good morning','おはようございます'],day:['Good afternoon','こんにちは'],dusk:['Good evening','こんばんは'],night:['Good evening','こんばんは'],late:['Good evening','こんばんは']};
+function vcArr(id){var p=P[id];save.vc=save.vc||{};if(!save.vc[id]){var c=save.clears[id]||0,cu=0;save.vc[id]=p.variants.map(function(v){return (!v.tp&&cu++<c)?1:0})}
+ while(save.vc[id].length<p.variants.length)save.vc[id].push(0);return save.vc[id]}
+function pickVi(id){var p=P[id],b=band(),vc=vcArr(id),best=-1,bs=1e9;
+ p.variants.forEach(function(v,i){var tg=!!v.tp;if(tg&&v.tp.indexOf(b)<0)return;var s=vc[i]*2+(tg?0:1);if(s<bs){bs=s;best=i}});
+ return best<0?0:best}
+function resolveTurn(t,tagged){var g=GRT[G.tp],o={};for(var k in t)o[k]=t[k];
+ function f(s,jp){if(typeof s!=='string')return s;
+  s=s.replace(/\*\{gr\}\*/g,g[0].split(' ').map(function(w){return '*'+w+'*'}).join(' ')).replace(/\{gr\}/g,g[0]).replace(/\{grJp\}/g,g[1]);
+  if(!tagged){if(jp)s=s.replace(/こんにちは|こんばんは|おはようございます/g,g[1]);
+   else s=s.replace(/\*Good\* \*(morning|afternoon|evening)\*/g,g[0].split(' ').map(function(w){return '*'+w+'*'}).join(' ')).replace(/Good (morning|afternoon|evening)/g,g[0])}
+  return s}
+ o.npc=f(o.npc);o.npcJp=f(o.npcJp,true);o.cue=f(o.cue);o.cueJp=f(o.cueJp,true);return o}
+
+var RETRY=['Sorry, could you say that again?','Pardon? A little slower, please.'];
+var THANKS=['Thank you!','Great.','Perfect.','No problem.'];
+function parseCue(c){return c.split(' ').map(function(t){return {txt:t.replace(/\*/g,''),s:t.indexOf('*')>=0}})}
+function cueText(c){return c.replace(/\*/g,'')}
+
+/* ---------- 音 ---------- */
+var AC=null,master,sfxG,ambG,noiseBuf=null;
+function initAudio(){
+ if(AC){try{AC.resume()}catch(e){}return}
+ try{AC=new (window.AudioContext||window.webkitAudioContext)();master=AC.createGain();master.gain.value=.9;master.connect(AC.destination);
+  sfxG=AC.createGain();sfxG.gain.value=.8;sfxG.connect(master);ambG=AC.createGain();ambG.gain.value=1;ambG.connect(master);
+  noiseBuf=AC.createBuffer(1,AC.sampleRate*2,AC.sampleRate);var d=noiseBuf.getChannelData(0);for(var i=0;i<d.length;i++)d[i]=Math.random()*2-1}catch(e){AC=null}
+}
+function tone(f,t0,d,type,v,f2,dest){if(!AC)return;var o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.setValueAtTime(f,t0);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t0+d);
+ g.gain.setValueAtTime(0.0001,t0);g.gain.exponentialRampToValueAtTime(v,t0+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t0+d);o.connect(g);g.connect(dest||sfxG);o.start(t0);o.stop(t0+d+0.03)}
+function noise(t0,d,v,freq,type,dest,q){if(!AC||!noiseBuf)return;var s=AC.createBufferSource();s.buffer=noiseBuf;var f=AC.createBiquadFilter();f.type=type||'bandpass';f.frequency.value=freq;if(q)f.Q.value=q;var g=AC.createGain();
+ g.gain.setValueAtTime(v,t0);g.gain.exponentialRampToValueAtTime(0.0001,t0+d);s.connect(f);f.connect(g);g.connect(dest||sfxG);s.start(t0);s.stop(t0+d+0.02)}
+function now(){return AC?AC.currentTime:0}
+function sfxBlip(){if(AC)tone(880,now(),.04,'square',.04)}
+function sfxTick(){if(AC){tone(520,now(),.07,'triangle',.4,300);noise(now(),.03,.12,2500,'bandpass')}}
+function sfxStep(){if(AC){noise(now(),.05,.1,700,'bandpass')}}
+function sfxOK(combo){if(!AC)return;var t=now(),m=Math.pow(1.0595,Math.min(combo||0,12));[523.25,659.25,783.99].forEach(function(f,k){tone(f*m,t+k*.06,.2,'triangle',.28)});if(combo>=3)tone(1568*m/2,t,.12,'sine',.12)}
+function sfxNG(){if(AC)tone(200,now(),.18,'square',.12,120)}
+function sfxClear(){if(!AC)return;var t=now();[523.25,659.25,783.99,1046.5,1318.5].forEach(function(f,k){tone(f,t+k*.09,.7,'triangle',.25);tone(f/2,t+k*.09,.7,'sine',.1)})}
+function sfxUnlock(){if(!AC)return;var t=now();[392,523.25,659.25,783.99,1046.5,1318.5].forEach(function(f,k){tone(f,t+k*.08,.5,'triangle',.22)});noise(t,.6,.12,3500,'highpass')}
+function sfxRumble(){if(!AC)return;var t=now();noise(t,1.2,.5,80,'lowpass');noise(t+.05,1,.3,160,'lowpass');tone(70,t,1,'sawtooth',.12,40)}
+function sfxDing(){if(!AC)return;var t=now();tone(1318.5,t,.5,'sine',.25);tone(1976,t+.02,.4,'sine',.1)}
+function sfxDoor(){if(AC)noise(now(),.5,.12,500,'lowpass')}
+function sfxSplash(){if(!AC)return;var t=now();noise(t,.5,.35,900,'bandpass');noise(t+.08,.5,.2,2400,'highpass');tone(300,t,.25,'sine',.15,120)}
+function sfxLullaby(){if(!AC)return;var t=now();[659.25,587.33,523.25,440,392].forEach(function(f,k){tone(f,t+k*.4,1,'sine',.12);tone(f/2,t+k*.4,1,'triangle',.05)})}
+function sfxChime(){if(!AC)return;var t=now();[523.25,659.25,783.99].forEach(function(f,k){tone(f,t+k*.12,.8,'sine',.16)})}
+function vib(p){try{if(navigator.vibrate)navigator.vibrate(p)}catch(e){}}
+
+/* ---- 場所のざわめき（すべてこの場で合成） ---- */
+var amb={nodes:[],timer:null};
+function ambStop(){amb.nodes.forEach(function(n){try{n.stop()}catch(e){}});amb.nodes=[];if(amb.timer){clearInterval(amb.timer);amb.timer=null}bmStop()}
+function loopNoise(freq,q,gain,lfoHz,lfoDepth,type){if(!AC)return;var s=AC.createBufferSource();s.buffer=noiseBuf;s.loop=true;var f=AC.createBiquadFilter();f.type=type||'bandpass';f.frequency.value=freq;f.Q.value=q;var g=AC.createGain();g.gain.value=gain;
+ if(lfoHz){var l=AC.createOscillator();l.frequency.value=lfoHz;var lg=AC.createGain();lg.gain.value=lfoDepth;l.connect(lg);lg.connect(g.gain);l.start();amb.nodes.push(l)}
+ s.connect(f);f.connect(g);g.connect(ambG);s.start();amb.nodes.push(s)}
+function ambStart(kind){
+ ambStop();if(!AC)return;if(kind==='beach'){beachSound();return}if(kind==='isle'){isleSound();return}if(set.amb!=='on')return;
+ if(kind==='hall'){loopNoise(380,.6,.07,.21,.025);loopNoise(1100,1.1,.03,.37,.012);loopNoise(110,.5,.04,0,0,'lowpass')}
+ if(kind==='sec'){loopNoise(260,.6,.04,.17,.015);loopNoise(130,.5,.07,0,0,'lowpass');loopNoise(2400,2,.008,.5,.005)}
+ if(kind==='cafe'){loopNoise(420,.7,.06,.25,.02);loopNoise(1500,1,.02,.43,.01)}
+ if(kind==='info'){loopNoise(300,.5,.05,.19,.018);loopNoise(900,1,.02,.33,.01);loopNoise(110,.5,.03,0,0,'lowpass')}
+ if(kind==='burger'){loopNoise(800,.8,.04,.31,.012);loopNoise(150,.5,.04,0,0,'lowpass')}
+ if(kind==='site'){loopNoise(90,.4,.12,0,0,'lowpass');loopNoise(2500,1.5,.01,1.2,.008)}
+ if(kind==='bag'){loopNoise(140,.5,.09,.4,.03,'lowpass');loopNoise(1800,1.2,.01,.9,.006);loopNoise(500,.7,.03,.23,.012)}
+ if(kind==='out'){loopNoise(220,.4,.07,.08,.03);loopNoise(1200,.8,.015,.2,.01);loopNoise(90,.4,.05,0,0,'lowpass')}
+ if(kind==='pool'){loopNoise(600,.5,.05,.15,.02);loopNoise(2400,1,.01,.5,.006)}
+ if(kind==='dream'){loopNoise(180,.5,.05,.08,.02,'lowpass')}
+ var bar=0,CH=[[261.63,329.63,392,493.88],[220,261.63,329.63,392],[293.66,349.23,440,523.25],[196,246.94,293.66,349.23]];
+ amb.timer=setInterval(function(){if(!AC)return;var t=now();
+  if(kind==='hall'){if(Math.random()<.05){tone(659.25,t,.5,'triangle',.1,null,ambG);tone(523.25,t+.45,.8,'triangle',.1,null,ambG)}
+   if(Math.random()<.1)noise(t,.9,.1,220,'lowpass',ambG)}
+  if(kind==='info'){if(Math.random()<.04){tone(1318.5,t,.6,'sine',.06,null,ambG)}if(Math.random()<.08)noise(t,.7,.08,260,'lowpass',ambG)}
+  if(kind==='sec'){if(Math.random()<.22){tone(1100,t,.09,'square',.05,null,ambG);if(Math.random()<.3)tone(1100,t+.16,.09,'square',.05,null,ambG)}
+   if(Math.random()<.08)noise(t,.5,.08,300,'lowpass',ambG)}
+  if(kind==='burger'){if(Math.random()<.12)noise(t,.7,.07,3200,'highpass',ambG);if(Math.random()<.05)tone(1320,t,.18,'sine',.06,null,ambG)}
+  if(kind==='site'){if(Math.random()<.09){noise(t,.08,.22,1800,'bandpass',ambG);tone(900,t,.12,'square',.04,null,ambG)}
+   if(Math.random()<.07){tone(1000,t,.1,'square',.035,null,ambG);tone(1000,t+.25,.1,'square',.035,null,ambG)}}
+  if(kind==='bag'){if(Math.random()<.1)noise(t,.12,.2,200,'lowpass',ambG);if(Math.random()<.03){tone(784,t,.25,'sine',.05,null,ambG);tone(659.25,t+.3,.35,'sine',.05,null,ambG)}}
+  if(kind==='out'){if(Math.random()<.08)noise(t,1.3,.09,400,'bandpass',ambG);if(Math.random()<.04){tone(1568,t,.18,'sine',.035,null,ambG);tone(1976,t+.12,.16,'sine',.03,null,ambG)}if(Math.random()<.025)tone(420,t,.25,'square',.03,null,ambG)}
+  if(kind==='dream'){if(Math.random()<.18){tone([523.25,659.25,783.99,987.77][(Math.random()*4)|0],t,1.2,'sine',.05,null,ambG)}}
+  if(kind==='pool'){if(Math.random()<.1)noise(t,.6,.05,1800,'bandpass',ambG)}
+  if(kind==='cafe'){bar++;if(bar%6===1){var ch=CH[(bar/6|0)%4];ch.forEach(function(f,i){tone(f,t+i*.06,2.4,'triangle',.05,null,ambG);tone(f*2,t+i*.06,1.6,'sine',.02,null,ambG)})}
+   if(Math.random()<.06)noise(t,1,.05,5000,'highpass',ambG);
+   if(Math.random()<.06){tone(3200,t,.12,'sine',.03,null,ambG);tone(4100,t+.05,.1,'sine',.025,null,ambG)}}
+ },420)}
+
+
+/* ---- マップのBGM（オリジナルの曲。すべてこの場で合成） ---- */
+var NN={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+function mid(s){var m=/^([A-G])(\d)$/.exec(s);return 12*(+m[2]+1)+NN[m[1]]}
+function mf(n){return 440*Math.pow(2,(n-69)/12)}
+var MBARS=['C5:1 E5:1 G5:2 E5:1 G5:1 C6:2','B5:1 G5:1 D5:2 G5:1 B5:1 A5:2','A5:1 F5:1 A5:2 C6:1 A5:1 F5:2','G5:1 E5:1 D5:1 E5:1 G5:4',
+ 'E5:1 G5:1 C6:2 B5:1 C6:1 D6:2','E6:2 D6:1 C6:1 B5:2 G5:2','A5:1 C6:1 F6:2 E6:1 D6:1 C6:2','D6:1 B5:1 G5:1 B5:1 C6:4'];
+var MROOT=[48,43,41,48,48,43,41,43],MFIF=[55,50,48,55,55,50,48,50];
+var MTRI=[[60,64,67],[59,62,67],[57,60,65],[60,64,67],[60,64,67],[59,62,67],[57,60,65],[59,62,67]];
+var LEAD=[],BASS=[];
+MBARS.forEach(function(b,bi){var st=bi*8;b.split(' ').forEach(function(tok){var a=tok.split(':');LEAD[st]={n:mid(a[0]),d:+a[1]};st+=+a[1]});
+ BASS[bi*8]=MROOT[bi];BASS[bi*8+2]=MFIF[bi];BASS[bi*8+4]=MROOT[bi];BASS[bi*8+6]=MFIF[bi]});
+var mus={timer:null,g:null,next:0,step:0,st:null};
+function musStyle(){var tp=G.tp;
+ if(tp==='late'||tp==='night')return {bpm:84,lead:'triangle',lv:.2,bass:'sine',bv:.24,oct:-12,stab:false,hat:false};
+ if(tp==='dusk')return {bpm:112,lead:'square',lv:.07,bass:'triangle',bv:.22,oct:0,stab:true,hat:true};
+ return {bpm:138,lead:'square',lv:.085,bass:'triangle',bv:.24,oct:0,stab:true,hat:true}}
+function musSched(){
+ if(!AC||!mus.g)return;var st=mus.st,e=60/st.bpm/2;
+ while(mus.next<AC.currentTime+.35){var s=mus.step%64,t=mus.next,L=LEAD[s],tri=MTRI[s>>3];
+  if(L)tone(mf(L.n+st.oct),t,Math.max(.12,L.d*e*.92),st.lead,st.lv,null,mus.g);
+  if(BASS[s])tone(mf(BASS[s]),t,e*1.8,st.bass,st.bv,null,mus.g);
+  if(st.stab&&s%2===1)tri.forEach(function(n){tone(mf(n),t,e*.45,'square',.022,null,mus.g)});
+  if(st.hat&&s%2===1)noise(t,.04,.05,6000,'highpass',mus.g);
+  if(!st.stab&&s%2===0)tone(mf(tri[(s>>1)%3]),t,e*1.6,'sine',.05,null,mus.g);
+  mus.next+=e;mus.step++}}
+function musicStop(){
+ if(mus.timer){clearInterval(mus.timer);mus.timer=null}
+ if(mus.g&&AC){var g=mus.g;try{g.gain.cancelScheduledValues(AC.currentTime);g.gain.setValueAtTime(g.gain.value,AC.currentTime);g.gain.linearRampToValueAtTime(.0001,AC.currentTime+.25)}catch(e){}setTimeout(function(){try{g.disconnect()}catch(e){}},700)}
+ mus.g=null}
+function musicStart(){
+ if(!AC||set.bgm!=='on'||G.view!=='map'||document.hidden)return;musicStop();
+ mus.st=musStyle();mus.g=AC.createGain();mus.g.gain.setValueAtTime(.0001,AC.currentTime);mus.g.gain.linearRampToValueAtTime(.55,AC.currentTime+.4);mus.g.connect(master);
+ mus.next=AC.currentTime+.08;mus.step=0;mus.timer=setInterval(musSched,100);musSched()}
+document.addEventListener('visibilitychange',function(){if(document.hidden)musicStop();else musicStart()});
+
+/* ---- ビーチの音（波の音と、常夏の曲。オリジナル。すべてこの場で合成）---- */
+var bm={timer:null,g:null,next:0,step:0,st:null};
+var TB=['E5:1 G5:1 A5:2 G5:1 E5:1 D5:2','F5:1 A5:1 C6:2 A5:1 F5:1 E5:2','G5:1 B5:1 D6:2 B5:1 G5:1 A5:2','A5:1 G5:1 E5:1 D5:1 C5:4'];
+var TROOT=[48,53,55,53],TTRI=[[60,64,67],[60,65,69],[59,62,67],[60,65,69]],TLEAD=[],TBASS=[];
+TB.forEach(function(b,bi){var st=bi*8;b.split(' ').forEach(function(tok){var a=tok.split(':');TLEAD[st]={n:mid(a[0]),d:+a[1]};st+=+a[1]});
+ TBASS[bi*8]=TROOT[bi];TBASS[bi*8+3]=TROOT[bi]+7;TBASS[bi*8+4]=TROOT[bi];TBASS[bi*8+7]=TROOT[bi]+7});
+function bmStyle(){var tp=G.tp;
+ if(tp==='night'||tp==='late')return {bpm:72,lead:'sine',lv:.11,oct:-12,stab:false,shk:false};
+ if(tp==='dusk')return {bpm:92,lead:'triangle',lv:.15,oct:0,stab:true,shk:true};
+ return {bpm:108,lead:'triangle',lv:.18,oct:0,stab:true,shk:true}}
+function bmSched(){
+ if(!AC||!bm.g)return;if(bm.st.isle){isleSched();return}var st=bm.st,e=60/st.bpm/2;
+ while(bm.next<AC.currentTime+.35){var s=bm.step%32,t=bm.next,L=TLEAD[s];
+  if(L){var f=mf(L.n+st.oct),d=Math.max(.14,L.d*e*.9);tone(f,t,d,st.lead,st.lv,null,bm.g);tone(f*2,t,d*.5,'sine',st.lv*.35,null,bm.g)}
+  if(TBASS[s])tone(mf(TBASS[s]),t,e*1.6,'sine',.2,null,bm.g);
+  if(st.stab&&s%2===1)TTRI[s>>3].forEach(function(n){tone(mf(n),t,e*.4,'triangle',.03,null,bm.g)});
+  if(st.shk&&s%2===1)noise(t,.05,.045,7000,'highpass',bm.g);
+  if(!st.stab&&s%8===0)TTRI[s>>3].forEach(function(n,i){tone(mf(n),t+i*.05,e*7,'sine',.04,null,bm.g)});
+  bm.next+=e;bm.step++}}
+function bmStop(){
+ if(bm.timer){clearInterval(bm.timer);bm.timer=null}
+ if(bm.g&&AC){var g=bm.g;try{g.gain.cancelScheduledValues(AC.currentTime);g.gain.setValueAtTime(g.gain.value,AC.currentTime);g.gain.linearRampToValueAtTime(.0001,AC.currentTime+.25)}catch(e){}setTimeout(function(){try{g.disconnect()}catch(e){}},700)}
+ bm.g=null}
+function bmStart(){
+ if(!AC||set.bgm!=='on')return;bmStop();bm.st=bmStyle();bm.g=AC.createGain();bm.g.gain.setValueAtTime(.0001,AC.currentTime);bm.g.gain.linearRampToValueAtTime(.4,AC.currentTime+.6);bm.g.connect(master);
+ bm.next=AC.currentTime+.08;bm.step=0;bm.timer=setInterval(bmSched,100);bmSched()}
+function beachSound(){
+ if(set.amb==='on'){
+  loopNoise(420,.4,.11,.11,.07,'lowpass');loopNoise(1600,.7,.03,.09,.02,'bandpass');
+  amb.timer=setInterval(function(){if(!AC)return;var t=now();
+   if(G.tp==='night'||G.tp==='late'){if(Math.random()<.35){var k=3+((Math.random()*3)|0);for(var i=0;i<k;i++)tone(4300,t+i*.09,.05,'sine',.02,null,ambG)}}
+   else if(Math.random()<.06){tone(2000,t,.35,'sine',.04,1300,ambG);tone(1700,t+.12,.3,'sine',.03,1100,ambG)}},420)}
+ bmStart()}
+
+
+/* ---- ウェルカムドリンクの曲（ウクレレ風のストラム＋やさしい旋律。オリジナル。すべてこの場で合成）---- */
+var ICH=[[60,64,67,72],[57,60,64,69],[57,60,65,69],[55,59,62,67]];
+var IL=[['E5',0,'G5','A5','G5','E5','D5',0],['C5',0,'D5','E5',0,'D5','C5',0],['A5',0,'C6','A5','G5','F5','E5',0],['D5',0,'G5','B5','A5','G5','D5',0]];
+function isleSched(){
+ var st=bm.st,e=60/st.bpm/2;
+ while(bm.next<AC.currentTime+.35){var s=bm.step%32,t=bm.next,bar=s>>3,q=s%8,ch=ICH[bar];
+  var dn=(q===0||q===2||q===6),up=(q===3||q===5||q===7)&&st.up;
+  if(dn||up){var ord=dn?ch:ch.slice().reverse();ord.forEach(function(m,i){tone(mf(m),t+i*.018,e*2.2,'triangle',dn?.06:.04,null,bm.g);tone(mf(m)*2,t+i*.018,e*1.2,'sine',.012,null,bm.g)})}
+  if(q===0)tone(mf(ch[0]-12),t,e*3,'sine',.12,null,bm.g);
+  var L=IL[bar][q];if(L){var f=mf(mid(L));tone(f,t,e*1.9,'triangle',st.lv,null,bm.g);tone(f*2,t,e*.9,'sine',st.lv*.3,null,bm.g)}
+  bm.next+=e;bm.step++}}
+function isleStart(){
+ if(!AC||set.bgm!=='on')return;bmStop();var nt=(G.tp==='night'||G.tp==='late');
+ bm.st={isle:true,bpm:nt?80:100,lv:nt?.07:.12,up:!nt};
+ bm.g=AC.createGain();bm.g.gain.setValueAtTime(.0001,AC.currentTime);bm.g.gain.linearRampToValueAtTime(.45,AC.currentTime+.6);bm.g.connect(master);
+ bm.next=AC.currentTime+.08;bm.step=0;bm.timer=setInterval(bmSched,100);bmSched()}
+function isleSound(){
+ if(set.amb==='on'){loopNoise(420,.4,.05,.11,.05,'lowpass');loopNoise(1600,.7,.012,.09,.01,'bandpass')}
+ isleStart()}
+
+/* ---- 時間（グアム現地 UTC+10）---- */
+var TP={morning:{en:'Morning',ic:'🌅',gr:'Good morning'},day:{en:'Daytime',ic:'☀️',gr:'Good afternoon'},dusk:{en:'Evening',ic:'🌇',gr:'Good evening'},night:{en:'Night',ic:'🌙',gr:'Good evening'},late:{en:'Late Night',ic:'🌌',gr:'Late night shift'}};
+function guamMin(){var d=new Date();return (d.getUTCHours()*60+d.getUTCMinutes()+600)%1440}
+/* 世界マップ用: 空港ごとの IANA 時間帯。夏時間は端末のブラウザが自動で反映する */
+var AP={haneda:['羽田','Asia/Tokyo'],guam:['グアム','Pacific/Guam'],incheon:['仁川','Asia/Seoul'],shanghai:['上海','Asia/Shanghai'],hongkong:['香港','Asia/Hong_Kong'],manila:['マニラ','Asia/Manila'],bangkok:['バンコク','Asia/Bangkok'],cambodia:['カンボジア','Asia/Phnom_Penh'],singapore:['シンガポール','Asia/Singapore'],india:['インド','Asia/Kolkata'],dubai:['ドバイ','Asia/Dubai'],cairo:['カイロ','Africa/Cairo'],istanbul:['イスタンブール','Europe/Istanbul'],paris:['パリ','Europe/Paris'],london:['ロンドン','Europe/London'],keflavik:['ケプラヴィーク','Atlantic/Reykjavik'],vancouver:['バンクーバー','America/Vancouver'],honolulu:['ホノルル','Pacific/Honolulu'],sydney:['シドニー','Australia/Sydney'],saopaulo:['サンパウロ','America/Sao_Paulo']};
+var tzFmt={};
+function tzMin(tz,now){try{var f=tzFmt[tz]||(tzFmt[tz]=new Intl.DateTimeFormat('en-GB',{timeZone:tz,hour:'2-digit',minute:'2-digit',hourCycle:'h23'}));var h=0,m=0;f.formatToParts(now||new Date()).forEach(function(x){if(x.type==='hour')h=+x.value;if(x.type==='minute')m=+x.value});return (h%24)*60+m}catch(e){return guamMin()}}
+function apId(){return (typeof G!=='undefined'&&G&&G.ap&&AP[G.ap])?G.ap:'guam'}
+function airportMin(id){return tzMin(AP[id||apId()][1])}
+function jpMin(){return tzMin('Asia/Tokyo')}
+function curMin(){return set.tmode==='man'?set.tmin:airportMin()}
+function phaseOf(m){return m>=300&&m<720?'morning':m>=720&&m<1020?'day':m>=1020&&m<1140?'dusk':m>=1140&&m<1320?'night':'late'}
+function pad2(n){return (n<10?'0':'')+n}
+function fmtT(m){return pad2(m/60|0)+':'+pad2(m%60)}
+function isClosed(id){return G.tp==='late'&&!OPEN24[id]}
+function shade(h,f){var m=/^#([0-9a-f]{6})$/i.exec(h||'');if(!m)return h;var n=parseInt(m[1],16);
+ return '#'+[n>>16&255,n>>8&255,n&255].map(function(v){v=Math.max(0,Math.min(255,Math.round(v*f)));return (v<16?'0':'')+v.toString(16)}).join('')}
+function timePal(pal){var f={morning:1,day:1,dusk:.92,night:.78,late:.6}[G.tp];if(f===1)return pal;var o={};for(var k in pal)o[k]=shade(pal[k],f);return o}
+function applyTime(){
+ var m=curMin(),old=G.tp;G.tp=phaseOf(m);G.tm=m;mapEl.dataset.tp=G.tp;
+ G.wxc=wxNow();$('clock').textContent=TP[G.tp].ic+' '+fmtT(m)+' '+TP[G.tp].en+(apId()==='guam'?' · '+wxClock(G.wxc):' · '+AP[apId()][0])+' 🇯🇵'+fmtT(jpMin());updateWxUI();
+ $('tLab').textContent='　'+fmtT(m)+' '+TP[G.tp].en;
+ if(set.tmode==='auto')$('tRange').value=Math.floor(m/30)*30;
+ PLACES.forEach(function(p){var n=nodeEls[p.id];if(!n)return;var ps=isPassed(p.id),cl=!ps&&isClosed(p.id),op=!ps&&G.tp==='late'&&(p.id==='ground'||p.id==='lotte'||p.id==='hotel');
+  n.classList.toggle('closed',cl);var tg=n.querySelector('.tag');if(tg){tg.textContent=ps?'':cl?'CLOSED':op?'OPEN':'';tg.className='tag'+(ps?'':cl?' cl':op?' op':'')}});
+ if(buddyEl)buddyEl.classList.toggle('sleep',G.tp==='late');
+ if(old&&old!==G.tp&&mus.g&&G.view==='map')musicStart()}
+function syncSeg(key){var sg=document.querySelector('.seg[data-key="'+key+'"]');if(!sg)return;Array.prototype.forEach.call(sg.querySelectorAll('button'),function(x){x.setAttribute('aria-pressed',x.dataset.v===set[key]?'true':'false')})}
+function onSet(key){
+ if(key==='bgm'){if(set.bgm==='on'&&G.view==='map')musicStart();else musicStop()}
+ if(key==='tmode'){if(set.tmode==='man')set.tmin=+$('tRange').value;applyTime()}}
+$('tRange').addEventListener('input',function(){set.tmode='man';set.tmin=+$('tRange').value;syncSeg('tmode');applyTime()});
+
+/* ---- 天気（グアム）----
+   実測：Open-Meteo の現在値。取れた時だけ使う。取れない時は、月ごとの平均（timeanddate の気候平均、確認日2026-11-05）から、時刻に合わせて気温を推定する。
+   MON は [最高°F, 最低°F, 湿度%]（1月〜12月）。画面には「実測」か「平均値」かを必ず出す。 */
+var MON=[[86,76,77],[86,75,76],[87,76,74],[88,77,75],[89,78,76],[89,78,77],[88,77,81],[87,76,83],[87,76,83],[87,77,82],[88,77,80],[87,77,78]];
+var WX={live:null,at:0,busy:false};
+function f2c(f){return (f-32)*5/9}
+function guamMonth(){return new Date(Date.now()+36000000).getUTCMonth()}
+function wxAvg(m){var r=MON[guamMonth()],hi=f2c(r[0]),lo=f2c(r[1]),mid=(hi+lo)/2,amp=(hi-lo)/2,h=m/60;return {src:'avg',t:mid+amp*Math.cos(2*Math.PI*(h-14)/24),rh:r[2],code:null}}
+function fetchWx(){
+ if(WX.busy||Date.now()-WX.at<600000)return;WX.busy=true;WX.at=Date.now();
+ var done=false,ctl=null,tmo=0;
+ function fin(){if(done)return;done=true;clearTimeout(tmo);WX.busy=false;applyTime()}
+ try{ctl=window.AbortController?new AbortController():null;tmo=setTimeout(function(){if(ctl){try{ctl.abort()}catch(e){}}fin()},5000);
+  fetch('https://api.open-meteo.com/v1/forecast?latitude=13.51&longitude=144.80&current=temperature_2m,relative_humidity_2m,weather_code&timezone=Pacific%2FGuam',ctl?{signal:ctl.signal}:{})
+  .then(function(r){if(!r.ok)throw new Error('http');return r.json()})
+  .then(function(j){var c=j&&j.current;if(c&&typeof c.temperature_2m==='number'&&typeof c.relative_humidity_2m==='number'&&typeof c.time==='string'){WX.live={t:c.temperature_2m,rh:c.relative_humidity_2m,code:typeof c.weather_code==='number'?c.weather_code:null,time:c.time.slice(11,16),got:Date.now()}}fin()})
+  .catch(function(){fin()})
+ }catch(e){fin()}}
+function wxNow(){
+ if(set.tmode==='auto'&&WX.live&&Date.now()-WX.live.got<1800000)return {src:'live',t:WX.live.t,rh:WX.live.rh,code:WX.live.code,time:WX.live.time};
+ return wxAvg(curMin())}
+function wxKind(c){if(c==null)return 'part';if(c>=95)return 'storm';if((c>=51&&c<=67)||(c>=80&&c<=82))return 'rain';if(c===3||c===45||c===48)return 'cloud';if(c===0)return 'clear';return 'part'}
+var WXJP={clear:'はれ',part:'はれ時々くもり',cloud:'くもり',rain:'雨',storm:'雷雨'};
+function wxClock(w){return '🌡'+Math.round(w.t)+'℃ 💧'+Math.round(w.rh)+'%'}
+function wxText(w){var a='🌡'+Math.round(w.t)+'℃   💧'+Math.round(w.rh)+'%';
+ var b=w.src==='live'?WXJP[wxKind(w.code)]:'';return [a,b]}
+function updateWxUI(){var box=$('wx');if(!box)return;
+ if(G.view==='scene'&&G.scene&&G.scene.id==='beach'){var t=wxText(G.wxc||wxNow());box.hidden=false;box.textContent='';box.appendChild(document.createTextNode(t[0]));box.appendChild(el('small',null,t[1]))}else box.hidden=true}
+
+/* ---- 読み上げ ---- */
+var synthOK='speechSynthesis' in window;
+function say(text,rate,pitch,done){
+ var fired=false;function fin(){if(fired)return;fired=true;if(done)done()}
+ if(!synthOK){setTimeout(fin,Math.max(800,text.length*55));return}
+ try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(text);u.lang='en-US';u.rate=rate||.95;u.pitch=pitch||1;u.onend=fin;u.onerror=fin;speechSynthesis.speak(u);
+  setTimeout(fin,Math.max(2500,text.length*110/(rate||.95)+1500))}catch(e){setTimeout(fin,1200)}
+}
+function stopSay(){try{speechSynthesis.cancel()}catch(e){}}
+
+/* ---------- 画面いっぱいの動き ---------- */
+var fx=$('fx'),fcx=fx.getContext('2d'),parts=[],fxD=1,fxDirty=false;
+function fxResize(){var r=$('app').getBoundingClientRect();fxD=Math.min(2,window.devicePixelRatio||1);fx.width=Math.max(1,Math.round(r.width*fxD));fx.height=Math.max(1,Math.round(r.height*fxD))}
+var COLS=['#ffc72c','#ff5a3c','#34d27b','#6cc0f5','#ffffff'];
+function burst(x,y,n,spd){for(var i=0;i<n;i++){parts.push({x:x,y:y,vx:(Math.random()-.5)*spd,vy:-Math.random()*spd*.9-60,life:1,s:4+Math.random()*7,c:COLS[(Math.random()*COLS.length)|0]})}}
+function burstAt(elm,n,spd){var a=$('app').getBoundingClientRect(),r=elm.getBoundingClientRect();burst(r.left-a.left+r.width/2,r.top-a.top+r.height/2,n,spd)}
+function fxStep(dt){
+ if(!parts.length){if(fxDirty){fcx.setTransform(1,0,0,1,0,0);fcx.clearRect(0,0,fx.width,fx.height);fxDirty=false}return}
+ fxDirty=true;fcx.setTransform(fxD,0,0,fxD,0,0);fcx.clearRect(0,0,fx.width/fxD,fx.height/fxD);
+ for(var i=parts.length-1;i>=0;i--){var p=parts[i];p.vy+=900*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt*1.3;if(p.life<=0){parts.splice(i,1);continue}
+  fcx.globalAlpha=Math.min(1,p.life*1.6);fcx.fillStyle=p.c;fcx.fillRect(p.x-p.s/2,p.y-p.s/2,p.s,p.s)}
+ fcx.globalAlpha=1}
+function flash(){var f=$('flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go')}
+function shakeApp(){var a=$('app');a.classList.remove('shake');void a.offsetWidth;a.classList.add('shake')}
+
+/* ---------- 絵 ---------- */
+var NPCMAP=['...cccccc...','..cccccccc..','..hssssssh..','..hsessesh..','..hssssssh..','...ssssss...','..bbbbbbbb..','.sbbbaabbbs.','.sbbbaabbbs.','..bbbbbbbb..','..dd....dd..','..dd....dd..'];
+var HEROMAP=['...hhhhhh...','..hhhhhhhh..','..hssssssh..','..hsessesh..','..hssssssh..','...ssssss...','..bbbbbbbb..','.sbbbaabbbs.','.sbbbaabbbs.','..bbbbbbbb..','..dd....dd..','..dd....dd..'];
+var HPAL={h:'#2b2b2b',s:'#f2c9a0',e:'#1c2230',b:'#2f5bea',a:'#f2b705',d:'#333a4d'};
+/* 連れ「ルル」 */
+var BUDDYMAP=['.tt....tt.','tttttttttt','ttettttett','tpttttttpt','tttttttttt','aaaaaaaaaa','.tttttttt.','.ff....ff.'];
+var BPAL={t:'#5fd6c3',e:'#10131f',p:'#ff9aa8',a:'#ffc72c',f:'#2f8f82'};
+/* 空港の案内役 オリジナル着ぐるみ2人組（創作）。ハガン＝ウミガメ(haggan)、ファニヒ＝オオコウモリ(fanihi)。名前はチャモロ語の一般名詞（Guampedia 用語集で確認、2026-11-05）。
+   実在の空港・観光局のマスコットの絵や名前は使っていない。ハガンは麦わら帽子と花・甲羅もようの着ぐるみ、ファニヒは翼を上げた花のレイの着ぐるみ。おなかに着ぐるみのファスナー(z)。 */
+var HAGMAP=['....SSSSw....','..SSSSSSSSS..','...GGGGGGG...','...GeGGGeG...','...GpGmGpG...','..DDGGGGGDD..','.DdDDdDdDDdD.','fDdDdDzDdDdDf','fDDdDdzdDdDDf','.DdDDdzDdDdD.','...GGG.GGG...','...FFF.FFF...'];
+var HAGPAL={S:'#e8c46a',w:'#ff4d6d',G:'#6fcf8a',D:'#3f8f55',d:'#8fdca0',e:'#2a1c1c',p:'#ff9aa8',m:'#a8323a',z:'#ffd23f',f:'#58b878',F:'#3f8f55'};
+var FANMAP=['...N.....N...','..NBN...NBN..','..NBBBBBBBN..','W.BPPPPPPPB.W','WWBPePPPePBWW','WvBpPPmPPpBvW','WvWYYYYYYYWvW','.WWYloyolYWW.','.vWBBBzBBBWv.','..vBBBzBBBv..','...NN...NN...'];
+var FANPAL={N:'#5b3a29',B:'#8a5a3c',P:'#f6d9b8',e:'#2a1c1c',p:'#ff9aa8',m:'#b34a4a',W:'#9a6a86',v:'#6a4560',Y:'#e8b050',z:'#ffd23f',l:'#ff6b9a',o:'#ffa83a',y:'#ffe066'};
+var HAGSHUT=HAGMAP.map(function(r){return r.replace(/e/g,'D')}),FANSHUT=FANMAP.map(function(r){return r.replace(/e/g,'B')});
+var MASCOT_AT={welcome:1};
+var HBA=['...hhhhhh...','..hhhhhhhh..','..hssssssh..','..hggggggh..','..hssssssh..','...ssssss...','..bbbbbbbb..','.sbbbaabbbs.','.sbbbaabbbs.','..bbbbbbbb..','..dd....dd..','..dd....dd..'];
+var HBB=['...hhhhhh..s','..hhhhhhhh.s','..hssssssh.s','..hggggggh.s','..hssssssh.s','...ssssss..s','..bbbbbbbbs.','.sbbbaabbb..','.sbbbaabbb..','..bbbbbbbb..','..dd....dd..','..dd....dd..'];
+var HPALB={h:'#2b2b2b',s:'#f2c9a0',g:'#10131f',b:'#ff7a3c',a:'#ffffff',d:'#2f5bea'};
+var MIAFACE=['..hhhhhhhh..','.hhhhhhhhhh.','.hhssssssffh','.hsessssesh.','.hssssssssh.','.hsssmmsssh.','..hssssssh..','..bbbbbbbb..'];
+var MIAPAL={h:'#1a1210',s:'#d9a066',e:'#1c2230',f:'#ff4d6d',m:'#a8323a',b:'#ff5aa0'};
+var cv=$('scene'),cx=cv.getContext('2d');
+function sprOn(c,map,pal,x,y,px,flip){for(var r=0;r<map.length;r++)for(var k=0;k<map[r].length;k++){var kk=flip?map[r].length-1-k:k,ch=map[r][kk];if(ch!=='.'){c.fillStyle=pal[ch];c.fillRect(Math.round(x+k*px),Math.round(y+r*px),px,px)}}}
+function spr(map,pal,x,y,px,flip){sprOn(cx,map,pal,x,y,px,flip)}
+function R(c,x,y,w,h){cx.fillStyle=c;cx.fillRect(x,y,w,h)}
+var A={t:0,jump:0,shake:0,nodT:0};
+function txt(s,x,y,sz,col){cx.fillStyle=col||'#fff';cx.font='800 '+(sz||11)+'px '+FONT;cx.textAlign='center';cx.textBaseline='middle';cx.fillText(s,x,y)}
+function palm(x,y){R('#7a4b2a',x,y,5,40);R('#2e8b57',x-14,y-8,34,8);R('#2e8b57',x-8,y-14,22,8)}
+function drawBg(S,t){
+ var b=S.bg;
+ if(b==='beach'){drawBeach(t);return}
+ if(b==='dream'){drawDreamBg(t);return}
+ if(b==='pool'){drawPoolBg(t);return}
+ if(b==='hotel'){drawHotelBg();return}
+ if(b==='welcome'){drawBg({bg:'arrgate'},t);drawWelcomeBanner(S);return}
+ if(b==='arrgate'){
+  R('#e6edf7',0,0,320,100);R('#a7afbf',0,100,320,50);for(var x=0;x<320;x+=32)R('#9098ab',x,100,2,50);R('#9098ab',0,124,320,2);
+  var g=cx.createLinearGradient(0,14,0,76);g.addColorStop(0,'#5ec8f2');g.addColorStop(1,'#d8f3ff');cx.fillStyle=g;cx.fillRect(14,14,124,62);R('#5b6690',14,14,124,3);R('#5b6690',14,73,124,3);R('#5b6690',74,14,3,62);
+  var px=((t*14)%170)-20;R('#fff',14+px,44,26,5);R('#fff',14+px+16,40,8,3);R('#e8452c',14+px+22,43,3,2);
+  R('#1d3a8a',160,10,126,22);txt('ARRIVALS  →',223,21,11);
+  R('#4a5163',282,40,38,60);R('#2b2f3a',286,44,30,56);R(Math.floor(t*2)%2?'#34d27b':'#2e8b57',296,36,10,4);palm(160,60)}
+ if(b==='imm'){
+  R('#d5dde8',0,0,320,98);R('#7a8294',0,98,320,52);R('#5b6477',0,126,320,2);
+  R('#1d3a8a',90,8,140,20);txt('IMMIGRATION',160,18,11);
+  R('#2b4d8a',24,66,86,34);R('#2b4d8a',130,66,86,34);cx.fillStyle='rgba(169,212,255,.55)';cx.fillRect(24,36,86,30);cx.fillRect(130,36,86,30);R('#1d3a8a',24,34,86,3);R('#1d3a8a',130,34,86,3);
+  for(var i=0;i<6;i++)R('#ffd21a',20+i*52,138,30,4);
+  R('#333',252,84,3,30);R('#333',284,84,3,30);R('#c8402c',255,88,29,3)}
+ if(b==='bag'){
+  R('#e8eef5',0,0,320,98);R('#8e96a8',0,98,320,52);R('#6e7588',0,126,320,2);
+  R('#10131f',20,10,112,34);txt('CAROUSEL 3',76,22,11,'#ffb020');txt('FROM TOKYO',76,36,9,'#fff');
+  R('#2b2f3a',20,88,200,18);R('#1b1f2b',20,106,200,5);for(var s=0;s<12;s++)R('#3a4050',20+((s*18+t*26)%200),88,3,18);
+  var cols=['#2f5bea','#c8402c','#2e8b57','#7a4b2a'];for(var k=0;k<4;k++){var bx=20+((k*58+t*26)%190);R(cols[k],bx,72,22,16);R('#222',bx+8,68,6,4);if(k===0)R('#ff5a3c',bx+16,74,4,6)}}
+ if(b==='customs'){
+  R('#e9efe6',0,0,320,98);R('#7d8579',0,98,320,52);R('#5f665c',0,126,320,2);
+  R('#14533f',100,8,120,20);txt('CUSTOMS',160,18,11);
+  R('#2b2f3a',20,88,110,16);R('#454b5d',30,60,90,28);R('#1b1f2b',34,68,82,20);R('#7a4b2a',30+((t*20)%70),76,14,12);
+  R('#7a4b2a',150,84,160,40);R('#a06a3c',150,84,160,5)}
+ if(b==='lobby'){
+  R('#f6f1e4',0,0,320,100);R('#c9c1ab',0,100,320,50);R('#b2aa93',0,124,320,2);
+  R('#1f7a8c',150,10,140,22);txt('WELCOME CENTER',220,21,10);
+  R('#1d6fd1',30,14,44,44);txt('i',52,36,30);
+  R('#7a4b2a',146,84,164,40);R('#a06a3c',146,84,164,5);R('#fff',196,72,10,12);R('#6cc0f5',208,72,10,12);R('#ffc72c',220,72,10,12);palm(300,58)}
+ if(b==='ground'){
+  var sg=cx.createLinearGradient(0,0,0,100);sg.addColorStop(0,'#5ec8f2');sg.addColorStop(1,'#d8f3ff');cx.fillStyle=sg;cx.fillRect(0,0,320,100);
+  R('#ffe066',250,10,22,22);R('#dfe6f2',0,52,150,48);R('#aab4c6',0,48,150,6);
+  R('#4a5163',0,110,320,40);R('#d0d0c8',0,102,320,8);for(var d=0;d<320;d+=40)R('#fff',d,132,22,3);
+  R('#2b2b2b',20,54,50,22);txt('TAXI',45,65,11,'#ffb020');R('#555',43,76,4,26);
+  R('#ffc72c',150,88,64,18);R('#e0a800',166,77,30,12);R('#a9d4ff',169,80,11,7);R('#a9d4ff',183,80,11,7);R('#222',158,100,11,11);R('#222',196,100,11,11);R('#fff',172,72,20,5);
+  palm(290,52)}
+ if(b==='staff'){
+  R('#b8bcc6',0,0,320,100);R('#6c7080',0,100,320,50);R('#5a5e6c',0,124,320,2);
+  R('#9aa0b0',0,12,320,6);R('#7d8394',0,18,320,3);R('#9aa0b0',40,12,6,34);
+  if(Math.floor(t*4)%7)R('#fff7c2',60,2,40,4);R('#fff7c2',240,2,40,4);
+  R('#5b6690',150,24,70,76);R('#3a4366',154,28,62,72);R('#c8402c',156,8,58,14);txt('STAFF ONLY',185,15,9);
+  R('#a06a3c',24,76,34,24);R('#7a4b2a',24,76,34,4);R('#a06a3c',34,60,26,16)}
+ if(b==='dep'){
+  R('#eef2f8',0,0,320,98);R('#9aa3b8',0,98,320,52);R('#838ca3',0,126,320,2);
+  R('#1d3a8a',90,8,140,20);txt('CHECK-IN',160,18,11);
+  R('#10131f',20,10,56,36);txt('FLIGHTS',48,19,8,'#ffb020');R('#34d27b',26,28,44,2);R('#ffb020',26,34,30,2);R('#34d27b',26,40,36,2);
+  R('#2b4d8a',20,70,96,30);R('#a9d4ff',20,52,96,18);R('#1d3a8a',20,50,96,3);
+  R('#2b4d8a',130,70,96,30);R('#a9d4ff',130,52,96,18);R('#1d3a8a',130,50,96,3);
+  R('#454b5d',252,80,60,6);R('#2b2f3a',252,86,60,14);R('#e6edf7',268,70,26,9);R('#10131f',272,72,18,5);
+  var bx2=252+((t*18)%46);R('#2f5bea',bx2,70,12,10);R('#222',bx2+4,67,4,3)}
+ if(b==='lotte'){
+  R('#f6eef2',0,0,320,100);R('#cdbfc7',0,100,320,50);R('#b3a4ad',0,124,320,2);
+  R('#7a2a5c',90,8,140,20);txt('DUTY FREE',160,18,11);
+  var bc=['#e8452c','#2f5bea','#ffc72c','#34d27b','#ffffff'];
+  for(var s2=0;s2<3;s2++){R('#a07a5a',20,44+s2*22,122,3);for(var k2=0;k2<8;k2++)R(bc[(k2+s2)%5],24+k2*14,32+s2*22,10,12)}
+  R('#7a4b2a',150,84,160,40);R('#a06a3c',150,84,160,5);R('#10131f',250,70,30,14);R('#34d27b',254,73,12,4)}
+ if(b==='bk'){
+  R('#fbe9d0',0,0,320,100);R('#b89a78',0,100,320,50);R('#9d8161',0,124,320,2);
+  R('#b5471c',90,8,140,20);txt('BURGERS',160,18,11);
+  R('#10131f',20,14,104,46);for(var m3=0;m3<4;m3++){R('#ffc72c',28,22+m3*10,56,3);R('#ffffff',94,22+m3*10,20,3)}
+  R('#7a4b2a',150,84,160,40);R('#a06a3c',150,84,160,5);R('#d8d2c4',160,76,24,8);R('#ffc72c',190,70,12,14);R('#e8452c',206,72,12,12)}
+ if(b==='denny'){
+  R('#f2e6d0',0,0,320,100);R('#8a6a48',0,100,320,50);R('#6e5338',0,126,320,2);
+  R('#c8402c',90,8,140,20);txt('DINER',160,18,11);
+  R('#a9d4ff',16,22,104,50);R('#6e5338',16,22,104,3);R('#6e5338',66,22,3,50);R('#6e5338',16,70,104,3);
+  R('#a06a3c',150,84,160,8);R('#7a4b2a',226,92,8,32);R('#ffffff',170,74,8,10);R('#7a4b2a',170,72,8,3);R('#ffffff',270,76,16,8);R('#ffc72c',274,78,8,4)}
+}
+function palmS(x,y,t){var sw=Math.round(Math.sin(t*1.4+x)*2);R('#7a4b2a',x,y,5,56);R('#5a3a1a',x+1,y+2,3,3);R('#2e8b57',x-14+sw,y-8,34,8);R('#2e8b57',x-8+sw,y-14,22,8);R('#3aa56a',x-20+sw*2,y-3,14,5);R('#3aa56a',x+12+sw*2,y-3,14,5)}
+function drawBeach(t){
+ var W=G.wxc||wxAvg(G.tm||720),kind=wxKind(W.code),tp=G.tp,night=(tp==='night'||tp==='late');
+ var SK={morning:['#7fd3ff','#ffe3b0'],day:['#3fb8f2','#cdeeff'],dusk:['#5a4a9a','#ff9a5a'],night:['#070d2b','#1a2a6a'],late:['#03061a','#0e1844']}[tp];
+ var g=cx.createLinearGradient(0,0,0,68);g.addColorStop(0,SK[0]);g.addColorStop(1,SK[1]);cx.fillStyle=g;cx.fillRect(0,0,320,68);
+ if(night){R('#f4f1d0',252,12,18,18);R('#cfcaa0',258,17,4,4);R('#cfcaa0',264,23,3,3)}
+ else if(tp==='dusk'){
+  if(G.scene&&G.scene.event==='sunset'){var pr=Math.min(1,((G.ti||0)+.3)/Math.max(1,G.scene.turns.length)),sy2=Math.round(22+pr*50);
+   cx.fillStyle='rgba(255,200,110,.30)';cx.beginPath();cx.arc(250,sy2,27,0,6.283);cx.fill();
+   cx.fillStyle='#ffb347';cx.beginPath();cx.arc(250,sy2,17,0,6.283);cx.fill();
+   cx.fillStyle='#ff7a3c';cx.beginPath();cx.arc(250,sy2,11,0,6.283);cx.fill()}
+  else{R('#ffcf6a',236,48,38,20);R('#ff8a3c',242,54,26,14)}}
+ else{R('#fff1a8',246,10,30,30);R('#ffd54a',251,15,20,20)}
+ var nc=kind==='clear'?1:kind==='part'?3:5;if(W.rh>=85&&nc<6)nc++;
+ var cc=night?'#26356f':(kind==='rain'||kind==='storm')?'#8c97a8':kind==='cloud'?'#e3e8f0':'#ffffff';
+ for(var c=0;c<nc;c++){var cxp=((c*97+t*(4+c))%400)-60,cy=8+(c*19)%38;R(cc,cxp,cy,46,10);R(cc,cxp+10,cy-6,28,8);R(cc,cxp+30,cy+6,24,6)}
+ var SE={morning:['#2aa5d9','#7ad9ec'],day:['#0f8fc9','#33c6e6'],dusk:['#5a6fb0','#ff9a6a'],night:['#050c2a','#0e2058'],late:['#030720','#091848']}[tp];
+ var g2=cx.createLinearGradient(0,68,0,112);g2.addColorStop(0,SE[0]);g2.addColorStop(1,SE[1]);cx.fillStyle=g2;cx.fillRect(0,68,320,44);
+ R(night?'#0c1a4a':'rgba(255,255,255,.5)',0,68,320,1);
+ for(var i=0;i<8;i++){var yy=Math.round(72+i*5+Math.sin(t*1.5+i)*1.2);for(var k=0;k<6;k++){var xx=((k*58+t*(8+i*3)+i*23)%380)-30;R(night?'rgba(130,160,255,.22)':'rgba(255,255,255,.38)',xx,yy,16+i*3,2)}}
+ if(night){for(var m=0;m<8;m++)R('rgba(244,241,208,.45)',258+Math.round(Math.sin(t*2+m)*3),70+m*5,9-(m%3)*2,2)}
+ else if(tp==='dusk'){for(var m2=0;m2<8;m2++)R('rgba(255,170,90,.5)',244+Math.round(Math.sin(t*2+m2)*3),70+m2*5,16-(m2%3)*3,2)}
+ var sy=Math.round(112+Math.sin(t*1.1)*3);
+ R(night?'#101c40':'#c9a96a',0,sy,320,8);R('rgba(255,255,255,.85)',0,sy-3,320,3);
+ R(night?'#26305a':'#f2d9a0',0,sy+8,320,50);
+ for(var d=0;d<14;d++)R(night?'#1c2650':'#dcc084',(d*47+11)%310,126+(d*13)%20,3,2);
+ palmS(300,52,t);palmS(14,58,t);
+ R('#e8e8e8',126,88,3,32);R('#ff5a3c',104,84,46,8);R('#ffffff',114,84,12,8);R('#ffffff',138,84,12,8);R('#ffd23f',104,128,42,10);R('#ff9a3c',104,134,42,4);
+ var bx=76,by=Math.round(118-Math.abs(Math.sin(t*2.2))*26);R('#ff5a3c',bx,by,9,9);R('#ffffff',bx+3,by,3,9)}
+function beachFx(t){var W=G.wxc||wxAvg(G.tm||720),k=wxKind(W.code);
+ if(k==='rain'||k==='storm'){R('rgba(60,70,95,.22)',0,0,320,150);for(var i=0;i<46;i++){R('rgba(210,225,255,.75)',((i*37+t*40)%330)-6,((i*53+t*230)%150),1,6)}
+  if(k==='storm'&&((t*3)%9)<.14)R('rgba(255,255,255,.45)',0,0,320,150)}
+ else if(W.rh>=85&&G.tp!=='night'&&G.tp!=='late')R('rgba(255,255,255,.07)',0,52,320,30)}
+function drawBeachChars(S,t){
+ var bob=Math.sin(t*3)*1.2,nod=A.nodT>0?Math.sin(A.nodT*18)*2:0;
+ var ny=Math.round(76+bob+nod);
+ spr(NPCMAP,{c:S.pal.c,h:S.pal.h,s:S.pal.s,e:'#1c2230',b:S.pal.b,a:S.pal.a,d:S.pal.s},S.npcX,ny,5,true);
+ R('#ff4d6d',S.npcX+6,ny+10,6,6);R('#ff9ab0',S.npcX+8,ny+12,2,2);
+ var lx=176,ly=Math.round(86+Math.sin(t*2)*3);
+ R('rgba(255,255,255,.5)',lx-6,ly+27,46,3);spr(BUDDYMAP,BPAL,lx,ly,3,false);
+ if(S.event==='sunset'){txt('♥',100,58+Math.round(Math.sin(t*2)*3),12,'#ff6b9a');txt('♥',112,48+Math.round(Math.sin(t*2+2)*3),9,'#ff9ab0')}
+ R('#ff5a8a',lx-4,ly+17,38,7);R('#ffffff',lx+5,ly+17,6,7);R('#ffffff',lx+19,ly+17,6,7);
+ R('#ffffff',lx+33+Math.round(Math.sin(t*5)*3),ly-3+Math.round(Math.cos(t*6)*2),2,2);
+ var hx=36,hy=76-(A.jump>0?Math.sin(A.jump*Math.PI)*16:0)+(A.shake>0?Math.sin(A.shake*60)*2:0);
+ R('rgba(0,0,0,.25)',hx+4,138,54,6);
+ spr((Math.floor(t*2.5)%2)?HBB:HBA,HPALB,hx,Math.round(hy),5,false)}
+/* ---- ホテル（受付・エレベーター・部屋・夢・プール）。絵はすべて四角の点で描く。実在のホテル名・ロゴは使っていない ---- */
+function drawHotelBg(){
+ R('#f1e2c4',0,0,320,100);R('#c9a77a',0,100,320,50);R('#b08d60',0,124,320,2);
+ for(var hx2=0;hx2<320;hx2+=40)R('#bd9a6c',hx2,100,1,50);
+ R('#0f6e6e',90,8,140,20);txt('FRONT DESK',160,18,11);
+ R('#3a2a1c',20,30,100,56);R('#241a10',24,34,92,48);
+ for(var kr=0;kr<3;kr++)for(var kc=0;kc<8;kc++){R(((kr+kc)%3)?'#ffc72c':'#c0c8d8',30+kc*10,40+kr*14,4,8)}
+ R('#3a2a1c',246,32,28,28);R('#fff6d8',249,35,22,22);R('#3a2a1c',259,38,2,10);R('#3a2a1c',259,47,8,2);
+ R('#8a5a2b',128,92,14,14);R('#2e8b57',122,76,26,16);R('#3aa56a',128,68,14,10);
+ R('#7a4b2a',150,84,160,40);R('#a06a3c',150,84,160,5);
+ R('#ffc72c',170,77,12,7);R('#ffffff',174,72,4,5);
+ R('#10131f',240,66,30,18);R('#34d27b',244,70,12,4);R('#10131f',252,84,6,3)}
+function drawDreamBg(t){
+ var dg=cx.createLinearGradient(0,0,0,150);dg.addColorStop(0,'#1a1650');dg.addColorStop(.55,'#4a3a9a');dg.addColorStop(1,'#e58ac0');cx.fillStyle=dg;cx.fillRect(0,0,320,150);
+ for(var i=0;i<26;i++){if(Math.floor(t*2+i)%4){var sz=(i%3)?2:3;R('#ffffff',(i*47+13)%316,(i*31+5)%88,sz,sz)}}
+ cx.fillStyle='#fff1a8';cx.beginPath();cx.arc(274,30,15,0,6.283);cx.fill();cx.fillStyle='#2a2268';cx.beginPath();cx.arc(281,25,13,0,6.283);cx.fill();
+ for(var c=0;c<5;c++){var x=((c*83+t*(6+c*2))%420)-60,y=64+c*17;R('rgba(255,225,245,.55)',x,y,44,9);R('rgba(255,225,245,.55)',x+8,y-6,24,7)}}
+function drawPoolBg(t){
+ var tp=G.tp,night=(tp==='night'||tp==='late');
+ var SK={morning:['#7fd3ff','#ffe3b0'],day:['#3fb8f2','#cdeeff'],dusk:['#5a4a9a','#ff9a5a'],night:['#070d2b','#1a2a6a'],late:['#03061a','#0e1844']}[tp];
+ var g=cx.createLinearGradient(0,0,0,74);g.addColorStop(0,SK[0]);g.addColorStop(1,SK[1]);cx.fillStyle=g;cx.fillRect(0,0,320,74);
+ if(night){for(var s=0;s<16;s++){if(Math.floor(t*2+s)%5)R('#fff',(s*53+9)%300,(s*29+3)%40,2,2)}R('#f4f1d0',34,10,14,14);R('#cfcaa0',38,14,3,3)}
+ R(night?'#272c52':'#efe3cc',168,16,150,58);
+ for(var wy=0;wy<3;wy++)for(var wx2=0;wx2<7;wx2++){R(night?((wx2+wy)%3?'#ffd870':'#3a4270'):'#9fd8f5',176+wx2*20,22+wy*16,12,9)}
+ palmS(16,30,t);
+ R(night?'#0f6aa0':'#1fb5e0',0,74,320,30);R(night?'#2fd0e8':'#7fe0f5',0,74,320,3);
+ for(var i=0;i<5;i++){var yy=Math.round(80+i*5+Math.sin(t*1.5+i)*1.2);for(var k=0;k<5;k++){var xx=((k*70+t*(10+i*3)+i*23)%380)-30;R(night?'rgba(160,240,255,.30)':'rgba(255,255,255,.42)',xx,yy,18+i*3,2)}}
+ R('#e9eef7',0,72,320,3);R('#cfd8e6',0,104,320,3);
+ R(night?'#4a4468':'#ddcba4',0,107,320,43);for(var d=0;d<320;d+=32)R(night?'#3e385a':'#cbb88e',d,107,1,43);R(night?'#3e385a':'#cbb88e',0,128,320,1)}
+function drawPoolChars(S,t){
+ var bob=Math.sin(t*3)*1.2,spk=S.spk,nd=A.nodT>0?Math.sin(A.nodT*18)*2:0;
+ var my=Math.round(66+bob+(spk==='Mr. Tom'?nd:0)),ly=Math.round(68+Math.sin(t*3+1)*1.2+(spk==='Lani'?nd:0));
+ R('#e8452c',172,30,134,10);for(var q=0;q<5;q++)R('#ffffff',176+q*28,30,14,10);R('#cfd6e4',242,40,4,66);
+ spr(NPCMAP,{c:'#e9d9a0',h:'#8a8a8a',s:'#e3b58a',e:'#1c2230',b:'#e8452c',a:'#ffd23f',d:'#333a4d'},192,my,4,false);
+ R('#10131f',192+12,my+12,24,4);R('#ffffff',192+16,my+12,3,1);R('#ffffff',192+28,my+12,3,1);
+ spr(NPCMAP,{c:'#2a1c18',h:'#2a1c18',s:'#e8b98a',e:'#1c2230',b:'#2fb5a3',a:'#ffffff',d:'#333a4d'},254,ly,4,true);
+ R('#2a1c18',254+8,ly+20,4,10);R('#2a1c18',254+36,ly+20,4,10);R('#ff4d6d',254+32,ly+4,4,4);
+ R('#e6ebf5',130,100,178,6);R('#a9b4c8',130,106,178,3);R('#8e98ac',150,109,6,32);R('#8e98ac',282,109,6,32);
+ R('#ffd0e0',212,90,8,10);R('#ff4d6d',216,86,2,6);R('#a9e0ff',268,90,8,10);
+ R('#ffffff',232,96,10,5);R('#e8452c',234,98,5,2);R('#ffffff',236,94,10,5);
+ var hx=62,hy=84-(A.jump>0?Math.sin(A.jump*Math.PI)*16:0)+(A.shake>0?Math.sin(A.shake*60)*2:0);
+ R('rgba(0,0,0,.25)',hx+4,138,54,6);spr(HEROMAP,HPAL,hx,Math.round(hy-4),5,false);
+ R('rgba(0,0,0,.22)',4,138,30,4);spr(BUDDYMAP,BPAL,4,116,3,false)}
+function drawDreamChars(S,t){
+ var jp=A.jump>0?Math.sin(A.jump*Math.PI):0,spk=S.spk,nd=A.nodT>0?Math.round(Math.sin(A.nodT*18)*2):0;
+ for(var i=0;i<8;i++){var bx=(i*41+24)%300,by=150-((t*14+i*29)%150);cx.strokeStyle='rgba(255,255,255,.55)';cx.lineWidth=1;cx.beginPath();cx.arc(bx,by,4+(i%3)*2,0,6.283);cx.stroke()}
+ var b=Math.round(100+Math.sin(t*1.3)*4);
+ R('#8a5a2b',8,b+14,90,8);R('#8a5a2b',8,b+2,5,26);R('#8a5a2b',93,b+8,5,20);
+ R('#ffffff',14,b+6,78,10);R('#5b86e5',42,b+2,50,14);R('#ffffff',14,b,26,8);
+ R('#2b2b2b',20,b-12,16,6);R('#f2c9a0',20,b-8,16,13);R('#1c2230',26,b-3,4,2);
+ txt('z',48,b-16+Math.sin(t*2)*3,11);txt('Z',58,b-28+Math.sin(t*2+1)*3,14);
+ var hy=Math.round(62+Math.sin(t*2.2)*4+(spk==='Haggan'?nd:0)-jp*6),fy=Math.round(48+Math.sin(t*3.1+1.3)*5+(spk==='Fanihi'?nd:0)-jp*10);
+ var hS=((t+.4)%3.9)<.13,fS=((t+1.7)%3.3)<.13;
+ spr(hS?HAGSHUT:HAGMAP,HAGPAL,118,hy,5,false);
+ spr(fS?FANSHUT:FANMAP,FANPAL,206+(A.shake>0?Math.round(Math.sin(A.shake*60)*2):0),fy,5,false)}
+/* ---- 動く場面（エレベーター・ひと泳ぎ・部屋） ---- */
+function drawAnim(S,t){
+ if(S.anim==='lift')drawLift(t-S.t0);
+ else if(S.anim==='swim')drawSwim(t-S.t0);
+ else if(S.anim==='room')drawRoom(S,t)}
+function drawLift(e){
+ var shk=(e>.5&&e<2.4)?Math.round(Math.sin(e*40)):0;
+ R('#bdb7a8',0,0,320,150);R('#a29c8d',0,0,320,14);R('#8d8779',0,138,320,12);
+ for(var x=40;x<320;x+=40)R('#aaa496',x,14,2,124);
+ R('#10131f',128,2,64,20);var fl=Math.max(1,Math.min(8,1+Math.floor(Math.max(0,e-.5)/1.9*7)));
+ txt('▲',142,12,9,'#ff6b3c');txt(String(fl),166,12,14,'#ff6b3c');
+ R('#fff7c2',90,0,140,3);
+ var open=e<.4?1-e/.4:(e<2.4?0:Math.min(1,(e-2.4)/.5));
+ R('#e8dcc4',100,24,120,86);R('#7a2a3c',100,110,120,28);R('#5a1f2d',100,110,120,3);
+ R('#a06a3c',110,40,22,62);R('#ffc72c',126,70,3,3);R('#a06a3c',188,40,22,62);R('#ffc72c',190,70,3,3);R('#fff6d8',116,32,10,5);R('#fff6d8',194,32,10,5);
+ var half=Math.round(60*(1-open));if(half>0){R('#c8ccd6',100,24,half,114);R('#c8ccd6',220-half,24,half,114);R('#9aa1b3',100+half-2,24,2,114);R('#9aa1b3',220-half,24,2,114)}
+ R('#5b6690',96,22,4,116);R('#5b6690',220,22,4,116);R('#5b6690',96,22,128,3);
+ R('#10131f',262,50,22,48);R(Math.floor(e*4)%2?'#ffc72c':'#6a5a2a',268,58,10,6);R('#34d27b',268,70,10,6);R('#9aa7d9',268,82,10,6);
+ spr(HEROMAP,HPAL,130,86+shk,5,false);R('rgba(0,0,0,.22)',4,138,30,4);spr(BUDDYMAP,BPAL,12,116+shk,3,false)}
+function drawSwim(e){
+ var tp=G.tp,night=(tp==='night'||tp==='late');
+ var SK={morning:['#7fd3ff','#ffe3b0'],day:['#3fb8f2','#cdeeff'],dusk:['#5a4a9a','#ff9a5a'],night:['#070d2b','#1a2a6a'],late:['#03061a','#0e1844']}[tp];
+ var g=cx.createLinearGradient(0,0,0,66);g.addColorStop(0,SK[0]);g.addColorStop(1,SK[1]);cx.fillStyle=g;cx.fillRect(0,0,320,66);
+ if(night){for(var s=0;s<16;s++){if(Math.floor(e*2+s)%5)R('#fff',(s*53+9)%300,(s*29+3)%40,2,2)}}
+ palmS(20,28,A.t);palmS(298,26,A.t);
+ R(night?'#4a4468':'#ddcba4',0,62,320,12);
+ R(night?'#0f6aa0':'#1fb5e0',0,74,320,76);R(night?'#2fd0e8':'#7fe0f5',0,74,320,3);
+ for(var l=0;l<3;l++){var ly=94+l*20;for(var k=0;k<20;k++)R(k%2?'#e8452c':'#ffffff',k*16,ly,14,3)}
+ var x=18+Math.min(1,e/2.6)*250,sw=Math.sin(e*11),by=Math.round(86+Math.sin(e*6)*2);
+ if(e<.5){for(var d=0;d<8;d++){var a=e*8+d;R('#cfefff',24+d*5+Math.round(Math.sin(d)*3),Math.round(74-Math.abs(Math.sin(a))*18),3,3)}}
+ R('#2f5bea',x-22,by+13,28,9);R('#333a4d',x-34,by+15,12,5);
+ R('#2b2b2b',x,by-4,16,7);R('#f2c9a0',x+2,by,14,13);R('#1c2230',x+11,by+5,2,2);
+ var up=sw>0;R('#f2c9a0',x+14+(up?10:0),by+(up?-8:6),9,5);R('#f2c9a0',x-4,by+(up?8:-6),9,5);
+ R('rgba(31,181,224,.55)',0,by+11,320,80);
+ for(var b=0;b<7;b++){R('rgba(255,255,255,.65)',x-12-b*9,Math.round(by+16+((b*7+e*22)%26)),3,3)}
+ R('rgba(255,255,255,.6)',x-60,by+12,60,2);R('rgba(255,255,255,.4)',x-90,by+14,50,2);
+ var col={dusk:'rgba(255,115,55,.2)',night:'rgba(15,25,90,.3)',late:'rgba(6,10,50,.3)'}[tp];if(col)R(col,0,0,320,150)}
+function drawRoom(S,t){
+ var m=S.mode,e=t-S.mt0,lampOn=(m==='wait'||m==='wake'||(m==='sleep'&&e<.9));
+ R('#e9d9bf',0,0,320,104);R('#8a6a48',0,104,320,46);R('#6e5338',0,100,320,5);
+ R('#10131f',20,16,92,52);for(var s=0;s<9;s++){if(Math.floor(t*2+s)%5)R('#fff',24+(s*37)%84,20+(s*23)%40,2,2)}cx.fillStyle='#f4f1d0';cx.beginPath();cx.arc(90,32,7,0,6.283);cx.fill();cx.fillStyle='#10131f';cx.beginPath();cx.arc(94,29,6,0,6.283);cx.fill();
+ R('#f3ecde',20,16,92,3);R('#f3ecde',20,65,92,3);R('#f3ecde',64,16,3,52);R('#f3ecde',20,16,3,52);R('#f3ecde',109,16,3,52);
+ R('#c8402c',12,12,12,62);R('#c8402c',108,12,12,62);
+ R('#6e5338',140,92,170,12);R('#6e5338',294,62,12,48);R('#6e5338',140,104,6,20);R('#6e5338',294,104,6,20);
+ R('#ffffff',146,80,150,14);R('#ffffff',150,68,36,12);
+ R('#6e5338',112,84,22,34);R('#8a5a2b',112,84,22,4);
+ R('#ffc72c',118,66,10,14);R('#ffe9a0',120,80,6,4);
+ if(lampOn){R('rgba(255,236,160,.08)',84,48,100,70);R('rgba(255,236,160,.08)',96,58,76,56)}
+ var bl='#2f7fc4',hx=36;
+ if(m==='wait'){spr(HEROMAP,HPAL,hx,84,5,false)}
+ else if(m==='sleep'){var w=Math.min(1,e/.9);hx=36+w*96;
+  if(e<.9)spr(HEROMAP,HPAL,Math.round(hx),84,5,false);
+  else{R('#2b2b2b',160,64,20,7);R('#f2c9a0',162,70,18,14);R('#1c2230',168,76,3,2);R('#1c2230',174,76,3,2);R(bl,176,82,118,12);R('#245f96',176,82,118,3);
+   txt('z',200,56+Math.sin(t*2)*3,11,'#3a2a1c');txt('Z',212,44+Math.sin(t*2+1)*3,14,'#3a2a1c')}
+  if(e>1.6)R('rgba(0,0,12,'+Math.min(1,(e-1.6)/.9).toFixed(2)+')',0,0,320,150);
+  else if(e>.9)R('rgba(0,0,20,.35)',0,0,320,150)}
+ else if(m==='wake'){spr(HEROMAP,HPAL,176,56,4,false);R(bl,150,86,148,12);R('#245f96',150,86,148,3);
+  if(e<.8)R('rgba(0,0,12,'+(1-e/.8).toFixed(2)+')',0,0,320,150)}
+ if(m==='wait'){R('rgba(0,0,0,.25)',hx+4,138,54,6)}}
+function drawChars(S,t){
+ if(S.bg==='beach'){drawBeachChars(S,t);return}
+ if(S.bg==='dream'){drawDreamChars(S,t);return}
+ if(S.bg==='pool'){drawPoolChars(S,t);return}
+ var bob=Math.sin(t*3)*1.2,nod=A.nodT>0?Math.sin(A.nodT*18)*2:0;
+ var ny=Math.round(46+bob+nod);spr(NPCMAP,{c:S.pal.c,h:S.pal.h,s:S.pal.s||'#f2c9a0',e:'#1c2230',b:S.pal.b,a:S.pal.a,d:'#333a4d'},S.npcX,ny,5,true);
+ if(G.tp==='night'||G.tp==='late'){R('#f5d63a',S.npcX+15,ny+30,5,20);R('#f5d63a',S.npcX+40,ny+30,5,20);R('#fff',S.npcX+15,ny+38,5,2);R('#fff',S.npcX+40,ny+38,5,2)}
+ if(G.tp==='late'&&!AWAKE[S.id]){txt('z',S.npcX+58,ny-2+Math.sin(t*2)*3,11);txt('Z',S.npcX+66,ny-12+Math.sin(t*2+1)*3,14)}
+ var hx=36,hy=84-(A.jump>0?Math.sin(A.jump*Math.PI)*16:0)+(A.shake>0?Math.sin(A.shake*60)*2:0);
+ R('rgba(0,0,0,.25)',hx+4,138,54,6);
+ spr(HEROMAP,HPAL,hx,Math.round(hy-4),5,false);
+ if(S.id!=='staff'){var by=116-(A.jump>0?Math.sin(A.jump*Math.PI+.6)*10:0);
+  R('rgba(0,0,0,.22)',4,138,30,4);spr(BUDDYMAP,BPAL,4,Math.round(by),3,false)}
+ if(S.id==='welcome')drawWelcomeTable(S,t);
+ if(MASCOT_AT[S.id])drawMascots(S,t);
+}
+/* ハガン(左・ゆったり)とファニヒ(右・はしゃぐ)。ふだんはゆっくり上下、会話の合図でうなずき、合格で小さくはねる。閉店中の深夜は寝る */
+function drawWelcomeBanner(S){
+ R('#0f6e6e',150,14,124,18);R('#ffc72c',150,14,124,2);R('#ffc72c',150,30,124,2);
+ txt(S.vi===0?'WELCOME DRINK':'THANK YOU',212,24,10,'#fff')}
+function drawWelcomeTable(S,t){
+ var open=(S.vi===0);
+ R('rgba(0,0,0,.25)',200,138,116,5);
+ R('#c98a4a',202,100,112,3);R('#8a5a2b',202,103,112,5);R('#6d4420',208,108,100,30);
+ R('#0f6e6e',208,110,100,12);txt(open?'FREE TASTING':'CLOSED',258,116,9,'#fff');
+ if(open){var LQ=['#ffb347','#ff6b9a','#9be564','#ffd23f'];
+  for(var i=0;i<8;i++){R('#ffffff',208+i*11,91,7,10);R(LQ[i%4],209+i*11,93,5,6)}
+  R('#e8f4ff',296,80,14,21);R('#ffb347',298,88,10,11);R('#ffffff',300,78,6,3)}
+ else{R('#ffffff',214,97,8,5);R('#ffffff',236,98,9,4);R('#ffffff',280,96,7,6);
+  R('#6d4420',255,80,3,20);R('#e8452c',230,60,56,22);R('#ffffff',232,62,52,18);txt('SOLD OUT',258,71,10,'#e8452c')}
+}
+function drawMascots(S,t){
+ var asleep=(G.tp==='late'&&!AWAKE[S.id]);
+ var hp=timePal(HAGPAL),fp=timePal(FANPAL);
+ var jp=A.jump>0?Math.sin(A.jump*Math.PI):0,nd=A.nodT>0?Math.round(Math.sin(A.nodT*18)):0;
+ var hb=asleep?0:Math.round(Math.sin(t*2.2)),fb=asleep?0:Math.round(Math.sin(t*3.1+1.3));
+ var spk0=S.spk,hnd=spk0==='Haggan'?nd:0,fnd=spk0==='Fanihi'?nd:0;
+ var hy=Math.round(104+hb+hnd-jp*6),fy=Math.round(107+fb+fnd-jp*11);
+ var fxp=156+(A.shake>0?Math.round(Math.sin(A.shake*60)*2):0);
+ var hShut=asleep||((t+.4)%3.9)<.13,fShut=asleep||((t+1.7)%3.3)<.13;
+ R('rgba(0,0,0,.25)',112,138,36,4);R('rgba(0,0,0,.25)',158,138,34,4);
+ spr(hShut?HAGSHUT:HAGMAP,hp,110,hy,3,false);
+ spr(fShut?FANSHUT:FANMAP,fp,fxp,fy,3,false);
+ if(asleep){txt('z',150,hy-4+Math.sin(t*2)*3,11);txt('Z',198,fy-6+Math.sin(t*2+1)*3,13)}
+}
+function stars(x,y,w,h){for(var i=0;i<14;i++){if(Math.floor(A.t*2+i)%5)R('#fff',x+((i*53+7)%w),y+((i*29+3)%h),2,2)}}
+function tintScene(S){
+ if(S.notint)return;
+ var tp=G.tp,cl=isClosed(S.id);
+ var col={morning:'rgba(255,205,130,.10)',day:null,dusk:'rgba(255,115,55,.22)',night:'rgba(15,25,90,.38)',late:(cl||S.id==='staff')?'rgba(5,8,40,.62)':'rgba(6,10,50,.36)'}[tp];
+ if(col)R(col,0,0,320,150);
+ if(tp==='night'||tp==='late'){
+  if(S.bg==='arrgate'||S.bg==='welcome')stars(14,14,124,34);
+  if(S.bg==='beach')stars(0,0,320,56);
+  if(S.bg==='ground'){R('#dfe6ff',250,10,22,22);R('#9aa7d9',256,16,5,5);stars(0,0,240,44)}}
+ if(S.bg==='beach')beachFx(A.t);
+ if(tp==='late'&&S.id!=='staff'&&S.id!=='beach'&&S.id!=='hotel'&&!P[S.id].sub){
+  if(cl){R('#7a1f1f',116,3,88,16);R('#e8452c',118,5,84,12);txt('CLOSED',160,11,10)}
+  else{R('#145a32',116,3,88,16);R(Math.floor(A.t*3)%2?'#34d27b':'#2e8b57',118,5,84,12);txt('OPEN',160,11,10,'#03200f')}}}
+function draw(dt){
+ A.t+=dt;A.nodT=Math.max(0,A.nodT-dt);A.jump=Math.max(0,A.jump-dt*2.4);A.shake=Math.max(0,A.shake-dt);
+ cx.clearRect(0,0,320,150);
+ if(!G.scene){R('#0d1226',0,0,320,150);return}
+ if(G.scene.anim){drawAnim(G.scene,A.t);return}
+ drawBg(G.scene,A.t);tintScene(G.scene);drawChars(G.scene,A.t);
+}
+
+/* ---------- 状態 ---------- */
+var G={scene:null,si:0,ti:0,tries:0,view:'none',stat:{turns:0,retry:0,assist:0,wmiss:0,wtot:0,rts:[],t0:0},typeTimer:null,phase:'idle',sid:0,at:'gate',timers:[]};
+var panel=$('panel'),msgText=$('msgText'),who=$('who');
+function later(ms,fn){var s=G.sid;var id=setTimeout(function(){if(G.sid===s)fn()},ms);G.timers.push(id);return id}
+function gd(fn){var s=G.sid;return function(){if(G.sid===s)return fn.apply(this,arguments)}}
+function clearTimers(){G.timers.forEach(clearTimeout);G.timers=[];clearInterval(G.typeTimer)}
+function setMsg(text,whoName){who.textContent=whoName||G.scene.who;msgText.textContent='';typeText(text)}
+function typeText(text,cb){clearInterval(G.typeTimer);var i=0,s=G.sid;G.typeTimer=setInterval(function(){if(G.sid!==s){clearInterval(G.typeTimer);return}i++;msgText.textContent=text.slice(0,i);if(i%2===0)sfxBlip();if(i>=text.length){clearInterval(G.typeTimer);if(cb)cb()}},26)}
+function setMsgInstant(text,whoName){clearInterval(G.typeTimer);who.textContent=whoName;msgText.textContent=text}
+function clearPanel(){panel.innerHTML=''}
+
+/* ---------- マップ ---------- */
+var mapEl=$('map'),pathsEl=$('paths'),nodeEls={},lineEls=[],heroEl,buddyEl;
+function cleared(id){return (save.clears[id]||0)>=1}
+/* 空港の外（ビーチ）に出たら、到着側の場所には戻れない */
+var ARRIVAL={welcome:1,gate:1,immigration:1,baggage:1,customs:1,lobby:1,ground:1,staff:1};
+function isOut(){return !!save.out||(save.clears.beach||0)>=1}
+function isPassed(id){return !!ARRIVAL[id]&&isOut()}
+function allDone(){return PLACES.every(function(p){return p.bonus||isPassed(p.id)||(save.clears[p.id]||0)>=coreN(p)})}
+function isUnlocked(id){var p=P[id];if(!p.req)return true;if(p.req==='secret')return !!save.secret;return cleared(p.req)}
+function distinctCleared(){return PLACES.filter(function(p){return p.req!=='secret'&&!p.bonus&&cleared(p.id)}).length}
+function playsDone(){return PLACES.reduce(function(a,p){return a+Math.min(save.clears[p.id]||0,coreN(p))},0)}
+function mkWalker(id,map,pal,px){var d=el('div','walker');d.id=id;var c=document.createElement('canvas');c.width=map[0].length*px;c.height=map.length*px;sprOn(c.getContext('2d'),map,pal,0,0,px,false);d.appendChild(c);return d}
+function buildMap(){
+ mapEl.querySelectorAll('.node,.walker').forEach(function(n){n.remove()});pathsEl.innerHTML='';nodeEls={};lineEls=[];
+ PLACES.forEach(function(p){
+  if(p.sub)return;
+  if(p.req){var from=p.from||p.req,a=P[from];
+   var ln=document.createElementNS('http://www.w3.org/2000/svg','line');ln.setAttribute('x1',a.x);ln.setAttribute('y1',a.y);ln.setAttribute('x2',p.x);ln.setAttribute('y2',p.y);ln.dataset.to=p.id;pathsEl.appendChild(ln);lineEls.push(ln)}
+ });
+ PLACES.forEach(function(p){
+  if(p.sub)return;
+  var n=el('button','node');n.type='button';n.dataset.id=p.id;n.style.left=p.x+'%';n.style.top=p.y+'%';n.setAttribute('aria-label',(PLACE_EN[p.id]||p.id));
+  n.appendChild(el('span','ico',p.icon));n.appendChild(el('span','star','★'));n.appendChild(el('span','q','?'));n.appendChild(el('span','tag'));
+  if(coreN(p)>1){var dd=el('span','dots');for(var di=0;di<coreN(p);di++)dd.appendChild(el('i'));n.appendChild(dd)}
+  n.addEventListener('click',function(){onNode(p.id)});mapEl.appendChild(n);nodeEls[p.id]=n;
+ });
+ heroEl=mkWalker('hero',HEROMAP,HPAL,3);buddyEl=mkWalker('buddy',BUDDYMAP,BPAL,3);mapEl.appendChild(buddyEl);mapEl.appendChild(heroEl);
+ placeWalkers(G.at,true);
+}
+
+/* ---- ビット絵のマップ背景（砂地・海・木・岩を点で描く。グラデーションなし） ---- */
+var PXM={
+ palm:['..gg.gg..','.ggggggg.','gg.ggg.gg','g...t...g','....t....','....t....','....t....'],
+ bush:['..GGG..','.GGgGG.','GGGGgGG','.GGGGG.'],
+ rock:['..kkk.','.kLLkk','kLLLkk','kkkkkk'],
+ flow:['.r.','rYr','.r.'],
+ shell:['.pp.','pPPp','.pp.']
+};
+var PXC={g:'#3f9b4a',G:'#2a6e35',t:'#8a5a2b',k:'#6d6a66',L:'#9a968f',r:'#d94f6a',Y:'#ffe066',p:'#f2b6a5',P:'#e48f7c'};
+function mrng(seed){return function(){seed=(seed+0x6D2B79F5)|0;var t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function drawMapBg(){
+ var c=document.getElementById('mapbg');
+ if(!c){c=document.createElement('canvas');c.id='mapbg';c.style.cssText='position:absolute;left:0;top:0;width:100%;height:100%;image-rendering:pixelated;z-index:0;pointer-events:none';mapEl.insertBefore(c,mapEl.firstChild)}
+ var W=mapEl.clientWidth,H=mapEl.clientHeight;if(!W||!H)return;
+ var U=4,cw=Math.ceil(W/U),ch=Math.ceil(H/U);c.width=cw;c.height=ch;var g=c.getContext('2d'),rnd=mrng(20261105);
+ function px(col,x,y,w,h){g.fillStyle=col;g.fillRect(x,y,w||1,h||1)}
+ /* 砂地：2色の点 */
+ px('#e9d49b',0,0,cw,ch);
+ for(var i=0;i<cw*ch/38;i++){px(rnd()<.5?'#dcc486':'#f1deac',(rnd()*cw)|0,(rnd()*ch)|0,1+((rnd()*2)|0),1)}
+ /* 道と建物のまわりは空ける */
+ var keep=[];PLACES.forEach(function(p){if(p.sub)return;keep.push({x:p.x/100*W,y:p.y/100*H,r:62});if(p.req){var a=P[p.from||p.req];keep.push({seg:[a.x/100*W,a.y/100*H,p.x/100*W,p.y/100*H],r:34})}});
+ function free(x,y,r){for(var k=0;k<keep.length;k++){var q=keep[k];if(q.seg){var s=q.seg,dx=s[2]-s[0],dy=s[3]-s[1],t=Math.max(0,Math.min(1,((x-s[0])*dx+(y-s[1])*dy)/(dx*dx+dy*dy||1))),ex=s[0]+t*dx-x,ey=s[1]+t*dy-y;if(Math.sqrt(ex*ex+ey*ey)<q.r+r)return false}else{var ex2=q.x-x,ey2=q.y-y;if(Math.sqrt(ex2*ex2+ey2*ey2)<q.r+r)return false}}return true}
+ var placed=[];function ok(x,y,r){if(!free(x,y,r))return false;for(var i=0;i<placed.length;i++){var d=Math.hypot(placed[i][0]-x,placed[i][1]-y);if(d<placed[i][2]+r)return false}placed.push([x,y,r]);return true}
+ /* 海（ビット風の池：外側に濃い縁、内側に波の点） */
+ for(var n=0,tries=0;n<3&&tries<80;tries++){var rx=18+((rnd()*14)|0),ry=10+((rnd()*8)|0),cx0=(rnd()*cw)|0,cy0=(rnd()*ch)|0;
+  if(!ok(cx0*U,cy0*U,Math.max(rx,ry)*U*.7))continue;n++;
+  for(var y=-ry;y<=ry;y++)for(var x=-rx;x<=rx;x++){var d=(x*x)/(rx*rx)+(y*y)/(ry*ry);if(d<=1){px(d>.78?'#2f7fc4':'#4fa8e8',cx0+x,cy0+y)}}
+  for(var w=0;w<rx*ry/14;w++){var wx=((rnd()*2-1)*rx*.7)|0,wy=((rnd()*2-1)*ry*.7)|0;if((wx*wx)/(rx*rx)+(wy*wy)/(ry*ry)<.55){px('#bfe3fa',cx0+wx,cy0+wy,2,1)}}}
+ function spr(map,x,y,k){for(var r=0;r<map.length;r++)for(var q=0;q<map[r].length;q++){var chh=map[r][q];if(chh!=='.')px(PXC[chh],x+q*k,y+r*k,k,k)}}
+ function scatter(map,count,k,rad){for(var i=0,t=0;i<count&&t<400;t++){var sx=(rnd()*(cw-map[0].length*k))|0,sy=(rnd()*(ch-map.length*k))|0;if(!ok((sx+map[0].length*k/2)*U,(sy+map.length*k/2)*U,rad))continue;i++;spr(map,sx,sy,k)}}
+ scatter(PXM.palm,6,2,16);scatter(PXM.bush,8,2,12);scatter(PXM.rock,5,2,9);scatter(PXM.shell,4,1,7);scatter(PXM.flow,10,1,5);
+}
+function placeWalkers(id,instant){var p=P[id];[heroEl,buddyEl].forEach(function(w){if(instant){w.style.transition='none'}w.style.left=p.x+'%';w.style.top=p.y+'%'});
+ if(instant){void heroEl.offsetWidth;heroEl.style.transition='';buddyEl.style.transition=''}}
+function refreshMap(newly,instant){
+ newly=newly||[];
+ PLACES.forEach(function(p){
+  if(p.sub)return;
+  var u=isUnlocked(p.id),n=nodeEls[p.id],c=save.clears[p.id]||0;
+  n.classList.toggle('locked',!u);n.classList.toggle('done',c>=1);n.classList.toggle('passed',isPassed(p.id));
+  var dots=n.querySelectorAll('.dots i');for(var i=0;i<dots.length;i++)dots[i].classList.toggle('on',c>i);
+  n.disabled=false;
+ });
+ lineEls.forEach(function(l){l.classList.toggle('on',isUnlocked(l.dataset.to))});
+ applyTime();var pips=$('pips');pips.innerHTML='';var d=playsDone();for(var i=0;i<TOTAL_PLAYS;i++){pips.appendChild(el('i',i<d?'on':''))}
+ newly.forEach(function(id){var n=nodeEls[id];n.classList.remove('pop','drop');void n.offsetWidth;n.classList.add(P[id].req==='secret'?'drop':'pop')});
+}
+function showMap(newly){
+ G.view='map';G.sid++;clearTimers();stopSay();ambStop();G.scene=null;G.phase='idle';
+ $('sceneView').hidden=true;$('mapView').hidden=false;updateWxUI();
+ var fresh=!heroEl||!heroEl.isConnected;if(fresh)buildMap();
+ refreshMap(newly,fresh);drawMapBg();placeWalkers(G.at,true);musicStart();
+ if(newly&&newly.length){
+  var secret=newly.some(function(id){return P[id].req==='secret'});
+  later(secret?250:350,function(){if(secret){sfxRumble();shakeApp();vib([60,40,120])}else{sfxUnlock();vib([20,30,40])}flash();newly.forEach(function(id){burstAt(nodeEls[id],secret?40:24,380)})});
+ }
+}
+function onNode(id){
+ initAudio();if(G.view!=='map')return;
+ if(isPassed(id)){sfxNG();vib(15);var pn=nodeEls[id];pn.animate([{transform:'translateX(0)'},{transform:'translateX(-5px)'},{transform:'translateX(5px)'},{transform:'translateX(0)'}],{duration:220});return}
+ if(!isUnlocked(id)){sfxNG();vib(15);var n=nodeEls[id];n.animate([{transform:'translateX(0)'},{transform:'translateX(-5px)'},{transform:'translateX(5px)'},{transform:'translateX(0)'}],{duration:220});return}
+ if(G.at===id){enterPlace(id);return}
+ G.view='walk';G.at=id;placeWalkers(id,false);
+ var steps=0,iv=setInterval(function(){sfxStep();if(++steps>=5)clearInterval(iv)},150);
+ setTimeout(function(){clearInterval(iv);enterPlace(id)},800);
+}
+
+/* ---------- 場面の進行 ---------- */
+function enterPlace(id){applyTime();musicStop();
+ var p=P[id],vi=pickVi(id),v=p.variants[vi],tagged=!!v.tp;
+ G.sid++;clearTimers();
+ var words=v.words,greet=null,dn=0;
+ if(id==='hotel_dream'){words=dreamWords(v.words);dn=Math.min(5,(save.missed||[]).length);greet=dn>0?'まちがえた単語 '+dn+' こ':'ゆめの中'}
+ G.scene={id:id,bg:p.bg,who:p.who,pitch:p.pitch,amb:p.amb,npcX:p.npcX,pal:timePal(p.pal),turns:v.turns.map(function(t){return resolveTurn(t,tagged)}),words:words,place:PLACE_EN[id],greet:greet,spk:p.who,notint:id==='hotel_dream',vi:vi,event:v.event||null};
+ if(id==='welcome'&&vi===1)G.scene.npcX=-300;
+ if(v.event==='sunset')G.scene.npcX=100;
+ G.view='scene';G.ti=0;G.tries=0;$('mapView').hidden=true;$('sceneView').hidden=false;
+ if(id==='beach'){fetchWx();if(!save.out){save.out=true;storeSave()}}G.wxc=wxNow();updateWxUI();
+ startScene();
+}
+function startScene(){
+ clearPanel();ambStart(G.scene.amb);
+ setMsgInstant(G.scene.place+' · '+(G.scene.greet!=null?G.scene.greet:TP[G.tp].gr),'');$('tapHint').textContent='';
+ var b=el('button','btn','すすむ');b.type='button';panel.appendChild(b);
+ b.addEventListener('click',function(){initAudio();npcTurn()});
+}
+function npcTurn(){
+ clearPanel();G.phase='npc';var T=G.scene.turns[G.ti];A.nodT=.5;
+ var show=set.npc==='show';
+ G.scene.spk=T.who||G.scene.who;
+ if(show)setMsg(T.npc,T.who);else setMsgInstant('♪ …',T.who||G.scene.who);
+ $('tapHint').textContent='タップでもう一度';
+ panel.appendChild(el('div','stat',''));
+ say(T.npc,.95,T.p||G.scene.pitch,gd(function(){if(G.phase==='npc'){if(!show)setMsgInstant(T.npc,T.who||G.scene.who);later(250,showCue)}}));
+}
+$('msg').addEventListener('click',function(){if(!G.scene||G.phase==='idle')return;var T=G.scene.turns[G.ti];if(T)say(T.npc,.95,T.p||G.scene.pitch)});
+$('exitBtn').addEventListener('click',function(){showMap()});
+
+function showCue(){
+ G.phase='cue';clearPanel();var T=G.scene.turns[G.ti],toks=parseCue(T.cue);
+ if(set.vmode==='pick'){showPick(T);return}
+ var card=el('div','cue');card.appendChild(el('span','lab','カンペ'));
+ var spans=toks.map(function(k){var s=el('span','w'+(k.s?' s':''),k.txt);card.appendChild(s);return s});
+ panel.appendChild(card);var stat=el('div','stat','');panel.appendChild(stat);
+ var row=el('div','row');var demo=el('button','btn sub','おてほん');demo.type='button';row.appendChild(demo);
+ demo.addEventListener('click',function(){say(cueText(T.cue),.8,1)});
+ var act=el('button','btn',set.vmode==='mic'?'はなす':'おして よむ');act.type='button';row.appendChild(act);panel.appendChild(row);
+ setupAction(act,stat,toks,spans,T);
+}
+function syl(w){return Math.max(1,(w.match(/[aeiouy]+/gi)||[]).length)}
+function setupAction(act,stat,toks,spans,T){
+ var sy=toks.map(function(k){return syl(k.txt.replace(/[^A-Za-z']/g,''))}),tot=sy.reduce(function(a,b){return a+b},0),Tm=tot*0.26+0.7;
+ var cum=[0];sy.forEach(function(n,i){cum.push(cum[i]+n)});
+ if(set.vmode==='mic'){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  act.addEventListener('click',function(){
+   initAudio();if(!SR){stat.className='stat ng';stat.textContent='この端末は声の認識が使えません。長押しにもどします';set.vmode='hold';return}
+   try{var r=new SR();r.lang='en-US';r.interimResults=false;r.maxAlternatives=3;stat.className='stat';stat.textContent='きいています…';act.disabled=true;
+    r.onresult=gd(function(e){var alts=[];for(var i=0;i<e.results[0].length;i++)alts.push(e.results[0][i].transcript);judgeMic(alts,toks,spans,stat,T)});
+    r.onerror=function(e){act.disabled=false;stat.className='stat ng';stat.textContent=(e.error==='not-allowed'||e.error==='service-not-allowed')?'この画面ではマイクが使えません。長押しにもどします':'うまく聞こえませんでした';if(e.error==='not-allowed'||e.error==='service-not-allowed')set.vmode='hold'};
+    r.onend=function(){act.disabled=false};r.start()}catch(err){stat.className='stat ng';stat.textContent='マイクを開始できません';act.disabled=false}
+  });return}
+ /* 長押し：押している間、強い語の順に光る。長さがちょうどよければ合格 */
+ var raf=0,t0=0,pressed=false;
+ function loop(){if(!pressed)return;var el0=(performance.now()-t0)/1000,f=el0/Tm,idx=-1;for(var i=0;i<toks.length;i++){if(f*tot>=cum[i])idx=i}
+  spans.forEach(function(s,i){var on=(i===idx);if(on&&!s._on&&set.tick==='on'&&toks[i].s){sfxTick();vib(8)}s._on=on;s.classList.toggle('on',on)});raf=requestAnimationFrame(loop)}
+ function down(e){e.preventDefault();initAudio();if(pressed)return;try{act.setPointerCapture(e.pointerId)}catch(x){}pressed=true;t0=performance.now();act.classList.add('down');stat.className='stat';stat.textContent='よんで…';stopSay();raf=requestAnimationFrame(loop)}
+ function up(e){if(!pressed)return;e.preventDefault();pressed=false;cancelAnimationFrame(raf);act.classList.remove('down');spans.forEach(function(s){s.classList.remove('on');s._on=false});
+  var d=(performance.now()-t0)/1000;
+  if(d<Tm*0.6){stat.className='stat ng';stat.textContent='Too short';onFail()}
+  else if(d>Tm*2.4){stat.className='stat ng';stat.textContent='Too long';onFail()}
+  else{stat.className='stat ok';stat.textContent='Nice!';onPass()}}
+ var lastUp=0,fake={preventDefault:function(){},pointerId:0};
+ act.addEventListener('click',function(){if(Date.now()-lastUp<500)return;if(!pressed)down(fake);else up(fake)});
+ stat.className='stat';stat.textContent='おして いる間 よむ（おせない時は 1回タップ→よんで→もう1回タップ）';
+ act.addEventListener('pointerdown',down);act.addEventListener('pointerup',function(e){lastUp=Date.now();up(e)});act.addEventListener('pointercancel',function(e){lastUp=Date.now();up(e)});act.addEventListener('pointerleave',function(e){if(pressed)up(e)});
+ act.addEventListener('contextmenu',function(e){e.preventDefault()});
+}
+function norm(s){return s.toLowerCase().replace(/[^a-z' ]/g,' ').split(/\s+/).filter(Boolean)}
+function judgeMic(alts,toks,spans,stat,T){
+ var need=norm(cueText(T.cue)),best=0,bestSet=null;
+ alts.forEach(function(a){var got=norm(a),pool=got.slice(),hit=need.map(function(w){var i=pool.indexOf(w);if(i>=0){pool.splice(i,1);return true}return false});
+  var sc=hit.filter(Boolean).length/need.length;if(sc>best){best=sc;bestSet=hit}});
+ var hits=bestSet||need.map(function(){return false}),k=0;
+ spans.forEach(function(s,i){var w=norm(toks[i].txt)[0];if(w){s.style.color=hits[k]?'#0a7c4a':'#b0382c';k++}});
+ stat.textContent=alts[0]+'  ('+Math.round(best*100)+'%)';
+ if(best>=0.7){stat.className='stat ok';onPass()}else{stat.className='stat ng';onFail()}
+}
+function showPick(T){
+ var others=[];PLACES.forEach(function(p){p.variants.forEach(function(v){v.turns.forEach(function(t){if(t!==T&&cueText(t.cue)!==cueText(T.cue))others.push(resolveTurn(t,false))})})});
+ var opts=shuffle([T].concat(shuffle(others).slice(0,2)));var box=el('div','choices');
+ opts.forEach(function(o){var b=el('button','ch cardc');b.type='button';
+  parseCue(o.cue).forEach(function(k,i){if(i)b.appendChild(document.createTextNode(' '));var n=k.s?el('b',null,k.txt):document.createTextNode(k.txt);b.appendChild(n)});
+  b.addEventListener('click',function(){initAudio();if(b.disabled)return;if(o===T){b.classList.add('good');sfxOK(0);Array.prototype.forEach.call(box.children,function(x){x.disabled=true});later(350,onPass)}else{b.classList.add('bad');b.disabled=true;sfxNG();onFail()}});
+  box.appendChild(b)});
+ panel.appendChild(box);panel.appendChild(el('div','stat',''));
+}
+function curT(){return G.scene&&G.scene.turns[G.ti]}
+function curWho(){var T=curT();return (T&&T.who)||G.scene.who}
+function curP(){var T=curT();return (T&&T.p)||G.scene.pitch}
+function onFail(){
+ sfxNG();vib([20,40,20]);A.shake=.4;G.tries++;G.stat.retry++;
+ if(G.tries>=3){G.stat.assist++;G.phase='assist';var T=G.scene.turns[G.ti];setMsgInstant('Listen, then try again.',curWho());say(cueText(T.cue),.6,1,gd(function(){G.tries=0;later(300,function(){if(set.vmode==='pick')showCue();else{var st=panel.querySelector('.stat');if(st){st.className='stat';st.textContent=''}}})}));return}
+ G.phase='retry';var line=RETRY[Math.min(G.tries-1,RETRY.length-1)];setMsg(line,curWho());say(line,.9,curP());
+}
+function onPass(){
+ G.phase='pass';sfxOK(2);vib([15,25,40]);A.jump=1;G.stat.turns++;G.tries=0;
+ var th=THANKS[Math.floor(Math.random()*THANKS.length)];setMsg(th,curWho());say(th,1,curP(),gd(function(){
+  later(350,function(){G.ti++;if(G.ti>=G.scene.turns.length)startWords();else npcTurn()})}));
+}
+
+/* ---------- 単語バトル（英語＋発音記号 → 日本語を3択） ---------- */
+function startWords(){
+ G.phase='words';clearPanel();stopSay();var S=G.scene;setMsgInstant('Word Battle','');$('tapHint').textContent='';
+ var queue=shuffle(S.words.slice()),done=0,total=S.words.length,combo=0;
+ G.stat.wtot+=total;
+ var allJp=[];PLACES.forEach(function(p){p.variants.forEach(function(v){v.words.forEach(function(w){allJp.push(w[2])})})});
+ function next(){
+  clearPanel();if(!queue.length){wordsClear();return}
+  var q=queue[0],answered=false;
+  var dots=el('div','dots');for(var i=0;i<total;i++)dots.appendChild(el('i',i<done?'on':''));panel.appendChild(dots);
+  var prompt=el('div','prompt');prompt.appendChild(el('span','en',q[0]));prompt.appendChild(el('span','ipa',q[1]));
+  if(combo>=2)prompt.appendChild(el('span','combo','×'+combo));
+  prompt.addEventListener('click',function(){say(q[0],.9,1)});panel.appendChild(prompt);
+  var bar=el('div','bar'),fill=el('i');bar.appendChild(fill);panel.appendChild(bar);
+  var wrong=shuffle(allJp.filter(function(x){return x!==q[2]})).slice(0,2),opts=shuffle([q[2]].concat(wrong)),box=el('div','choices'),btns=[];
+  var t0=performance.now(),tmo;
+  function lock(){answered=true;clearTimeout(tmo);btns.forEach(function(x){x.disabled=true})}
+  function miss(b){
+   lock();combo=0;G.stat.wmiss++;noteMiss(q);queue.push(queue.shift());sfxNG();vib([20,30,20]);A.shake=.3;shakeApp();
+   btns.forEach(function(x){if(x.textContent===q[2])x.classList.add('good')});if(b)b.classList.add('bad');
+   say(q[0],.9,1);later(900,next)}
+  opts.forEach(function(o){var b=el('button','ch',o);b.type='button';btns.push(b);b.addEventListener('click',function(){initAudio();if(answered)return;
+   if(o===q[2]){
+    var rt=performance.now()-t0;lock();combo++;G.stat.rts.push(rt);b.classList.add('good');sfxOK(combo);vib(12);A.jump=1;burstAt(b,10+Math.min(combo,10)*2,300);
+    queue.shift();done++;later(380,next)}
+   else miss(b)});box.appendChild(b)});
+  panel.appendChild(box);
+  say(q[0],.9,1);
+  fill.style.transition='none';fill.style.width='100%';void fill.offsetWidth;fill.style.transition='width '+LIMIT+'ms linear';fill.style.width='0%';
+  tmo=later(LIMIT,function(){if(!answered)miss(null)});
+ }
+ next();
+}
+function wordsClear(){
+ sfxClear();vib([40,30,80]);A.jump=1;flash();
+ var a=$('app').getBoundingClientRect();burst(a.width/2,a.height*.45,70,520);
+ later(900,startReveal);
+}
+
+/* ---------- 5秒だけ日本語 ---------- */
+function startReveal(){
+ G.phase='reveal';var S=G.scene,i=0,tok=0;stopSay();$('tapHint').textContent='';
+ function one(){
+  clearPanel();if(i>=S.turns.length){finishScene();return}
+  var my=++tok,T=S.turns[i],box=el('div','reveal');
+  box.appendChild(el('div','who2',(T.who||S.who).toUpperCase()));box.appendChild(el('div','en',T.npc));box.appendChild(el('div','jp',T.npcJp));
+  box.appendChild(el('div','who2','YOU'));box.appendChild(el('div','en',cueText(T.cue)));box.appendChild(el('div','jp',T.cueJp));
+  panel.appendChild(box);var bar=el('div','bar'),f=el('i');bar.appendChild(f);panel.appendChild(bar);
+  var skip=el('button','btn sub','つぎへ');skip.type='button';panel.appendChild(skip);
+  setMsgInstant('Meaning!  '+(i+1)+' / '+S.turns.length,'');
+  f.style.transition='none';f.style.width='100%';void f.offsetWidth;f.style.transition='width 5s linear';f.style.width='0%';
+  var spoken=false,timed=false;
+  function adv(){if(my!==tok||!spoken||!timed)return;box.querySelectorAll('.jp').forEach(function(n){n.textContent='…'});later(500,function(){if(my!==tok)return;i++;one()})}
+  later(5000,function(){timed=true;adv()});
+  say(T.npc,.95,T.p||S.pitch,function(){if(my!==tok)return;later(200,function(){if(my!==tok)return;say(cueText(T.cue),.9,1,function(){if(my!==tok)return;spoken=true;adv()})})});
+  skip.addEventListener('click',function(){tok++;i++;one()});
+ }
+ one();
+}
+function finishScene(){
+ ambStop();var id=G.scene.id,S0=G.scene;
+ var before={};PLACES.forEach(function(p){before[p.id]=isUnlocked(p.id)});
+ save.clears[id]=(save.clears[id]||0)+1;vcArr(id)[S0.vi||0]++;
+ if(!save.secret&&distinctCleared()>=4)save.secret=true;
+ var gotItem=false;if(id==='beach'&&!save.items.mia){save.items.mia={meet:meetStamp()};gotItem=true}
+ if(id==='hotel_dream'){var dw={};S0.words.forEach(function(w){dw[w[0]]=1});save.missed=(save.missed||[]).filter(function(w){return !dw[w[0]]})}
+ storeSave();
+ if(id==='hotel_dream'){showWake();return}
+ if(id==='hotel'){showHotelMenu();return}
+ var newly=PLACES.filter(function(p){return !before[p.id]&&isUnlocked(p.id)}).map(function(p){return p.id});
+ showMap(newly);
+ if(gotItem)setTimeout(function(){showGet('mia')},1100);
+ if(!P[id].bonus&&allDone())later(1600,endGame);
+}
+function endGame(){
+ var s=$('endStats');s.innerHTML='';var r=G.stat.rts,avg=r.length?(r.reduce(function(a,b){return a+b},0)/r.length/1000).toFixed(1)+'秒':'-';
+ var sec=Math.round((performance.now()-G.stat.t0)/1000);
+ [['今回の時間',Math.floor(sec/60)+'分'+(sec%60)+'秒'],['会話の数',G.stat.turns+'回'],['言い直し',G.stat.retry+'回'],['単語のまちがい',G.stat.wmiss+'回 / '+G.stat.wtot+'語'],['1語の平均',avg],['クリアした場面',playsDone()+' / '+TOTAL_PLAYS]].forEach(function(x){var d=el('div',null,x[0]);d.appendChild(el('b',null,x[1]));s.appendChild(d)});
+ $('ovEnd').hidden=false;
+}
+
+/* ---------- ホテル（夜の遊び場）: 受付 → えらぶ → エレベーター → 部屋 → 夢 ／ プール ---------- */
+function runAnim(kind,dur,msg,next){
+ G.sid++;clearTimers();stopSay();ambStop();clearPanel();
+ G.scene={id:'anim_'+kind,bg:kind,anim:kind,t0:A.t,mt0:A.t,mode:'',who:'',pitch:1,npcX:0,pal:{},turns:[],words:[],place:'',notint:true};
+ G.view='scene';G.phase='anim';G.ti=0;$('mapView').hidden=true;$('sceneView').hidden=false;
+ setMsgInstant(msg,'');$('tapHint').textContent='';
+ if(kind==='lift'){later(250,sfxDoor);later(2400,sfxDing)}
+ if(kind==='swim')later(80,sfxSplash);
+ later(dur,next)}
+function showHotelMenu(){
+ G.phase='menu';ambStop();clearPanel();stopSay();setMsg('どうする？','HOTEL');$('tapHint').textContent='';
+ var box=el('div','dq'),locked=false;
+ [['へやに いく','room'],['プールに いく','pool'],['マップに もどる','map']].forEach(function(o){
+  var b=el('button','dqo',o[0]);b.type='button';
+  b.addEventListener('click',function(){initAudio();if(locked)return;locked=true;b.classList.add('on');sfxOK(0);later(260,function(){hotelGo(o[1])})});
+  box.appendChild(b)});
+ panel.appendChild(box)}
+function hotelGo(k){
+ if(k==='map'){showMap();return}
+ if(k==='room')runAnim('lift',3000,'Going up…  8F',showRoom);
+ else runAnim('swim',3000,'Splash!',function(){enterPlace('hotel_pool')})}
+function roomScene(mode,msg,btnText,onBtn){
+ G.sid++;clearTimers();stopSay();ambStop();clearPanel();
+ G.scene={id:'anim_room',bg:'room',anim:'room',t0:A.t,mt0:A.t,mode:mode,who:'',pitch:1,npcX:0,pal:{},turns:[],words:[],place:'',notint:true};
+ G.view='scene';G.phase='room';G.ti=0;$('mapView').hidden=true;$('sceneView').hidden=false;
+ setMsgInstant(msg,'');$('tapHint').textContent='';
+ var b=el('button','btn',btnText);b.type='button';panel.appendChild(b);
+ b.addEventListener('click',function(){initAudio();onBtn(b)})}
+function showRoom(){
+ roomScene('wait','Room · 8F','ベッドに ねる',function(b){
+  if(G.scene.mode!=='wait')return;b.disabled=true;G.scene.mode='sleep';G.scene.mt0=A.t;sfxLullaby();
+  later(2600,function(){enterPlace('hotel_dream')})});
+ var st=el('div','stat','ベッドにねると、夢の中の会話がはじまります');panel.insertBefore(st,panel.firstChild)}
+function showWake(){
+ roomScene('wake','ふぁ……いい夢だった。','マップへ',function(){showMap()});sfxChime()}
+/* 夢の単語: その端末で最近まちがえた単語を先に入れ、足りない分は夢用の単語で8語にする */
+function noteMiss(q){
+ if(!save.missed)save.missed=[];
+ save.missed=save.missed.filter(function(w){return w[0]!==q[0]});save.missed.unshift([q[0],q[1],q[2]]);
+ if(save.missed.length>16)save.missed.length=16;storeSave()}
+function dreamWords(base){
+ var out=[],seen={};(save.missed||[]).slice(0,5).forEach(function(w){if(!seen[w[0]]){seen[w[0]]=1;out.push(w)}});
+ base.forEach(function(w){if(out.length<8&&!seen[w[0]]){seen[w[0]]=1;out.push(w)}});return out}
+
+/* ---------- アイテムボックス ---------- */
+var ITEMS={mia:{name:'Mia',place:'グアム · Ypao Beach Park',line:'See you again at Ypao!'}};
+function meetStamp(){var d=new Date(Date.now()+36000000),w=G.wxc||wxNow();
+ return pad2(d.getUTCMonth()+1)+'/'+pad2(d.getUTCDate())+' '+fmtT(curMin())+' '+TP[G.tp].en+' · '+Math.round(w.t)+'℃ '+Math.round(w.rh)+'%'}
+function drawFace(cv){var c=cv.getContext('2d');c.clearRect(0,0,cv.width,cv.height);sprOn(c,MIAFACE,MIAPAL,0,0,8,false)}
+function renderItems(){var box=$('itemBox');box.innerHTML='';var keys=Object.keys(save.items||{}).filter(function(k){return ITEMS[k]});
+ if(!keys.length){box.appendChild(el('div','empty','まだ空です。マップで出会いがあると、ここに入ります。'));return}
+ keys.forEach(function(k){var it=ITEMS[k],row=el('div','icard'),cv=document.createElement('canvas');cv.width=96;cv.height=64;cv.style.width='72px';cv.style.height='48px';drawFace(cv);row.appendChild(cv);
+  var nm=el('div','nm',it.name);nm.appendChild(el('small',null,it.place));row.appendChild(nm);
+  var b=el('button','btn sub','連絡先');b.type='button';b.addEventListener('click',function(){openCard(k)});row.appendChild(b);box.appendChild(row)})}
+function openCard(k){var it=ITEMS[k],sv=save.items[k];if(!it||!sv)return;drawFace($('cardFace'));$('cardName').textContent=it.name;
+ var info=$('cardInfo');info.textContent='';info.appendChild(document.createTextNode(it.place+' で出会った'));info.appendChild(document.createElement('br'));
+ info.appendChild(document.createTextNode('出会った時: '+(sv.meet||'-')));info.appendChild(document.createElement('br'));info.appendChild(document.createTextNode('ひとこと: '+it.line));$('ovCard').hidden=false}
+$('cardOk').addEventListener('click',function(){$('ovCard').hidden=true});
+function showGet(k){var it=ITEMS[k];if(!it)return;drawFace($('getFace'));$('getName').textContent=it.name+'  ·  '+it.place;renderItems();$('ovGet').hidden=false;sfxClear();vib([40,30,80]);flash();var a=$('app').getBoundingClientRect();burst(a.width/2,a.height*.4,60,480)}
+$('getOk').addEventListener('click',function(){$('ovGet').hidden=true});
+
+/* ---------- 開始・設定 ---------- */
+Array.prototype.forEach.call(document.querySelectorAll('.seg[data-key]'),function(seg){seg.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+ Array.prototype.forEach.call(seg.querySelectorAll('button'),function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});set[seg.dataset.key]=b.dataset.v;onSet(seg.dataset.key)})});
+$('goBtn').addEventListener('click',function(){initAudio();$('ovStart').hidden=true;if(G.view==='none'||G.view==='map'){showMap()}});
+$('setBtn').addEventListener('click',function(){renderItems();$('ovStart').hidden=false});
+$('again').addEventListener('click',function(){$('ovEnd').hidden=true});
+var rst=$('resetBtn'),rstArm=false;
+rst.addEventListener('click',function(){
+ if(!rstArm){rstArm=true;rst.textContent='もう一度おすと、進み具合が消えます';setTimeout(function(){rstArm=false;rst.textContent='はじめからやり直す'},3500);return}
+ save={vc:{},clears:{},secret:false,out:false,items:{},missed:[]};storeSave();renderItems();G.at='gate';rstArm=false;rst.textContent='消しました';setTimeout(function(){rst.textContent='はじめからやり直す'},1500);
+ if(G.view==='map'){buildMap();refreshMap(null,true)}else if(G.view==='scene'){showMap()}});
+
+loadSave();renderItems();G.stat.t0=performance.now();
+(function(){var am=/[#&]ap=([a-z]+)/.exec(location.hash);if(am&&AP[am[1]])G.ap=am[1];var hm=/[#&]t=(\d{1,4})/.exec(location.hash);if(hm){set.tmode='man';set.tmin=Math.min(1439,+hm[1]);syncSeg('tmode');$('tRange').value=Math.floor(set.tmin/30)*30}
+ for(var i=0;i<10;i++){var f=el('i','ff');f.style.left=(6+Math.random()*88)+'%';f.style.top=(6+Math.random()*88)+'%';f.style.animationDuration=(4+Math.random()*4)+'s';f.style.animationDelay=(-Math.random()*5)+'s';mapEl.appendChild(f)}
+ fetchWx();applyTime();setInterval(function(){fetchWx();applyTime()},20000)})();
+var last=0;function frame(ts){var dt=Math.min(.05,(ts-last)/1000||.016);last=ts;if(G.view==='scene')draw(dt);fxStep(dt);requestAnimationFrame(frame)}
+fxResize();window.addEventListener('resize',function(){fxResize();if(G.view==='map')drawMapBg()});requestAnimationFrame(frame);
+window.__dbg=function(){return {G:G,set:set,save:save,PLACES:PLACES,enter:enterPlace,wx:wxNow,WX:WX,runAnim:runAnim,showRoom:showRoom,showWake:showWake,showHotelMenu:showHotelMenu,showMap:showMap}};
+})();
+</script>
+<!-- v9 2026-11-06: 時間帯で会話とアニメーションが変わる・夕日イベント・出迎えテーブル(2人+スタッフ、2回目は完売)・長押しボタン補強 -->
+<!-- v10 2026-11-06: 空港ごとの現地時刻(20空港の時間帯テーブル)・日本時間を併記。#ap=paris で空港を切り替えてテスト -->
+
+</body></html>
