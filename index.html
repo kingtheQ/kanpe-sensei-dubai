@@ -84,8 +84,10 @@ body{margin:0;box-sizing:border-box;background:var(--bg);color:var(--line);font-
 .reveal .who2{font-size:11px;color:var(--gold);font-weight:800;letter-spacing:.08em}
 .note{margin:0;font-size:11px;font-weight:500;color:var(--mute);line-height:1.5;flex:none}
 /* 発音チェック: 聞こえた文字・赤表示 */
-.cue{padding-bottom:44px}
-.cue .heard{position:absolute;left:12px;right:12px;bottom:8px;font-size:15px;font-weight:800;line-height:1.3;color:#5a5340;max-height:38px;overflow:hidden}
+.cue{padding-bottom:78px}
+.cue .heard{position:absolute;left:12px;right:12px;bottom:8px;font-size:24px;font-weight:800;line-height:1.3;color:#5a5340;max-height:66px;overflow:hidden}
+.cue .heard::before{content:'🎤';font-size:1.45em;line-height:1;margin-right:.25em;vertical-align:-.12em}
+.cue .heard.nomic::before{content:none}
 .cue .heard.live{color:#8a7b55}
 .cue .heard b{color:#e11d2e}
 .cue.ev .w,.cue.ev .w.s{color:#0a7c4a}
@@ -836,13 +838,13 @@ function renderEval(card,spans,toks,res,heardEl){
    s.appendChild(document.createTextNode(good));var em=document.createElement('em');em.textContent=badp;s.appendChild(em);
    if(punct)s.appendChild(document.createTextNode(punct));return}
   s.classList.add('bad');s.textContent=txt});
- heardEl.className='heard';heardEl.textContent='';heardEl.appendChild(document.createTextNode('🎤 '));
+ heardEl.className='heard';heardEl.textContent='';
  if(!res.heardRaw.length){heardEl.appendChild(document.createTextNode('…'));return}
  res.heardRaw.forEach(function(h,j){var e=document.createElement(res.hflags[j]==='bad'?'b':'span');e.textContent=h+' ';heardEl.appendChild(e)})}
 function setupAction(act,stat,toks,spans,T){
  var card=spans.length?spans[0].parentNode:null;
- if(!SR||!card){setupActionTimer(act,stat,toks,spans,T);if(card)card.appendChild(el('div','heard','このブラウザは音声認識なし(時間だけで判定)'));return}
- var heardEl=el('div','heard','🎤');card.appendChild(heardEl);
+ if(!SR||!card){setupActionTimer(act,stat,toks,spans,T);if(card)card.appendChild(el('div','heard nomic','このブラウザは音声認識なし(時間だけで判定)'));return}
+ var heardEl=el('div','heard','');card.appendChild(heardEl);
  var tgToks=toks.map(function(k){return k.txt}),sid=G.sid,rec=null,listening=false,got=false,lastInt='',errCode='',mode='say',IDLE='おして よむ';
  function alive(){return G.sid===sid&&G.view==='scene'}
  function label(){return mode==='next'?'つぎへ':(mode==='skip'?'マイクなしで すすむ':IDLE)}
@@ -866,14 +868,14 @@ function setupAction(act,stat,toks,spans,T){
   var hi=res.ratio>=0.7;stat.className=hi?'stat ok':'stat ng';
   stat.textContent=cnt+(hi?'  7割以上 聞こえた':'  7割未満');showNext()}
  function start(){
-  stopSay();resetCard();heardEl.className='heard live';heardEl.textContent='🎤 …';stat.className='stat';stat.textContent='';
+  stopSay();resetCard();heardEl.className='heard live';heardEl.textContent='…';stat.className='stat';stat.textContent='';
   var r;try{r=new SR()}catch(e){blocked('マイクが使えません');return}
   rec=r;r.lang='en-US';r.interimResults=true;r.maxAlternatives=3;r.continuous=false;got=false;lastInt='';errCode='';
   r.onresult=function(ev){
    if(rec!==r)return;if(!alive()){try{r.abort()}catch(e){}return}
    var rs=ev.results[ev.results.length-1],alt=rs[0];
    if(rs.isFinal){got=true;finish(alt.transcript,alt.confidence)}
-   else{lastInt=alt.transcript;heardEl.textContent='🎤 '+lastInt}};
+   else{lastInt=alt.transcript;heardEl.textContent=lastInt}};
   r.onerror=function(ev){errCode=(ev&&ev.error)||'error'};
   r.onend=function(){Snd.duck(0);
    if(rec!==r)return;rec=null;if(!alive())return;
@@ -882,7 +884,7 @@ function setupAction(act,stat,toks,spans,T){
    setIdle();if(got)return;
    if(errCode==='network'){stat.className='stat ng';stat.textContent='ネットワークエラー';return}
    if(lastInt){finish(lastInt,0);return}
-   heardEl.textContent='🎤 …';stat.className='stat ng';stat.textContent='きこえませんでした';noHear++;if(noHear>=2)showNext()};
+   heardEl.textContent='…';stat.className='stat ng';stat.textContent='きこえませんでした';noHear++;if(noHear>=2)showNext()};
   try{Snd.duck(1);r.start();listening=true;act.classList.add('down');act.textContent='きいてます…';
    later(15000,function(){if(rec===r){try{r.stop()}catch(e){}}})}
   catch(e){Snd.duck(0);blocked('マイクが使えません')}}
@@ -941,7 +943,7 @@ function boothPractice(tokens,key){
  var toks=tokens.map(function(t){return {txt:t,s:false}});
  var card=el('div','cue');card.appendChild(el('span','lab','れんしゅう'));
  var spans=toks.map(function(k){var s=el('span','w',k.txt);card.appendChild(s);return s});
- var heardEl=el('div','heard','🎤');card.appendChild(heardEl);
+ var heardEl=el('div','heard','');card.appendChild(heardEl);
  var sum=el('div','stat','');var atts=el('div','atts');
  var row=el('div','row'),demo=el('button','btn sub','おてほん'),act=el('button','btn','おして よむ');
  demo.type='button';act.type='button';row.appendChild(demo);row.appendChild(act);
@@ -961,7 +963,7 @@ function boothPractice(tokens,key){
   else{var hi=ratio>=0.7;badge=el('span','bd '+(hi?'mid':'ng'),Math.round(ratio*100)+'% '+(hi?'7割以上':'7割未満'))}
   r.appendChild(badge);atts.insertBefore(r,atts.firstChild);pracAdd(key,perfect);upd()}
  function listen(){
-  stopSay();heardEl.className='heard live';heardEl.textContent='🎤 …';
+  stopSay();heardEl.className='heard live';heardEl.textContent='…';
   var r;try{r=new SR()}catch(e){sum.className='stat ng';sum.textContent='マイクが使えません';return}
   rec=r;listening=true;act.textContent='きいてます…';act.classList.add('down');
   r.lang='en-US';r.interimResults=true;r.maxAlternatives=3;r.continuous=false;
@@ -971,9 +973,9 @@ function boothPractice(tokens,key){
    if(err==='not-allowed'||err==='service-not-allowed'){sum.className='stat ng';sum.textContent='マイクが許可されていません';return}
    if(err==='audio-capture'){sum.className='stat ng';sum.textContent='マイクが見つかりません';return}
    if(err==='network'){sum.className='stat ng';sum.textContent='ネットワークエラー';return}
-   if(!txt){heardEl.textContent='🎤 …';sum.className='stat ng';sum.textContent='きこえませんでした';return}
+   if(!txt){heardEl.textContent='…';sum.className='stat ng';sum.textContent='きこえませんでした';return}
    var res=analyze(tokens,txt);renderEval(card,spans,toks,res,heardEl);addRow(res,txt)}
-  r.onresult=function(ev){if(rec!==r)return;var rs=ev.results[ev.results.length-1],alt=rs[0];if(rs.isFinal){got=true;done(alt.transcript)}else{last=alt.transcript;heardEl.textContent='🎤 '+last}};
+  r.onresult=function(ev){if(rec!==r)return;var rs=ev.results[ev.results.length-1],alt=rs[0];if(rs.isFinal){got=true;done(alt.transcript)}else{last=alt.transcript;heardEl.textContent=last}};
   r.onerror=function(ev){err=(ev&&ev.error)||'error'};
   r.onend=function(){Snd.duck(0);if(rec!==r)return;done(got?'':last)};
   try{Snd.duck(1);r.start();setTimeout(function(){if(rec===r){try{r.stop()}catch(e){}}},12000)}catch(e){Snd.duck(0);rec=null;listening=false;act.classList.remove('down');act.textContent='おして よむ';sum.className='stat ng';sum.textContent='マイクが使えません'}}
