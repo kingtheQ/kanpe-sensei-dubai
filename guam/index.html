@@ -72,6 +72,8 @@ body{margin:0;box-sizing:border-box;background:var(--bg);color:var(--line);font-
 .row{display:flex;gap:8px;flex:none}
 .btn{font:inherit;font-weight:800;color:#fff;background:var(--hot);border:3px solid var(--brown);border-radius:14px;padding:12px;box-shadow:0 5px 0 var(--brown);cursor:pointer;min-height:56px;font-size:20px;flex:1;touch-action:none}
 .btn:active,.btn.down{transform:translateY(3px);box-shadow:0 2px 0 var(--brown)}
+.btn.help{background:#2f8f82;font-size:16px;flex:none;width:100%;min-height:46px;padding:8px 12px;box-shadow:0 4px 0 var(--brown)}
+.btn.help.camp{background:#d9531e;font-size:17px}
 .btn.sub{background:var(--navy);font-size:14px;flex:none;padding:8px 14px;min-height:44px}
 .btn.go{font-size:clamp(56px,20vw,96px);letter-spacing:.06em;text-shadow:0 4px 0 var(--brown)}
 .btn.go.shake{animation:goShake .55s linear infinite}
@@ -428,8 +430,9 @@ var PLACE_EN={gate:'Arrival Gate',immigration:'Immigration (CBP)',baggage:'Bagga
 var OPEN24={ground:1,staff:1,beach:1,lotte:1,hotel:1,hotel_dream:1,hotel_pool:1},AWAKE={ground:1,beach:1,lotte:1,hotel:1,hotel_dream:1,hotel_pool:1};
 var LIMIT=3000;
 var set={vmode:'mic',npc:'show',tick:'on',amb:'on',bgm:'on',tmode:'auto',tmin:720};
-var SAVEKEY='kanpe-guam-v1',save={vc:{},clears:{},secret:false,items:{},missed:[]};
-function loadSave(){try{var s=JSON.parse(localStorage.getItem(SAVEKEY)||'null');if(s&&s.clears){save={vc:(s.vc&&typeof s.vc==='object')?s.vc:{},clears:s.clears,secret:!!s.secret,out:!!s.out,items:(s.items&&typeof s.items==='object')?s.items:{},missed:Array.isArray(s.missed)?s.missed.filter(function(w){return Array.isArray(w)&&w.length===3&&typeof w[0]==='string'}).slice(0,16):[]}}}catch(e){}}
+var HELPMAX=5;
+var SAVEKEY='kanpe-guam-v1',save={vc:{},clears:{},secret:false,items:{},missed:[],help:HELPMAX,weak:[]};
+function loadSave(){try{var s=JSON.parse(localStorage.getItem(SAVEKEY)||'null');if(s&&s.clears){save={vc:(s.vc&&typeof s.vc==='object')?s.vc:{},clears:s.clears,secret:!!s.secret,out:!!s.out,items:(s.items&&typeof s.items==='object')?s.items:{},missed:Array.isArray(s.missed)?s.missed.filter(function(w){return Array.isArray(w)&&w.length===3&&typeof w[0]==='string'}).slice(0,16):[],help:(typeof s.help==='number'&&s.help>=0&&s.help<=HELPMAX)?Math.floor(s.help):HELPMAX,weak:Array.isArray(s.weak)?s.weak.filter(function(w){return w&&typeof w.c==='string'&&typeof w.j==='string'}).slice(0,8):[]}}}catch(e){}}
 function storeSave(){try{localStorage.setItem(SAVEKEY,JSON.stringify(save))}catch(e){}}
 /* 世界マップへ「クリア」を伝える: 全場面クリアしたら */
 function worldMark(k){try{var w=JSON.parse(localStorage.getItem('kanpe-world-v1')||'null');if(!w||typeof w!=='object')w={v:1,at:'haneda',seen:{haneda:1},cleared:{haneda:1}};w.seen=w.seen&&typeof w.seen==='object'?w.seen:{};w.cleared=w.cleared&&typeof w.cleared==='object'?w.cleared:{};w.seen[k]=1;w.cleared[k]=1;localStorage.setItem('kanpe-world-v1',JSON.stringify(w))}catch(e){}}
@@ -746,7 +749,15 @@ var cv=$('scene'),cx=cv.getContext('2d');
 function sprOn(c,map,pal,x,y,px,flip){for(var r=0;r<map.length;r++)for(var k=0;k<map[r].length;k++){var kk=flip?map[r].length-1-k:k,ch=map[r][kk];if(ch!=='.'){c.fillStyle=pal[ch];c.fillRect(Math.round(x+k*px),Math.round(y+r*px),px,px)}}}
 function spr(map,pal,x,y,px,flip){sprOn(cx,map,pal,x,y,px,flip)}
 function R(c,x,y,w,h){cx.fillStyle=c;cx.fillRect(x,y,w,h)}
-var A={t:0,jump:0,shake:0,nodT:0};
+var A={t:0,jump:0,shake:0,nodT:0,luOn:false,luP:0,luTalk:0};
+function buddySpr(x,y,px,flip){if(A.luP>.02)return;spr(BUDDYMAP,BPAL,x,y,px,flip)}
+/* ルルが ヘルプで 前に出て しゃべる: ふだんの場所から主人公の前へ移動して大きくなり、口もとに音符 */
+function drawLulu(t){
+ var p=A.luP;if(p<=.02)return;var e=p*p*(3-2*p),x=4+(70-4)*e,y=116+(98-116)*e,px=3+2*e,bob=A.luTalk>0?Math.abs(Math.sin(t*14))*4*e:0;
+ R('rgba(0,0,0,.28)',Math.round(x+2),138,Math.round(10*px-2),5);
+ spr(BUDDYMAP,BPAL,x,Math.round(y-bob),Math.round(px),false);
+ if(A.luTalk>0&&p>.7){var k=Math.floor(t*8)%3,bx=Math.round(x+10*px+6),by=Math.round(y+2*px);for(var q=0;q<3;q++){var hh=6+q*5,on=(q<=k);R(on?'#e8452c':'#7a2a1c',bx+q*7,by-Math.round(hh/2)-bob,4,hh)}txt('♪',bx+4,Math.round(y-10-bob),14,'#e8452c')}
+}
 function txt(s,x,y,sz,col){cx.fillStyle=col||'#fff';cx.font='800 '+(sz||11)+'px '+FONT;cx.textAlign='center';cx.textBaseline='middle';cx.fillText(s,x,y)}
 function palm(x,y){R('#7a4b2a',x,y,5,40);R('#2e8b57',x-14,y-8,34,8);R('#2e8b57',x-8,y-14,22,8)}
 function drawBg(S,t){
@@ -860,7 +871,7 @@ function drawBeachChars(S,t){
  spr(NPCMAP,{c:S.pal.c,h:S.pal.h,s:S.pal.s,e:'#1c2230',b:S.pal.b,a:S.pal.a,d:S.pal.s},S.npcX,ny,5,true);
  R('#ff4d6d',S.npcX+6,ny+10,6,6);R('#ff9ab0',S.npcX+8,ny+12,2,2);
  var lx=176,ly=Math.round(86+Math.sin(t*2)*3);
- R('rgba(255,255,255,.5)',lx-6,ly+27,46,3);spr(BUDDYMAP,BPAL,lx,ly,3,false);
+ R('rgba(255,255,255,.5)',lx-6,ly+27,46,3);buddySpr(lx,ly,3,false);
  if(S.event==='sunset'){txt('♥',100,58+Math.round(Math.sin(t*2)*3),12,'#ff6b9a');txt('♥',112,48+Math.round(Math.sin(t*2+2)*3),9,'#ff9ab0')}
  R('#ff5a8a',lx-4,ly+17,38,7);R('#ffffff',lx+5,ly+17,6,7);R('#ffffff',lx+19,ly+17,6,7);
  R('#ffffff',lx+33+Math.round(Math.sin(t*5)*3),ly-3+Math.round(Math.cos(t*6)*2),2,2);
@@ -909,7 +920,7 @@ function drawPoolChars(S,t){
  R('#ffffff',232,96,10,5);R('#e8452c',234,98,5,2);R('#ffffff',236,94,10,5);
  var hx=62,hy=84-(A.jump>0?Math.sin(A.jump*Math.PI)*16:0)+(A.shake>0?Math.sin(A.shake*60)*2:0);
  R('rgba(0,0,0,.25)',hx+4,138,54,6);spr(HEROMAP,HPAL,hx,Math.round(hy-4),5,false);
- R('rgba(0,0,0,.22)',4,138,30,4);spr(BUDDYMAP,BPAL,4,116,3,false)}
+ R('rgba(0,0,0,.22)',4,138,30,4);buddySpr(4,116,3,false)}
 function drawDreamChars(S,t){
  var jp=A.jump>0?Math.sin(A.jump*Math.PI):0,spk=S.spk,nd=A.nodT>0?Math.round(Math.sin(A.nodT*18)*2):0;
  for(var i=0;i<8;i++){var bx=(i*41+24)%300,by=150-((t*14+i*29)%150);cx.strokeStyle='rgba(255,255,255,.55)';cx.lineWidth=1;cx.beginPath();cx.arc(bx,by,4+(i%3)*2,0,6.283);cx.stroke()}
@@ -940,7 +951,7 @@ function drawLift(e){
  var half=Math.round(60*(1-open));if(half>0){R('#c8ccd6',100,24,half,114);R('#c8ccd6',220-half,24,half,114);R('#9aa1b3',100+half-2,24,2,114);R('#9aa1b3',220-half,24,2,114)}
  R('#5b6690',96,22,4,116);R('#5b6690',220,22,4,116);R('#5b6690',96,22,128,3);
  R('#10131f',262,50,22,48);R(Math.floor(e*4)%2?'#ffc72c':'#6a5a2a',268,58,10,6);R('#34d27b',268,70,10,6);R('#9aa7d9',268,82,10,6);
- spr(HEROMAP,HPAL,130,86+shk,5,false);R('rgba(0,0,0,.22)',4,138,30,4);spr(BUDDYMAP,BPAL,12,116+shk,3,false)}
+ spr(HEROMAP,HPAL,130,86+shk,5,false);R('rgba(0,0,0,.22)',4,138,30,4);buddySpr(12,116+shk,3,false)}
 function drawSwim(e){
  var tp=G.tp,night=(tp==='night'||tp==='late');
  var SK={morning:['#7fd3ff','#ffe3b0'],day:['#3fb8f2','#cdeeff'],dusk:['#5a4a9a','#ff9a5a'],night:['#070d2b','#1a2a6a'],late:['#03061a','#0e1844']}[tp];
@@ -993,7 +1004,7 @@ function drawChars(S,t){
  R('rgba(0,0,0,.25)',hx+4,138,54,6);
  spr(HEROMAP,HPAL,hx,Math.round(hy-4),5,false);
  if(S.id!=='staff'){var by=116-(A.jump>0?Math.sin(A.jump*Math.PI+.6)*10:0);
-  R('rgba(0,0,0,.22)',4,138,30,4);spr(BUDDYMAP,BPAL,4,Math.round(by),3,false)}
+  R('rgba(0,0,0,.22)',4,138,30,4);buddySpr(4,Math.round(by),3,false)}
  if(S.id==='welcome')drawWelcomeTable(S,t);
  if(MASCOT_AT[S.id])drawMascots(S,t);
 }
@@ -1046,6 +1057,7 @@ function draw(dt){
  if(!G.scene){R('#0d1226',0,0,320,150);return}
  if(G.scene.anim){drawAnim(G.scene,A.t);return}
  drawBg(G.scene,A.t);tintScene(G.scene);drawChars(G.scene,A.t);
+ A.luP+=((A.luOn?1:0)-A.luP)*Math.min(1,dt*7);if(!A.luOn&&A.luP<.03)A.luP=0;A.luTalk=Math.max(0,A.luTalk-dt);drawLulu(A.t);
 }
 
 /* ---------- 状態 ---------- */
@@ -1137,7 +1149,7 @@ function refreshMap(newly,instant){
  newly.forEach(function(id){var n=nodeEls[id];n.classList.remove('pop','drop');void n.offsetWidth;n.classList.add(P[id].req==='secret'?'drop':'pop')});
 }
 function showMap(newly){
- G.view='map';G.sid++;clearTimers();stopSay();ambStop();G.scene=null;G.phase='idle';
+ G.camp=null;A.luOn=false;A.luP=0;A.luTalk=0;G.view='map';G.sid++;clearTimers();stopSay();ambStop();G.scene=null;G.phase='idle';
  $('sceneView').hidden=true;$('mapView').hidden=false;updateWxUI();
  var fresh=!heroEl||!heroEl.isConnected;if(fresh)buildMap();
  refreshMap(newly,fresh);drawMapBg();placeWalkers(G.at,true);musicStart();
@@ -1204,6 +1216,7 @@ function showCue(){
  demo.addEventListener('click',function(){say(cueText(T.cue),.8,1)});
  var act=el('button','btn',set.vmode==='mic'?'はなす':'おして よむ');act.type='button';row.appendChild(act);panel.appendChild(row);
  setupAction(act,stat,toks,spans,T);
+ if(!G.camp)addHelp(T);
  fitCue(card);
 }
 function syl(w){return Math.max(1,(w.match(/[aeiouy]+/gi)||[]).length)}
@@ -1255,18 +1268,52 @@ function showPick(T){
   box.appendChild(b)});
  panel.appendChild(box);panel.appendChild(el('div','stat',''));
 }
+
+/* ---------- ヘルプ（ルルが かわりに 発音）と 羽田の強化合宿 ---------- */
+function noteWeak(T){if(!T||G.camp)return;var c=T.cue;save.weak=save.weak.filter(function(w){return w.c!==c});save.weak.unshift({c:c,j:T.cueJp||''});save.weak=save.weak.slice(0,8);storeSave()}
+function addHelp(T){
+ if(set.vmode==='pick')return;
+ var h=el('button','btn help'),left=save.help;h.type='button';
+ if(left>0){h.textContent='ヘルプ　残り'+left+'回';h.addEventListener('click',function(){useHelp(T)})}
+ else{h.classList.add('camp');h.textContent='✈ 羽田空港にもどる（強化合宿）';h.addEventListener('click',function(){initAudio();startCamp()})}
+ panel.appendChild(h);
+}
+function useHelp(T){
+ if(G.phase!=='cue'||save.help<=0)return;
+ initAudio();G.phase='help';save.help--;G.stat.assist++;noteWeak(T);storeSave();stopSay();
+ Array.prototype.forEach.call(panel.querySelectorAll('button'),function(b){b.disabled=true});
+ var hb=panel.querySelector('.btn.help');if(hb)hb.textContent=save.help>0?'ヘルプ　残り'+save.help+'回':'ヘルプ　つかいきった';
+ var st=panel.querySelector('.stat');if(st){st.className='stat';st.textContent='ルルが かわりに いうよ（ヘルプ のこり '+save.help+'回）'}
+ A.luOn=true;sfxOK(1);
+ later(450,function(){setMsgInstant(cueText(T.cue),'Lulu');A.luTalk=30;var t0=Date.now();
+  say(cueText(T.cue),.85,1.75,gd(function(){later(Math.max(500,1800-(Date.now()-t0)),function(){A.luTalk=0;A.luOn=false;later(450,function(){G.ti++;if(G.ti>=G.scene.turns.length)startWords();else npcTurn()})})}))});
+}
+function startCamp(){
+ var list=save.weak.slice();if(!list.length&&curT())list=[{c:curT().cue,j:curT().cueJp||''}];
+ G.camp={scene:G.scene,ti:G.ti,n:list.length};
+ var p=P.gate;G.sid++;clearTimers();stopSay();A.luOn=false;A.luP=0;A.luTalk=0;
+ G.scene={id:'gate',bg:'arrgate',who:'Coach',pitch:1.05,amb:'hall',npcX:200,pal:timePal(p.pal),turns:list.map(function(w){return{npc:'Say it again. Slowly, and clearly.',npcJp:'もういちど。ゆっくり、はっきり。',cue:w.c,cueJp:w.j}}),words:[],place:'HANEDA · TRAINING CAMP',greet:'強化合宿  '+list.length+'もん',spk:'Coach',vi:0,event:null};
+ G.ti=0;G.tries=0;startScene();
+}
+function campDone(){
+ var sv=G.camp;G.camp=null;save.help=HELPMAX;storeSave();
+ G.sid++;clearTimers();stopSay();G.scene=sv.scene;G.ti=sv.ti;G.tries=0;
+ ambStart(G.scene.amb);var T=G.scene.turns[G.ti];setMsgInstant(T.npc,T.who||G.scene.who);$('tapHint').textContent='タップでもう一度';
+ showCue();var st=panel.querySelector('.stat');if(st){st.className='stat ok';st.textContent='強化合宿おわり！ ヘルプが '+HELPMAX+'回 ふっかつ'}
+ sfxUnlock();
+}
 function curT(){return G.scene&&G.scene.turns[G.ti]}
 function curWho(){var T=curT();return (T&&T.who)||G.scene.who}
 function curP(){var T=curT();return (T&&T.p)||G.scene.pitch}
 function onFail(){
  sfxNG();vib([20,40,20]);A.shake=.4;G.tries++;G.stat.retry++;
- if(G.tries>=3){G.stat.assist++;G.phase='assist';var T=G.scene.turns[G.ti];setMsgInstant('Listen, then try again.',curWho());say(cueText(T.cue),.6,1,gd(function(){G.tries=0;later(300,function(){if(set.vmode==='pick')showCue();else{var st=panel.querySelector('.stat');if(st){st.className='stat';st.textContent='';fitCue(panel.querySelector('.cue'))}}})}));return}
+ if(G.tries>=3){G.stat.assist++;G.phase='assist';var T=G.scene.turns[G.ti];noteWeak(T);setMsgInstant('Listen, then try again.',curWho());say(cueText(T.cue),.6,1,gd(function(){G.tries=0;later(300,function(){if(set.vmode==='pick')showCue();else{var st=panel.querySelector('.stat');if(st){st.className='stat';st.textContent='';fitCue(panel.querySelector('.cue'))}}})}));return}
  G.phase='retry';var line=RETRY[Math.min(G.tries-1,RETRY.length-1)];setMsg(line,curWho());say(line,.9,curP());
 }
 function onPass(){
  G.phase='pass';sfxOK(2);vib([15,25,40]);A.jump=1;G.stat.turns++;G.tries=0;
  var th=THANKS[Math.floor(Math.random()*THANKS.length)];setMsg(th,curWho());say(th,1,curP(),gd(function(){
-  later(350,function(){G.ti++;if(G.ti>=G.scene.turns.length)startWords();else npcTurn()})}));
+  later(350,function(){if(G.camp){var done=G.scene.turns[G.ti];save.weak=save.weak.filter(function(w){return w.c!==done.cue});storeSave()}G.ti++;if(G.ti>=G.scene.turns.length){if(G.camp)campDone();else startWords()}else npcTurn()})}));
 }
 
 /* ---------- 単語バトル（英語＋発音記号 → 日本語を3択） ---------- */
@@ -1420,7 +1467,7 @@ $('again').addEventListener('click',function(){$('ovEnd').hidden=true});
 var rst=$('resetBtn'),rstArm=false;
 rst.addEventListener('click',function(){
  if(!rstArm){rstArm=true;rst.textContent='もう一度おすと、進み具合が消えます';setTimeout(function(){rstArm=false;rst.textContent='はじめからやり直す'},3500);return}
- save={vc:{},clears:{},secret:false,out:false,items:{},missed:[]};storeSave();renderItems();G.at='gate';rstArm=false;rst.textContent='消しました';setTimeout(function(){rst.textContent='はじめからやり直す'},1500);
+ save={vc:{},clears:{},secret:false,out:false,items:{},missed:[],help:HELPMAX,weak:[]};storeSave();renderItems();G.at='gate';rstArm=false;rst.textContent='消しました';setTimeout(function(){rst.textContent='はじめからやり直す'},1500);
  if(G.view==='map'){buildMap();refreshMap(null,true)}else if(G.view==='scene'){showMap()}});
 
 loadSave();renderItems();G.stat.t0=performance.now();
