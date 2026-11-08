@@ -134,6 +134,20 @@ body{margin:0;box-sizing:border-box;background:var(--bg);color:var(--line);font-
 .dq{display:flex;gap:10px;align-items:center;width:100%;text-align:left;font:inherit;font-weight:800;font-size:20px;color:#fff;background:#05070f;border:3px solid #fff;border-radius:8px;padding:10px 14px;box-shadow:0 0 0 3px #05070f;cursor:pointer;margin-bottom:8px}
 .dq .cur{color:#ffc72c;flex:none}.dq .ok{margin-left:auto;color:#6be58a;font-size:16px}.dq:active{background:#1a2250}
 .dqbox{display:flex;flex-direction:column}
+.node.locked{filter:grayscale(1);opacity:.62}
+.node.locked .nm{background:rgba(40,40,48,.85);color:#ddd}
+.maptoast{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);max-width:92%;background:#05070f;color:#fff;border:3px solid #fff;border-radius:10px;padding:8px 14px;font-weight:800;font-size:14px;text-align:center;z-index:30;box-shadow:0 0 0 3px #05070f;pointer-events:none}
+#albumView{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}
+#albumView[hidden]{display:none}
+#albumBody{flex:1;overflow:auto;padding:8px 10px 14px}
+.agrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.aph{margin:0;background:var(--paper);border:3px solid var(--brown);border-radius:10px;padding:5px 5px 6px;cursor:pointer;font:inherit;text-align:center}
+.aph img{display:block;width:100%;height:auto;image-rendering:pixelated;border-radius:4px;background:#000}
+.aph span{display:block;font-size:11px;font-weight:800;color:var(--ink);margin-top:4px;line-height:1.25}
+.abig{position:fixed;inset:0;background:rgba(5,7,15,.94);z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:14px}
+.abig img{width:100%;max-width:640px;height:auto;image-rendering:pixelated;border:4px solid #fff;border-radius:8px}
+.abig b{color:#fff;font-size:16px}.abig small{color:#bbb}
+.aempty{white-space:pre-line;font-weight:800;color:var(--ink);text-align:center;padding:30px 12px;line-height:1.7}
 .modebar{display:flex;gap:6px;margin-bottom:8px}.mbtn{flex:1;font:inherit;font-weight:800;font-size:13px;color:#fff;background:#3a3f66;border:3px solid var(--brown);border-radius:12px;padding:9px 2px;box-shadow:0 3px 0 var(--brown);cursor:pointer}.mbtn.on{background:#8a3b1e}.mbtn:active{transform:translateY(2px)}
 .citybtn{flex:none;font:inherit;font-weight:800;font-size:14px;color:#fff;background:#8a3b1e;border:3px solid var(--brown);border-radius:12px;padding:10px;box-shadow:0 4px 0 var(--brown);cursor:pointer;margin-bottom:8px}
 .citybtn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--brown)}
@@ -149,6 +163,11 @@ body{margin:0;box-sizing:border-box;background:var(--bg);color:var(--line);font-
     <div id="map"><svg id="paths" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg></div>
     <div id="modeBar" class="modebar"></div>
     <button id="boothBtn" class="boothbtn" type="button">✈ 羽田空港 発音教室</button>
+    <button id="albumBtn" class="boothbtn" type="button">📷 アルバム</button>
+  </div>
+  <div id="albumView" hidden>
+    <div class="mapbar"><h1>アルバム<small id="albumSub"></small></h1><button id="albumBack" class="btn sub" type="button" aria-label="マップにもどる">✕</button></div>
+    <div id="albumBody"></div>
   </div>
   <div id="boothView" hidden>
     <div class="mapbar"><h1>羽田空港 発音教室<small id="boothSub"></small></h1><button id="boothBack" class="btn sub" type="button" aria-label="マップにもどる">✕</button></div>
@@ -250,6 +269,26 @@ var Snd=(function(){
  };
  K.souk=K.cafe;K.mosque=K.ahlan;K.atop=K.hall;K.hotel=K.costa;K.vault=K.s34;K.room=K.ahlan;K.city=K.map;
  K.mall=K.cafe;K.fountain=K.hall;K.safari=K.ahlan;K.marina=K.s34;K.beach=K.costa;
+ K.show_fountain={bpm:function(){return 100},
+  amb:function(){loopNoise(2600,.6,.012,.35,.006,'highpass')},
+  st:function(s,t,e){
+   var CH=[[62,66,69],[63,67,70],[60,63,67],[62,66,69]],ARP=[0,2,4,7,6,4,2,1];
+   if(s%16===0)CH[(s/16|0)%4].forEach(function(m,i){pad(hz(m),t+i*.04,e*15,.05)});
+   if(s%2===0)pluck(hz(H[ARP[(s>>1)%8]]+12),t,e*2,.1);
+   var n=MEL[s%32];if(n>=0&&s%2===0)pluck(hz(H[n]+24),t,e*2.4,.07);
+   if(s%16===0)tone(hz(38),t,e*16,'sine',.1,.3);
+   if(s%8===0||s%8===5)dum(t,.22);if(s%4===2)tak(t,.1);
+   if(s%32===16)chime(t,.05)}};
+ K.show_dance={bpm:function(){return 116},
+  amb:function(){},
+  st:function(s,t,e){
+   var RH=['D','T','','T','D','','T',''],r=RH[s%8];
+   if(r==='D')dum(t,.3);else if(r==='T')tak(t,.16);
+   if(s%2===1)clink(t);
+   if(s%16===0)tone(hz(38),t,e*16,'sine',.08,.3);
+   var n=MEL[(s>>1)%32];if(s%2===0&&n>=0)pluck(hz(H[n]-12),t,e*2.6,.12);
+   if(s%8===0)pluck(hz(H[(s>>3)%2?4:0]),t,e*5,.08);
+   if(s%32===24)whoosh(t,e*6,.04,800,3000)}};
  function fade(g){if(!g)return;try{g.gain.cancelScheduledValues(AC.currentTime);g.gain.setValueAtTime(Math.max(.0001,g.gain.value),AC.currentTime);g.gain.linearRampToValueAtTime(.0001,AC.currentTime+.3)}catch(e){}
   setTimeout(function(){try{g.disconnect()}catch(e){}},700)}
  function halt(){
@@ -605,7 +644,7 @@ Object.assign(DLG,{
   inter:[
    {after:1,anim:'dress',ms:3800,cap:[{at:0,t:'キングは試着室へ…'},{at:2200,t:'じゃーん！ カンドゥーラに着がえた！'}],set:{hero:'kandura'}},
    {after:4,anim:'fade',ms:2400,swapAt:1200,cap:[{at:0,t:'つぎは、ルルのおくりものを買いに ゴールドスークへ…'}],set:{bg:'souk',sign:'Gold Souk',who:'ゴールドスークの店員',sp:'gold_shop'}},
-   {after:7,anim:'sparkle',ms:3600,cap:[{at:0,t:'キングは ルルに 金のネックレスをかけてあげた！'},{at:1900,t:'ルル「Thank you, King!」',say:'Thank you, King!'}],set:{gold:1}}],
+   {after:7,anim:'sparkle',ms:3600,snap:[{at:2900,t:'金のネックレス'}],cap:[{at:0,t:'キングは ルルに 金のネックレスをかけてあげた！'},{at:1900,t:'ルル「Thank you, King!」',say:'Thank you, King!'}],set:{gold:1}}],
   lines:[
    {n:"Hello, my friend! Are you looking for something special?",jp:"こんにちは、お客さん。何かお探しですか。"},
    {y:"*Yes*. I *want* a *white* *kandura*, *please*.",jp:"はい。白いカンドゥーラがほしいです。"},
@@ -887,12 +926,10 @@ Object.assign(DLG,{
 
 /* ---------- 街編の続き(会話): ザ・ドバイモール／ドバイ噴水／砂漠サファリ／マリーナのダウ船クルーズ／ブルジュ・アル・アラブとビーチ。実在の場所の名前を使い、値段と相手の会話は創作 ---------- */
 Object.assign(DLG,{
- mall_story:{who:'インフォメーションのスタッフ',story:1,bg:'mall',sp:'mall_info',hero:'kandura',lulu:'plain',gold:1,
+ mall_aq:{who:'インフォメーションのスタッフ',story:1,bg:'mall',sp:'mall_info',hero:'kandura',lulu:'plain',gold:1,
   intro:'ブルジュ・ハリファのとなりの「ザ・ドバイモール」。まずはインフォメーションで水族館の場所を聞こう。',
   inter:[
-   {after:1,anim:'fade',ms:2400,swapAt:1200,cap:[{at:0,t:'エスカレーターをのりついで、水族館へ…'}],set:{bg:'aquarium',who:'アクアリウムの受付',sp:'aq_staff'}},
-   {after:4,anim:'fade',ms:2400,swapAt:1200,cap:[{at:0,t:'つぎは、アイスリンクへ…'}],set:{bg:'rink',who:'リンクのスタッフ',sp:'rink_staff'}},
-   {after:6,anim:'fade',ms:2600,swapAt:1300,cap:[{at:0,t:'遊んだら、おなかぺこぺこ…フードコートへ！'}],set:{bg:'food',who:'フードコートの店員',sp:'food_staff'}}],
+   {after:1,anim:'fade',ms:2400,swapAt:1200,cap:[{at:0,t:'エスカレーターをのりついで、水族館へ…'}],set:{bg:'aquarium',who:'アクアリウムの受付',sp:'aq_staff'}}],
   lines:[
    {n:"Welcome to The Dubai Mall. How can I help you?",jp:"ザ・ドバイモールへようこそ。ご用件は何でしょう。"},
    {y:"*Hello*. *Where* is the *aquarium*, *please*?",jp:"こんにちは。水族館はどこですか。"},
@@ -903,22 +940,64 @@ Object.assign(DLG,{
    {n:"It is two hundred and fifty dirhams each. You can pay by card.",jp:"1人250ディルハムです。カードで払えます。"},
    {y:"*Okay*. *Can* we *take* *photos* *inside*?",jp:"わかりました。中で写真を撮ってもいいですか。"},
    {n:"Yes, but please do not use a flash. It scares the fish.",jp:"はい。ただしフラッシュは使わないでください。魚がおどろきます。"},
-   {y:"*I* *see*. *Thank* you. *We* will *enjoy* it!",jp:"わかりました。ありがとう。楽しみます。"},
+   {y:"*I* *see*. *Thank* you. *We* will *enjoy* it!",jp:"わかりました。ありがとう。楽しみます。"}],
+  words:[["escalator","/ˈɛskəleɪtər/","エスカレーター"],["aquarium","/əˈkwɛriəm/","水族館"],["ticket","/ˈtɪkɪt/","チケット"],["dirham","/dɪrˈhæm/","ディルハム(UAEのお金)"],["flash","/flæʃ/","フラッシュ"]]},
+ mall_rink:{who:'リンクのスタッフ',story:1,bg:'rink',sp:'rink_staff',hero:'kandura',lulu:'plain',gold:1,
+  intro:'ドバイモールのアイスリンク。スケート靴を借りて、すべってみよう。',
+  inter:[],
+  lines:[
    {n:"Welcome to the Ice Rink. Do you need skates? What size?",jp:"アイスリンクへようこそ。スケート靴は必要ですか。サイズは？"},
    {y:"*Yes*, *please*. *Size* *nine* and *size* *six*.",jp:"はい。9と6をお願いします。"},
    {n:"Here you are. The ice is slippery, so please hold the wall.",jp:"どうぞ。氷はすべりやすいので、壁につかまってください。"},
    {y:"*Thank* you. *I* am a *beginner*. *Can* you *help* me?",jp:"ありがとう。初心者です。手伝ってもらえますか。"},
+   {n:"Of course! Step slowly. After skating, you can leave your shoes in a locker.",jp:"もちろん。ゆっくり進んで。滑ったあとは、くつをロッカーに入れられます。"},
+   {y:"*Thank* you. *Where* is the *locker*, *please*?",jp:"ありがとう。ロッカーはどこですか。"}],
+  words:[["ice rink","/aɪs rɪŋk/","アイスリンク"],["skates","/skeɪts/","スケート靴"],["slippery","/ˈslɪpəri/","すべりやすい"],["beginner","/bɪˈɡɪnər/","初心者"],["locker","/ˈlɑːkər/","ロッカー"]]},
+ mall_food:{who:'フードコートの店員',story:1,bg:'food',sp:'food_staff',hero:'kandura',lulu:'plain',gold:1,
+  intro:'遊んだら、おなかぺこぺこ。フードコートでシャワルマを注文しよう。',
+  inter:[],
+  lines:[
    {n:"Hello! What would you like to order?",jp:"いらっしゃいませ。ご注文は？"},
    {y:"*Can* I *have* a *chicken* *shawarma*, *please*?",jp:"チキンのシャワルマをください。"},
    {n:"Sure. Eat in or take away?",jp:"かしこまりました。店内ですか、持ち帰りですか。"},
    {y:"*Eat* *in*, *please*. *How* *much* is it?",jp:"店内でお願いします。いくらですか。"},
    {n:"Forty-five dirhams. Please take this number. We will bring it to your table.",jp:"45ディルハムです。この番号札をどうぞ。お席までお持ちします。"}],
-  words:[["escalator","/ˈɛskəleɪtər/","エスカレーター"],["aquarium","/əˈkwɛriəm/","水族館"],["flash","/flæʃ/","フラッシュ"],["ice rink","/aɪs rɪŋk/","アイスリンク"],["skates","/skeɪts/","スケート靴"],["slippery","/ˈslɪpəri/","すべりやすい"],["beginner","/bɪˈɡɪnər/","初心者"],["shawarma","/ʃəˈwɑːrmə/","シャワルマ(肉のサンド)"],["take away","/teɪk əˈweɪ/","持ち帰り"]]},
+  words:[["shawarma","/ʃəˈwɑːrmə/","シャワルマ(肉のサンド)"],["take away","/teɪk əˈweɪ/","持ち帰り"],["eat in","/iːt ɪn/","店内で食べる"],["table","/ˈteɪbəl/","テーブル・席"]]},
+ book_safari:{who:'フロントスタッフ',story:1,bg:'lobby',sp:'front_staff',hero:'kandura',lulu:'plain',gold:1,
+  intro:'JW マリオットのフロント。夜の砂漠サファリを予約しよう。',
+  inter:[],
+  lines:[
+   {n:"Good evening. How can I help you?",jp:"こんばんは。ご用件は何でしょう。"},
+   {y:"*Hello*. *I* would *like* to *book* a *desert* *safari*.",jp:"こんにちは。砂漠サファリを予約したいです。"},
+   {n:"Certainly. Which day would you like? The pickup is at four in the afternoon.",jp:"かしこまりました。ご希望の日は？ お迎えは午後4時です。"},
+   {y:"*Tomorrow*, *please*. *How* *much* is it for *two* *people*?",jp:"明日でお願いします。2人でいくらですか。"},
+   {n:"It is three hundred and fifty dirhams per person.",jp:"お一人350ディルハムです。"},
+   {y:"*Does* it *include* *dinner*, *please*?",jp:"夕食は含まれていますか。"},
+   {n:"Yes. Dinner, the show, and the hotel pickup are all included.",jp:"はい。夕食とショーとホテルへのお迎えがすべて含まれます。"},
+   {y:"*Great*. *I* will *pay* by *card*.",jp:"いいですね。カードで払います。"},
+   {n:"Thank you. Your booking is confirmed. The driver will meet you in this lobby tomorrow.",jp:"ありがとうございます。予約が確定しました。明日、運転手がこのロビーでお待ちします。"},
+   {y:"*Thank* you *very* *much*. *See* you *tomorrow*!",jp:"どうもありがとう。また明日。"}],
+  words:[["book","/bʊk/","予約する"],["pickup","/ˈpɪkʌp/","お迎え"],["per person","/pər ˈpɜːrsən/","1人あたり"],["include","/ɪnˈkluːd/","ふくむ"],["confirmed","/kənˈfɜːrmd/","確定した"],["lobby","/ˈlɑːbi/","ロビー"]]},
+ book_marina:{who:'フロントスタッフ',story:1,bg:'lobby',sp:'front_staff',hero:'kandura',lulu:'plain',gold:1,
+  intro:'JW マリオットのフロント。ドバイ・マリーナのダウ船ディナークルーズを予約しよう。',
+  inter:[],
+  lines:[
+   {n:"Good evening. How can I help you?",jp:"こんばんは。ご用件は何でしょう。"},
+   {y:"*Hello*. *I'd* *like* to *book* a *dhow* *dinner* *cruise*, *please*.",jp:"こんにちは。ダウ船のディナークルーズを予約したいです。"},
+   {n:"Of course. The boat leaves Dubai Marina at eight in the evening. Which day?",jp:"かしこまりました。船は夜8時にドバイ・マリーナを出ます。何日ですか。"},
+   {y:"*Tomorrow* *night*, for *two* *people*, *please*.",jp:"明日の夜、2人でお願いします。"},
+   {n:"It is two hundred and eighty dirhams per person. A taxi to the pier is not included.",jp:"お一人280ディルハムです。乗り場までのタクシー代は含まれません。"},
+   {y:"*That* is *fine*. *Is* the *dinner* a *buffet*?",jp:"それでけっこうです。夕食はビュッフェですか。"},
+   {n:"Yes. It is a buffet, and there are vegetarian dishes too.",jp:"はい。ビュッフェで、ベジタリアン料理もあります。"},
+   {y:"*Good*. *Can* I *pay* by *card*?",jp:"いいですね。カードで払えますか。"},
+   {n:"Of course. Your booking is confirmed. Please arrive thirty minutes early.",jp:"もちろんです。予約が確定しました。30分前にお越しください。"},
+   {y:"*Thank* you. *We* will *be* *there*!",jp:"ありがとう。必ず行きます。"}],
+  words:[["dhow","/daʊ/","ダウ船(木の伝統船)"],["cruise","/kruːz/","クルーズ"],["pier","/pɪr/","桟橋"],["buffet","/bəˈfeɪ/","ビュッフェ"],["vegetarian","/ˌvɛdʒɪˈtɛriən/","菜食の"],["early","/ˈɜːrli/","早く"]]},
  fountain_story:{who:'ファウンテンのスタッフ',story:1,bg:'fountain',sp:'fn_staff',hero:'kandura',lulu:'plain',gold:1,
   intro:'ブルジュ・ハリファのふもと。夜の「ドバイ・ファウンテン」のショーを見にきた。',
   inter:[
    {after:3,anim:'fade',ms:2400,swapAt:1200,cap:[{at:0,t:'チケットを買って、ボートにのりこむ…'}],set:{bg:'lake',who:'ボートのスタッフ',sp:'boat_staff'}},
-   {after:5,anim:'show',ms:8200,cap:[{at:0,t:'そのとき…ドバイ・ファウンテンのショーがはじまった！'},{at:2600,t:'音楽にあわせて、水が高く高くおどる！'},{at:5400,t:'ルル「Wow! It is so beautiful!」',say:'Wow! It is so beautiful!'}]}],
+   {after:5,anim:'show',ms:8200,mus:'show_fountain',snap:[{at:5200,t:'噴水ショー'}],cap:[{at:0,t:'そのとき…ドバイ・ファウンテンのショーがはじまった！'},{at:2600,t:'音楽にあわせて、水が高く高くおどる！'},{at:5400,t:'ルル「Wow! It is so beautiful!」',say:'Wow! It is so beautiful!'}]}],
   lines:[
    {n:"Good evening! Are you here for the fountain show?",jp:"こんばんは。噴水ショーを見にいらしたのですか。"},
    {y:"*Yes*. *What* *time* is the *next* *show*?",jp:"はい。次のショーは何時ですか。"},
@@ -941,8 +1020,10 @@ Object.assign(DLG,{
   intro:'夕方、JW マリオットのロビーに砂漠サファリのむかえが来た。ドライバーにあいさつしよう。',
   inter:[
    {after:2,anim:'dune',ms:6400,cap:[{at:0,t:'4WDで砂漠へ！ ぐんぐん砂丘をのぼる…'},{at:3000,t:'ゆれる、ゆれる！'},{at:4800,t:'ルル「Whoa! This is fun!」',say:'Whoa! This is fun!'}],set:{bg:'desert'}},
+   {after:3,anim:'flash',ms:1500,snap:[{at:700,t:'砂丘の夕日'}],cap:[{at:0,t:'📷 パシャ！ 夕日をバックに記念写真'}]},
+   {after:8,anim:'flash',ms:1500,dancer:1,snap:[{at:700,t:'ダンサーといっしょに'}],cap:[{at:0,t:'📷 パシャ！ ダンサーといっしょに'}]},
    {after:4,anim:'fade',ms:2600,swapAt:1300,cap:[{at:0,t:'ラクダにゆられて、キャンプへ…'}],set:{bg:'camp',who:'キャンプのスタッフ',sp:'camp_host'}},
-   {after:7,anim:'fire',ms:8400,cap:[{at:0,t:'まずは、ベリーダンス…'},{at:2800,t:'つぎは、タヌーラの回転ダンス…'},{at:5600,t:'そして、火のショー！'}]}],
+   {after:7,anim:'fire',ms:8400,mus:'show_dance',snap:[{at:3200,t:'ベリーダンス'},{at:7000,t:'火のショー'}],cap:[{at:0,t:'まずは、ベリーダンス…'},{at:2800,t:'つぎは、タヌーラの回転ダンス…'},{at:5600,t:'そして、火のショー！'}]}],
   lines:[
    {n:"Good afternoon! Are you Mr. King? I am your driver for the desert safari.",jp:"こんにちは。キングさんですか。砂漠サファリのドライバーです。"},
    {y:"*Yes*, *that's* *right*. *How* *long* is the *drive*?",jp:"はい、そうです。運転はどのくらいですか。"},
@@ -967,7 +1048,7 @@ Object.assign(DLG,{
   intro:'ドバイ・マリーナの夜。木でできた伝統の船「ダウ船」でディナークルーズ。まずは乗り場で受付をしよう。',
   inter:[
    {after:2,anim:'fade',ms:2600,swapAt:1300,cap:[{at:0,t:'ダウ船にのりこむ…'}],set:{bg:'dhow',who:'ダウ船のスタッフ',sp:'dhow_waiter'}},
-   {after:5,anim:'cruise',ms:7000,cap:[{at:0,t:'ダウ船が、ゆっくり動きだした…'},{at:3200,t:'マリーナの高層ビルが、きらきらと流れていく'}]}],
+   {after:5,anim:'cruise',ms:7000,snap:[{at:4600,t:'ダウ船からの夜景'}],cap:[{at:0,t:'ダウ船が、ゆっくり動きだした…'},{at:3200,t:'マリーナの高層ビルが、きらきらと流れていく'}]}],
   lines:[
    {n:"Good evening! Do you have a reservation?",jp:"こんばんは。ご予約はありますか。"},
    {y:"*Yes*. *It* is *under* *King*, *for* *two* *people*.",jp:"はい。キングの名前で、2名です。"},
@@ -990,6 +1071,7 @@ Object.assign(DLG,{
  beach_story:{who:'ビーチにいた人',story:1,bg:'beach',sp:'beach_walker',hero:'kandura',lulu:'plain',gold:1,
   intro:'ジュメイラのビーチの夕ぐれ。海のむこうに、帆のかたちのホテル「ブルジュ・アル・アラブ」が見える。',
   inter:[
+   {after:1,anim:'flash',ms:1500,snap:[{at:700,t:'ブルジュ・アル・アラブを背に'}],cap:[{at:0,t:'📷 パシャ！ ブルジュ・アル・アラブをバックに'}]},
    {after:2,anim:'fade',ms:2600,swapAt:1300,cap:[{at:0,t:'ホテルの入口のゲートへ…'}],set:{bg:'babgate',who:'ゲートのスタッフ',sp:'bab_guard'}},
    {after:5,anim:'fade',ms:2400,swapAt:1200,cap:[{at:0,t:'予約カウンターへ…'}],set:{who:'予約カウンターのスタッフ',sp:'bab_concierge'}}],
   lines:[
@@ -1041,14 +1123,14 @@ var PLACES_AIR=[
 /* ドバイの街(バスで出かける): 実在の場所。会話の中身と店員は創作 */
 var PLACES_CITY=[
  {id:'souk',name:'お土産通り・ゴールドスーク',snd:'souk',x:22,y:9,ico:'🛍️',tip:['お土産通り(Textile Souk)とDeira Gold Souk','カンドゥーラとネックレスを買う・値段は創作'],v:['souk_story']},
- {id:'mall',name:'The Dubai Mall',snd:'mall',x:72,y:19,ico:'🏬',tip:['The Dubai Mall','水族館・アイスリンク・フードコート・値段は創作'],v:['mall_story']},
+ {id:'mall',name:'The Dubai Mall',snd:'mall',x:72,y:19,ico:'🏬',tip:['The Dubai Mall','水族館・アイスリンク・フードコート・値段は創作'],v:['mall_aq','mall_rink','mall_food'],menu:'mall'},
  {id:'fountain',name:'Dubai Fountain',snd:'fountain',x:26,y:29,ico:'⛲',tip:['Dubai Fountain(ブルジュ・レイク)','夜のショーとボート・値段は創作'],v:['fountain_story']},
  {id:'atop',name:'At the Top(ブルジュ・ハリファ)',snd:'atop',x:72,y:39,ico:'🏙️',tip:['At the Top, Burj Khalifa','展望台の写真サービス・値段は創作'],v:['atop_story']},
  {id:'marina',name:'ドバイ・マリーナ ダウ船クルーズ',snd:'marina',x:26,y:49,ico:'⛵',tip:['Dubai Marina のダウ船ディナークルーズ','受付・ビュッフェ・ショー・値段は創作'],v:['marina_story']},
  {id:'beach',name:'ブルジュ・アル・アラブとビーチ',snd:'beach',x:72,y:59,ico:'🏖️',tip:['Burj Al Arab とジュメイラのビーチ','入るには予約が必要・会話と値段は創作'],v:['beach_story']},
  {id:'safari',name:'砂漠サファリ',snd:'safari',x:26,y:69,ico:'🐪',tip:['ドバイの砂漠サファリ','4WD・ラクダ・キャンプのBBQ・値段は創作'],v:['safari_story']},
  {id:'mosque',name:'シェイク・ザイード・グランド・モスク',snd:'mosque',x:72,y:79,ico:'🕌',tip:['Sheikh Zayed Grand Mosque(アブダビ)','ドバイからバスで・服装に決まりあり'],v:['mosque_story']},
- {id:'hotel',name:'JW Marriott Marquis Dubai',snd:'hotel',x:26,y:89,ico:'🏨',hub:true,tip:['JW Marriott Marquis Dubai','へや・フロント・バー Vault・テレビ・ルームサービス'],v:['vault_story','tv_bbc','tv_aje','tv_nhk','room_service']}
+ {id:'hotel',name:'JW Marriott Marquis Dubai',snd:'hotel',x:26,y:89,ico:'🏨',hub:true,tip:['JW Marriott Marquis Dubai','へや・フロント・バー Vault・テレビ・ルームサービス'],v:['vault_story','tv_bbc','tv_aje','tv_nhk','room_service','book_safari','book_marina']}
 ];
 /* 相手の見た目(個人名なし)。pitch は読み上げの声の高さ */
 var BEARD={beard:true},BK={w:'#1b1b24',W:'#363648',c:'#1b1b24'};
@@ -1210,15 +1292,25 @@ function buildMap(){
  heroEl=mkWalker('hero',HEROMAP,HPAL,3);buddyEl=mkWalker('buddy',BUDDYMAP,BPAL,3);mapEl.appendChild(buddyEl);mapEl.appendChild(heroEl);placeWalkers(G.at,true)}
 function placeWalkers(id,instant){var p=PBY[id];[heroEl,buddyEl].forEach(function(w){if(instant)w.style.transition='none';w.style.left=p.x+'%';w.style.top=p.y+'%'});if(instant){void heroEl.offsetWidth;heroEl.style.transition='';buddyEl.style.transition=''}}
 function refreshMap(){
- PLACES.forEach(function(p){var n=nodeEls[p.id],dots=n.querySelectorAll('.dots i'),c0=0;
+ PLACES.forEach(function(p){var n=nodeEls[p.id],dots=n.querySelectorAll('.dots i'),c0=0;var lk=!!lockWhy(p.id);n.classList.toggle('locked',lk);var ic=n.querySelector('.ico');if(ic)ic.textContent=lk?'🔒':p.ico;
   p.v.forEach(function(v,i){var on=(save.seen[v]||0)>0;dots[i].classList.toggle('on',on);if(on)c0++});n.classList.toggle('done',c0===p.v.length)});
  var pips=$m('pips');pips.textContent='';var d=0;PLACES.forEach(function(p){p.v.forEach(function(v){if(save.seen[v])d++})});for(var i=0;i<TOTALV;i++)pips.appendChild(el('i',i<d?'on':''))}
 function showMap(){
  G.view='map';Snd.go(MODE==='city'?'city':'map');G.sid++;clearTimers();stopSay();G.scene=null;G.camp=null;luHelp=false;luTalk=false;G.phase='idle';speaker=null;
- $m('sceneView').hidden=true;$m('boothView').hidden=true;$m('mapView').hidden=false;refreshBoothBtn();refreshCityBtn();
+ $m('sceneView').hidden=true;$m('boothView').hidden=true;$m('albumView').hidden=true;$m('mapView').hidden=false;refreshBoothBtn();refreshCityBtn();
  if(!heroEl||!heroEl.isConnected)buildMap();refreshMap();drawMapBg();placeWalkers(G.at,true)}
+function lockWhy(id){
+ if(MODE!=='city'||id==='souk')return '';
+ if(!save.seen.souk_story)return '🔒 まず お土産通り(ゴールド・スーク)で カンドゥーラを買おう';
+ if(id==='safari'&&!save.seen.book_safari&&!save.seen.safari_story)return '🔒 ホテルのフロントで 砂漠サファリを予約しよう';
+ if(id==='marina'&&!save.seen.book_marina&&!save.seen.marina_story)return '🔒 ホテルのフロントで ダウ船クルーズを予約しよう';
+ return ''}
+var toastT=0;
+function mapToast(msg){var t0=document.getElementById('mapToast');if(!t0){t0=el('div','maptoast');t0.id='mapToast';mapEl.appendChild(t0)}
+ t0.textContent=msg;t0.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){t0.hidden=true},2600)}
 function onNode(id){
  if(G.view!=='map')return;
+ var why=lockWhy(id);if(why){mapToast(why);return}
  if(G.at===id){enterPlace(id);return}
  G.view='walk';G.at=id;placeWalkers(id,false);setTimeout(function(){enterPlace(id)},800)}
 
@@ -1229,7 +1321,7 @@ function pickV(pl){
  if(!pool.length)pool=ids.filter(function(i){return i!==lastId});
  if(!pool.length)pool=ids.slice();
  return pool[Math.floor(Math.random()*pool.length)]}
-function enterPlace(id){var pl=PBY[id];if(pl.hub){enterHub(pl);return}startVid(pl,pickV(pl),null)}
+function enterPlace(id){var pl=PBY[id];if(pl.hub){enterHub(pl);return}if(pl.menu==='mall'){enterMall(pl);return}startVid(pl,pickV(pl),null)}
 function startVid(pl,vid,from){
  var d=DLG[vid];lastId=vid;G.sid++;clearTimers();stopSay();Snd.go(pl.snd||pl.id);resetOUT();
  G.scene={id:pl.id,vid:vid,pl:pl,d:d,turns:turnsOf(vid),words:d.words,pitch:SP[vid]?SP[vid].pitch:1,from:from||null,anim:null,lastSp:null,tables:null};
@@ -1594,7 +1686,7 @@ function startReveal(){
  one()}
 function finishScene(){
  var S=G.scene;save.seen[S.vid]=(save.seen[S.vid]||0)+1;(S.d.inter||[]).forEach(function(n){if(n.set&&n.set.gold)save.gold=1});storeSave();worldSync();
- if(S.from==='hub'){enterHub(S.pl);return}showMap()}
+ if(S.from==='hub'){enterHub(S.pl);return}if(S.from==='mall'){enterMall(S.pl);return}showMap()}
 
 /* ---------- お店の中(Veranda・S34・Costa・Ahlan): 入るたびに、食べている人と相手がかわる ---------- */
 var INSIDE={cafe:1,s34:1,costa:1,ahlan:1};
@@ -1693,10 +1785,13 @@ function playInter(idx,cb){
  function run(){
   if(k>=list.length){S.anim=null;applyCtx(ctxAt(S.d,idx+1));cb();return}
   var sp=list[k++];G.phase='inter';clearPanel();spSay=false;stopSay();$m('tapHint').textContent='';
-  S.anim={n:sp.anim,t0:t,ms:sp.ms,seg:-1,d:0};
+  S.anim={n:sp.anim,t0:t,ms:sp.ms,seg:-1,d:0,dancer:sp.dancer};
+  if(sp.mus)Snd.go(sp.mus);
+  var snaps=sp.snap||(sp.anim==='photo'?[0,1,2,3,4,5,6,7].map(function(i){return {at:i*1000+520,t:'ポーズ'+(i+1)}}):[]);
+  snaps.forEach(function(z){later(z.at,function(){albumAdd(S.vid,z.t)})});
   (sp.cap||[]).forEach(function(c0){later(c0.at,function(){setMsgInstant(c0.t,'');if(c0.say)say(c0.say,.95,1.35)})});
   if(sp.swapAt!=null)later(sp.swapAt,function(){applyCtx(ctxAt(S.d,idx+1))});
-  later(sp.ms,function(){OUT.hvis=1;OUT.lvis=1;OUT.hdx=OUT.hdy=OUT.ldx=OUT.ldy=0;run()})}
+  later(sp.ms,function(){if(sp.mus)Snd.go(S.pl.snd||S.pl.id);OUT.hvis=1;OUT.lvis=1;OUT.hdx=OUT.hdy=OUT.ldx=OUT.ldy=0;run()})}
  run()}
 
 /* ---------- 描く道具 ---------- */
@@ -1822,6 +1917,8 @@ BGS.tv=function(ctx,S){
 var ANIM={};
 ANIM.fade={fg:function(p,S){var h=S.anim.ms/2000,a=p<h?p/h:Math.max(0,2-p/h);if(a<0)a=0;if(a>1)a=1;c.globalAlpha=a;R('#05070f',0,0,VW,VH);c.globalAlpha=1}};
 ANIM.wait={};
+function bellyDancer(cx,p){var i;var sw=Math.round(Math.sin(p*5)*4);R('#241a14',cx-5+sw,52,10,5);R('#f2c9a0',cx-4+sw,56,8,7);R('#ff9ac0',cx-5+sw,63,10,10);R('#ffd36a',cx-5+sw,66,10,2);R('#c8402a',cx-9+sw,73,18,18);for(i=0;i<5;i++)R('#ffd36a',cx-8+sw+i*4,76+(i%2)*5,2,2);R('#f2c9a0',cx-12+sw,62+Math.round(Math.sin(p*6)*3),4,2);R('#f2c9a0',cx+8+sw,62-Math.round(Math.sin(p*6)*3),4,2)}
+ANIM.flash={tick:function(p,S){var an=S.anim;if(!an.d){an.d=1;Snd.fx('shutter')}},bg:function(p,S){var k=S.ctx&&BGS[S.ctx.bg];if(k)k(S.ctx,S);if(S.anim&&S.anim.dancer)bellyDancer(196,1.2)},fg:function(p){if(p<.4){c.globalAlpha=(1-p/.4)*.95;R('#fff',0,0,VW,VH);c.globalAlpha=1}}};
 ANIM.dress={
  tick:function(p){if(p<.5)OUT.hdy=-Math.abs(Math.sin(p*Math.PI/.5))*6;else if(p<2){OUT.hvis=0}else{OUT.hvis=1;OUT.hero='kandura';var q=p-2.1;OUT.hdy=(q>0&&q<.8)?-Math.sin(q/.8*Math.PI)*10:0}},
  fg:function(p){poof(98,118,(p-.4)/.7);poof(98,118,(p-2)/.7)}};
@@ -2050,14 +2147,61 @@ function hubMenu(w){
   item('Al Jazeera English',save.seen.tv_aje,function(){runStory('tv_aje')});
   item('NHK WORLD-JAPAN',save.seen.tv_nhk,function(){runStory('tv_nhk')});
   item('もどる',0,function(){hubMenu('main')})
+ }else if(w==='front'||w==='tour'){
+  applyCtx({bg:'lobby',who:'',sp:'front_staff',hero:'kandura',lulu:'plain',gold:1});
+  if(w==='front'){
+   setMsgInstant('ホテルのフロント。何をする？','');
+   item('おすすめの場所を聞く',save.seen.vault_story,function(){runStory('vault_story')});
+   item('ツアーを予約する',save.seen.book_safari&&save.seen.book_marina,function(){hubMenu('tour')});
+   item('へやにもどる',0,function(){hubMenu('main')})
+  }else{
+   setMsgInstant('どのツアーを予約する？(予約すると、街のマップで行けるようになる)','');
+   item('砂漠サファリ',save.seen.book_safari,function(){runStory('book_safari')});
+   item('ダウ船ディナークルーズ',save.seen.book_marina,function(){runStory('book_marina')});
+   item('もどる',0,function(){hubMenu('front')})}
  }else{
+  if(G.scene.ctx&&G.scene.ctx.bg!=='room')applyCtx({bg:'room',who:'',sp:null,hero:'kandura',lulu:'plain',gold:1});
   setMsgInstant('JW Marriott Marquis Dubai のへや。窓の外にはドバイの夜景。どうする？','');
   item('テレビを見る',save.seen.tv_bbc&&save.seen.tv_aje&&save.seen.tv_nhk,function(){hubMenu('tv')});
   item('電話をかける',save.seen.room_service,function(){runStory('room_service')});
-  item('フロントにいく',save.seen.vault_story,function(){runStory('vault_story')});
+  item('フロントにいく',save.seen.vault_story&&save.seen.book_safari&&save.seen.book_marina,function(){hubMenu('front')});
   item('ねる',0,sleepNow)}
  panel.appendChild(box)}
 function runStory(vid){startVid(G.scene.pl,vid,'hub')}
+/* ---------- ザ・ドバイモール: 行き先を▶で選ぶ(ホテルと同じ形式) ---------- */
+function enterMall(pl){
+ G.sid++;clearTimers();stopSay();Snd.go(pl.snd||pl.id);
+ G.scene={id:pl.id,vid:null,pl:pl,d:{who:''},turns:[],words:[],pitch:1,hub:true,anim:null,lastSp:null};
+ resetOUT();speaker=null;applyCtx({bg:'mall',who:'',sp:null,hero:'kandura',lulu:'plain',gold:1});
+ cam=0;spSay=false;G.view='scene';G.ti=0;G.tries=0;$m('mapView').hidden=true;$m('sceneView').hidden=false;
+ clearPanel();G.phase='hub';$m('tapHint').textContent='';
+ setMsgInstant('ザ・ドバイモール。広すぎて迷いそう…どこへ行く？','');
+ var box=el('div','dqbox');
+ function item(label,seen,fn){var b=el('button','dq');b.type='button';b.appendChild(el('span','cur','▶'));b.appendChild(el('span','',label));if(seen)b.appendChild(el('span','ok','✓'));b.addEventListener('click',fn);box.appendChild(b)}
+ item('ドバイ・アクアリウム(水族館)',save.seen.mall_aq,function(){startVid(pl,'mall_aq','mall')});
+ item('ドバイ・アイスリンク',save.seen.mall_rink,function(){startVid(pl,'mall_rink','mall')});
+ item('フードコート',save.seen.mall_food,function(){startVid(pl,'mall_food','mall')});
+ item('マップにもどる',0,function(){showMap()});
+ panel.appendChild(box)}
+
+/* ---------- アルバム(撮った写真を、この端末のブラウザの中だけに残す) ---------- */
+var ALBKEY='kanpe-dubai-album-v1',ALBMAX=48,ALBNAME={atop_story:'At the Top',safari_story:'砂漠サファリ',beach_story:'ブルジュ・アル・アラブ',fountain_story:'ドバイ・ファウンテン',marina_story:'ダウ船クルーズ',souk_story:'ゴールド・スーク'};
+function albumLoad(){try{var a=JSON.parse(localStorage.getItem(ALBKEY)||'[]');return Array.isArray(a)?a.filter(function(x){return x&&typeof x.d==='string'&&x.d.indexOf('data:image/png;base64,')===0&&typeof x.k==='string'}):[]}catch(e){return []}}
+function albumSave(a){while(a.length>ALBMAX)a.shift();for(var n=0;n<6;n++){try{localStorage.setItem(ALBKEY,JSON.stringify(a));return true}catch(e){a.shift()}}return false}
+function albumAdd(vid,label){
+ try{var cv=document.getElementById('scene'),d=cv.toDataURL('image/png'),k=vid+'|'+label,a=albumLoad().filter(function(x){return x.k!==k});
+  a.push({k:k,p:ALBNAME[vid]||'ドバイ',t:label,d:d,ts:Date.now()});albumSave(a)}catch(e){}}
+function showAlbum(){
+ G.view='album';Snd.go('map');$m('mapView').hidden=true;$m('albumView').hidden=false;
+ var body=$m('albumBody');body.textContent='';var a=albumLoad();$m('albumSub').textContent=a.length+'まい';
+ if(!a.length){body.appendChild(el('p','aempty','まだ写真がありません。\nAt the Top・砂漠サファリ・ビーチなどで 写真をとると、ここにたまります。'));return}
+ var g=el('div','agrid');
+ a.slice().reverse().forEach(function(x){var f=el('button','aph');f.type='button';var im=document.createElement('img');im.src=x.d;im.alt=x.p+' '+x.t;f.appendChild(im);f.appendChild(el('span','',x.p+' ・ '+x.t));
+  f.addEventListener('click',function(){var o=el('div','abig'),i2=document.createElement('img');i2.src=x.d;i2.alt=x.t;o.appendChild(i2);o.appendChild(el('b','',x.p+' ・ '+x.t));o.appendChild(el('small','','タップでとじる'));o.addEventListener('click',function(){o.remove()});document.body.appendChild(o)});
+  g.appendChild(f)});
+ body.appendChild(g)}
+$m('albumBtn').addEventListener('click',function(){if(G.view==='map')showAlbum()});
+$m('albumBack').addEventListener('click',function(){$m('albumView').hidden=true;showMap()});
 function sleepNow(){
  clearPanel();G.phase='inter';setMsgInstant('キングとルルは、ふかふかのベッドで ぐっすり… おやすみなさい。','');say('Goodnight!',.9,1);
  G.scene.anim={n:'fade',t0:t,ms:3600,seg:-1,d:0};later(3600,function(){G.scene.anim=null;showMap()})}
