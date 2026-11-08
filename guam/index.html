@@ -65,7 +65,7 @@ body{margin:0;box-sizing:border-box;background:var(--bg);color:var(--line);font-
 .win .tap{position:absolute;right:8px;bottom:4px;font-size:10px;color:var(--mute)}
 #panel{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;overflow:hidden}
 .cue{background:var(--paper);color:var(--ink);border:3px solid var(--brown);border-radius:10px;padding:12px 12px 10px;display:flex;flex-wrap:wrap;gap:2px 10px;align-items:baseline;align-content:center;flex:1;min-height:0;position:relative}
-.cue .w{font-weight:800;font-size:calc(16px*var(--k,1));color:#6b6552;transition:transform .12s,color .12s}
+.cue .w{font-weight:800;font-size:calc(25px*var(--k,1));color:#6b6552;transition:transform .12s,color .12s}
 .cue .w.s{font-size:calc(46px*var(--k,1));line-height:1.15;font-weight:900;color:var(--strong)}
 .cue .w.on{transform:scale(1.15);color:#0a7c4a}
 .cue .lab{position:absolute;top:5px;right:10px;font-size:11px;color:#8a7b55;font-weight:800;letter-spacing:.06em}
@@ -131,7 +131,7 @@ body{margin:0;box-sizing:border-box;background:var(--bg);color:var(--line);font-
 .stats div{background:#1c2540;border-radius:10px;padding:8px 10px;font-size:12px;color:var(--mute)}
 .stats b{display:block;font-size:20px;color:#fff;font-variant-numeric:tabular-nums}
 :focus-visible{outline:3px solid #fff;outline-offset:2px}
-@media (max-height:700px){.cue .w.s{font-size:27px}.cue .w{font-size:11px}.win p{font-size:16px;min-height:46px}.win{min-height:64px}.prompt .en{font-size:38px}.prompt{min-height:84px}}
+@media (max-height:700px){.cue .w.s{font-size:27px}.cue .w{font-size:16px}.win p{font-size:16px;min-height:46px}.win{min-height:64px}.prompt .en{font-size:38px}.prompt{min-height:84px}}
 @media (prefers-reduced-motion:reduce){#app.shake{animation:none}.node.pop,.node.drop{animation:none}}
 
 /* ---- 時間・空・BGM ---- */
@@ -1230,7 +1230,7 @@ function setupAction(act,stat,toks,spans,T){
    try{var r=new SR();r.lang='en-US';r.interimResults=false;r.maxAlternatives=3;stat.className='stat';stat.textContent='きいています…';fitCue(panel.querySelector('.cue'));act.disabled=true;
     r.onresult=gd(function(e){var alts=[];for(var i=0;i<e.results[0].length;i++)alts.push(e.results[0][i].transcript);judgeMic(alts,toks,spans,stat,T)});
     r.onerror=function(e){act.disabled=false;stat.className='stat ng';stat.textContent=(e.error==='not-allowed'||e.error==='service-not-allowed')?'この画面ではマイクが使えません。長押しにもどします':'うまく聞こえませんでした';if(e.error==='not-allowed'||e.error==='service-not-allowed')set.vmode='hold'};
-    r.onend=function(){act.disabled=false};r.start()}catch(err){stat.className='stat ng';stat.textContent='マイクを開始できません';act.disabled=false}
+    r.onend=function(){if(G.phase!=='help')act.disabled=false};G.rec=r;r.start()}catch(err){stat.className='stat ng';stat.textContent='マイクを開始できません';act.disabled=false}
   });return}
  /* 長押し：押している間、強い語の順に光る。長さがちょうどよければ合格 */
  var raf=0,t0=0,pressed=false;
@@ -1279,8 +1279,9 @@ function addHelp(T){
  panel.appendChild(h);
 }
 function useHelp(T){
- if(G.phase!=='cue'||save.help<=0)return;
- initAudio();G.phase='help';save.help--;G.stat.assist++;noteWeak(T);storeSave();stopSay();
+ if((G.phase!=='cue'&&G.phase!=='retry'&&G.phase!=='assist')||save.help<=0)return;
+ initAudio();G.phase='help';save.help--;G.stat.assist++;noteWeak(T);storeSave();
+ G.sid++;clearTimers();try{if(G.rec)G.rec.abort()}catch(e){}G.rec=null;stopSay();
  Array.prototype.forEach.call(panel.querySelectorAll('button'),function(b){b.disabled=true});
  var hb=panel.querySelector('.btn.help');if(hb)hb.textContent=save.help>0?'ヘルプ　残り'+save.help+'回':'ヘルプ　つかいきった';
  var st=panel.querySelector('.stat');if(st){st.className='stat';st.textContent='ルルが かわりに いうよ（ヘルプ のこり '+save.help+'回）'}
