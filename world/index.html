@@ -277,6 +277,7 @@ function load(){
   var r=JSON.parse(localStorage.getItem(KEY)||'null');
   if(r&&typeof r==='object'){
    if(typeof r.at==='string'&&has(AP,r.at))s.at=r.at;
+   if(typeof r.from==='string'&&has(AP,r.from))s.from=r.from;
    ['seen','cleared'].forEach(function(k){
     if(r[k]&&typeof r[k]==='object')Object.keys(r[k]).forEach(function(id){if(has(AP,id)&&r[k][id])s[k][id]=1})})
   }
@@ -284,7 +285,7 @@ function load(){
  s.seen.haneda=1;s.cleared.haneda=1;
  if(s.cleared[s.at])s.seen[s.at]=1;
  return s}
-function store(s){try{localStorage.setItem(KEY,JSON.stringify({v:1,at:s.at,seen:s.seen,cleared:s.cleared}))}catch(e){}}
+function store(s){try{localStorage.setItem(KEY,JSON.stringify({v:1,at:s.at,from:s.from,seen:s.seen,cleared:s.cleared}))}catch(e){}}
 
 /* ---------- 距離と方角(大圏距離。実際の航路とはずれます) ---------- */
 function geo(a,b){
@@ -609,7 +610,7 @@ function fly(to){
  S=load();
  var from=S.at,knownTo=S.cleared[to]||S.seen[to];
  $('flRoute').textContent=AP[from].n+' → '+(knownTo?AP[to].n:'？');
- S.at=to;S.seen[to]=1;store(S);
+ S.from=from;S.at=to;S.seen[to]=1;store(S);
  var box=$('flBox');box.textContent='';
  var svg=baseMap(),a=xy(from),b=xy(to);
  svg.appendChild(se('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:'#f4f1e8','stroke-width':.9,'stroke-dasharray':'2 1.6',opacity:.85}));
