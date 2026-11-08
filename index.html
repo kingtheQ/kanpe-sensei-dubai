@@ -62,6 +62,10 @@ body{margin:0;box-sizing:border-box;background:var(--bg);color:var(--line);font-
 .btn{font:inherit;font-weight:800;color:#fff;background:var(--hot);border:3px solid var(--brown);border-radius:14px;padding:12px;box-shadow:0 5px 0 var(--brown);cursor:pointer;min-height:56px;font-size:20px;flex:1;touch-action:none}
 .btn:active,.btn.down{transform:translateY(3px);box-shadow:0 2px 0 var(--brown)}
 .btn.sub{background:var(--navy);font-size:14px;flex:none;padding:8px 14px;min-height:44px}
+.btn.go{font-size:clamp(56px,20vw,96px);letter-spacing:.06em;text-shadow:0 4px 0 var(--brown)}
+.btn.go.shake{animation:goShake .55s linear infinite}
+@keyframes goShake{0%,100%{transform:translate(0,0) rotate(0)}10%{transform:translate(-3px,1px) rotate(-1.2deg)}20%{transform:translate(3px,-1px) rotate(1.2deg)}30%{transform:translate(-3px,-1px) rotate(-1deg)}40%{transform:translate(3px,1px) rotate(1deg)}50%{transform:translate(-2px,2px) rotate(-1.2deg)}60%{transform:translate(2px,-2px) rotate(1.2deg)}70%{transform:translate(-3px,0) rotate(-1deg)}80%{transform:translate(3px,1px) rotate(1deg)}90%{transform:translate(-2px,-1px) rotate(-.8deg)}}
+@media (prefers-reduced-motion:reduce){.btn.go.shake{animation:none;outline:4px dashed #fff}}
 .btn[disabled]{opacity:.45}
 .stat{min-height:20px;font-size:13px;font-weight:800;color:var(--mute);text-align:center;flex:none}
 .stat.ok{color:var(--ok)}.stat.ng{color:var(--bad)}
@@ -745,7 +749,7 @@ function enterPlace(id){
 function startScene(){
  clearPanel();var S=G.scene;
  setMsgInstant(S.pl.tip[0],'');$m('tapHint').textContent='';
- var b=el('button','btn','すすむ');b.type='button';panel.appendChild(b);
+ var b=el('button','btn go','GO！');b.type='button';panel.appendChild(b);setTimeout(function(){if(b.isConnected)b.classList.add('shake')},3000);
  b.addEventListener('click',function(){npcTurn()})}
 function npcTurn(){
  clearPanel();G.phase='npc';var S=G.scene,T=S.turns[G.ti];
