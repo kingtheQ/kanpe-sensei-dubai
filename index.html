@@ -33,6 +33,13 @@ body{margin:0;box-sizing:border-box;background:var(--bg);color:var(--line);font-
 .node .dots i{width:9px;height:9px;border-radius:2px;border:2px solid var(--brown);background:#fff6d8}
 .node .dots i.on{background:var(--gold)}
 .walker{position:absolute;z-index:4;pointer-events:none;transition:left .75s ease-in-out,top .75s ease-in-out}
+@media (max-height:760px){
+ #map.dense .node{width:48px;height:48px;margin:-24px 0 0 -24px;box-shadow:0 4px 0 var(--brown)}
+ #map.dense .node .ico{font-size:25px}
+ #map.dense .node .nm{top:51px;font-size:10px;padding:0 4px}
+ #map.dense .node .dots{bottom:-12px}
+ #map.dense .node .dots i{width:7px;height:7px}
+}
 #hero{transform:translate(-50%,16px)}
 #buddy{transform:translate(-135%,26px);transition-duration:.95s}
 #hero canvas,#buddy canvas{display:block;image-rendering:pixelated}
@@ -62,6 +69,8 @@ body{margin:0;box-sizing:border-box;background:var(--bg);color:var(--line);font-
 .row{display:flex;gap:8px;flex:none}
 .btn{font:inherit;font-weight:800;color:#fff;background:var(--hot);border:3px solid var(--brown);border-radius:14px;padding:12px;box-shadow:0 5px 0 var(--brown);cursor:pointer;min-height:56px;font-size:20px;flex:1;touch-action:none}
 .btn:active,.btn.down{transform:translateY(3px);box-shadow:0 2px 0 var(--brown)}
+.btn.help{background:#2f8f82;font-size:16px;flex:none;width:100%;min-height:46px;padding:8px 12px;box-shadow:0 4px 0 var(--brown)}
+.btn.help.camp{background:#d9531e;font-size:17px}
 .btn.sub{background:var(--navy);font-size:14px;flex:none;padding:8px 14px;min-height:44px}
 .btn.go{font-size:clamp(56px,20vw,96px);letter-spacing:.06em;text-shadow:0 4px 0 var(--brown)}
 .btn.go.shake{animation:goShake .55s linear infinite}
@@ -240,6 +249,7 @@ var Snd=(function(){
    st:function(s,t,e){if(Math.random()<.04)chime(t,.06);if(Math.random()<.025)jet(t,5)}}
  };
  K.souk=K.cafe;K.mosque=K.ahlan;K.atop=K.hall;K.hotel=K.costa;K.vault=K.s34;K.room=K.ahlan;K.city=K.map;
+ K.mall=K.cafe;K.fountain=K.hall;K.safari=K.ahlan;K.marina=K.s34;K.beach=K.costa;
  function fade(g){if(!g)return;try{g.gain.cancelScheduledValues(AC.currentTime);g.gain.setValueAtTime(Math.max(.0001,g.gain.value),AC.currentTime);g.gain.linearRampToValueAtTime(.0001,AC.currentTime+.3)}catch(e){}
   setTimeout(function(){try{g.disconnect()}catch(e){}},700)}
  function halt(){
@@ -546,12 +556,12 @@ function palm(wx){var x=wx-cam;if(x<-30||x>VW+30)return;var sw=Math.round(Math.s
  R('#7a5a3a',x-14,90,28,10);R('#946d44',x-12,88,24,3);R('#6b4a2f',x-14,97,28,3);
  R('#7a4b2a',x-2,58,5,32);R('#5a3a1a',x-1,66,3,2);R('#5a3a1a',x-1,76,3,2);
  R('#2e8b57',x-18+sw,52,38,6);R('#2e8b57',x-10+sw,46,22,6);R('#3aa56a',x-26+sw*2,58,18,5);R('#3aa56a',x+10+sw*2,58,18,5);R('#2a7a4a',x-6+sw,42,14,5)}
-function hanging(wx,txt,col){var x=wx-cam;if(x<-80||x>VW+80)return;R('#8a8a94',x-1,6,2,10);R('#8a8a94',x+49,6,2,10);R(col||'#f2c200',x-8,14,70,12);R('#14141a',x-8,14,70,1);R('#14141a',x-8,25,70,1);T(txt,x+27,20,7.5,'#14141a')}
+function hanging(wx,txt,col){var x=wx-cam;if(x<-80||x>VW+80)return;R('#8a8a94',x-1,6,2,10);R('#8a8a94',x+49,6,2,10);R(col||'#f2c200',x-12,13,78,14);R('#14141a',x-12,13,78,1);R('#14141a',x-12,26,78,1);T(txt,x+27,20,8,'#14141a')}
 function shop(s){var x=s.x-cam;if(x>VW||x+s.w<0)return;var w=s.w;
  R('#2b2418',x-2,37,w+4,62);
  var sign={cafe:'#2d2a22',s34:'#123a38',duty:'#0f2a6b',costa:'#4a1a22',ahlan:'#241a40'}[s.k];
  var inner={cafe:'#f6e9c8',s34:'#1f4d4a',duty:'#f2ecdc',costa:'#7a3a3a',ahlan:'#35275c'}[s.k];
- R(sign,x,39,w,12);T(s.name,x+w/2,45,7.5,'#ffd36a');
+ R(sign,x,38,w,14);T(s.name,x+w/2,45.5,10,'#ffd36a');
  R(inner,x+3,52,w-6,44);
  if(s.k==='cafe'){R('#d9c79a',x+6,52,w-12,3);for(var i=0;i<5;i++){R('#f7d56a',x+20+i*38,56,6,6);R('#8a6a30',x+22+i*38,52,2,4)}R('#cfe8ee',x+8,72,w-16,12);R('#e9dcc0',x+6,84,w-12,12);R('#b88a4a',x+6,94,w-12,2);var cc=['#e8a0b0','#d6a050','#8a5a3a','#f4e0a0','#a06a8a'];for(i=0;i<12;i++){R(cc[i%5],x+14+i*13,75,8,6)}}
  if(s.k==='s34'){R('#7a4b2a',x+6,60,w-12,3);R('#7a4b2a',x+6,74,w-12,3);for(i=0;i<9;i++){R(['#d9a441','#c46a3a','#e8d09a'][i%3],x+12+i*20,64,12,8)}for(i=0;i<3;i++){R('#f3c15a',x+30+i*60,54,4,6);R('#2b2418',x+31+i*60,52,2,2)}R('#5a3a22',x+8,86,w-16,10);R('#e9d6a0',x+20,84,30,3);R('#e9d6a0',x+110,84,30,3)}
@@ -875,6 +885,133 @@ Object.assign(DLG,{
   words:[["left","/lɛft/","置き忘れた"],["last","/læst/","最後に"],["strap","/stræp/","ストラップ"],["yours","/jɔːrz/","あなたのもの"],["sign","/saɪn/","サインする"],["safe trip","/seɪf trɪp/","気をつけて(よい旅を)"]]}
 });
 
+/* ---------- 街編の続き(会話): ザ・ドバイモール／ドバイ噴水／砂漠サファリ／マリーナのダウ船クルーズ／ブルジュ・アル・アラブとビーチ。実在の場所の名前を使い、値段と相手の会話は創作 ---------- */
+Object.assign(DLG,{
+ mall_story:{who:'インフォメーションのスタッフ',story:1,bg:'mall',sp:'mall_info',hero:'kandura',lulu:'plain',gold:1,
+  intro:'ブルジュ・ハリファのとなりの「ザ・ドバイモール」。まずはインフォメーションで水族館の場所を聞こう。',
+  inter:[
+   {after:1,anim:'fade',ms:2400,swapAt:1200,cap:[{at:0,t:'エスカレーターをのりついで、水族館へ…'}],set:{bg:'aquarium',who:'アクアリウムの受付',sp:'aq_staff'}},
+   {after:4,anim:'fade',ms:2400,swapAt:1200,cap:[{at:0,t:'つぎは、アイスリンクへ…'}],set:{bg:'rink',who:'リンクのスタッフ',sp:'rink_staff'}},
+   {after:6,anim:'fade',ms:2600,swapAt:1300,cap:[{at:0,t:'遊んだら、おなかぺこぺこ…フードコートへ！'}],set:{bg:'food',who:'フードコートの店員',sp:'food_staff'}}],
+  lines:[
+   {n:"Welcome to The Dubai Mall. How can I help you?",jp:"ザ・ドバイモールへようこそ。ご用件は何でしょう。"},
+   {y:"*Hello*. *Where* is the *aquarium*, *please*?",jp:"こんにちは。水族館はどこですか。"},
+   {n:"Go straight, then turn left at the big escalator. It takes about five minutes.",jp:"まっすぐ行って、大きなエスカレーターを左へ。5分ほどです。"},
+   {y:"*Thank* you *very* *much*. *Have* a *nice* *day*!",jp:"どうもありがとう。よい一日を。"},
+   {n:"Welcome to the Dubai Aquarium. How many tickets do you need?",jp:"ドバイ・アクアリウムへようこそ。チケットは何枚ですか。"},
+   {y:"*Two* *tickets*, *please*. *How* *much* is it?",jp:"2枚お願いします。いくらですか。"},
+   {n:"It is two hundred and fifty dirhams each. You can pay by card.",jp:"1人250ディルハムです。カードで払えます。"},
+   {y:"*Okay*. *Can* we *take* *photos* *inside*?",jp:"わかりました。中で写真を撮ってもいいですか。"},
+   {n:"Yes, but please do not use a flash. It scares the fish.",jp:"はい。ただしフラッシュは使わないでください。魚がおどろきます。"},
+   {y:"*I* *see*. *Thank* you. *We* will *enjoy* it!",jp:"わかりました。ありがとう。楽しみます。"},
+   {n:"Welcome to the Ice Rink. Do you need skates? What size?",jp:"アイスリンクへようこそ。スケート靴は必要ですか。サイズは？"},
+   {y:"*Yes*, *please*. *Size* *nine* and *size* *six*.",jp:"はい。9と6をお願いします。"},
+   {n:"Here you are. The ice is slippery, so please hold the wall.",jp:"どうぞ。氷はすべりやすいので、壁につかまってください。"},
+   {y:"*Thank* you. *I* am a *beginner*. *Can* you *help* me?",jp:"ありがとう。初心者です。手伝ってもらえますか。"},
+   {n:"Hello! What would you like to order?",jp:"いらっしゃいませ。ご注文は？"},
+   {y:"*Can* I *have* a *chicken* *shawarma*, *please*?",jp:"チキンのシャワルマをください。"},
+   {n:"Sure. Eat in or take away?",jp:"かしこまりました。店内ですか、持ち帰りですか。"},
+   {y:"*Eat* *in*, *please*. *How* *much* is it?",jp:"店内でお願いします。いくらですか。"},
+   {n:"Forty-five dirhams. Please take this number. We will bring it to your table.",jp:"45ディルハムです。この番号札をどうぞ。お席までお持ちします。"}],
+  words:[["escalator","/ˈɛskəleɪtər/","エスカレーター"],["aquarium","/əˈkwɛriəm/","水族館"],["flash","/flæʃ/","フラッシュ"],["ice rink","/aɪs rɪŋk/","アイスリンク"],["skates","/skeɪts/","スケート靴"],["slippery","/ˈslɪpəri/","すべりやすい"],["beginner","/bɪˈɡɪnər/","初心者"],["shawarma","/ʃəˈwɑːrmə/","シャワルマ(肉のサンド)"],["take away","/teɪk əˈweɪ/","持ち帰り"]]},
+ fountain_story:{who:'ファウンテンのスタッフ',story:1,bg:'fountain',sp:'fn_staff',hero:'kandura',lulu:'plain',gold:1,
+  intro:'ブルジュ・ハリファのふもと。夜の「ドバイ・ファウンテン」のショーを見にきた。',
+  inter:[
+   {after:3,anim:'fade',ms:2400,swapAt:1200,cap:[{at:0,t:'チケットを買って、ボートにのりこむ…'}],set:{bg:'lake',who:'ボートのスタッフ',sp:'boat_staff'}},
+   {after:5,anim:'show',ms:8200,cap:[{at:0,t:'そのとき…ドバイ・ファウンテンのショーがはじまった！'},{at:2600,t:'音楽にあわせて、水が高く高くおどる！'},{at:5400,t:'ルル「Wow! It is so beautiful!」',say:'Wow! It is so beautiful!'}]}],
+  lines:[
+   {n:"Good evening! Are you here for the fountain show?",jp:"こんばんは。噴水ショーを見にいらしたのですか。"},
+   {y:"*Yes*. *What* *time* is the *next* *show*?",jp:"はい。次のショーは何時ですか。"},
+   {n:"The show runs every thirty minutes in the evening. The next one starts in ten minutes.",jp:"ショーは夜、30分ごとに行われます。次は10分後に始まります。"},
+   {y:"*Is* it *free*? *Where* can we *watch*?",jp:"無料ですか。どこで見られますか。"},
+   {n:"Yes, it is free! The front railing has the best view, or you can take a boat ride.",jp:"はい、無料です。手すりの前がいちばんよく見えますが、ボートにも乗れます。"},
+   {y:"*A* *boat* *ride* *sounds* *nice*. *How* *much* is it?",jp:"ボートはいいですね。いくらですか。"},
+   {n:"It is about seventy dirhams per person. The ride takes thirty minutes.",jp:"1人70ディルハムほどで、30分かかります。"},
+   {y:"*Two* *tickets*, *please*. *Can* we *board* *now*?",jp:"2枚お願いします。もう乗れますか。"},
+   {n:"Welcome aboard! Please sit down and keep your hands inside the boat.",jp:"ご乗船ありがとうございます。座って、手はボートの中に入れておいてください。"},
+   {y:"*Okay*. *Can* you *take* a *photo* of *us*, *please*?",jp:"わかりました。写真を撮っていただけますか。"},
+   {n:"Of course! Say cheese! One, two, three!",jp:"もちろん。はい、チーズ。1、2、3。"},
+   {y:"*Thank* you. *Look*! *The* *show* is *starting*!",jp:"ありがとう。見て、ショーが始まる。"},
+   {n:"Wow, what a beautiful show! Did you like it?",jp:"なんて美しいショーでしょう。気に入りましたか。"},
+   {y:"*It* was *amazing*! *The* *water* *danced* with the *music*.",jp:"すばらしかった。水が音楽にあわせて踊っていました。"},
+   {n:"I am glad you enjoyed it. Would you like to see one more show?",jp:"楽しんでもらえてうれしいです。もう1回ショーを見ますか。"},
+   {y:"*Yes*, *let's* *see* *one* *more*. *Thank* you *very* *much*!",jp:"はい、もう1回見ましょう。ありがとうございました。"}],
+  words:[["fountain","/ˈfaʊntən/","噴水"],["every thirty minutes","/ˈɛvri ˈθɜːrti ˈmɪnɪts/","30分ごとに"],["free","/friː/","無料の"],["railing","/ˈreɪlɪŋ/","手すり"],["boat ride","/boʊt raɪd/","ボートに乗ること"],["board","/bɔːrd/","乗りこむ"],["keep your hands inside","/kiːp jɔːr hændz ɪnˈsaɪd/","手を中に入れておく"],["amazing","/əˈmeɪzɪŋ/","すばらしい"]]},
+ safari_story:{who:'サファリのドライバー',story:1,bg:'lobby',sp:'safari_driver',hero:'kandura',lulu:'plain',gold:1,
+  intro:'夕方、JW マリオットのロビーに砂漠サファリのむかえが来た。ドライバーにあいさつしよう。',
+  inter:[
+   {after:2,anim:'dune',ms:6400,cap:[{at:0,t:'4WDで砂漠へ！ ぐんぐん砂丘をのぼる…'},{at:3000,t:'ゆれる、ゆれる！'},{at:4800,t:'ルル「Whoa! This is fun!」',say:'Whoa! This is fun!'}],set:{bg:'desert'}},
+   {after:4,anim:'fade',ms:2600,swapAt:1300,cap:[{at:0,t:'ラクダにゆられて、キャンプへ…'}],set:{bg:'camp',who:'キャンプのスタッフ',sp:'camp_host'}},
+   {after:7,anim:'fire',ms:8400,cap:[{at:0,t:'まずは、ベリーダンス…'},{at:2800,t:'つぎは、タヌーラの回転ダンス…'},{at:5600,t:'そして、火のショー！'}]}],
+  lines:[
+   {n:"Good afternoon! Are you Mr. King? I am your driver for the desert safari.",jp:"こんにちは。キングさんですか。砂漠サファリのドライバーです。"},
+   {y:"*Yes*, *that's* *right*. *How* *long* is the *drive*?",jp:"はい、そうです。運転はどのくらいですか。"},
+   {n:"About forty-five minutes. Please wear your seat belt. The dunes are very bumpy!",jp:"約45分です。シートベルトをしてください。砂丘はとてもゆれます。"},
+   {y:"*I* am a *little* *nervous*. *Is* it *safe*?",jp:"少し緊張しています。安全ですか。"},
+   {n:"Don't worry! Our drivers are very experienced. Hold on tight and enjoy!",jp:"ご心配なく。ドライバーは経験豊富です。しっかりつかまって楽しんでください。"},
+   {y:"*Okay*. *Let's* *go*!",jp:"わかりました。行きましょう。"},
+   {n:"We are at the top of the dune. Look at the sunset! Would you like a photo?",jp:"砂丘の上に着きました。夕日を見てください。写真はいかがですか。"},
+   {y:"*Yes*, *please*. *It* is *so* *beautiful*!",jp:"はい、お願いします。とてもきれい。"},
+   {n:"Now, would you like to try a camel ride? It is included in your tour.",jp:"さあ、ラクダに乗ってみませんか。ツアーに含まれています。"},
+   {y:"*Yes*, *please*! *It* *sounds* *like* *so* *much* *fun*.",jp:"はい、お願いします。とても楽しそう。"},
+   {n:"Welcome to our camp! Please sit down. Would you like some Arabic coffee and dates?",jp:"キャンプへようこそ。おかけください。アラビアコーヒーとデーツはいかがですか。"},
+   {y:"*Yes*, *please*. *Do* you *have* a *vegetarian* *dinner*?",jp:"はい、お願いします。ベジタリアン向けの夕食はありますか。"},
+   {n:"Of course! The BBQ buffet has vegetarian dishes. Please help yourself.",jp:"もちろん。BBQビュッフェにはベジタリアン料理もあります。ご自由にどうぞ。"},
+   {y:"*Thank* you. *It* *smells* *delicious*!",jp:"ありがとう。おいしそうなにおい。"},
+   {n:"Now it is show time! First a belly dancer, then a tanoura dancer, and then a fire show.",jp:"さあ、ショーの時間です。最初はベリーダンス、次はタヌーラ、最後は火のショーです。"},
+   {y:"*Wonderful*! *I* *can't* *wait*!",jp:"すばらしい。待ちきれません。"},
+   {n:"Did you enjoy the show? Would you like a photo with the dancer?",jp:"ショーはいかがでしたか。ダンサーといっしょに写真はいかがですか。"},
+   {y:"*Yes*, *please*! *Thank* you *for* a *wonderful* *night*!",jp:"はい、お願いします。すてきな夜をありがとうございました。"}],
+  words:[["safari","/səˈfɑːri/","サファリ"],["dune","/duːn/","砂丘"],["bumpy","/ˈbʌmpi/","ゆれの多い"],["seat belt","/siːt bɛlt/","シートベルト"],["sunset","/ˈsʌnsɛt/","夕日"],["camel","/ˈkæməl/","ラクダ"],["vegetarian","/ˌvɛdʒəˈtɛriən/","ベジタリアンの"],["help yourself","/hɛlp jɔːrˈsɛlf/","ご自由にどうぞ"],["tanoura","/tɑːˈnuːrə/","タヌーラ(回転ダンス)"]]},
+ marina_story:{who:'乗り場のスタッフ',story:1,bg:'pier',sp:'pier_staff',hero:'kandura',lulu:'plain',gold:1,
+  intro:'ドバイ・マリーナの夜。木でできた伝統の船「ダウ船」でディナークルーズ。まずは乗り場で受付をしよう。',
+  inter:[
+   {after:2,anim:'fade',ms:2600,swapAt:1300,cap:[{at:0,t:'ダウ船にのりこむ…'}],set:{bg:'dhow',who:'ダウ船のスタッフ',sp:'dhow_waiter'}},
+   {after:5,anim:'cruise',ms:7000,cap:[{at:0,t:'ダウ船が、ゆっくり動きだした…'},{at:3200,t:'マリーナの高層ビルが、きらきらと流れていく'}]}],
+  lines:[
+   {n:"Good evening! Do you have a reservation?",jp:"こんばんは。ご予約はありますか。"},
+   {y:"*Yes*. *It* is *under* *King*, *for* *two* *people*.",jp:"はい。キングの名前で、2名です。"},
+   {n:"Let me check. Yes, I found it. Boarding starts at eight fifteen. Please wait here.",jp:"確認します。ありました。乗船は8時15分からです。こちらでお待ちください。"},
+   {y:"*Thank* you. *How* *long* is the *cruise*?",jp:"ありがとう。クルーズはどのくらいですか。"},
+   {n:"About ninety minutes, with dinner. You can sit on the upper deck or the lower deck.",jp:"夕食つきで約90分です。上のデッキでも下のデッキでも座れます。"},
+   {y:"*The* *upper* *deck*, *please*. *I* *want* to *see* the *view*.",jp:"上のデッキでお願いします。景色が見たいです。"},
+   {n:"Welcome aboard! Here is your welcome drink. Please sit at this table.",jp:"ご乗船ありがとうございます。ウェルカムドリンクです。このテーブルへどうぞ。"},
+   {y:"*Thank* you. *The* *view* is *beautiful*.",jp:"ありがとう。景色がきれいですね。"},
+   {n:"The buffet is open now. We have chicken, fish, rice, and salad.",jp:"ビュッフェが始まりました。チキン、魚、ごはん、サラダがあります。"},
+   {y:"*Is* there *anything* *without* *meat*?",jp:"お肉を使っていないものはありますか。"},
+   {n:"Yes. The vegetable curry and the salad have no meat. Please help yourself.",jp:"はい。野菜カレーとサラダは肉を使っていません。ご自由にどうぞ。"},
+   {y:"*Thank* you. *It* is *delicious*!",jp:"ありがとう。おいしい。"},
+   {n:"How do you like the view? That is Dubai Marina at night.",jp:"景色はいかがですか。これが夜のドバイ・マリーナです。"},
+   {y:"*It* is *like* a *dream*. *Can* you *take* a *photo* of *us*?",jp:"夢みたいです。写真を撮ってもらえますか。"},
+   {n:"Of course. Now it is time for the tanoura show. Please enjoy!",jp:"もちろん。これからタヌーラのショーです。お楽しみください。"},
+   {y:"*Thank* you. *This* is a *wonderful* *night*!",jp:"ありがとう。すばらしい夜です。"},
+   {n:"Thank you for coming. Please watch your step when you leave the boat.",jp:"ご乗船ありがとうございました。降りるときは足元にご注意ください。"}],
+  words:[["reservation","/ˌrɛzərˈveɪʃən/","予約"],["boarding","/ˈbɔːrdɪŋ/","乗船"],["upper deck","/ˈʌpər dɛk/","上のデッキ"],["welcome drink","/ˈwɛlkəm drɪŋk/","ウェルカムドリンク"],["buffet","/bəˈfeɪ/","ビュッフェ"],["vegetable curry","/ˈvɛdʒtəbəl ˈkɜːri/","野菜カレー"],["view","/vjuː/","景色"],["watch your step","/wɑːtʃ jɔːr stɛp/","足元に気をつけて"]]},
+ beach_story:{who:'ビーチにいた人',story:1,bg:'beach',sp:'beach_walker',hero:'kandura',lulu:'plain',gold:1,
+  intro:'ジュメイラのビーチの夕ぐれ。海のむこうに、帆のかたちのホテル「ブルジュ・アル・アラブ」が見える。',
+  inter:[
+   {after:2,anim:'fade',ms:2600,swapAt:1300,cap:[{at:0,t:'ホテルの入口のゲートへ…'}],set:{bg:'babgate',who:'ゲートのスタッフ',sp:'bab_guard'}},
+   {after:5,anim:'fade',ms:2400,swapAt:1200,cap:[{at:0,t:'予約カウンターへ…'}],set:{who:'予約カウンターのスタッフ',sp:'bab_concierge'}}],
+  lines:[
+   {n:"Hi! What a beautiful sunset, isn't it? Are you taking photos?",jp:"こんにちは。きれいな夕日ですね。写真を撮っていますか。"},
+   {y:"*Yes*. *Could* you *take* a *photo* of *us*, *please*?",jp:"はい。私たちの写真を撮っていただけますか。"},
+   {n:"Sure! Stand over there. The Burj Al Arab is right behind you. Smile!",jp:"いいですよ。あそこに立って。すぐ後ろにブルジュ・アル・アラブが見えます。はい、笑って。"},
+   {y:"*Thank* you! *Can* we *go* *inside* the *hotel*?",jp:"ありがとう。ホテルの中に入れますか。"},
+   {n:"Not by yourselves. You need a booking. Please ask at the gate.",jp:"ふらっとは入れません。予約が必要です。ゲートで聞いてみてください。"},
+   {y:"*I* *see*. *We* will *ask* *at* the *gate*.",jp:"わかりました。ゲートで聞いてみます。"},
+   {n:"Good evening. Welcome to the Burj Al Arab. Do you have a reservation?",jp:"こんばんは。ブルジュ・アル・アラブへようこそ。ご予約はありますか。"},
+   {y:"*No*, *we* *don't*. *Can* we *go* *in* *just* *to* *look*?",jp:"いいえ。見るだけでも入れませんか。"},
+   {n:"I am sorry. Only guests and people with a booking can enter. You can book afternoon tea or a guided tour.",jp:"申し訳ありません。宿泊客と予約のある方だけです。アフタヌーンティーかガイドツアーを予約できます。"},
+   {y:"*I* *see*. *What* is the *guided* *tour*?",jp:"なるほど。ガイドツアーとは何ですか。"},
+   {n:"A guide shows you the hotel for about ninety minutes. It is better to book in advance.",jp:"ガイドが約90分、ホテルを案内します。事前の予約がおすすめです。"},
+   {y:"*Okay*. *We* *would* *like* *afternoon* *tea* *tomorrow*, *please*.",jp:"わかりました。明日のアフタヌーンティーをお願いします。"},
+   {n:"Certainly. For how many people, and what time? Please note the dress code: no beachwear or flip-flops.",jp:"かしこまりました。何名様、何時でしょうか。服装規定にもご注意ください。ビーチウェアやビーチサンダルはだめです。"},
+   {y:"*Two* *people*, *at* *three* *in* the *afternoon*, *please*.",jp:"2名、午後3時でお願いします。"},
+   {n:"Thank you. Your table is booked. Please show this card at the gate tomorrow.",jp:"ありがとうございます。お席を予約しました。明日ゲートでこのカードを見せてください。"},
+   {y:"*Thank* you *very* *much*. *See* you *tomorrow*!",jp:"ありがとうございます。また明日。"}],
+  words:[["booking","/ˈbʊkɪŋ/","予約"],["guest","/ɡɛst/","宿泊客"],["afternoon tea","/ˌæftərˈnuːn tiː/","アフタヌーンティー"],["guided tour","/ˈɡaɪdɪd tʊr/","ガイドつきツアー"],["in advance","/ɪn ədˈvæns/","事前に"],["dress code","/drɛs koʊd/","服装規定"],["beachwear","/ˈbiːtʃwɛr/","ビーチウェア"],["flip-flops","/ˈflɪp flɑːps/","ビーチサンダル"]]}
+});
+
 /* ---------- 会話の仕上げ: 最後が相手の言葉で終わる会話には、キングの返事を1つ足す ---------- */
 var CLOSERS=[
  {y:"*Thanks* for *telling* me. *Have* a *good* *day*!",jp:"教えてくれてありがとう。よい一日を。"},
@@ -903,10 +1040,15 @@ var PLACES_AIR=[
 ];
 /* ドバイの街(バスで出かける): 実在の場所。会話の中身と店員は創作 */
 var PLACES_CITY=[
- {id:'souk',name:'お土産通り・ゴールドスーク',snd:'souk',x:22,y:20,ico:'🛍️',tip:['お土産通り(Textile Souk)とDeira Gold Souk','カンドゥーラとネックレスを買う・値段は創作'],v:['souk_story']},
- {id:'mosque',name:'シェイク・ザイード・グランド・モスク',snd:'mosque',x:72,y:38,ico:'🕌',tip:['Sheikh Zayed Grand Mosque(アブダビ)','ドバイからバスで・服装に決まりあり'],v:['mosque_story']},
- {id:'atop',name:'At the Top(ブルジュ・ハリファ)',snd:'atop',x:26,y:62,ico:'🏙️',tip:['At the Top, Burj Khalifa','展望台の写真サービス・値段は創作'],v:['atop_story']},
- {id:'hotel',name:'JW Marriott Marquis Dubai',snd:'hotel',x:72,y:84,ico:'🏨',hub:true,tip:['JW Marriott Marquis Dubai','へや・フロント・バー Vault・テレビ・ルームサービス'],v:['vault_story','tv_bbc','tv_aje','tv_nhk','room_service']}
+ {id:'souk',name:'お土産通り・ゴールドスーク',snd:'souk',x:22,y:9,ico:'🛍️',tip:['お土産通り(Textile Souk)とDeira Gold Souk','カンドゥーラとネックレスを買う・値段は創作'],v:['souk_story']},
+ {id:'mall',name:'The Dubai Mall',snd:'mall',x:72,y:19,ico:'🏬',tip:['The Dubai Mall','水族館・アイスリンク・フードコート・値段は創作'],v:['mall_story']},
+ {id:'fountain',name:'Dubai Fountain',snd:'fountain',x:26,y:29,ico:'⛲',tip:['Dubai Fountain(ブルジュ・レイク)','夜のショーとボート・値段は創作'],v:['fountain_story']},
+ {id:'atop',name:'At the Top(ブルジュ・ハリファ)',snd:'atop',x:72,y:39,ico:'🏙️',tip:['At the Top, Burj Khalifa','展望台の写真サービス・値段は創作'],v:['atop_story']},
+ {id:'marina',name:'ドバイ・マリーナ ダウ船クルーズ',snd:'marina',x:26,y:49,ico:'⛵',tip:['Dubai Marina のダウ船ディナークルーズ','受付・ビュッフェ・ショー・値段は創作'],v:['marina_story']},
+ {id:'beach',name:'ブルジュ・アル・アラブとビーチ',snd:'beach',x:72,y:59,ico:'🏖️',tip:['Burj Al Arab とジュメイラのビーチ','入るには予約が必要・会話と値段は創作'],v:['beach_story']},
+ {id:'safari',name:'砂漠サファリ',snd:'safari',x:26,y:69,ico:'🐪',tip:['ドバイの砂漠サファリ','4WD・ラクダ・キャンプのBBQ・値段は創作'],v:['safari_story']},
+ {id:'mosque',name:'シェイク・ザイード・グランド・モスク',snd:'mosque',x:72,y:79,ico:'🕌',tip:['Sheikh Zayed Grand Mosque(アブダビ)','ドバイからバスで・服装に決まりあり'],v:['mosque_story']},
+ {id:'hotel',name:'JW Marriott Marquis Dubai',snd:'hotel',x:26,y:89,ico:'🏨',hub:true,tip:['JW Marriott Marquis Dubai','へや・フロント・バー Vault・テレビ・ルームサービス'],v:['vault_story','tv_bbc','tv_aje','tv_nhk','room_service']}
 ];
 /* 相手の見た目(個人名なし)。pitch は読み上げの声の高さ */
 var BEARD={beard:true},BK={w:'#1b1b24',W:'#363648',c:'#1b1b24'};
@@ -937,7 +1079,21 @@ var SP={
  pay_staff:{pitch:1.2,m:[[HJ,P(1,{x:'#1b1b24',o:'#3a2f5a'})]]},
  front_staff:{pitch:1.05,m:[[trav({}),P(2,{o:'#7a1f2b',p:'#2a2a33',h:'#241a14'})]]},
  waiter:{pitch:.95,m:[[trav({}),P(3,{o:'#f4f1e8',p:'#14141a',h:'#241a14'})]]},
- phone_staff:{pitch:1.15,ghost:true,m:[[trav({hair:'long'}),P(1,{o:'#f4f1e8',p:'#2a2a33'})]]}
+ phone_staff:{pitch:1.15,ghost:true,m:[[trav({hair:'long'}),P(1,{o:'#f4f1e8',p:'#2a2a33'})]]},
+ /* 街編の続き(ドバイモール・噴水・サファリ・マリーナ・ブルジュ・アル・アラブ) */
+ mall_info:{pitch:1.15,m:[[HJ,P(1,{x:'#1b1b24',o:'#2d8f8a'})]]},
+ aq_staff:{pitch:1,m:[[trav({}),P(2,{o:'#2a5a9a',p:'#1b1b24',h:'#241a14'})]]},
+ rink_staff:{pitch:1.1,m:[[trav({hair:'cap'}),P(3,{o:'#c8402a',p:'#2a3a5a'})]]},
+ food_staff:{pitch:.95,m:[[trav({}),P(1,{o:'#f4f1e8',p:'#14141a',h:'#241a14'})]]},
+ fn_staff:{pitch:.9,m:[[kanC({beard:true}),P(2)]]},
+ boat_staff:{pitch:1,m:[[trav({hair:'cap'}),P(1,{o:'#1b2a55',p:'#f4f1e8'})]]},
+ safari_driver:{pitch:.85,m:[[kanG({beard:true}),P(3)]]},
+ camp_host:{pitch:.95,m:[[kanC({beard:true}),P(2)]]},
+ pier_staff:{pitch:1.2,m:[[HJ,P(1,{x:'#1b1b24',o:'#1b2a55'})]]},
+ dhow_waiter:{pitch:.95,m:[[trav({}),P(2,{o:'#f4f1e8',p:'#14141a',h:'#241a14'})]]},
+ beach_walker:{pitch:1.25,m:[[trav({hair:'long'}),P(0,{o:'#5a9ad8',p:'#f4f1e8'})]]},
+ bab_guard:{pitch:.85,m:[[kanC({beard:true}),P(2,BK)]]},
+ bab_concierge:{pitch:1.15,m:[[HJ,P(1,{x:'#f4f4ee',o:'#7a1f2b'})]]}
 };
 
 /* ---------- 背景の人々(話しかけられない。たくさん歩いている) ---------- */
@@ -971,9 +1127,9 @@ var TOTALV=PLACES.reduce(function(a,p){return a+p.v.length},0);
 /* ---------- 状態 ---------- */
 var $m=function(i){return document.getElementById(i)};
 var cam=0,t=0,speaker=null,spX=360,spSay=false,lastId=null,LIMIT=5000;
-var G={view:'map',at:'info',scene:null,ti:0,tries:0,phase:'idle',sid:0,timers:[],typeTimer:0};
-var save={seen:{}},SAVEKEY='kanpe-dubai-save-v2';
-try{var s0=JSON.parse(localStorage.getItem(SAVEKEY)||'null');if(s0&&s0.seen&&typeof s0.seen==='object')save.seen=s0.seen;if(s0&&s0.gold)save.gold=1}catch(e){}
+var G={view:'map',at:'info',scene:null,ti:0,tries:0,phase:'idle',sid:0,timers:[],typeTimer:0,camp:null},luHelp=false;
+var HELPMAX=5,save={seen:{},help:HELPMAX,weak:[]},SAVEKEY='kanpe-dubai-save-v2';
+try{var s0=JSON.parse(localStorage.getItem(SAVEKEY)||'null');if(s0&&s0.seen&&typeof s0.seen==='object')save.seen=s0.seen;if(s0&&s0.gold)save.gold=1;if(s0&&typeof s0.help==='number'&&s0.help>=0&&s0.help<=HELPMAX)save.help=Math.floor(s0.help);if(s0&&Array.isArray(s0.weak))save.weak=s0.weak.filter(function(w){return w&&typeof w.c==='string'}).slice(0,8)}catch(e){}
 function storeSave(){try{localStorage.setItem(SAVEKEY,JSON.stringify(save))}catch(e){}}
 /* 世界マップへ「クリア」を伝える: 6つの場所を、それぞれ1回以上あそんだら */
 function worldMark(k){try{var w=JSON.parse(localStorage.getItem('kanpe-world-v1')||'null');if(!w||typeof w!=='object')w={v:1,at:'haneda',seen:{haneda:1},cleared:{haneda:1}};w.seen=w.seen&&typeof w.seen==='object'?w.seen:{};w.cleared=w.cleared&&typeof w.cleared==='object'?w.cleared:{};w.seen[k]=1;w.cleared[k]=1;localStorage.setItem('kanpe-world-v1',JSON.stringify(w))}catch(e){}}
@@ -1010,13 +1166,14 @@ function drawCrowd(){
   sp2(m,n.pal,x,n.y-m.length*3,3)})}
 function drawFront(){
  var S=G.scene,an=S&&S.anim;
- var hx=24,hk=OUT.hero==='kandura',hm=hk?HKMAP:HEROMAP,hpal=hk?HKPAL:HPAL,hh=hm.length*4;
+ var hx=76,hk=OUT.hero==='kandura',hm=hk?HKMAP:HEROMAP,hpal=hk?HKPAL:HPAL,hh=hm.length*4;
  if(OUT.hvis){c.globalAlpha=.22;R('#000',hx+4+OUT.hdx,145,44,4);c.globalAlpha=1;sp2(hm,hpal,hx+OUT.hdx,147-hh+OUT.hdy,4)}
  if(OUT.lvis){
-  var lx=hx+52+OUT.ldx,ab=OUT.lulu==='abaya',lb=(luTalk&&spSay&&Math.floor(t*6)%2)?-2:0,by=147-BUDDYMAP.length*4+(Math.floor(t*2)%2?0:1)+OUT.ldy+lb;
+  var lx=24+OUT.ldx,ab=OUT.lulu==='abaya',lb=(luHelp&&Math.floor(t*7)%2)?-3:((luTalk&&spSay&&Math.floor(t*6)%2)?-2:0),by=147-BUDDYMAP.length*4+(Math.floor(t*2)%2?0:1)+OUT.ldy+lb;
   c.globalAlpha=.22;R('#000',lx+2,145,36,4);c.globalAlpha=1;sp2(ab?BUDDYAB:BUDDYMAP,ab?BPALAB:BPAL,lx,by,4);
   if(OUT.lulu==='sheer'){c.globalAlpha=.5;R('#ffc9e0',lx+4,by+12,32,16);c.globalAlpha=.85;for(var q=0;q<6;q++)R('#fff',lx+6+q*5,by+14+(q%2)*6,2,2);c.globalAlpha=1}
   if(OUT.gold){R('#ffe27a',lx+16,by+24,8,4);R('#fff',lx+16,by+24,2,2)}
+  if(luHelp){var kk=Math.floor(t*8)%3,bb=by-4;for(var q=0;q<3;q++){var hq=5+q*4;R(q<=kk?'#e8452c':'#7a2a1c',lx+4+q*5,bb-hq,3,hq)}T('♪',lx+22,bb-10,10,'#e8452c')}
   if(luTalk&&spSay){var bx0=lx+16,by0=by-12;R('#05070f',bx0-8,by0-1,17,12);R('#f4f1e8',bx0-7,by0,15,10);T('…',bx0,by0+4,8,'#05070f')}}
  if(speaker&&!an){
   if(speaker.ghost){R('#f4f1e8',236,6,72,70);R('#1d2a44',239,9,66,64);sp2r(speaker.m[0][0],speaker.m[0][1],254,14,3,14);T('☎',296,16,9,'#ffd36a');
@@ -1057,7 +1214,7 @@ function refreshMap(){
   p.v.forEach(function(v,i){var on=(save.seen[v]||0)>0;dots[i].classList.toggle('on',on);if(on)c0++});n.classList.toggle('done',c0===p.v.length)});
  var pips=$m('pips');pips.textContent='';var d=0;PLACES.forEach(function(p){p.v.forEach(function(v){if(save.seen[v])d++})});for(var i=0;i<TOTALV;i++)pips.appendChild(el('i',i<d?'on':''))}
 function showMap(){
- G.view='map';Snd.go(MODE==='city'?'city':'map');G.sid++;clearTimers();stopSay();G.scene=null;G.phase='idle';speaker=null;
+ G.view='map';Snd.go(MODE==='city'?'city':'map');G.sid++;clearTimers();stopSay();G.scene=null;G.camp=null;luHelp=false;luTalk=false;G.phase='idle';speaker=null;
  $m('sceneView').hidden=true;$m('boothView').hidden=true;$m('mapView').hidden=false;refreshBoothBtn();refreshCityBtn();
  if(!heroEl||!heroEl.isConnected)buildMap();refreshMap();drawMapBg();placeWalkers(G.at,true)}
 function onNode(id){
@@ -1105,7 +1262,8 @@ function showCue(){
  var row=el('div','row');var demo=el('button','btn sub','おてほん');demo.type='button';row.appendChild(demo);
  demo.addEventListener('click',function(){say(cueText(T.cue),.8,1)});
  var act=el('button','btn','おして よむ');act.type='button';row.appendChild(act);panel.appendChild(row);
- setupAction(act,stat,toks,spans,T)}
+ setupAction(act,stat,toks,spans,T);
+ if(!G.camp)addHelp(T)}
 /* ---------- 発音チェック: 目標の文と「聞こえた文字」を単語ごとに比べる ---------- */
 var ONES=['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
 var TENS=['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
@@ -1193,26 +1351,22 @@ function setupAction(act,stat,toks,spans,T){
  var heardEl=el('div','heard','');card.appendChild(heardEl);
  var tgToks=toks.map(function(k){return k.txt}),sid=G.sid,rec=null,listening=false,got=false,lastInt='',errCode='',mode='say',IDLE='おして よむ';
  function alive(){return G.sid===sid&&G.view==='scene'}
- function label(){return mode==='next'?'つぎへ':(mode==='skip'?'マイクなしで すすむ':IDLE)}
+ function label(){return IDLE}
  function setIdle(){listening=false;act.classList.remove('down');act.textContent=label()}
  function resetCard(){card.classList.remove('ev');spans.forEach(function(s,i){s.classList.remove('on','bad');s.textContent=toks[i].txt})}
- function blocked(msg){mode='skip';setIdle();stat.className='stat ng';stat.textContent=msg}
- var rb=null,noHear=0;
- function dropRb(){if(rb){rb.remove();rb=null}}
- function showNext(){
-  mode='next';act.textContent=label();dropRb();
-  var row=act.parentNode;rb=el('button','btn sub','もう一度');rb.type='button';row.insertBefore(rb,act);
-  rb.addEventListener('click',function(){dropRb();mode='say';act.textContent=label();start()})}
+ function blocked(msg){/* マイクが使えない: 長押し(時間)判定にもどす */
+  listening=false;var a2=act.cloneNode(false);a2.className='btn';a2.textContent=IDLE;act.parentNode.replaceChild(a2,act);
+  setupActionTimer(a2,stat,toks,spans,T);stat.className='stat ng';stat.textContent=msg+'。長押しにもどします'}
+ var noHear=0;
  function finish(txt,conf){
   var res=analyze(tgToks,txt);renderEval(card,spans,toks,res,heardEl);
   plogAdd({ts:Date.now(),v:G.scene?G.scene.vid:'',tg:tgToks.join(' '),hd:String(txt||'').slice(0,200),cf:conf||0,ok:res.okN,n:res.n,
    miss:res.words.filter(function(w){return !w.ok}).map(function(w){return {t:missKey(w.t),h:w.h,k:w.k}})});
   noHear=0;
   var pct=Math.round(res.ratio*100),cnt=res.okN+'/'+res.n+'語 '+pct+'%';
-  if(res.okN===res.n){stat.className='stat ok';stat.textContent='Nice!  '+cnt;onPass();return}
-  /* 7割未満でも会話は止めない。赤い語は記録に入り、羽田の発音教室で練習する */
-  var hi=res.ratio>=0.7;stat.className=hi?'stat ok':'stat ng';
-  stat.textContent=cnt+(hi?'  7割以上 聞こえた':'  7割未満');showNext()}
+  /* 7割以上でOK(グアム編と同じ)。赤い語は記録に入り、羽田の発音教室で練習する */
+  if(res.ratio>=0.7){stat.className='stat ok';stat.textContent=(res.okN===res.n?'Nice!  ':'')+cnt;onPass();return}
+  stat.className='stat ng';stat.textContent=cnt+'  7割未満';onFail()}
  function start(){
   stopSay();resetCard();heardEl.className='heard live';heardEl.textContent='…';stat.className='stat';stat.textContent='';
   var r;try{r=new SR()}catch(e){blocked('マイクが使えません');return}
@@ -1230,12 +1384,11 @@ function setupAction(act,stat,toks,spans,T){
    setIdle();if(got)return;
    if(errCode==='network'){stat.className='stat ng';stat.textContent='ネットワークエラー';return}
    if(lastInt){finish(lastInt,0);return}
-   heardEl.textContent='…';stat.className='stat ng';stat.textContent='きこえませんでした';noHear++;if(noHear>=2)showNext()};
+   heardEl.textContent='…';stat.className='stat ng';stat.textContent='きこえませんでした';noHear++;if(noHear>=2){noHear=0;onFail()}};
   try{Snd.duck(1);r.start();listening=true;act.classList.add('down');act.textContent='きいてます…';
    later(15000,function(){if(rec===r){try{r.stop()}catch(e){}}})}
   catch(e){Snd.duck(0);blocked('マイクが使えません')}}
  act.addEventListener('click',function(){
-  if(mode==='skip'||mode==='next'){onPass();return}
   if(listening){try{if(rec)rec.stop()}catch(e){}return}
   start()});
  act.addEventListener('contextmenu',function(e){e.preventDefault()});
@@ -1356,12 +1509,46 @@ var RETRY=["Sorry, one more time?","Could you say that again, please?","Pardon? 
 var THANKS=["Okay.","Sure.","I see.","Right.","Got it.","Of course."];
 function onFail(){
  A_shake();G.tries++;
- if(G.tries>=3){G.phase='assist';var T=G.scene.turns[G.ti];setMsgInstant('Listen, then try again.',whoNow());say(cueText(T.cue),.6,1,gd(function(){G.tries=0;later(300,function(){var st=panel.querySelector('.stat');if(st){st.className='stat';st.textContent=''}})}));return}
+ if(G.tries>=3){G.phase='assist';var T=G.scene.turns[G.ti];noteWeak(T);setMsgInstant('Listen, then try again.',whoNow());say(cueText(T.cue),.6,1,gd(function(){G.tries=0;later(300,function(){var st=panel.querySelector('.stat');if(st){st.className='stat';st.textContent=''}})}));return}
  G.phase='retry';var line=RETRY[Math.min(G.tries-1,RETRY.length-1)];setMsg(line,whoNow());say(line,.9,G.scene.pitch)}
 function A_shake(){var a=$m('app');a.classList.remove('shake');void a.offsetWidth;a.classList.add('shake')}
+function advance(){
+ if(G.camp){var done=G.scene.turns[G.ti];save.weak=save.weak.filter(function(w){return w.c!==done.cue});storeSave();G.ti++;if(G.ti>=G.scene.turns.length)campDone();else npcTurn();return}
+ G.ti++;playInter(G.ti-1,function(){if(G.ti>=G.scene.turns.length)startWords();else npcTurn()})}
 function onPass(){
  G.phase='pass';G.tries=0;var th=THANKS[Math.floor(Math.random()*THANKS.length)];setMsg(th,whoNow());spSay=true;
- say(th,1,G.scene.pitch,gd(function(){spSay=false;later(350,function(){G.ti++;playInter(G.ti-1,function(){if(G.ti>=G.scene.turns.length)startWords();else npcTurn()})})}))}
+ say(th,1,G.scene.pitch,gd(function(){spSay=false;later(350,advance)}))}
+
+/* ---------- ヘルプ(るるが かわりに 発音)と 強化合宿(グアム編と同じ仕組み) ---------- */
+function noteWeak(T){if(!T||G.camp)return;var c=T.cue;save.weak=save.weak.filter(function(w){return w.c!==c});save.weak.unshift({c:c,j:T.cueJp||''});save.weak=save.weak.slice(0,8);storeSave()}
+function addHelp(T){
+ var h=el('button','btn help'),left=save.help;h.type='button';
+ if(left>0){h.textContent='ヘルプ\u3000残り'+left+'回';h.addEventListener('click',function(){useHelp(T)})}
+ else{h.classList.add('camp');h.textContent='\u2708 強化合宿へ(ヘルプが もどる)';h.addEventListener('click',function(){startCamp()})}
+ panel.appendChild(h)}
+function useHelp(T){
+ if((G.phase!=='cue'&&G.phase!=='retry'&&G.phase!=='assist')||save.help<=0)return;
+ G.phase='help';save.help--;noteWeak(T);storeSave();
+ G.sid++;clearTimers();stopSay();
+ Array.prototype.forEach.call(panel.querySelectorAll('button'),function(b){b.disabled=true});
+ var hb=panel.querySelector('.btn.help');if(hb)hb.textContent=save.help>0?'ヘルプ\u3000残り'+save.help+'回':'ヘルプ\u3000つかいきった';
+ var st=panel.querySelector('.stat');if(st){st.className='stat';st.textContent='るるが かわりに いうよ(ヘルプ のこり '+save.help+'回)'}
+ later(450,function(){setMsgInstant(cueText(T.cue),'Lulu');luHelp=true;spSay=false;var t0=Date.now();
+  say(cueText(T.cue),.85,1.75,gd(function(){later(Math.max(500,1800-(Date.now()-t0)),function(){luHelp=false;later(450,advance)})}))})}
+function startCamp(){
+ var S0=G.scene,cur=S0.turns[G.ti],list=save.weak.slice();if(!list.length&&cur)list=[{c:cur.cue,j:cur.cueJp||''}];
+ G.sid++;clearTimers();stopSay();luHelp=false;
+ var cx=S0.d&&S0.d.story?Object.assign({},S0.ctx,{who:'Coach',sp:null}):null;
+ G.camp={scene:S0,ti:G.ti};
+ G.scene=Object.assign({},S0,{anim:null,camp:1,pitch:1.05,turns:list.map(function(w){var o={npc:'Say it again. Slowly, and clearly.',npcJp:'もういちど。ゆっくり、はっきり。',cue:w.c,cueJp:w.j,pitch:1.05};if(cx)o.ctx=cx;return o})});
+ G.ti=0;G.tries=0;clearPanel();speaker=cx?null:speaker;setMsgInstant('強化合宿 '+list.length+'もん','Coach');
+ later(900,npcTurn)}
+function campDone(){
+ var sv=G.camp;G.camp=null;save.help=HELPMAX;storeSave();
+ G.sid++;clearTimers();stopSay();G.scene=sv.scene;G.ti=sv.ti;G.tries=0;
+ var T=G.scene.turns[G.ti];if(T.ctx)applyCtx(T.ctx);
+ setMsgInstant(T.npc,T.ctx?T.ctx.who:G.scene.d.who);spSay=false;
+ showCue();var st=panel.querySelector('.stat');if(st){st.className='stat ok';st.textContent='強化合宿おわり！ ヘルプが '+HELPMAX+'回 ふっかつ'}}
 
 /* ---------- 単語バトル(英語+発音記号 → 日本語を3択) ---------- */
 function startWords(){
@@ -1532,7 +1719,7 @@ BGS.souk=function(ctx){
  R('#3a2414',0,0,VW,18);for(i=0;i<8;i++)R('#2a190d',i*44,0,6,18);
  R('#caa06a',0,18,VW,80);R('#b78850',0,70,VW,28);
  for(i=0;i<7;i++){var lx=18+i*48;R('#6a5028',lx+2,18,1,10);R('#ffb62e',lx-3,28,8,10);R('#ffe27a',lx-1,30,4,5);c.globalAlpha=.12;R('#ffb62e',lx-12,24,26,22);c.globalAlpha=1}
- R('#2b1a0c',80,40,160,14);R('#c9a03a',80,40,160,1);R('#c9a03a',80,53,160,1);T(ctx.sign,160,47,9,'#ffd36a');
+ R('#2b1a0c',70,38,180,18);R('#c9a03a',70,38,180,1);R('#c9a03a',70,55,180,1);T(ctx.sign,160,47,11,'#ffd36a');
  if(gold){R('#1a1208',14,58,292,36);R('#2e2010',14,58,292,3);
   for(i=0;i<5;i++){var bx=30+i*58;for(var k=0;k<5;k++){R('#ffd03a',bx+k*5,66+Math.round(Math.sin(k/4*Math.PI)*10),3,2)}R('#ffd03a',bx+10,78,5,6);R('#fff2a8',bx+10,78,2,2);R('#c98a20',bx+22,86,12,3);R('#ffd03a',bx+24,84,8,3)}
   c.globalAlpha=.08;R('#ffe27a',14,58,292,36);c.globalAlpha=1;if(Math.floor(t*2)%2)glint(60,72,3,'#fff');else glint(210,70,3,'#fff')
@@ -1548,7 +1735,7 @@ BGS.gate=function(ctx){
  R('#f6f2e6',292,16,8,60);R('#d8b04a',292,14,8,3);R('#f6f2e6',294,8,4,8);R('#d8b04a',295,4,2,5);
  for(var i=0;i<6;i++){R('#cdbf9a',46+i*40,64,22,34);R('#3a342a',49+i*40,68,16,30);R('#cdbf9a',49+i*40,66,16,3)}
  R('#efeadb',0,98,VW,52);for(var x=0;x<VW;x+=26)R('#ddd5bd',x,98,1,52);for(var y=108;y<150;y+=12)R('#ddd5bd',0,y,VW,1);
- R('#6a5a3a',110,76,100,16);R('#8a7448',110,76,100,3);R('#14100a',120,56,80,10);T('SHEIKH ZAYED GRAND MOSQUE',160,61,5,'#ffd36a')};
+ R('#6a5a3a',110,76,100,16);R('#8a7448',110,76,100,3);R('#14100a',84,52,152,16);R('#d8b04a',84,52,152,1);T('SHEIKH ZAYED GRAND MOSQUE',160,60,8,'#ffd36a')};
 BGS.yard=function(){
  grad(0,60,'#78bfec','#e9f5fa',14);
  dome(70,60,20,'#fdfbf4','#fff');dome(160,56,30,'#fdfbf4','#fff');dome(250,60,20,'#fdfbf4','#fff');
@@ -1570,10 +1757,10 @@ BGS.atop=function(){
  skyline(96,'#161d33','#ffd36a',1.25);burj(250,96,'#2a3350');
  R('#10131c',0,0,5,98);R('#10131c',80,0,4,98);R('#10131c',160,0,4,98);R('#10131c',240,0,4,98);R('#10131c',315,0,5,98);R('#10131c',0,0,VW,4);
  R('#20263a',0,96,VW,54);R('#c0c8d8',0,94,VW,2);R('#8a93a8',0,96,VW,1);for(var i=0;i<10;i++)R('#2a3148',i*34,104+(i%3)*12,24,2);
- R('#05070f',112,6,96,16);R('#c9a03a',112,6,96,1);R('#c9a03a',112,21,96,1);T('AT THE TOP',160,12,8,'#ffd36a');T('LEVEL 124',160,18,5,'#cfd6e4')};
+ R('#05070f',96,4,128,26);R('#c9a03a',96,4,128,1);R('#c9a03a',96,29,128,1);T('AT THE TOP',160,13,11,'#ffd36a');T('LEVEL 124',160,23,7,'#cfd6e4')};
 BGS.atopdesk=function(){
  R('#1e2438',0,0,VW,98);R('#c9a03a',0,36,VW,1);R('#20263a',0,98,VW,52);R('#c9a03a',0,98,VW,1);
- R('#05070f',150,10,150,48);R('#c9a03a',150,10,150,1);T('AT THE TOP  BURJ KHALIFA',225,17,6,'#ffd36a');
+ R('#05070f',150,10,150,48);R('#c9a03a',150,10,150,1);T('AT THE TOP  BURJ KHALIFA',225,17,8.5,'#ffd36a');
  var cl=['#f08a5a','#5a8ad8','#d9a441','#7a3b8a','#2d8f8a','#c8402a'];for(var i=0;i<8;i++){var gx=156+(i%4)*36,gy=24+Math.floor(i/4)*16;R(cl[i%6],gx,gy,30,13);R('#fff',gx+10,gy+3,5,6);R('#ffd36a',gx+18,gy+5,4,4)}
  for(i=0;i<3;i++){R('#e9e2d0',14+i*44,22,34,26);R('#1b2a55',16+i*44,24,30,22);R('#f08a5a',16+i*44,38,30,8)}
  R('#d9d4c6',140,84,170,14);R('#9a947f',140,84,170,2);R('#05070f',250,68,22,16);R('#2a6a9a',252,70,18,11)};
@@ -1581,7 +1768,7 @@ BGS.lobby=function(){
  R('#efe6d0',0,0,VW,98);R('#c9a85a',0,0,VW,4);for(var i=0;i<5;i++){R('#c9a85a',i*80+20,8,6,90);R('#e2d6b4',i*80+26,8,50,90)}
  R('#caa24a',150,0,2,16);R('#fff3c0',134,16,34,4);R('#caa24a',130,14,42,3);for(i=0;i<12;i++)R(Math.floor(t*3+i)%5?'#fff6c0':'#ffd36a',134+i*3,20+(i%3)*2,2,2);
  R('#e8e0cc',0,98,VW,52);for(var x=0;x<VW;x+=32)R('#d0c6aa',x,98,1,52);for(var y=110;y<150;y+=14)R('#d0c6aa',0,y,VW,1);
- R('#4a2f1c',150,72,150,26);R('#d6c090',146,70,158,4);R('#14100a',162,44,126,12);R('#c9a03a',162,44,126,1);R('#c9a03a',162,55,126,1);T('JW MARRIOTT MARQUIS DUBAI',225,50,6,'#ffd36a');
+ R('#4a2f1c',150,72,150,26);R('#d6c090',146,70,158,4);R('#14100a',152,42,146,16);R('#c9a03a',152,42,146,1);R('#c9a03a',152,57,146,1);T('JW MARRIOTT MARQUIS DUBAI',225,50,8,'#ffd36a');
  R('#2f7a4a',286,60,8,12);R('#2f7a4a',290,54,6,18);R('#6a3b1e',286,72,10,10);R('#e8d09a',160,66,10,6);R('#14100a',250,64,10,6)};
 var BARG=[
  {m:kanG({beard:true}),pal:P(2),x:112},
@@ -1594,7 +1781,7 @@ BGS.bar=function(){
  R('#c9a03a',100,10,212,3);R('#2a1d10',150,12,3,82);R('#2a1d10',205,12,3,82);R('#2a1d10',260,12,3,82);R('#2a1d10',309,12,6,82);
  R('#2a1d10',0,0,100,94);R('#1a120a',0,0,VW,10);
  for(var s=0;s<4;s++){var y=24+s*20;R('#c9a03a',6,y,88,3);var cl=['#6a2a1a','#3a5a2a','#c98a2a','#2a3a6a','#8a1a2a'];for(var i=0;i<9;i++){var cc=cl[(i+s)%5];R(cc,8+i*9,y-12,5,12);R(cc,9+i*9,y-15,3,3)}}
- c.globalAlpha=.07;R('#ffb347',0,0,100,94);c.globalAlpha=1;T('VAULT',50,6,7,'#ffd36a');
+ c.globalAlpha=.07;R('#ffb347',0,0,100,94);c.globalAlpha=1;T('VAULT',50,6,10,'#ffd36a');
  R('#1d140e',0,94,VW,56);R('#c9a03a',0,94,VW,1);R('#2a1c14',60,120,200,20);
  var bob=Math.floor(t*1.2)%6===0?1:0;
  R('#5a3626',104,64,86,20);R('#5a3626',212,64,90,20);
@@ -1637,26 +1824,26 @@ ANIM.fade={fg:function(p,S){var h=S.anim.ms/2000,a=p<h?p/h:Math.max(0,2-p/h);if(
 ANIM.wait={};
 ANIM.dress={
  tick:function(p){if(p<.5)OUT.hdy=-Math.abs(Math.sin(p*Math.PI/.5))*6;else if(p<2){OUT.hvis=0}else{OUT.hvis=1;OUT.hero='kandura';var q=p-2.1;OUT.hdy=(q>0&&q<.8)?-Math.sin(q/.8*Math.PI)*10:0}},
- fg:function(p){poof(48,118,(p-.4)/.7);poof(48,118,(p-2)/.7)}};
+ fg:function(p){poof(98,118,(p-.4)/.7);poof(98,118,(p-2)/.7)}};
 ANIM.abaya={
  tick:function(p,S){OUT.hdx=Math.round(Math.sin(p*3));
   if(p<1.4){OUT.ldy=-Math.abs(Math.sin(p*Math.PI/.7))*8}
   else if(p<4){OUT.lvis=0}
   else{OUT.lvis=1;OUT.lulu='abaya';var q=p-4.1;OUT.ldy=(q>0&&q<.8)?-Math.sin(q/.8*Math.PI)*12:0}},
- fg:function(p){poof(96,128,(p-1.3)/.7);poof(96,128,(p-3.9)/.7)}};
+ fg:function(p){poof(44,128,(p-1.3)/.7);poof(44,128,(p-3.9)/.7)}};
 ANIM.sparkle={
- tick:function(p){OUT.gold=p>1.4?1:0;OUT.hdx=p<.8?Math.min(8,p*12):Math.max(0,8-(p-.8)*12);var q=p-1.8;OUT.ldy=(q>0&&q<.8)?-Math.sin(q/.8*Math.PI)*12:0},
- fg:function(p){if(p<.9)return;for(var i=0;i<7;i++){var ph=(p*2.2+i*.37)%1,x=96+Math.cos(i*1.9)*22,y=128+Math.sin(i*2.7)*16;glint(x,y,Math.round(Math.sin(ph*Math.PI)*4),i%2?'#fff':'#ffe27a')}}};
+ tick:function(p){OUT.gold=p>1.4?1:0;OUT.hdx=-(p<.8?Math.min(8,p*12):Math.max(0,8-(p-.8)*12));var q=p-1.8;OUT.ldy=(q>0&&q<.8)?-Math.sin(q/.8*Math.PI)*12:0},
+ fg:function(p){if(p<.9)return;for(var i=0;i<7;i++){var ph=(p*2.2+i*.37)%1,x=44+Math.cos(i*1.9)*22,y=128+Math.sin(i*2.7)*16;glint(x,y,Math.round(Math.sin(ph*Math.PI)*4),i%2?'#fff':'#ffe27a')}}};
 ANIM.photo={
  tick:function(p,S){var an=S.anim,seg=Math.min(7,Math.floor(p)),q=Math.min(1,p-Math.floor(p)),j=-Math.sin(q*Math.PI);
   if(seg!==an.seg){an.seg=seg;Snd.fx('shutter')}
   OUT.hdy=OUT.ldy=OUT.hdx=OUT.ldx=0;
   if(seg===1){OUT.hdy=OUT.ldy=j*16}
-  else if(seg===2){OUT.hdx=10;OUT.ldx=-8}
+  else if(seg===2){OUT.hdx=-10;OUT.ldx=8}
   else if(seg===3){OUT.hdy=j*22}
   else if(seg===4){OUT.ldy=j*14;OUT.ldx=Math.round(Math.sin(q*6.28)*6)}
   else if(seg===5){if(q<.5)OUT.hdy=-Math.sin(q*2*Math.PI)*14;else OUT.ldy=-Math.sin((q-.5)*2*Math.PI)*14}
-  else if(seg===6){OUT.hdx=-6;OUT.ldx=6}
+  else if(seg===6){OUT.hdx=6;OUT.ldx=-6}
   else if(seg===7){OUT.hdy=j*22;OUT.ldy=j*18}},
  fg:function(p,S){var seg=Math.min(7,Math.floor(p)),q=p-Math.floor(p);
   R('#fff',6,6,12,2);R('#fff',6,6,2,12);R('#fff',302,6,12,2);R('#fff',312,6,2,12);R('#fff',6,142,12,2);R('#fff',6,132,2,12);R('#fff',302,142,12,2);R('#fff',312,132,2,12);
@@ -1680,7 +1867,7 @@ ANIM.walk={
   c.save();c.beginPath();c.rect(0,12,VW,76);c.clip();grad(12,88,'#0a1030','#34305a',8);skyline(88,'#0e1630','#ffcf6a',1.1);burj(230,88,'#1c2548');c.restore();
   var off=-((p*70)%64);for(var x=off;x<VW;x+=64){R('#241d3a',x,12,6,80);R('#c9a03a',x,12,6,1);R('#ffe9a8',x+1,0,3,3)}
   R('#5a2a3a',0,98,VW,52);R('#c9a03a',0,98,VW,1);for(var d=off*1.4;d<VW;d+=40)R('#7a3a4a',d,100,18,50);
-  R('#05070f',104,20,112,12);T('TO THE NEXT TOWER  ▶',160,26,6,'#ffd36a')}};
+  R('#05070f',104,20,112,12);T('TO THE NEXT TOWER  ▶',160,26,8.5,'#ffd36a')}};
 ANIM.lift={
  tick:function(p,S){var an=S.anim;OUT.hdx=OUT.ldx=0;if(p>1&&p<5.2){var s=Math.floor(p*14)%2?1:-1;OUT.hdx=s;OUT.ldx=-s}
   if(p>5.2&&!an.d){an.d=1;Snd.fx('ding')}},
@@ -1696,6 +1883,155 @@ ANIM.lift={
    R('#2a2218',0,0,80,150);R('#2a2218',240,0,80,150);R('#2a2218',80,0,160,36);
    R('#c9a85a',80,36,w,104);R('#b8923a',240-w,36,w,104);R('#d9d9e0',0,76,78,3);R('#d9d9e0',242,76,78,3);
    c.globalAlpha=.25*(1-o);R('#fff2c0',80,36,160,104);c.globalAlpha=1}}};
+
+/* ---------- 街編の続き: 背景と場面転換(ドバイモール・噴水・サファリ・マリーナ・ブルジュ・アル・アラブ) ---------- */
+function starsN(n,h,sd){for(var i=0;i<n;i++){if(((i*7+Math.floor(t*2+i*3))%6)!==0)R('#fff',(i*53+sd)%VW,(i*17+sd)%h,1,1)}}
+function skylineAt(off,base,hs){c.save();c.translate(-off,0);skyline(base,'#0e1630','#ffcf6a',hs);c.translate(330,0);skyline(base,'#0e1630','#ffcf6a',hs);c.restore()}
+function babSail(x,base,s){
+ var h=Math.round(58*s),i;
+ for(i=0;i<h;i++){var w=Math.max(2,Math.round((2+(i/h)*16)*s));R('#f6f4ee',x,base-h+i,w,1)}
+ R('#d8d4c8',x,base-h,Math.max(2,Math.round(2*s)),h);
+ R('#c9c9c0',x+Math.round(s),base-h-Math.round(9*s),1,Math.round(9*s));
+ R('#9aa0b0',x-Math.round(6*s),base-2,Math.round(40*s),3);
+ for(i=0;i<5;i++)R('#ffd36a',x+Math.round((3+i*3)*s),base-Math.round((6+i*2)*s),1,1)}
+
+/* ザ・ドバイモール(中の広場・水族館・アイスリンク・フードコート) */
+BGS.mall=function(){
+ var i,cl=['#c8402a','#2d8f8a','#d9a441','#7a3b8a','#2f5bea'];
+ R('#f3ead6',0,0,VW,98);R('#fff6d8',0,0,VW,16);for(i=0;i<11;i++)R('#d8c89a',i*30,0,2,16);
+ R('#d9c8a0',0,34,VW,3);R('#b8a070',0,37,VW,2);
+ for(i=0;i<8;i++){R('#fffdf2',8+i*40,40,30,15);R(cl[i%5],10+i*40,42,26,5);R('#d8c89a',20+i*40,48,6,7)}
+ R('#d9c8a0',0,58,VW,3);R('#14100a',84,14,152,19);R('#c9a03a',84,14,152,1);R('#c9a03a',84,32,152,1);T('THE DUBAI MALL',160,24,10,'#ffd36a');
+ for(i=0;i<5;i++){var sx=6+i*62;R('#1b1b24',sx,64,54,34);R(cl[i],sx,64,54,5);R('#ffe9a8',sx+6,74,42,20);R('#2b2b33',sx+14,76,6,18);R('#f2c9a0',sx+15,72,4,4);R(cl[(i+2)%5],sx+30,78,8,16);R('#f2c9a0',sx+32,74,4,4)}
+ R('#e8dfc8',0,98,VW,52);for(var x=0;x<VW;x+=32)R('#d0c6aa',x,98,1,52);for(var y=110;y<150;y+=14)R('#d0c6aa',0,y,VW,1);
+ R('#2f7a4a',296,76,8,22);R('#2f7a4a',302,70,6,28);R('#6a3b1e',298,98,10,6)};
+BGS.aquarium=function(){
+ var i,fc=['#ffb62e','#ff7a2e','#ffe27a','#7ad8ff'];
+ R('#05122a',0,0,VW,150);
+ c.save();c.beginPath();c.rect(10,16,300,76,0);c.clip();grad(16,92,'#2b8fd8','#06224a',16);
+ c.globalAlpha=.13;for(i=0;i<6;i++)R('#d8f4ff',22+i*52+Math.round(Math.sin(t*.6+i)*5),16,10,76);c.globalAlpha=1;
+ R('#cdb880',10,84,300,8);R('#8a7a50',34,78,26,8);R('#6a7a3a',70,70,3,16);R('#6a7a3a',75,74,3,12);R('#9a5a6a',230,76,22,10);R('#d9768a',236,72,10,6);
+ for(i=0;i<16;i++){var fx=((i*53+t*(9+(i%4)*4))%340)-12,fy=22+((i*31)%48)+Math.round(Math.sin(t*1.3+i)*3);R(fc[i%4],fx,fy,7,3);R(fc[i%4],fx-3,fy-1,3,5);R('#05070f',fx+5,fy,1,1)}
+ var sx=((t*13)%440)-70;R('#7a8aa0',sx,48,44,9);R('#7a8aa0',sx+16,40,9,9);R('#7a8aa0',sx-7,44,7,13);R('#dfe8f0',sx+4,54,32,3);R('#05070f',sx+36,50,2,2);
+ var rx=320-((t*9)%400);R('#5a6a8a',rx,66,24,6);R('#5a6a8a',rx+8,62,8,4);R('#5a6a8a',rx+22,68,12,1);
+ c.restore();
+ R('#0b0f1c',4,0,312,16);R('#0b0f1c',4,92,312,6);R('#0b0f1c',4,16,6,78);R('#0b0f1c',310,16,6,78);R('#c9a03a',4,15,312,1);
+ T('DUBAI AQUARIUM & UNDERWATER ZOO',160,8,8.5,'#ffd36a');
+ R('#243a5a',0,98,VW,52);for(i=0;i<12;i++)R('#1b2d4a',i*28,98,1,52);R('#3a5a8a',0,98,VW,1)};
+BGS.rink=function(){
+ var i,sk=[['#c8402a',60],['#2d8f8a',140],['#d9a441',200],['#7a3b8a',260]];
+ R('#e8f4fb',0,0,VW,98);R('#cfe6f4',0,0,VW,30);for(i=0;i<8;i++)R('#fff',i*42+8,6,24,10);
+ R('#14100a',84,14,152,19);R('#9ad8f2',84,14,152,1);T('DUBAI ICE RINK',160,24,10,'#9ad8f2');
+ R('#2b4a6a',0,60,VW,6);R('#fff',0,60,VW,2);for(i=0;i<16;i++)R('#c8402a',i*20+4,62,10,3);
+ R('#d9f1fb',0,66,VW,84);R('#bfe4f4',0,100,VW,50);
+ for(i=0;i<9;i++)R('#fff',((i*37+t*6)%330)-4,70+((i*19)%24),24,1);
+ sk.forEach(function(s,k){var x=((s[1]+Math.sin(t*.7+k)*40+t*(k%2?9:-9))%360+360)%360-20,y=70+k*5;R('#f2c9a0',x,y,5,5);R(s[0],x-1,y+5,7,9);R('#2b2b33',x,y+14,2,5);R('#2b2b33',x+4,y+14,2,5)})};
+BGS.food=function(){
+ var i,cl=['#c8402a','#2d8f8a','#d9a441','#7a3b8a'];
+ R('#f6ead0',0,0,VW,98);R('#e8d6a8',0,0,VW,12);for(i=0;i<8;i++){R('#ffcf6a',i*40+16,6,6,10);R('#fff2c0',i*40+17,16,4,3)}
+ R('#14100a',84,14,152,19);R('#c9a03a',84,14,152,1);T('FOOD COURT',160,24,10,'#ffd36a');
+ for(i=0;i<4;i++){var bx=10+i*76;R('#6a3b1e',bx,64,64,34);R('#8a5a30',bx,62,64,4);R(cl[i],bx,40,64,18);R('#fff',bx+4,44,56,10);R('#14100a',bx+6,46,52,2);R('#14100a',bx+6,50,36,2);R(cl[(i+1)%4],bx+8,70,10,12);R('#ffd36a',bx+36,72,18,8)}
+ R('#d8c8a0',0,98,VW,52);for(var x=0;x<VW;x+=28)R('#c4b184',x,98,1,52)};
+
+/* ドバイ噴水(夜のブルジュ・ハリファの前・ボートの上) */
+function fountainScene(lv,p,boat){
+ var i,sh=lv>.6,cols=['#bfe8ff','#ffd36a','#ff9ac0','#9affc8','#c8a0ff'];
+ grad(0,70,'#0a1030','#2a2a5a',14);starsN(26,44,5);
+ skyline(70,'#0e1630','#ffcf6a',.9);burj(262,70,'#1c2548');R('#ffd36a',262,16,1,4);
+ if(sh){c.globalAlpha=.16;for(i=0;i<5;i++)R(cols[i],40+i*54+Math.round(Math.sin(p*2+i)*10),10,8,76);c.globalAlpha=1}
+ grad(70,98,'#12204a','#0a1030',8);
+ for(i=0;i<12;i++)R('#ffcf6a',((i*29+Math.floor(p*6))%VW),74+(i%4)*5,6,1);
+ for(i=0;i<12;i++){
+  var x=36+i*22,ph=p*(sh?3.4:1.5)+i*.7,w=Math.sin(ph)*.5+.5,h=sh?Math.round(16+34*w+((i*7)%9)):Math.round(6+8*w),col=sh?cols[i%5]:'#9ec6f0';
+  R(col,x,86-h,2,h);R('#ffffff',x,86-h,2,2);
+  if(sh){R(col,x-4,86-Math.round(h*.7),1,Math.round(h*.4));R(col,x+5,86-Math.round(h*.7),1,Math.round(h*.4))}
+  R('#6a8ac0',x-3,86,8,1)}
+ if(boat){R('#5a3a1e',0,98,VW,52);for(i=0;i<20;i++)R('#4a2e16',i*16,98,1,52);R('#8a5a30',0,90,VW,4);for(i=0;i<8;i++)R('#8a5a30',6+i*42,80,3,14)}
+ else{R('#cfc6b4',0,98,VW,52);for(i=0;i<12;i++)R('#bdb39e',i*28,98,1,52);R('#2a2a33',0,90,VW,3);for(i=0;i<9;i++)R('#2a2a33',6+i*40,82,2,16)}}
+BGS.fountain=function(){fountainScene(.3,t,false)};
+BGS.lake=function(){fountainScene(.3,t,true)};
+
+/* 砂漠サファリ(夕ぐれの砂丘・夜のキャンプ) */
+function desertScene(sc){
+ var x;
+ grad(0,56,'#5a3a7a','#f2985a',14);dome(228,62,17,'#ffe9a8','#fff');
+ for(x=0;x<VW;x+=2){var y1=64+Math.round(Math.sin((x+sc*.3)*.035)*8);R('#c9783e',x,y1,2,150-y1)}
+ for(x=0;x<VW;x+=2){var y2=84+Math.round(Math.sin((x+sc)*.05)*9+Math.sin((x+sc)*.17)*2);R('#a8582e',x,y2,2,150-y2)}
+ for(x=0;x<VW;x+=2){var y3=100+Math.round(Math.sin((x+sc*1.4)*.03)*3);R('#8a4624',x,y3,2,150-y3)}}
+BGS.desert=function(){desertScene(0)};
+function campScene(p){
+ var i,fx=160,fy=92;
+ grad(0,64,'#05070f','#1b1740',12);starsN(40,52,11);
+ R('#1b1030',0,60,VW,38);for(i=0;i<VW;i+=2)R('#241640',i,56+Math.round(Math.sin(i*.04)*4),2,8);
+ for(i=0;i<26;i++){var w=i*3+6;R(i%6<3?'#7a4a26':'#9a5a30',72-w/2,36+i,w,1)}
+ R('#3a2a1c',40,62,64,26);R('#14100a',60,66,24,22);
+ R('#ffb62e',24,40,4,8);R('#ffe27a',25,42,2,3);c.globalAlpha=.14;R('#ffb62e',12,34,28,24);c.globalAlpha=1;
+ R('#ffb62e',290,44,4,8);R('#ffe27a',291,46,2,3);c.globalAlpha=.14;R('#ffb62e',278,38,28,24);c.globalAlpha=1;
+ R('#3a2a1c',fx-14,fy,28,4);
+ for(i=0;i<5;i++){var h=10+Math.round(Math.abs(Math.sin(p*9+i*1.7))*10);R('#ff7a2e',fx-10+i*5,fy-h,4,h);R('#ffcf3a',fx-9+i*5,fy-Math.round(h*.7),2,Math.round(h*.7))}
+ c.globalAlpha=.1;R('#ff9a40',100,60,120,40);c.globalAlpha=1;
+ R('#7a1f2b',0,98,VW,52);for(i=0;i<20;i++){R('#e8c870',6+i*16,106,8,3);R('#2d8f8a',10+i*16,118,4,4);R('#e8c870',6+i*16,130,8,3)}
+ R('#e8c870',0,110,VW,1);R('#e8c870',0,126,VW,1)}
+BGS.camp=function(){campScene(t)};
+ANIM.dune={
+ tick:function(){OUT.hvis=0;OUT.lvis=0},
+ bg:function(p){
+  desertScene(p*60);
+  var by=76+Math.round(Math.sin(p*8)*4),tx=Math.round(Math.sin(p*5)*2),i;
+  for(i=0;i<16;i++)R(i%2?'#e8b078':'#c9783e',40-((p*90+i*17)%60)+tx,by+26-((i*5)%14),3,2);
+  R('#14141a',62,by+20,24,12);R('#14141a',160,by+20,24,12);R('#8a93a8',69,by+24,10,5);R('#8a93a8',167,by+24,10,5);
+  R('#f4f4ee',54,by,140,24);R('#e6e6e0',54,by,140,4);R('#c8182a',54,by+16,140,4);
+  R('#7ac0f0',72,by+5,24,10);R('#7ac0f0',100,by+5,36,10);R('#7ac0f0',140,by+5,28,10);R('#d8f0ff',100,by+5,36,2);
+  R('#2b2b2b',108,by+6,8,4);R('#f2c9a0',108,by+9,8,5);R('#5fd6c3',120,by+9,8,5);R('#5fd6c3',119,by+6,2,3);R('#5fd6c3',127,by+6,2,3);
+  R('#2a2a33',70,by-3,100,2)}};
+ANIM.fire={
+ tick:function(p){OUT.ldy=Math.floor(p*2)%2?-2:0},
+ bg:function(p){
+  campScene(p);
+  var cx=160,i;
+  if(p<2.8){var sw=Math.round(Math.sin(p*5)*4);R('#241a14',cx-5+sw,52,10,5);R('#f2c9a0',cx-4+sw,56,8,7);R('#ff9ac0',cx-5+sw,63,10,10);R('#ffd36a',cx-5+sw,66,10,2);R('#c8402a',cx-9+sw,73,18,18);for(i=0;i<5;i++)R('#ffd36a',cx-8+sw+i*4,76+(i%2)*5,2,2);R('#f2c9a0',cx-12+sw,62+Math.round(Math.sin(p*6)*3),4,2);R('#f2c9a0',cx+8+sw,62-Math.round(Math.sin(p*6)*3),4,2)}
+  else if(p<5.6){var w=14+Math.round(Math.abs(Math.sin(p*11))*16);R('#f2c9a0',cx-4,52,8,8);R('#c8182a',cx-5,50,10,3);R('#fff',cx-5,60,10,12);R('#fff',cx-w/2,72,w,20);R('#ffcf3a',cx-w/2,78,w,2);R('#2d8f8a',cx-w/2,84,w,2);R('#fff',cx-18,61,36,2)}
+  else{R('#f2c9a0',cx-4,52,8,8);R('#241a14',cx-5,50,10,3);R('#2b2b33',cx-5,60,10,22);for(i=0;i<14;i++){var a=p*7+i*.45,r=14+Math.sin(p*5+i)*3;R(i%3?'#ff7a2e':'#ffcf3a',cx+Math.cos(a)*r*1.6,66+Math.sin(a)*r*.7,3,3)}R('#ffcf3a',cx+10,58,3,9)}}};
+
+/* ドバイ・マリーナ(夜の桟橋とダウ船・ダウ船の上) */
+BGS.pier=function(){
+ var i;grad(0,62,'#0a1030','#2a2a5a',14);starsN(30,40,3);skylineAt(0,66,1.25);
+ grad(66,98,'#12204a','#0a1030',8);for(i=0;i<16;i++)R('#ffcf6a',((i*23+Math.floor(t*8))%VW),70+(i%5)*5,4,1);
+ R('#4a2a14',150,70,160,14);R('#6a3b1e',150,70,160,4);R('#6a3b1e',296,60,18,12);R('#6a3b1e',304,54,10,8);
+ R('#8a5a30',172,52,90,18);for(i=0;i<4;i++)R('#14100a',182+i*22,56,12,10);
+ for(i=0;i<18;i++)R(((i+Math.floor(t*3))%3)?'#ffe27a':'#ffb62e',150+i*9,48+Math.round(Math.sin(i)*2),2,2);R('#3a2a1c',150,48,160,1);
+ R('#7a5a3a',0,98,VW,52);for(i=0;i<20;i++)R('#5e4228',i*16,98,1,52);R('#2a2a33',20,70,3,28);R('#ffe27a',16,66,11,5);
+ R('#05070f',90,8,140,19);R('#c9a03a',90,8,140,1);R('#c9a03a',90,26,140,1);T('DUBAI MARINA',160,18,10,'#ffd36a')};
+function dhowScene(off){
+ var i;grad(0,56,'#0a1030','#2a2a5a',14);starsN(30,36,9);skylineAt(off,64,1.3);
+ grad(64,92,'#12204a','#0a1030',8);for(i=0;i<20;i++)R('#ffcf6a',((i*31+Math.floor(t*10+off))%VW),68+(i%5)*5,4,1);
+ for(i=0;i<22;i++)R(((i+Math.floor(t*3))%4)?'#fff2a8':'#ffb62e',i*15,14+Math.round(Math.sin(i*.8)*3),3,3);R('#3a2a1c',0,14,VW,1);
+ R('#8a5a30',0,86,VW,4);for(i=0;i<9;i++)R('#6a3b1e',4+i*40,74,3,14);
+ R('#5a3a1e',0,92,VW,58);for(i=0;i<20;i++)R('#4a2e16',i*16,92,1,58);
+ R('#f4f4ee',124,100,66,5);R('#f4f4ee',150,105,14,12);R('#ffcf3a',156,94,2,6);R('#ff7a2e',156,92,2,2)}
+BGS.dhow=function(){dhowScene(0)};
+ANIM.cruise={tick:function(){OUT.hdy=0;OUT.ldy=0},bg:function(p){dhowScene(p*11)}};
+
+/* ブルジュ・アル・アラブとジュメイラのビーチ(夕ぐれの砂浜・ホテルの入口のゲート) */
+BGS.beach=function(){
+ var i;grad(0,60,'#6a4a8a','#ffb070',14);dome(110,64,14,'#ffe9a8','#fff');R('#ffd9a0',0,58,VW,6);
+ grad(62,94,'#3a7aaa','#1a4a7a',8);for(i=0;i<14;i++)R('#ffd9a0',((i*37+Math.floor(t*6))%VW),66+(i%6)*5,5,1);
+ babSail(236,72,1);
+ R('#e8cfa0',0,94,VW,56);R('#d4b880',0,94,VW,3);c.globalAlpha=.85;R('#fff',0,90+Math.round(Math.sin(t*1.2)*1),VW,1);R('#d6e8f0',0,91,VW,3);c.globalAlpha=1;
+ for(i=0;i<10;i++)R('#d4b880',i*34,110+(i%3)*10,18,1);
+ R('#6a3b1e',294,52,4,44);R('#2f7a4a',280,48,16,4);R('#2f7a4a',296,46,18,4);R('#2f7a4a',286,42,10,4);R('#2f7a4a',298,40,8,4)};
+BGS.babgate=function(){
+ var i;grad(0,70,'#3a2a5a','#ff9a60',14);R('#ffd9a0',0,64,VW,6);
+ grad(70,96,'#3a7aaa','#1a4a7a',6);
+ babSail(236,96,1.55);
+ for(i=0;i<5;i++){R('#6a3b1e',16+i*28,52,3,44);R('#2f7a4a',6+i*28,48,22,3);R('#2f7a4a',10+i*28,44,14,3)}
+ R('#4a4a56',0,98,VW,52);R('#6a6a76',0,98,VW,2);for(i=0;i<8;i++)R('#f0e6a0',i*44,130,22,2);
+ R('#05070f',14,14,124,20);R('#c9a03a',14,14,124,1);R('#c9a03a',14,33,124,1);T('BURJ AL ARAB',76,24,10.5,'#ffd36a');
+ R('#2a2a33',126,80,4,18);R('#fff',56,86,72,3);for(i=0;i<7;i++)R('#c8182a',56+i*10,86,5,3)};
+ANIM.show={
+ tick:function(p){OUT.ldy=Math.floor(p*3)%2?-3:0},
+ bg:function(p){fountainScene(1,p,true)},
+ fg:function(p){for(var i=0;i<8;i++){var ph=(p*1.6+i*.31)%1;glint(30+i*38,24+((i*23)%40),Math.round(Math.sin(ph*Math.PI)*3),i%2?'#fff':'#ffe27a')}}};
 
 /* ---------- ホテルの部屋(ドラクエ風メニュー) ---------- */
 function enterHub(pl){
@@ -1753,7 +2089,7 @@ SP.lost_staff={pitch:1,m:[[trav({}),P(1,{o:'#6a5a3a',p:'#2a2a33',h:'#241a14'})]]
 
 function floorAir(c0,c1){R(c0,0,98,VW,52);for(var x=0;x<VW;x+=32)R(c1,x,98,1,52);for(var y=110;y<150;y+=14)R(c1,0,y,VW,1)}
 function airWall(c0){R(c0,0,0,VW,98);R('#c9d2e0',0,0,VW,5)}
-function signBox(x,y,w,txt,bg,fg){R(bg,x,y,w,12);R('#fff',x,y,w,1);T(txt,x+w/2,y+6,6,fg||'#fff')}
+function signBox(x,y,w,txt,bg,fg){R(bg,x,y,w,17);R('#fff',x,y,w,1);T(txt,x+w/2,y+9,9.5,fg||'#fff')}
 BGS.immig=function(){airWall('#e9e4d6');floorAir('#cfc8b4','#bdb59d');signBox(100,10,120,'PASSPORT CONTROL','#143fb0');
  for(var i=0;i<3;i++){var x=22+i*100;R('#cfd6e4',x,36,80,52);R('#8aa0b8',x+2,38,76,36);c.globalAlpha=.3;R('#fff',x+6,40,20,32);c.globalAlpha=1;R('#5a5a66',x,74,80,24);R('#c9a03a',x,74,80,2);R(Math.floor(t*2+i)%2?'#3ad36a':'#2a8a4a',x+34,30,10,4)}
  R('#f2c200',0,124,VW,2)};
@@ -1766,32 +2102,32 @@ BGS.sim=function(){airWall('#f1ede2');floorAir('#e0d8c4','#cfc6ae');signBox(40,1
  R('#d6d0be',30,84,250,14);R('#9a947f',30,84,250,2);for(var i=0;i<6;i++){R('#14141a',40+i*38,72,8,12);R('#5a8ad8',41+i*38,73,6,8)}};
 BGS.taxi=function(){grad(0,70,'#7cc4ee','#dff2fa',10);R('#cfd6e4',0,40,VW,28);for(var i=0;i<9;i++)R('#8aa0b8',i*36+4,44,28,20);
  R('#5a5a66',0,86,VW,64);R('#8a8a94',0,86,VW,3);R('#f2c200',0,126,VW,2);
- R('#143fb0',20,8,70,12);T('TAXI',55,14,8,'#fff');R('#c8182a',200,8,100,12);T('DUBAI METRO ▶',250,14,6,'#fff');
+ R('#143fb0',20,6,70,17);T('TAXI',55,14.5,11,'#fff');R('#c8182a',190,6,120,17);T('DUBAI METRO ▶',250,14.5,9,'#fff');
  for(var k=0;k<2;k++){var x=130+k*90;R('#e8d8a8',x,70,70,18);R('#d6c48c',x+10,60,46,12);R('#7ac0f0',x+14,62,16,9);R('#7ac0f0',x+34,62,16,9);R('#c8182a',x+16,56,34,4);R('#14141a',x+8,86,12,8);R('#14141a',x+50,86,12,8)}
  R('#2f7a4a',296,50,6,40);R('#2f7a4a',286,50,26,8)};
 BGS.checkin=function(){airWall('#eef0f4');floorAir('#d8dce6','#c4c8d4');
- for(var i=0;i<4;i++){var x=20+i*76;R('#c8182a',x,16,64,14);T('Emirates',x+32,23,8,'#fff');R('#d9d4c6',x,62,64,36);R('#9a947f',x,62,64,3);R('#14141a',x+22,50,20,12);R('#2a6a9a',x+24,52,16,8)}
+ for(var i=0;i<4;i++){var x=20+i*76;R('#c8182a',x,13,64,18);T('Emirates',x+32,22,10.5,'#fff');R('#d9d4c6',x,62,64,36);R('#9a947f',x,62,64,3);R('#14141a',x+22,50,20,12);R('#2a6a9a',x+24,52,16,8)}
  for(i=0;i<8;i++){R('#c9a03a',14+i*40,112,2,12);R('#8a1a2a',14+i*40,114,38,1)}};
 BGS.security=function(){airWall('#cfd3dc');floorAir('#bcc0ca','#a8acb8');signBox(110,10,100,'SECURITY','#14141a');
  R('#4a4a56',40,50,150,40);R('#14141a',50,58,130,24);R('#6a6a76',40,50,150,4);for(var i=0;i<4;i++)R('#3a3a46',54+i*34,62,26,16);
  R('#8a8a94',210,36,60,62);R('#14141a',218,44,44,54);R('#ffd36a',212,36,56,3);R(Math.floor(t*3)%2?'#3ad36a':'#2a8a4a',236,30,8,4);
  R('#1f6aa8',20,96,40,4);R('#1f6aa8',270,96,40,4)};
-BGS.duty=function(){R('#1b2a55',0,0,VW,98);R('#c9a03a',0,0,VW,4);R('#143fb0',70,8,180,16);R('#ffd36a',70,8,180,1);T('Dubai Duty Free',160,16,9,'#ffd36a');
+BGS.duty=function(){R('#1b2a55',0,0,VW,98);R('#c9a03a',0,0,VW,4);R('#143fb0',60,6,200,21);R('#ffd36a',60,6,200,1);T('Dubai Duty Free',160,16.5,12,'#ffd36a');
  for(var s=0;s<3;s++){var y=34+s*20;R('#c9a03a',10,y+14,300,3);var cl=['#c98a2a','#8a1a2a','#2d8f8a','#f4f0e6','#7a3b8a','#3a5a2a'];for(var i=0;i<24;i++){var h=8+((i*7+s)%3)*3;R(cl[(i+s)%6],14+i*12,y+14-h,8,h)}}
  R('#2a1a14',210,76,100,22);R('#c98a2a',216,68,22,8);R('#6a3b1e',244,68,22,8);R('#c98a2a',272,68,22,8);
  R('#efe6d0',0,98,VW,52);for(var x=0;x<VW;x+=32)R('#d0c6aa',x,98,1,52)};
 BGS.gate=function(){airWall('#d8dde8');R('#8fd0f0',20,12,230,62);R('#cdeaf7',20,50,230,24);R('#6a6a76',20,74,230,6);
  var px=((t*10)%330)-40;R('#f6f6f2',px,54,70,12);R('#c8182a',px+60,40,8,16);R('#f6f6f2',px+8,50,40,4);R('#7ac0f0',px+10,56,48,3);
  R('#aab3c8',18,10,4,72);R('#aab3c8',248,10,4,72);R('#aab3c8',134,10,3,72);
- R('#05070f',262,16,50,34);T('B25',287,26,10,'#ffd36a');T(Math.floor(t*1.2)%2?'BOARDING':'TOKYO',287,40,6,'#3ad36a');
+ R('#05070f',262,16,50,34);T('B25',287,26,10,'#ffd36a');T(Math.floor(t*1.2)%2?'BOARDING':'TOKYO',287,40,7.5,'#3ad36a');
  floorAir('#c4c8d4','#aeb2c0');for(var i=0;i<4;i++){R('#4a5a8a',262,60+i*0,0,0)}R('#4a5a8a',266,68,46,10);R('#3a4a7a',266,78,46,6)};
 BGS.cabin=function(){R('#d8dce6',0,0,VW,98);R('#aab3c8',0,0,VW,22);R('#c8ccd8',0,18,VW,5);
  for(var i=0;i<4;i++){R('#8a93a8',10+i*76,24,60,4)}
  R('#6a7a9a',0,98,VW,52);R('#5a6a8a',100,98,120,52);R('#7a8aaa',104,98,3,52);R('#7a8aaa',213,98,3,52);
  R('#05070f',250,42,40,30);R('#8fd0f0',253,45,34,24);var cx=((t*20)%80)-10;R('#fff',253+cx%40,52,18,6);R('#fff',262+(cx*1.5)%30,58,14,5);
  for(i=0;i<3;i++){var x=14+i*34;R('#3a4a7a',x,60,28,38);R('#4a5a8a',x+3,56,22,10);R('#2a3a6a',x,92,28,6)}
- R('#a0142a',120,10,80,10);T('Emirates',160,15,7,'#fff')};
-BGS.lost=function(){airWall('#ece6d6');floorAir('#d8d0bc','#c4bca6');signBox(90,10,140,'LOST & FOUND','#6a5a3a');
+ R('#a0142a',110,7,100,17);T('Emirates',160,16,10.5,'#fff')};
+BGS.lost=function(){airWall('#ece6d6');floorAir('#d8d0bc','#c4bca6');signBox(90,4,140,'LOST & FOUND','#6a5a3a');
  R('#9a8a66',20,32,280,3);R('#9a8a66',20,56,280,3);var cl=['#2d8f8a','#c8402a','#5a8ad8','#d9a441','#7a3b8a','#14141a'];for(var i=0;i<12;i++){R(cl[i%6],26+i*22,22+((i*5)%3),14,10);R(cl[(i+2)%6],28+i*22,46+((i*3)%3),12,10)}
  R('#7a5a30',150,80,150,18);R('#d6c090',146,78,158,4);R('#14141a',250,64,14,14);R('#c8402a',252,66,6,4)};
 
@@ -1803,7 +2139,8 @@ var MODES={air:{p:PLACES_AIR,b:'✈ 空港',h:'ドバイ国際空港 ターミ�
 function refreshCityBtn(){
  var bar=$m('modeBar');if(!bar.childNodes.length){Object.keys(MODES).forEach(function(k){var b=el('button','mbtn',MODES[k].b);b.type='button';b.dataset.m=k;b.addEventListener('click',function(){if(G.view==='map'&&MODE!==k)setMode(k)});bar.appendChild(b)})}
  bar.querySelectorAll('.mbtn').forEach(function(b){b.classList.toggle('on',b.dataset.m===MODE)});
- var h=document.querySelector('#mapView .mapbar h1');if(h)h.innerHTML=MODES[MODE].h}
+ var h=document.querySelector('#mapView .mapbar h1');if(h)h.innerHTML=MODES[MODE].h;
+ mapEl.classList.toggle('dense',MODE==='city')}
 function setMode(m){
  MODE=m;PLACES=MODES[m].p;TOTALV=PLACES.reduce(function(a,p){return a+p.v.length},0);
  G.at=PLACES[0].id;Snd.go(MODES[m].snd);buildMap();refreshMap();drawMapBg();refreshCityBtn()}
