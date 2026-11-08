@@ -125,6 +125,7 @@ body{margin:0;box-sizing:border-box;background:var(--bg);color:var(--line);font-
 .dq{display:flex;gap:10px;align-items:center;width:100%;text-align:left;font:inherit;font-weight:800;font-size:20px;color:#fff;background:#05070f;border:3px solid #fff;border-radius:8px;padding:10px 14px;box-shadow:0 0 0 3px #05070f;cursor:pointer;margin-bottom:8px}
 .dq .cur{color:#ffc72c;flex:none}.dq .ok{margin-left:auto;color:#6be58a;font-size:16px}.dq:active{background:#1a2250}
 .dqbox{display:flex;flex-direction:column}
+.modebar{display:flex;gap:6px;margin-bottom:8px}.mbtn{flex:1;font:inherit;font-weight:800;font-size:13px;color:#fff;background:#3a3f66;border:3px solid var(--brown);border-radius:12px;padding:9px 2px;box-shadow:0 3px 0 var(--brown);cursor:pointer}.mbtn.on{background:#8a3b1e}.mbtn:active{transform:translateY(2px)}
 .citybtn{flex:none;font:inherit;font-weight:800;font-size:14px;color:#fff;background:#8a3b1e;border:3px solid var(--brown);border-radius:12px;padding:10px;box-shadow:0 4px 0 var(--brown);cursor:pointer;margin-bottom:8px}
 .citybtn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--brown)}
 :focus-visible{outline:3px solid #fff;outline-offset:2px}
@@ -137,7 +138,7 @@ body{margin:0;box-sizing:border-box;background:var(--bg);color:var(--line);font-
     <div class="mapbar"><h1>ドバイ国際空港 ターミナル3<small>コンコースB・カンペ先生 試作</small></h1><div style="display:flex;gap:6px;align-items:center"><span class="badge">私用</span><button id="sndBtn" class="btn sub" type="button" aria-label="音のオンオフ">🔊</button></div></div>
     <div id="pips" aria-label="進み具合"></div>
     <div id="map"><svg id="paths" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg></div>
-    <button id="cityBtn" class="citybtn" type="button"></button>
+    <div id="modeBar" class="modebar"></div>
     <button id="boothBtn" class="boothbtn" type="button">✈ 羽田空港 発音教室</button>
   </div>
   <div id="boothView" hidden>
@@ -736,6 +737,144 @@ Object.assign(DLG,{
   words:[["clear","/klɪr/","晴れた"],["cool","/kuːl/","すずしい"],["autumn colors","/ˈɔːtəm ˈkʌlərz/","紅葉"],["on time","/ɑːn taɪm/","時間どおり"],["normally","/ˈnɔːrməli/","ふだんどおり"]]}
 });
 
+/* ====================================================================
+   空港の続き: 到着編(入国〜タクシー)・出発編(チェックイン〜機内)。実在の名前(Emirates・Dubai Duty Free・du・e&・Dubai Metro)を使い、値段と会話は創作
+   ==================================================================== */
+Object.assign(DLG,{
+ arr_immig:{who:'入国審査の係官',story:1,bg:'immig',sp:'officer',hero:'blue',lulu:'plain',nogold:1,inter:[],
+  intro:'ドバイ到着。入国審査の列にならんだ。順番がきた。',
+  lines:[
+   {n:"Good morning. Passport, please.",jp:"おはようございます。パスポートをお願いします。"},
+   {y:"*Good* *morning*. *Here* is my *passport*.",jp:"おはようございます。パスポートです。"},
+   {n:"What is the purpose of your visit?",jp:"訪問の目的は何ですか。"},
+   {y:"I'm here for *sightseeing*. I am a *tourist*.",jp:"観光です。旅行者です。"},
+   {n:"How long will you stay in Dubai?",jp:"ドバイにどのくらい滞在しますか。"},
+   {y:"I will *stay* for *five* *days*.",jp:"5日間滞在します。"},
+   {n:"Where will you stay?",jp:"どこに泊まりますか。"},
+   {y:"At the *JW* *Marriott* *Marquis* *Dubai*.",jp:"JWマリオット・マーキス・ドバイです。"},
+   {n:"Please look at the camera. Welcome to Dubai!",jp:"カメラを見てください。ドバイへようこそ。"},
+   {y:"*Thank* you. Have a *nice* *day*!",jp:"ありがとう。よい一日を。"}],
+  words:[["passport","/ˈpæspɔːrt/","パスポート"],["purpose","/ˈpɜːrpəs/","目的"],["sightseeing","/ˈsaɪtsiːɪŋ/","観光"],["tourist","/ˈtʊrɪst/","旅行者"],["stay","/steɪ/","泊まる・滞在する"],["camera","/ˈkæmrə/","カメラ"]]},
+ arr_bag:{who:'手荷物カウンターのスタッフ',story:1,bg:'baggage',sp:'bag_staff',hero:'blue',lulu:'plain',nogold:1,inter:[],
+  intro:'ターンテーブルを何周も見たのに、キングのスーツケースが出てこない…。カウンターで相談しよう。',
+  lines:[
+   {n:"Hello. How can I help you?",jp:"こんにちは。どうなさいましたか。"},
+   {y:"My *suitcase* did *not* *come* *out*.",jp:"スーツケースが出てきませんでした。"},
+   {n:"I'm sorry about that. Which flight did you come on?",jp:"申し訳ありません。どの便でいらっしゃいましたか。"},
+   {y:"I came from *Tokyo*. It was an *Emirates* *flight*.",jp:"東京から来ました。エミレーツ航空の便です。"},
+   {n:"What does your suitcase look like?",jp:"スーツケースはどんな見た目ですか。"},
+   {y:"It is a *big* *blue* suitcase with a *yellow* *tag*.",jp:"大きな青いスーツケースで、黄色いタグが付いています。"},
+   {n:"Please fill in this form. We can deliver it to your hotel.",jp:"この用紙に記入してください。ホテルへお届けできます。"},
+   {y:"Can you *deliver* it to the *JW* *Marriott* *Marquis*?",jp:"JWマリオット・マーキスへ届けてもらえますか。"},
+   {n:"Of course. We will call you when it arrives.",jp:"もちろんです。届いたらお電話します。"},
+   {y:"*Thank* you. I will *wait* for your *call*.",jp:"ありがとう。お電話を待っています。"}],
+  words:[["suitcase","/ˈsuːtkeɪs/","スーツケース"],["come out","/kʌm aʊt/","出てくる"],["flight","/flaɪt/","フライト・便"],["tag","/tæɡ/","タグ・荷札"],["deliver","/dɪˈlɪvər/","届ける"],["form","/fɔːrm/","用紙"]]},
+ arr_sim:{who:'SIMカードの売り場の店員',story:1,bg:'sim',sp:'sim_staff',hero:'blue',lulu:'plain',nogold:1,inter:[],
+  intro:'スマホが使えないと地図も見られない。到着ロビーのSIM売り場へ（du と e& の看板が出ている）。',
+  lines:[
+   {n:"Hello! Do you need a SIM card?",jp:"こんにちは。SIMカードが必要ですか。"},
+   {y:"*Yes*. I *want* a *tourist* *SIM*.",jp:"はい。旅行者用のSIMがほしいです。"},
+   {n:"We have du and e&. Both are good. How much data do you need?",jp:"duとe&があります。どちらもいいですよ。データはどのくらい必要ですか。"},
+   {y:"*Ten* *gigabytes*, *please*. *How* *much* is it?",jp:"10ギガをお願いします。いくらですか。"},
+   {n:"It is one hundred dirhams for five days.",jp:"5日間で100ディルハムです。"},
+   {y:"*Okay*. Can you *set* it *up* for me?",jp:"わかりました。設定してもらえますか。"},
+   {n:"Sure. Please show me your passport. I need it to register the SIM.",jp:"もちろん。パスポートを見せてください。SIMの登録に必要です。"},
+   {y:"*Here* you are. *Thank* you *very* *much*!",jp:"どうぞ。ありがとうございます。"}],
+  words:[["SIM card","/sɪm kɑːrd/","SIMカード"],["data","/ˈdeɪtə/","データ"],["gigabyte","/ˈɡɪɡəbaɪt/","ギガバイト"],["set up","/sɛt ʌp/","設定する"],["register","/ˈrɛdʒɪstər/","登録する"]]},
+ arr_taxi:{who:'タクシー乗り場の係員',story:1,bg:'taxi',sp:'taxi_staff',hero:'blue',lulu:'plain',nogold:1,inter:[],
+  intro:'外に出ると、あたたかい風。タクシー乗り場と Dubai Metro の案内が見える。',
+  lines:[
+   {n:"Hello! Do you need a taxi?",jp:"こんにちは。タクシーが必要ですか。"},
+   {y:"*Yes*. *How* *much* is it to the *JW* *Marriott* *Marquis*?",jp:"はい。JWマリオット・マーキスまでいくらですか。"},
+   {n:"About forty-five dirhams. Or you can take the Dubai Metro.",jp:"だいたい45ディルハムです。Dubai Metro も使えますよ。"},
+   {y:"*Where* is the *metro* *station*?",jp:"メトロの駅はどこですか。"},
+   {n:"Follow the signs. It is a short walk from the terminal.",jp:"案内に従ってください。ターミナルから少し歩きます。"},
+   {y:"*Okay*. I'll *take* a *taxi*. It is *late*.",jp:"わかりました。タクシーにします。もう遅いので。"},
+   {n:"Please get in. Do you have any luggage?",jp:"どうぞ乗ってください。荷物はありますか。"},
+   {y:"*Only* a *backpack*. *Please* *take* us to the *hotel*.",jp:"リュックだけです。ホテルまでお願いします。"}],
+  words:[["taxi","/ˈtæksi/","タクシー"],["metro","/ˈmɛtroʊ/","地下鉄"],["station","/ˈsteɪʃən/","駅"],["short walk","/ʃɔːrt wɔːk/","少しの徒歩"],["luggage","/ˈlʌɡɪdʒ/","荷物"]]},
+ dep_checkin:{who:'Emirates のチェックイン係',story:1,bg:'checkin',sp:'checkin_staff',hero:'kandura',lulu:'plain',inter:[],
+  intro:'帰りの日。ターミナル3のチェックインカウンターで、Emirates の係員に声をかけよう。',
+  lines:[
+   {n:"Good evening. Passport and booking, please.",jp:"こんばんは。パスポートと予約情報をお願いします。"},
+   {y:"*Here* you are. I am *going* to *Tokyo*.",jp:"どうぞ。東京へ行きます。"},
+   {n:"Would you like a window seat or an aisle seat?",jp:"窓側と通路側、どちらがいいですか。"},
+   {y:"A *window* *seat*, *please*.",jp:"窓側をお願いします。"},
+   {n:"Do you have any bags to check?",jp:"預ける荷物はありますか。"},
+   {y:"*One* *suitcase*. This *small* *bag* is my *carry-on*.",jp:"スーツケースが1つです。この小さいバッグは機内に持ちこみます。"},
+   {n:"Please put it on the scale. It is twenty-two kilos. That is fine.",jp:"はかりにのせてください。22キロです。だいじょうぶです。"},
+   {y:"*Great*. *Thank* you.",jp:"よかった。ありがとう。"},
+   {n:"Here is your boarding pass. Your gate is B25. Boarding starts at ten forty.",jp:"搭乗券です。ゲートはB25で、搭乗は10時40分からです。"},
+   {y:"*Gate* *B25*. *Thank* you. *See* you *later*!",jp:"B25ですね。ありがとう。またあとで。"}],
+  words:[["booking","/ˈbʊkɪŋ/","予約"],["window seat","/ˈwɪndoʊ siːt/","窓側の席"],["aisle seat","/aɪl siːt/","通路側の席"],["carry-on","/ˈkæri ɑːn/","機内持ちこみ"],["scale","/skeɪl/","はかり"],["boarding pass","/ˈbɔːrdɪŋ pæs/","搭乗券"]]},
+ dep_security:{who:'保安検査の係官',story:1,bg:'security',sp:'security_staff',hero:'kandura',lulu:'plain',inter:[],
+  intro:'手荷物検査の列。前の人のまねをして、トレーに荷物をのせよう。',
+  lines:[
+   {n:"Please put your bags and laptop in the tray.",jp:"かばんとパソコンをトレーに入れてください。"},
+   {y:"*Okay*. Do I *take* *out* my *laptop*?",jp:"わかりました。パソコンは出しますか。"},
+   {n:"Yes. Also take off your belt and watch.",jp:"はい。ベルトと腕時計も外してください。"},
+   {y:"*Here* is my *belt* and *watch*.",jp:"ベルトと腕時計です。"},
+   {n:"Do you have any liquids in your bag?",jp:"かばんに液体は入っていますか。"},
+   {y:"*No*, I don't have *any* *liquids*.",jp:"いいえ、液体は入っていません。"},
+   {n:"Please step through the gate. Arms up, please.",jp:"ゲートを通ってください。腕を上げてください。"},
+   {y:"*Like* this?",jp:"こうですか。"},
+   {n:"Thank you. You can pick up your bags.",jp:"ありがとうございます。荷物を受け取ってください。"},
+   {y:"*Thank* you. Have a *good* *day*!",jp:"ありがとう。よい一日を。"}],
+  words:[["tray","/treɪ/","トレー"],["laptop","/ˈlæptɑːp/","ノートパソコン"],["belt","/bɛlt/","ベルト"],["liquid","/ˈlɪkwɪd/","液体"],["step through","/stɛp θruː/","通りぬける"],["pick up","/pɪk ʌp/","受け取る"]]},
+ dep_duty:{who:'Dubai Duty Free の店員',story:1,bg:'duty',sp:'duty_staff',hero:'kandura',lulu:'plain',inter:[],
+  intro:'出発前に Dubai Duty Free へ。家族へのお土産を選ぼう。',
+  lines:[
+   {n:"Welcome to Dubai Duty Free! May I help you?",jp:"ドバイ・デューティー・フリーへようこそ。お手伝いしましょうか。"},
+   {y:"I'm *looking* for a *gift* for my *family*.",jp:"家族へのおくりものを探しています。"},
+   {n:"How about our Arabic dates? They are very popular.",jp:"アラビアのデーツはいかがですか。とても人気です。"},
+   {y:"*They* look *delicious*. Can I *try* one?",jp:"おいしそう。1つ味見できますか。"},
+   {n:"Of course! Here you are. Chocolate or plain?",jp:"もちろん。どうぞ。チョコとプレーン、どちらですか。"},
+   {y:"*Chocolate*, *please*. It is so *sweet*!",jp:"チョコをお願いします。とても甘い。"},
+   {n:"They come in a gift box. Twenty-five dirhams.",jp:"ギフトボックスに入っています。25ディルハムです。"},
+   {y:"I'll *take* *two* *boxes*. Can I pay by *card*?",jp:"2箱ください。カードで払えますか。"},
+   {n:"Yes. Please show me your boarding pass.",jp:"はい。搭乗券を見せてください。"},
+   {y:"*Here* it is. *Thank* you!",jp:"これです。ありがとう。"}],
+  words:[["gift","/ɡɪft/","おくりもの"],["dates","/deɪts/","デーツ(なつめやし)"],["delicious","/dɪˈlɪʃəs/","おいしい"],["sweet","/swiːt/","甘い"],["gift box","/ɡɪft bɑːks/","ギフトボックス"],["boarding pass","/ˈbɔːrdɪŋ pæs/","搭乗券"]]},
+ dep_gate:{who:'ゲートの係員',story:1,bg:'gate',sp:'gate_agent',hero:'kandura',lulu:'plain',inter:[],
+  intro:'ゲート B25。窓の外には Emirates の飛行機。アナウンスが流れた。',
+  lines:[
+   {n:"Attention, passengers. The flight to Tokyo is now boarding at gate B25.",jp:"お客様にご案内です。東京行きは、B25ゲートで搭乗中です。"},
+   {y:"That is our *flight*, *Lulu*! Let's *go*.",jp:"ぼくたちの便だ、ルル。行こう。"},
+   {n:"Boarding pass and passport, please.",jp:"搭乗券とパスポートをお願いします。"},
+   {y:"*Here* you are.",jp:"どうぞ。"},
+   {n:"Thank you. Your seats are thirty-two A and thirty-two B.",jp:"ありがとうございます。お席は32Aと32Bです。"},
+   {y:"*Where* is our *seat*?",jp:"席はどこですか。"},
+   {n:"Walk down the jet bridge and turn left.",jp:"搭乗橋を進んで、左に曲がってください。"},
+   {y:"*Thank* you. Have a *nice* *day*!",jp:"ありがとう。よい一日を。"}],
+  words:[["attention","/əˈtɛnʃən/","ご注意・ご案内"],["passengers","/ˈpæsɪndʒərz/","乗客"],["boarding","/ˈbɔːrdɪŋ/","搭乗"],["gate","/ɡeɪt/","ゲート"],["jet bridge","/dʒɛt brɪdʒ/","搭乗橋"],["turn left","/tɜːrn lɛft/","左に曲がる"]]},
+ dep_plane:{who:'客室乗務員',story:1,bg:'cabin',sp:'cabin_crew',hero:'kandura',lulu:'plain',inter:[],
+  intro:'ついに機内へ。笑顔の客室乗務員が出迎えてくれた。',
+  lines:[
+   {n:"Welcome aboard! May I see your boarding pass?",jp:"ご搭乗ありがとうございます。搭乗券を見せていただけますか。"},
+   {y:"*Here* you are. *Where* is *seat* *thirty*-*two* A?",jp:"どうぞ。32Aの席はどこですか。"},
+   {n:"It is on the left, by the window. Please watch your head.",jp:"左側の窓ぎわです。頭に気をつけてください。"},
+   {y:"*Thank* you. Can I *put* my *bag* *up* there?",jp:"ありがとう。かばんをあそこに入れてもいいですか。"},
+   {n:"Yes, I'll help you. Would you like something to drink?",jp:"はい、お手伝いします。お飲み物はいかがですか。"},
+   {y:"*Orange* *juice*, *please*. And a *blanket*.",jp:"オレンジジュースをお願いします。それとブランケットも。"},
+   {n:"Here you are. We will take off soon. Please fasten your seat belt.",jp:"どうぞ。まもなく離陸します。シートベルトをお締めください。"},
+   {y:"*Okay*. *Goodbye*, *Dubai*!",jp:"わかりました。さよなら、ドバイ。"}],
+  words:[["aboard","/əˈbɔːrd/","搭乗して"],["overhead","/ˌoʊvərˈhɛd/","頭上の"],["blanket","/ˈblæŋkɪt/","ブランケット"],["take off","/teɪk ɔːf/","離陸する"],["fasten","/ˈfæsən/","締める"],["seat belt","/siːt bɛlt/","シートベルト"]]},
+ dep_lost:{who:'忘れ物カウンターのスタッフ',story:1,bg:'lost',sp:'lost_staff',hero:'kandura',lulu:'plain',inter:[],
+  intro:'あれ、カメラがない！ 忘れ物カウンターに行ってみよう。',
+  lines:[
+   {n:"Hello. Can I help you?",jp:"こんにちは。どうなさいましたか。"},
+   {y:"I *think* I *left* my *camera* *here*.",jp:"カメラを忘れたみたいです。"},
+   {n:"Where did you see it last?",jp:"最後に見たのはどこですか。"},
+   {y:"I *had* it at the *cafe* *near* gate *B25*.",jp:"B25ゲートの近くのカフェで持っていました。"},
+   {n:"What color is it?",jp:"何色ですか。"},
+   {y:"It is *black*. It has a *red* *strap*.",jp:"黒です。赤いストラップが付いています。"},
+   {n:"Is this yours?",jp:"これですか。"},
+   {y:"*Yes*, that's it! *Thank* you so *much*!",jp:"はい、それです。本当にありがとう。"},
+   {n:"Please sign here. Have a safe trip!",jp:"ここにサインしてください。お気をつけて。"},
+   {y:"*Thank* you. *Goodbye*!",jp:"ありがとう。さようなら。"}],
+  words:[["left","/lɛft/","置き忘れた"],["last","/læst/","最後に"],["strap","/stræp/","ストラップ"],["yours","/jɔːrz/","あなたのもの"],["sign","/saɪn/","サインする"],["safe trip","/seɪf trɪp/","気をつけて(よい旅を)"]]}
+});
+
 /* ---------- 会話の仕上げ: 最後が相手の言葉で終わる会話には、キングの返事を1つ足す ---------- */
 var CLOSERS=[
  {y:"*Thanks* for *telling* me. *Have* a *good* *day*!",jp:"教えてくれてありがとう。よい一日を。"},
@@ -896,9 +1035,9 @@ function drawMapBg(){
  if(!cv2){cv2=document.createElement('canvas');cv2.id='mapbg';cv2.style.cssText='position:absolute;left:0;top:0;width:100%;height:100%;image-rendering:pixelated;z-index:0;pointer-events:none';mapEl.insertBefore(cv2,mapEl.firstChild)}
  var W2=mapEl.clientWidth,H2=mapEl.clientHeight;if(!W2||!H2)return;
  var U=4,cw=Math.ceil(W2/U),ch=Math.ceil(H2/U);cv2.width=cw;cv2.height=ch;var g=cv2.getContext('2d');
- var cty=MODE==='city';g.fillStyle=cty?'#ead2a0':'#efe6d2';g.fillRect(0,0,cw,ch);
- g.fillStyle=cty?'#dcc08a':'#e3d7bc';for(var x=0;x<cw;x+=12)g.fillRect(x,0,1,ch);for(var y=0;y<ch;y+=12)g.fillRect(0,y,cw,1);
- g.fillStyle=cty?'#a07838':'#c9a05a';for(var k=1;k<=3;k++)g.fillRect(0,Math.round(ch*k/4),cw,2);
+ var cty=MODE==='city',pal3={air:['#efe6d2','#e3d7bc','#c9a05a'],arr:['#dfe9f0','#cfdbe6','#8aa0b8'],city:['#ead2a0','#dcc08a','#a07838'],dep:['#e9e2f2','#d9d0e8','#8a7ac0']}[MODE];g.fillStyle=pal3[0];g.fillRect(0,0,cw,ch);
+ g.fillStyle=pal3[1];for(var x=0;x<cw;x+=12)g.fillRect(x,0,1,ch);for(var y=0;y<ch;y+=12)g.fillRect(0,y,cw,1);
+ g.fillStyle=pal3[2];for(var k=1;k<=3;k++)g.fillRect(0,Math.round(ch*k/4),cw,2);
  if(cty){g.fillStyle='#e8f0f4';g.fillRect(0,ch-8,cw,8);g.fillStyle='#9ad0e4';g.fillRect(0,ch-6,cw,6);return}
  /* 赤と青の柱(ターミナル3の柱)を縁に */
  g.fillStyle='#143fb0';g.fillRect(0,0,5,ch);g.fillRect(cw-5,0,5,ch);g.fillStyle='#c8182a';for(var y2=0;y2<ch;y2+=40){g.fillRect(0,y2,5,8);g.fillRect(cw-5,y2,5,8)}
@@ -1350,7 +1489,7 @@ function drawTables(tb,id){
 var OUT={hero:'blue',lulu:'plain',gold:0,hvis:1,lvis:1,hdx:0,hdy:0,ldx:0,ldy:0},luTalk=false;
 function resetOUT(){OUT.hero='blue';OUT.lulu='plain';OUT.gold=0;OUT.hvis=1;OUT.lvis=1;OUT.hdx=OUT.hdy=OUT.ldx=OUT.ldy=0;luTalk=false}
 function ctxAt(d,i){
- var c0={bg:d.bg,who:d.who,sp:d.sp,hero:d.hero||'blue',lulu:d.lulu||'plain',gold:d.gold||(save.gold?1:0),sign:d.sign,tv:d.tv};
+ var c0={bg:d.bg,who:d.who,sp:d.sp,hero:d.hero||'blue',lulu:d.lulu||'plain',gold:d.nogold?0:(d.gold||(save.gold?1:0)),sign:d.sign,tv:d.tv};
  (d.inter||[]).forEach(function(n){if(n.after<i&&n.set)for(var k in n.set)c0[k]=n.set[k]});
  return c0}
 function applyCtx(ctx){
@@ -1587,15 +1726,87 @@ function sleepNow(){
  clearPanel();G.phase='inter';setMsgInstant('キングとルルは、ふかふかのベッドで ぐっすり… おやすみなさい。','');say('Goodnight!',.9,1);
  G.scene.anim={n:'fade',t0:t,ms:3600,seg:-1,d:0};later(3600,function(){G.scene.anim=null;showMap()})}
 
-/* ---------- 空港 ⇄ ドバイの街 ---------- */
-function refreshCityBtn(){
- $m('cityBtn').textContent=MODE==='air'?'🚌 ドバイの街へ出かける（バス）':'✈ ターミナル3にもどる';
- var h=document.querySelector('#mapView .mapbar h1');if(h)h.innerHTML=MODE==='air'?'ドバイ国際空港 ターミナル3<small>コンコースB・カンペ先生 試作</small>':'ドバイの街<small>バスで出かけよう・実在の場所</small>'}
-function setMode(m){
- MODE=m;PLACES=m==='air'?PLACES_AIR:PLACES_CITY;TOTALV=PLACES.reduce(function(a,p){return a+p.v.length},0);
- G.at=PLACES[0].id;Snd.go(m==='air'?'map':'city');buildMap();refreshMap();drawMapBg();refreshCityBtn()}
-$m('cityBtn').addEventListener('click',function(){if(G.view==='map')setMode(MODE==='air'?'city':'air')});
+/* ---------- 空港の続き: 場所・人・背景・モード切りかえ ---------- */
+var PLACES_ARR=[
+ {id:'immig',name:'入国審査',snd:'info',x:22,y:16,ico:'🛂',tip:['入国審査(Passport Control)','パスポート・目的・滞在日数・ホテル名'],v:['arr_immig']},
+ {id:'bag',name:'手荷物受け取り',snd:'hall',x:70,y:36,ico:'🧳',tip:['バゲージクレーム','スーツケースが出てこない！'],v:['arr_bag']},
+ {id:'sim',name:'SIMカード売り場',snd:'info',x:24,y:58,ico:'📱',tip:['du と e& のSIM売り場','データ量と日数を選ぶ'],v:['arr_sim']},
+ {id:'taxi',name:'タクシー・Dubai Metro',snd:'hall',x:70,y:84,ico:'🚕',tip:['タクシー乗り場と Dubai Metro','行き先と料金をたずねる'],v:['arr_taxi']}];
+var PLACES_DEP=[
+ {id:'checkin',name:'チェックイン(Emirates)',snd:'info',x:22,y:12,ico:'🎫',tip:['Emirates チェックインカウンター','座席・荷物・搭乗券'],v:['dep_checkin']},
+ {id:'security',name:'保安検査',snd:'info',x:72,y:26,ico:'🔍',tip:['保安検査','荷物・ベルト・液体'],v:['dep_security']},
+ {id:'duty',name:'Dubai Duty Free',snd:'cafe',x:24,y:44,ico:'🛍️',tip:['Dubai Duty Free','お土産(デーツ)を選ぶ'],v:['dep_duty']},
+ {id:'gate',name:'ゲート B25',snd:'hall',x:72,y:58,ico:'🚪',tip:['ゲート B25','搭乗アナウンスと搭乗口'],v:['dep_gate']},
+ {id:'plane',name:'機内(Emirates)',snd:'atop',x:26,y:74,ico:'✈️',tip:['機内','客室乗務員との会話'],v:['dep_plane']},
+ {id:'lost',name:'忘れ物カウンター',snd:'info',x:70,y:90,ico:'📷',tip:['忘れ物カウンター','カメラを探す'],v:['dep_lost']}];
+PLACES_ARR.concat(PLACES_DEP).forEach(function(p){PBY[p.id]=p});
+SP.officer={pitch:.9,m:[[trav({hair:'cap'}),P(3,{o:'#2b3a5a',p:'#2b2b33',h:'#241a14'})]]};
+SP.bag_staff={pitch:1,m:[[trav({}),P(2,{o:'#f2b705',p:'#2a2a33',h:'#241a14'})]]};
+SP.sim_staff={pitch:1.15,m:[[trav({hair:'long'}),P(1,{o:'#1d6aa8',p:'#2a2a33',h:'#241a14'})]]};
+SP.taxi_staff={pitch:.9,m:[[trav({hair:'cap'}),P(4,{o:'#e8d8a8',p:'#3a3a48',h:'#241a14'})]]};
+SP.checkin_staff={pitch:1.2,m:[[trav({hair:'long'}),P(1,{o:'#c8182a',p:'#2a2a33',h:'#241a14'})]]};
+SP.security_staff={pitch:.85,m:[[trav({hair:'cap'}),P(3,{o:'#14141a',p:'#14141a',h:'#241a14'})]]};
+SP.duty_staff={pitch:1.1,m:[[trav({}),P(2,{o:'#143fb0',p:'#2a2a33',h:'#241a14'})]]};
+SP.gate_agent={pitch:1.2,m:[[HJ,P(1,{x:'#f4f4ee',o:'#143fb0'})]]};
+SP.cabin_crew={pitch:1.25,m:[[trav({hair:'long'}),P(0,{o:'#a0142a',p:'#a0142a',h:'#6a3a1a'})]]};
+SP.lost_staff={pitch:1,m:[[trav({}),P(1,{o:'#6a5a3a',p:'#2a2a33',h:'#241a14'})]]};
 
+function floorAir(c0,c1){R(c0,0,98,VW,52);for(var x=0;x<VW;x+=32)R(c1,x,98,1,52);for(var y=110;y<150;y+=14)R(c1,0,y,VW,1)}
+function airWall(c0){R(c0,0,0,VW,98);R('#c9d2e0',0,0,VW,5)}
+function signBox(x,y,w,txt,bg,fg){R(bg,x,y,w,12);R('#fff',x,y,w,1);T(txt,x+w/2,y+6,6,fg||'#fff')}
+BGS.immig=function(){airWall('#e9e4d6');floorAir('#cfc8b4','#bdb59d');signBox(100,10,120,'PASSPORT CONTROL','#143fb0');
+ for(var i=0;i<3;i++){var x=22+i*100;R('#cfd6e4',x,36,80,52);R('#8aa0b8',x+2,38,76,36);c.globalAlpha=.3;R('#fff',x+6,40,20,32);c.globalAlpha=1;R('#5a5a66',x,74,80,24);R('#c9a03a',x,74,80,2);R(Math.floor(t*2+i)%2?'#3ad36a':'#2a8a4a',x+34,30,10,4)}
+ R('#f2c200',0,124,VW,2)};
+BGS.baggage=function(){airWall('#e2e6ec');floorAir('#d8d2c0','#c4bca6');signBox(100,10,120,'BAGGAGE CLAIM','#143fb0');
+ R('#2a2a33',0,76,VW,22);R('#4a4a56',0,76,VW,3);var cl=['#c8402a','#2d8f8a','#14141a','#7a3b8a','#d9a441'];
+ for(var i=0;i<5;i++){var x=((t*26+i*72)%390)-30;R(cl[i],x,64,26,14);R('#14141a',x+10,60,6,4);R('#f2c200',x+22,64,3,6)}
+ R('#a0a0aa',0,96,VW,3)};
+BGS.sim=function(){airWall('#f1ede2');floorAir('#e0d8c4','#cfc6ae');signBox(40,10,90,'SIM CARDS','#143fb0');
+ R('#2b3a5a',40,34,100,52);T('du',90,52,16,'#fff');R('#4a1a22',170,34,100,52);T('e&',220,52,16,'#fff');
+ R('#d6d0be',30,84,250,14);R('#9a947f',30,84,250,2);for(var i=0;i<6;i++){R('#14141a',40+i*38,72,8,12);R('#5a8ad8',41+i*38,73,6,8)}};
+BGS.taxi=function(){grad(0,70,'#7cc4ee','#dff2fa',10);R('#cfd6e4',0,40,VW,28);for(var i=0;i<9;i++)R('#8aa0b8',i*36+4,44,28,20);
+ R('#5a5a66',0,86,VW,64);R('#8a8a94',0,86,VW,3);R('#f2c200',0,126,VW,2);
+ R('#143fb0',20,8,70,12);T('TAXI',55,14,8,'#fff');R('#c8182a',200,8,100,12);T('DUBAI METRO ▶',250,14,6,'#fff');
+ for(var k=0;k<2;k++){var x=130+k*90;R('#e8d8a8',x,70,70,18);R('#d6c48c',x+10,60,46,12);R('#7ac0f0',x+14,62,16,9);R('#7ac0f0',x+34,62,16,9);R('#c8182a',x+16,56,34,4);R('#14141a',x+8,86,12,8);R('#14141a',x+50,86,12,8)}
+ R('#2f7a4a',296,50,6,40);R('#2f7a4a',286,50,26,8)};
+BGS.checkin=function(){airWall('#eef0f4');floorAir('#d8dce6','#c4c8d4');
+ for(var i=0;i<4;i++){var x=20+i*76;R('#c8182a',x,16,64,14);T('Emirates',x+32,23,8,'#fff');R('#d9d4c6',x,62,64,36);R('#9a947f',x,62,64,3);R('#14141a',x+22,50,20,12);R('#2a6a9a',x+24,52,16,8)}
+ for(i=0;i<8;i++){R('#c9a03a',14+i*40,112,2,12);R('#8a1a2a',14+i*40,114,38,1)}};
+BGS.security=function(){airWall('#cfd3dc');floorAir('#bcc0ca','#a8acb8');signBox(110,10,100,'SECURITY','#14141a');
+ R('#4a4a56',40,50,150,40);R('#14141a',50,58,130,24);R('#6a6a76',40,50,150,4);for(var i=0;i<4;i++)R('#3a3a46',54+i*34,62,26,16);
+ R('#8a8a94',210,36,60,62);R('#14141a',218,44,44,54);R('#ffd36a',212,36,56,3);R(Math.floor(t*3)%2?'#3ad36a':'#2a8a4a',236,30,8,4);
+ R('#1f6aa8',20,96,40,4);R('#1f6aa8',270,96,40,4)};
+BGS.duty=function(){R('#1b2a55',0,0,VW,98);R('#c9a03a',0,0,VW,4);R('#143fb0',70,8,180,16);R('#ffd36a',70,8,180,1);T('Dubai Duty Free',160,16,9,'#ffd36a');
+ for(var s=0;s<3;s++){var y=34+s*20;R('#c9a03a',10,y+14,300,3);var cl=['#c98a2a','#8a1a2a','#2d8f8a','#f4f0e6','#7a3b8a','#3a5a2a'];for(var i=0;i<24;i++){var h=8+((i*7+s)%3)*3;R(cl[(i+s)%6],14+i*12,y+14-h,8,h)}}
+ R('#2a1a14',210,76,100,22);R('#c98a2a',216,68,22,8);R('#6a3b1e',244,68,22,8);R('#c98a2a',272,68,22,8);
+ R('#efe6d0',0,98,VW,52);for(var x=0;x<VW;x+=32)R('#d0c6aa',x,98,1,52)};
+BGS.gate=function(){airWall('#d8dde8');R('#8fd0f0',20,12,230,62);R('#cdeaf7',20,50,230,24);R('#6a6a76',20,74,230,6);
+ var px=((t*10)%330)-40;R('#f6f6f2',px,54,70,12);R('#c8182a',px+60,40,8,16);R('#f6f6f2',px+8,50,40,4);R('#7ac0f0',px+10,56,48,3);
+ R('#aab3c8',18,10,4,72);R('#aab3c8',248,10,4,72);R('#aab3c8',134,10,3,72);
+ R('#05070f',262,16,50,34);T('B25',287,26,10,'#ffd36a');T(Math.floor(t*1.2)%2?'BOARDING':'TOKYO',287,40,6,'#3ad36a');
+ floorAir('#c4c8d4','#aeb2c0');for(var i=0;i<4;i++){R('#4a5a8a',262,60+i*0,0,0)}R('#4a5a8a',266,68,46,10);R('#3a4a7a',266,78,46,6)};
+BGS.cabin=function(){R('#d8dce6',0,0,VW,98);R('#aab3c8',0,0,VW,22);R('#c8ccd8',0,18,VW,5);
+ for(var i=0;i<4;i++){R('#8a93a8',10+i*76,24,60,4)}
+ R('#6a7a9a',0,98,VW,52);R('#5a6a8a',100,98,120,52);R('#7a8aaa',104,98,3,52);R('#7a8aaa',213,98,3,52);
+ R('#05070f',250,42,40,30);R('#8fd0f0',253,45,34,24);var cx=((t*20)%80)-10;R('#fff',253+cx%40,52,18,6);R('#fff',262+(cx*1.5)%30,58,14,5);
+ for(i=0;i<3;i++){var x=14+i*34;R('#3a4a7a',x,60,28,38);R('#4a5a8a',x+3,56,22,10);R('#2a3a6a',x,92,28,6)}
+ R('#a0142a',120,10,80,10);T('Emirates',160,15,7,'#fff')};
+BGS.lost=function(){airWall('#ece6d6');floorAir('#d8d0bc','#c4bca6');signBox(90,10,140,'LOST & FOUND','#6a5a3a');
+ R('#9a8a66',20,32,280,3);R('#9a8a66',20,56,280,3);var cl=['#2d8f8a','#c8402a','#5a8ad8','#d9a441','#7a3b8a','#14141a'];for(var i=0;i<12;i++){R(cl[i%6],26+i*22,22+((i*5)%3),14,10);R(cl[(i+2)%6],28+i*22,46+((i*3)%3),12,10)}
+ R('#7a5a30',150,80,150,18);R('#d6c090',146,78,158,4);R('#14141a',250,64,14,14);R('#c8402a',252,66,6,4)};
+
+/* ---------- 4つのモード(空港⇄到着⇄街⇄出発) ---------- */
+var MODES={air:{p:PLACES_AIR,b:'✈ 空港',h:'ドバイ国際空港 ターミナル3<small>コンコースB・カンペ先生 試作</small>',snd:'map'},
+ arr:{p:PLACES_ARR,b:'🛬 到着',h:'ドバイに到着<small>入国審査からタクシーまで</small>',snd:'map'},
+ city:{p:PLACES_CITY,b:'🏙 街',h:'ドバイの街<small>バスで出かけよう・実在の場所</small>',snd:'city'},
+ dep:{p:PLACES_DEP,b:'🛫 出発',h:'ドバイから出発<small>チェックインから機内まで</small>',snd:'map'}};
+function refreshCityBtn(){
+ var bar=$m('modeBar');if(!bar.childNodes.length){Object.keys(MODES).forEach(function(k){var b=el('button','mbtn',MODES[k].b);b.type='button';b.dataset.m=k;b.addEventListener('click',function(){if(G.view==='map'&&MODE!==k)setMode(k)});bar.appendChild(b)})}
+ bar.querySelectorAll('.mbtn').forEach(function(b){b.classList.toggle('on',b.dataset.m===MODE)});
+ var h=document.querySelector('#mapView .mapbar h1');if(h)h.innerHTML=MODES[MODE].h}
+function setMode(m){
+ MODE=m;PLACES=MODES[m].p;TOTALV=PLACES.reduce(function(a,p){return a+p.v.length},0);
+ G.at=PLACES[0].id;Snd.go(MODES[m].snd);buildMap();refreshMap();drawMapBg();refreshCityBtn()}
 
 /* ---------- ループ ---------- */
 var last=0;
