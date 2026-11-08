@@ -51,6 +51,7 @@ body{margin:0;box-sizing:border-box;background:var(--bg);color:var(--line);font-
 .win .tag.good{color:var(--ok);border-color:var(--ok)}.win .tag.bad{color:var(--bad);border-color:var(--bad)}.win .tag.info{color:var(--info);border-color:var(--info)}.win .tag.tbd{color:var(--mute);border-color:var(--mute)}
 .win .tag:empty{display:none}
 .win p{margin:0;font-size:22px;line-height:1.45;font-weight:800;min-height:64px}
+#sceneView:has(.reveal) .win p{font-size:27px}
 .win .tap{position:absolute;right:8px;bottom:4px;font-size:10px;color:var(--mute)}
 #panel{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;overflow:hidden}
 .cue{background:var(--paper);color:var(--ink);border:3px solid var(--brown);border-radius:10px;padding:12px 12px 10px;display:flex;flex-wrap:wrap;gap:2px 10px;align-items:baseline;align-content:center;flex:1;min-height:0;position:relative}
@@ -83,9 +84,9 @@ body{margin:0;box-sizing:border-box;background:var(--bg);color:var(--line);font-
 .bar{height:10px;background:#1a2142;border-radius:5px;overflow:hidden;flex:none}
 .bar i{display:block;height:100%;width:100%;background:var(--gold)}
 .reveal{background:var(--win);border:3px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:12px;flex:1;min-height:0;overflow:auto}
-.reveal .en{font-size:22px;color:#fff;font-weight:800;line-height:1.35;text-wrap:balance}
-.reveal .jp{font-size:16px;color:var(--gold);font-weight:800;line-height:1.5}
-.reveal .who2{font-size:11px;color:var(--gold);font-weight:800;letter-spacing:.08em}
+.reveal .en{font-size:27px;color:#fff;font-weight:800;line-height:1.35;text-wrap:balance}
+.reveal .jp{font-size:20px;color:var(--gold);font-weight:800;line-height:1.5}
+.reveal .who2{font-size:14px;color:var(--gold);font-weight:800;letter-spacing:.08em}
 .note{margin:0;font-size:11px;font-weight:500;color:var(--mute);line-height:1.5;flex:none}
 /* 発音チェック: 聞こえた文字・赤表示 */
 .cue{padding-bottom:78px}

@@ -209,6 +209,7 @@ button{font:inherit;color:inherit;cursor:pointer}
   <p class="setsub">きめた ことは、どの空港でも つかわれます。</p>
   <div class="cmdwin setwin" id="setWin"></div>
   <div class="cmdwin cmdmap">
+   <button type="button" class="copt sub" id="setWorld" hidden><span class="cur">▶</span>せかいマップ（ほかの空港へ）</button>
    <button type="button" class="copt sub" id="setInfo" hidden><span class="cur">▶</span>グアムの アイテム・時間・メモ</button>
    <button type="button" class="copt" id="setBack"><span class="cur">▶</span>もどる</button>
   </div>
@@ -645,6 +646,8 @@ $('mSet').addEventListener('click',function(){blip();openSet()});
 /* グアム編の ⚙ から来たとき(#set&from=guam): もどる→グアム、グアム専用のものも見られる */
 var FROMG=/[#&]from=guam/.test(location.hash);
 $('setInfo').hidden=!FROMG;
+$('setWorld').hidden=!FROMG;
+$('setWorld').addEventListener('click',function(){blip();renderMap();show('sMap')});
 $('setInfo').addEventListener('click',function(){blip();location.href='../guam/#w=1&info=1'});
 $('setBack').addEventListener('click',function(){blip();if(FROMG){location.href='../guam/#w=1';return}renderMap();show('sMap')});
 
