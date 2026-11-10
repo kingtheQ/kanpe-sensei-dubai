@@ -1749,7 +1749,7 @@ function phoStat(t,k){var s=$m('phoStat');s.className='stat'+(k?' '+k:'');s.text
 function phoRender(){
  if(!PHO)return;var w=PHO.words[PHO.idx],ip=ipaOf(w);
  var wd=$m('phoWord');wd.textContent='';var f=el('span',null,w.charAt(0)=== 'p'?'ph':'f');wd.appendChild(f);wd.appendChild(el('i',null,w.slice(w.charAt(0)==='p'?2:1)));
- $m('phoIpa').textContent=ip;
+ $m('phoIpa').textContent=ip;var c3=document.querySelector('#phoView .pchip.c3');if(c3)c3.textContent=w;
  $m('phoLb').textContent='れんしゅう '+Math.min(PHO.ok+1,PHO.need)+'/'+PHO.need;
  var wl=$m('phoWl');wl.textContent='';PHO.words.forEach(function(x,i){var b=el('div','wb'+(i===PHO.idx?' cur':''));b.appendChild(el('b',null,x));b.appendChild(el('em',null,PHO.heard[x]?'きこえた→ '+PHO.heard[x]:''));wl.appendChild(b)});
  $m('phoCnt').textContent=PHO.done?'できたよ！ ルルの つぎの れんしゅうへ':'できるまで つづけるよ ・ いま '+PHO.ok+'/'+PHO.need+' かい';
@@ -1765,7 +1765,7 @@ function phoBeat(on){
  if(!PHO)return;PHO.bt.forEach(clearTimeout);PHO.bt=[];PHO.beat=on;$m('phoDemo').textContent=on?'とめる':'ルルの おてほん';
  if(!on){Snd.beatStop();return}
  stopSay();Snd.beatStart();phoRun(false);setTimeout(function(){if(PHO&&PHO.beat)phoRun(true)},120);
- var bar=function(){if(!PHO||!PHO.beat)return;PHO.bt.push(setTimeout(function(){if(PHO&&PHO.beat&&!PHO.listening)say('food',.8,1.3)},1250));PHO.bt.push(setTimeout(bar,2400))};bar()}
+ var bar=function(){if(!PHO||!PHO.beat)return;PHO.bt.push(setTimeout(function(){if(PHO&&PHO.beat&&!PHO.listening)say(PHO.words[PHO.idx],.8,1.3)},1250));PHO.bt.push(setTimeout(bar,2400))};bar()}
 function phoOk(){
  PHO.ok++;PHO.heard[PHO.words[PHO.idx]]='';PHO.idx=(PHO.idx+1)%PHO.words.length;
  if(PHO.ok>=PHO.need){PHO.done=true;phoBeat(false);phoStat('✓ つたわった '+PHO.ok+'/'+PHO.need,'ok');sayJp('できたね！ すごい！')}
