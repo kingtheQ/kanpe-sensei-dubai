@@ -210,6 +210,26 @@ body.big .cue .w{font-size:30px}body.big .cue .w.s{font-size:52px}
 @keyframes phbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
 @keyframes phnod{0%,100%{transform:translateY(0)}50%{transform:translateY(1px)}}
 @keyframes phdot{0%,100%{opacity:.2}50%{opacity:1}}
+.phobar .pp i.done{background:var(--ok);border-color:var(--ok)}
+.pboard{position:absolute;left:2.8%;top:3.7%;width:94.4%;height:74.7%;box-sizing:border-box;color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center;overflow:hidden}
+.pboard[hidden]{display:none}
+.pboard.w2 .bw{font-size:clamp(40px,14vw,58px);font-weight:800;line-height:1.05;color:var(--ink);overflow-wrap:anywhere}
+.pboard.w2 .bi{font-size:clamp(20px,6.5vw,28px);font-weight:800;color:#1f46c8;font-family:"Noto Sans","Segoe UI",system-ui,sans-serif}
+.pboard .cmp{display:flex;gap:14px;margin-top:6px}
+.pboard .cmp>div{display:flex;flex-direction:column;align-items:center;padding:2px 12px;border-radius:8px}
+.pboard .cmp small{font-size:10px;font-weight:800;color:#4a3a2a}
+.pboard .cmp b{font-size:16px;font-weight:800}
+.pboard .cmp .ng{background:#ffe1dd;color:#c8182a}.pboard .cmp .okc{background:#d8f5e2;color:#0a7c4a}
+.pboard.w3{flex-direction:row;flex-wrap:wrap;align-content:center;justify-content:center;gap:8px 10px;padding:0 6px}
+.pboard.w3 .tk{display:flex;flex-direction:column;align-items:center;min-width:0}
+.pboard.w3 .tk b{font-size:clamp(14px,4.3vw,18px);font-weight:800;color:var(--ink);line-height:1.2}
+.pboard.w3 .tk span{font-size:clamp(10px,3vw,12px);font-weight:800;color:#1f46c8;white-space:nowrap;font-family:"Noto Sans","Segoe UI",system-ui,sans-serif;min-height:16px}
+.pboard.w3 .tk.ok b{color:#0a7c4a}.pboard.w3 .tk.bad b{color:#e11d2e;text-decoration:underline wavy #e11d2e;text-underline-offset:3px}
+.pboard.w3 .lk{font-style:normal;font-size:16px;font-weight:800;color:#6b7390;align-self:flex-start;margin:0 -6px}
+.phocard .heard3{font-size:15px;font-weight:800;color:#5a5340;line-height:1.4}.phocard .heard3 b{color:#e11d2e}
+.phocard .res{font-size:15px;font-weight:800}.phocard .res.ok{color:#0a7c4a}.phocard .res.ng{color:#c8182a}
+.phocard .atts{display:flex;flex-direction:column;gap:5px}
+.phocard .att{background:#fff;border-color:var(--brown)}
 @media (prefers-reduced-motion:reduce){#phoView.run .pl,#phoView.run .pr,.phostage .hero,.phostage .lulu{animation:none}}
 @media (max-height:700px){.phocard .big b{font-size:44px}.phocard .big>span{font-size:26px}#phoWin p{font-size:16px}.pchip{font-size:19px}}
 </style>
@@ -235,7 +255,7 @@ body.big .cue .w{font-size:30px}body.big .cue .w.s{font-size:52px}
     <div id="panel"></div>
   </div>
   <div id="phoView" hidden>
-    <div class="phobar"><button id="phoSet" class="setbtn" type="button" aria-label="せってい"></button><div class="t">強化合宿 ・ フォニックス<div class="pp"><i class="on"></i><i></i><i></i></div></div><button id="phoBack" class="btn sub" type="button" aria-label="もどる">✕</button></div>
+    <div class="phobar"><button id="phoSet" class="setbtn" type="button" aria-label="せってい"></button><div class="t"><span id="phoTitle">強化合宿 ・ フォニックス</span><div class="pp"><i class="on"></i><i></i><i></i></div></div><button id="phoBack" class="btn sub" type="button" aria-label="もどる">✕</button></div>
     <div class="phostage"><svg viewBox="0 0 320 190" preserveAspectRatio="xMidYMid slice" shape-rendering="crispEdges" aria-hidden="true" style="position:absolute;left:0;top:0;width:100%;height:100%;display:block">
 <path fill="#2b3a6b" d="M0 0h320v156h-320z"/>
 <path fill="#2f3f73" d="M10 0h1v156h-1zM30 0h1v156h-1zM50 0h1v156h-1zM70 0h1v156h-1zM90 0h1v156h-1zM110 0h1v156h-1zM130 0h1v156h-1zM150 0h1v156h-1zM170 0h1v156h-1zM190 0h1v156h-1zM210 0h1v156h-1zM230 0h1v156h-1zM250 0h1v156h-1zM270 0h1v156h-1zM290 0h1v156h-1zM310 0h1v156h-1z"/>
@@ -273,7 +293,7 @@ body.big .cue .w{font-size:30px}body.big .cue .w.s{font-size:52px}
 <path class="dot d3" fill="#05070f" d="M270 108h2v2h-2z"/>
 </g>
 </g>
-</svg><svg viewBox="0 0 320 190" aria-hidden="true" style="position:absolute;left:0;top:0;width:100%;height:100%;display:block">
+</svg><svg id="phoLips" viewBox="0 0 320 190" aria-hidden="true" style="position:absolute;left:0;top:0;width:100%;height:100%;display:block">
 <text x="80" y="26" text-anchor="middle" font-size="12" font-weight="800" fill="#c8182a" font-family="'M PLUS Rounded 1c',sans-serif">えいごの F</text>
 <text x="80" y="40" text-anchor="middle" font-size="9" font-weight="800" fill="#4a3a2a" font-family="'M PLUS Rounded 1c',sans-serif">うえの はを</text>
 <text x="80" y="52" text-anchor="middle" font-size="9" font-weight="800" fill="#4a3a2a" font-family="'M PLUS Rounded 1c',sans-serif">したの くちびるに ちょん</text>
@@ -295,10 +315,11 @@ body.big .cue .w{font-size:30px}body.big .cue .w.s{font-size:52px}
 <ellipse cx="233" cy="52" rx="15" ry="8" fill="#5a1a2a"/>
 <path d="M223 70l-2 8M233 71v9M243 70l2 8" stroke="#9fb4e8" stroke-width="2" stroke-linecap="round"/>
 </g>
-</svg></div>
-    <div class="win" id="phoWin"><span class="who">Lulu 先生</span><span class="tag info">♪ リズムに のって！</span><p>うえの はを したの くちびるに ちょん♪ こえは ださずに、いきだけ「f」</p><div class="pchips"><span class="pchip c1">f</span><span class="pchip c2">f</span><span class="pchip c3 w3">food</span></div></div>
-    <div class="phocard"><span class="lb" id="phoLb">れんしゅう 0/3</span><div class="big"><b id="phoWord"></b><span id="phoIpa"></span></div><div class="sub2">F の ことば（きみの カンペから）</div><div class="wl" id="phoWl"></div><div class="stat" id="phoStat"></div><div class="cnt" id="phoCnt"></div></div>
+</svg><div id="phoBoard" class="pboard" hidden></div></div>
+    <div class="win" id="phoWin"><span class="who">Lulu 先生</span><span class="tag info" id="phoTag">♪ リズムに のって！</span><p id="phoMsg">うえの はを したの くちびるに ちょん♪ こえは ださずに、いきだけ「f」</p><div class="pchips" id="phoChips"><span class="pchip c1">f</span><span class="pchip c2">f</span><span class="pchip c3 w3">food</span></div></div>
+    <div class="phocard" id="phoCard"></div>
     <div class="row"><button id="phoDemo" class="btn sub" type="button" style="flex:1;min-height:56px;font-size:18px">ルルの おてほん</button><button id="phoAct" class="btn act" type="button" style="font-size:20px">おして よむ</button></div>
+    <button id="phoSkip" class="btn sub" type="button" hidden style="min-height:40px;font-size:13px">うまく いかない ときは つぎへ ›</button>
   </div>
   <div id="setView" hidden><div class="sbar"><button id="setBack" class="btn sub" type="button" aria-label="もどる">‹ もどる</button><b>せってい</b><span style="width:84px;flex:none"></span></div><div class="sctx" id="setCtx"></div><div id="setBody" style="display:flex;flex-direction:column;gap:18px"></div><p class="snote">音声は 保存も 送信も しません。発音の きろくは この端末の中だけに のこります。</p></div>
 </div>
@@ -1691,7 +1712,6 @@ function useHelp(T){
  var st=panel.querySelector('.stat');if(st){st.className='stat';st.textContent='るるが かわりに いうよ(ヘルプ のこり '+save.help+'回)'}
  later(450,function(){setMsgInstant(cueText(T.cue),'Lulu');luHelp=true;spSay=false;var t0=Date.now();
   say(cueText(T.cue),.85,1.75,gd(function(){later(Math.max(500,1800-(Date.now()-t0)),function(){luHelp=false;later(450,advance)})}))})}
-function startCamp(){var fw=fWords();if(fw.length){showPho(fw,false);return}startCampCore()}
 function startCampCore(){
  var S0=G.scene,cur=S0.turns[G.ti],list=save.weak.slice();if(!list.length&&cur)list=[{c:cur.cue,j:cur.cueJp||''}];
  G.sid++;clearTimers();stopSay();luHelp=false;
@@ -1738,71 +1758,152 @@ $m('setBack').addEventListener('click',closeSettings);
  mkSetBtn('phoSet')})();
 prefApply();
 
-/* ---------- 強化合宿 ① フォニックス(F の おと): ルルが リズムで 引っぱる ---------- */
+/* ---------- 強化合宿(ルル先生): ①フォニックス → ②たんご → ③ぶん(発音記号つき) ---------- */
+/* 発音記号の辞書: CMU Pronouncing Dictionary(米国英語・公開辞書)から、このゲームの会話に出る単語分を作成 */
+var IPAC={"a":"/ə/","about":"/əˈbaʊt/","act":"/ækt/","advice":"/ædˈvaɪs/","afternoon":"/ˌæftərˈnuːn/","again":"/əˈgen/","all":"/ɔːl/","always":"/ˈɔːlˌweɪz/","am":"/æm/","amazing":"/əˈmeɪzɪŋ/","an":"/æn/","and":"/ənd/","any":"/ˈeni/","anything":"/ˈeniˌθɪŋ/","anyway":"/ˈeniˌweɪ/","aquarium":"/əˈkweriəm/","are":"/ɑːr/","arrive":"/ərˈaɪv/","ask":"/æsk/","at":"/æt/","autumn":"/ˈɔːtəm/","b":"/biː/","backpack":"/ˈbækˌpæk/","bad":"/bæd/","bag":"/bæg/","bar":"/bɑːr/","be":"/biː/","beautiful":"/ˈbjuːtəfəl/","beginner":"/bɪˈgɪnər/","belt":"/belt/","best":"/best/","big":"/bɪg/","black":"/blæk/","blanket":"/ˈblæŋkət/","blue":"/bluː/","board":"/bɔːrd/","boat":"/boʊt/","boxes":"/ˈbɑːksəz/","bring":"/brɪŋ/","busy":"/ˈbɪzi/","but":"/bʌt/","buy":"/baɪ/","by":"/baɪ/","caesar":"/ˈsiːzər/","cafe":"/kəˈfeɪ/","call":"/kɔːl/","calm":"/kɑːm/","came":"/keɪm/","camera":"/ˈkæmərə/","can":"/kæn/","can't":"/kænt/","card":"/kɑːrd/","care":"/ker/","carpet":"/ˈkɑːrpət/","charge":"/tʃɑːrdʒ/","check":"/tʃek/","cheers":"/tʃɪrz/","chicken":"/ˈtʃɪkən/","chocolate":"/ˈtʃɔːklət/","clean":"/kliːn/","club":"/klʌb/","cocktail":"/ˈkɑːkˌteɪl/","coffee":"/ˈkɑːfi/","come":"/kʌm/","could":"/kʊd/","crazy":"/ˈkreɪzi/","cruise":"/kruːz/","danced":"/dænst/","day":"/deɪ/","days":"/deɪz/","deal":"/diːl/","deck":"/dek/","degrees":"/dɪˈgriːz/","delicious":"/dɪˈlɪʃəs/","deliver":"/dɪˈlɪvər/","did":"/dɪd/","dinner":"/ˈdɪnər/","discount":"/dɪˈskaʊnt/","do":"/duː/","does":"/dʌz/","dollars":"/ˈdɑːlərz/","domes":"/doʊmz/","don't":"/doʊnt/","dream":"/driːm/","drink":"/drɪŋk/","drinks":"/drɪŋks/","drive":"/draɪv/","dubai":"/duˈbaɪ/","early":"/ˈɜːrli/","eat":"/iːt/","emirates":"/ˈemərəts/","enjoy":"/ˌenˈdʒɔɪ/","everywhere":"/ˈevriˌwer/","excited":"/ɪkˈsaɪtəd/","expensive":"/ɪkˈspensɪv/","family":"/ˈfæməli/","far":"/fɑːr/","fast":"/fæst/","favorite":"/ˈfeɪvərɪt/","fifteen":"/fɪfˈtiːn/","fifty":"/ˈfɪfti/","fine":"/faɪn/","five":"/faɪv/","flight":"/flaɪt/","flowers":"/ˈflaʊərz/","food":"/fuːd/","for":"/fɔːr/","forever":"/fərˈevər/","fountain":"/ˈfaʊntən/","free":"/friː/","friend":"/frend/","from":"/frʌm/","fun":"/fʌn/","gate":"/geɪt/","gates":"/geɪts/","get":"/get/","gift":"/gɪft/","gigabytes":"/ˈgɪgəˌbaɪts/","give":"/gɪv/","glad":"/glæd/","glass":"/glæs/","go":"/goʊ/","going":"/ˈgoʊɪŋ/","good":"/gʊd/","goodbye":"/ˌgʊdˈbaɪ/","goodnight":"/ˈgʊdˌnaɪt/","great":"/greɪt/","guided":"/ˈgaɪdəd/","had":"/hæd/","happened":"/ˈhæpənd/","has":"/hæz/","hat":"/hæt/","have":"/hæv/","hello":"/həˈloʊ/","help":"/help/","her":"/hɜːr/","here":"/hiːr/","here's":"/hɪrz/","high":"/haɪ/","hold":"/hoʊld/","hope":"/hoʊp/","hot":"/hɑːt/","hotel":"/hoʊˈtel/","hour":"/ˈaʊər/","hours":"/ˈaʊərz/","how":"/haʊ/","hundred":"/ˈhʌndrəd/","i":"/aɪ/","i'd":"/aɪd/","i'll":"/aɪl/","i'm":"/aɪm/","ice":"/aɪs/","idea":"/aɪˈdiːə/","if":"/ɪf/","in":"/ɪn/","include":"/ˌɪnˈkluːd/","inside":"/ˌɪnˈsaɪd/","instead":"/ˌɪnˈsted/","is":"/ɪz/","it":"/ɪt/","it's":"/ɪts/","japan":"/dʒəˈpæn/","juice":"/dʒuːs/","just":"/dʒʌst/","kind":"/kaɪnd/","king":"/kɪŋ/","know":"/noʊ/","laptop":"/ˈlæpˌtɑːp/","late":"/leɪt/","later":"/ˈleɪtər/","leaves":"/liːvz/","left":"/left/","legs":"/legz/","let's":"/lets/","like":"/laɪk/","liquids":"/ˈlɪkwədz/","little":"/ˈlɪtəl/","london":"/ˈlʌndən/","long":"/lɔːŋ/","look":"/lʊk/","looking":"/ˈlʊkɪŋ/","lot":"/lɑːt/","luck":"/lʌk/","lulu":"/ˈluːˌluː/","many":"/ˈmeni/","marquis":"/ˌmɑːrˈkiː/","marriott":"/ˈmeriət/","may":"/meɪ/","maybe":"/ˈmeɪbi/","me":"/miː/","meat":"/miːt/","memory":"/ˈmeməri/","metro":"/ˈmeˌtroʊ/","mine":"/maɪn/","minutes":"/ˈmɪnəts/","miss":"/mɪs/","moment":"/ˈmoʊmənt/","more":"/mɔːr/","morning":"/ˈmɔːrnɪŋ/","mosque":"/mɑːsk/","much":"/mʌtʃ/","music":"/mˈjuːzɪk/","my":"/maɪ/","name":"/neɪm/","natural":"/ˈnætʃərəl/","near":"/nɪr/","need":"/niːd/","nervous":"/ˈnɜːrvəs/","news":"/nuːz/","next":"/nekst/","nice":"/naɪs/","night":"/naɪt/","nine":"/naɪn/","no":"/noʊ/","not":"/nɑːt/","now":"/naʊ/","of":"/ʌv/","often":"/ˈɔːfən/","oh":"/oʊ/","okay":"/ˌoʊˈkeɪ/","on":"/ɑːn/","one":"/wʌn/","only":"/ˈoʊnli/","orange":"/ˈɔːrəndʒ/","order":"/ˈɔːrdər/","our":"/ˈaʊər/","out":"/aʊt/","package":"/ˈpækədʒ/","packed":"/pækt/","paintings":"/ˈpeɪntɪŋz/","passport":"/ˈpæˌspɔːrt/","pay":"/peɪ/","people":"/ˈpiːpəl/","perfect":"/pərˈfekt/","photo":"/ˈfoʊˌtoʊ/","photos":"/ˈfoʊˌtoʊz/","place":"/pleɪs/","please":"/pliːz/","polite":"/pəˈlaɪt/","portion":"/ˈpɔːrʃən/","present":"/ˈprezənt/","pretty":"/ˈprɪti/","put":"/pʊt/","quiet":"/ˈkwaɪət/","real":"/riːl/","really":"/ˈrɪli/","recommend":"/ˌrekəˈmend/","recommendations":"/ˌrekəmənˈdeɪʃənz/","red":"/red/","rest":"/rest/","restaurant":"/ˈrestərˌɑːnt/","ride":"/raɪd/","right":"/raɪt/","room":"/ruːm/","safe":"/seɪf/","salad":"/ˈsæləd/","sandwich":"/ˈsændwɪtʃ/","seat":"/siːt/","see":"/siː/","set":"/set/","seven":"/ˈsevən/","she":"/ʃiː/","shines":"/ʃaɪnz/","should":"/ʃʊd/","show":"/ʃoʊ/","sightseeing":"/ˈsaɪtˈsiːɪŋ/","sign":"/saɪn/","sim":"/sɪm/","sit":"/sɪt/","six":"/sɪks/","size":"/saɪz/","sleep":"/sliːp/","slowly":"/ˈsloʊli/","small":"/smɔːl/","smart":"/smɑːrt/","smells":"/smelz/","so":"/soʊ/","sofas":"/ˈsoʊfəz/","some":"/sʌm/","sorry":"/ˈsɑːri/","sounds":"/saʊndz/","sparkling":"/ˈspɑːrklɪŋ/","staff":"/stæf/","star":"/stɑːr/","starting":"/ˈstɑːrtɪŋ/","station":"/ˈsteɪʃən/","stay":"/steɪ/","strap":"/stræp/","strong":"/strɔːŋ/","suitcase":"/ˈsuːtˌkeɪs/","sunny":"/ˈsʌni/","sure":"/ʃʊr/","sweet":"/swiːt/","tag":"/tæg/","take":"/teɪk/","taxi":"/ˈtæksi/","tea":"/tiː/","tell":"/tel/","telling":"/ˈtelɪŋ/","ten":"/ten/","terrible":"/ˈterəbəl/","thank":"/θæŋk/","thanks":"/θæŋks/","that":"/ðæt/","that's":"/ðæts/","the":"/ðə/","them":"/ðem/","then":"/ðen/","there":"/ðer/","they":"/ðeɪ/","think":"/θɪŋk/","thirty":"/ˈθɜːrˌdiː/","this":"/ðɪs/","three":"/θriː/","tickets":"/ˈtɪkəts/","tight":"/taɪt/","time":"/taɪm/","tip":"/tɪp/","tired":"/ˈtaɪərd/","to":"/tuː/","together":"/təˈgeðər/","tokyo":"/ˈtoʊkiˌoʊ/","tomorrow":"/təˈmɑːˌroʊ/","too":"/tuː/","tour":"/tʊr/","tourist":"/ˈtʊrəst/","train":"/treɪn/","travel":"/ˈtrævəl/","trip":"/trɪp/","try":"/traɪ/","twelve":"/twelv/","two":"/tuː/","under":"/ˈʌndər/","up":"/ʌp/","upper":"/ˈʌpər/","us":"/ʌs/","use":"/juːs/","vegetarian":"/ˌvedʒəˈteˌriːən/","very":"/ˈveri/","view":"/vjuː/","visit":"/ˈvɪzɪt/","wait":"/weɪt/","waiting":"/ˈweɪtɪŋ/","walk":"/wɔːk/","want":"/wɑːnt/","warm":"/wɔːrm/","warning":"/ˈwɔːrnɪŋ/","was":"/wɑːz/","watch":"/wɑːtʃ/","water":"/ˈwɔːtər/","waters":"/ˈwɔːtərz/","way":"/weɪ/","we":"/wiː/","we'll":"/wiːl/","wear":"/wer/","weeks":"/wiːks/","welcome":"/ˈwelkəm/","well":"/wel/","were":"/wɜːr/","what":"/wʌt/","where":"/wer/","which":"/wɪtʃ/","white":"/waɪt/","will":"/wɪl/","window":"/ˈwɪndoʊ/","wine":"/waɪn/","with":"/wɪð/","without":"/wɪˈθaʊt/","wonderful":"/ˈwʌndərfəl/","worth":"/wɜːrθ/","would":"/wʊd/","wow":"/waʊ/","yellow":"/ˈjeloʊ/","yes":"/jes/","you":"/juː/","you're":"/jʊr/","your":"/jɔːr/"};
 var PHO=null,IPAMAP=null;
-var IPAF={fab:'/fæb/',family:'/ˈfæməli/',fast:'/fæst/',fifteen:'/ˌfɪfˈtiːn/',fifty:'/ˈfɪfti/',fine:'/faɪn/',five:'/faɪv/',flowers:'/ˈflaʊərz/',food:'/fuːd/','for':'/fɔːr/',friend:'/frend/',from:'/frʌm/',fun:'/fʌn/',photo:'/ˈfoʊtoʊ/',photos:'/ˈfoʊtoʊz/',fountain:'/ˈfaʊntən/'};
-function ipaOf(w){if(!IPAMAP){IPAMAP={};Object.keys(DLG).forEach(function(k){(DLG[k].words||[]).forEach(function(x){IPAMAP[String(x[0]).toLowerCase()]=x[1]})})}return IPAMAP[w]||IPAF[w]||''}
+function tokKey(t){return String(t).toLowerCase().replace(/[^a-z'-]/g,'')}
+function ipaOf(t){
+ if(!IPAMAP){IPAMAP={};Object.keys(DLG).forEach(function(k){(DLG[k].words||[]).forEach(function(x){IPAMAP[String(x[0]).toLowerCase()]=x[1]})})}
+ var k=tokKey(t);if(!k)return '';var v=IPAMAP[k]||IPAC[k];if(v)return v;
+ if(k.indexOf('-')>0){var ps=k.split('-').map(function(p){var x=IPAMAP[p]||IPAC[p];return x?x.slice(1,-1):''});if(ps.every(Boolean))return '/'+ps.join(' ')+'/'}
+ return ''}
 function fWords(){var out=[],seen={};save.weak.forEach(function(w){String(w.c||'').replace(/\*/g,'').split(/\s+/).forEach(function(t){var k=t.toLowerCase().replace(/[^a-z']/g,'');if(k.length>1&&/^(f|ph)/.test(k)&&!seen[k]){seen[k]=1;out.push(k)}})});return out.slice(0,3)}
+function missWords(skip){var out=[];try{boothStats().words.forEach(function(e){var k=String(e.w).toLowerCase();if(k.length>1&&out.length<3&&skip.indexOf(k)<0&&e.m>0){var top='',n=0;Object.keys(e.hs||{}).forEach(function(h){if(e.hs[h]>n){n=e.hs[h];top=h}});out.push({w:k,h:top==='(聞こえず)'?'':top})}})}catch(e){}return out}
+function weakSents(){var out=save.weak.slice(0,2).map(function(w){return String(w.c||'').replace(/\*/g,'')}).filter(Boolean);if(!out.length&&G.scene){var cur=G.scene.turns[G.ti];if(cur)out=[cueText(cur.cue)]}return out}
+function startCamp(){
+ var fw=fWords(),mw=missWords(fw),ss=weakSents(),st=[];
+ if(fw.length)st.push(1);if(mw.length)st.push(2);if(ss.length)st.push(3);
+ if(!st.length){startCampCore();return}
+ showPho({fw:fw,mw:mw,ss:ss,stages:st},false)}
 function jpVoice(){try{var v=speechSynthesis.getVoices().filter(function(x){return /^ja/i.test(x.lang)});if(!v.length)return null;var f=v.filter(function(x){return /kyoko|o-ren|nanami|haruka|sayaka|google|female|女/i.test(x.name)});return f[0]||v[0]}catch(e){return null}}
-function sayJp(text,done,quick){var my=++sayTok,fired=false;function fin(){if(fired||my!==sayTok)return;fired=true;if(done)done()}
- try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(text);u.lang='ja-JP';var vo=jpVoice();if(vo)u.voice=vo;u.rate=(quick?1:.95)*PREF.rate;u.pitch=Math.min(2,PREF.pitch);u.volume=PREF.voice/100;u.onend=fin;u.onerror=fin;speechSynthesis.speak(u)}catch(e){}
+function sayJp(text,done){var my=++sayTok,fired=false;function fin(){if(fired||my!==sayTok)return;fired=true;if(done)done()}
+ try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(text);u.lang='ja-JP';var vo=jpVoice();if(vo)u.voice=vo;u.rate=.95*PREF.rate;u.pitch=Math.min(2,PREF.pitch);u.volume=PREF.voice/100;u.onend=fin;u.onerror=fin;speechSynthesis.speak(u)}catch(e){}
  setTimeout(fin,text.length*260+2500)}
+function luSay(text,rate){say(text,rate||.8,Math.min(2,PREF.pitch))}
 function phoRun(on){var v=$m('phoView');v.classList.remove('run');if(on){void v.offsetWidth;v.classList.add('run')}}
-function phoStat(t,k){var s=$m('phoStat');s.className='stat'+(k?' '+k:'');s.textContent=t||''}
+function phoStat(t,k){var s=$m('phoStat');if(!s)return;s.className='stat'+(k?' '+k:'');s.textContent=t||''}
+var VOWC='aeiouɑæʌəɔɪʊɛɜ';
+function linkAfter(a,b){if(!a||!b)return false;var x=a.replace(/[\/ˈˌ]/g,''),y=b.replace(/[\/ˈˌ]/g,'');if(!x||!y)return false;var le=x.charAt(x.length-1),fi=y.charAt(0);return VOWC.indexOf(le)<0&&le!=='ː'&&VOWC.indexOf(fi)>=0}
+function phoLab(t){var l=el('span','lb',t);return l}
+function phoTitleFor(){return PHO.stage===1?'強化合宿 ・ フォニックス':(PHO.stage===2?'強化合宿 ・ たんご':'強化合宿 ・ ぶん')}
+function phoSetPips(){var pp=document.querySelectorAll('#phoView .phobar .pp i');pp.forEach(function(i,n){i.className=n+1<PHO.stage?'done':(n+1===PHO.stage?'on':'')});$m('phoTitle').textContent=phoTitleFor()}
+function phoBoardHide(){$m('phoLips').style.display='none';$m('phoBoard').hidden=true}
+function phoCur(){return PHO.stage===3?PHO.sents[PHO.idx]:(PHO.stage===2?PHO.mw[PHO.idx].w:PHO.words[PHO.idx])}
 function phoRender(){
- if(!PHO)return;var w=PHO.words[PHO.idx],ip=ipaOf(w);
- var wd=$m('phoWord');wd.textContent='';var f=el('span',null,w.charAt(0)=== 'p'?'ph':'f');wd.appendChild(f);wd.appendChild(el('i',null,w.slice(w.charAt(0)==='p'?2:1)));
- $m('phoIpa').textContent=ip;var c3=document.querySelector('#phoView .pchip.c3');if(c3)c3.textContent=w;
- $m('phoLb').textContent='れんしゅう '+Math.min(PHO.ok+1,PHO.need)+'/'+PHO.need;
- var wl=$m('phoWl');wl.textContent='';wl.hidden=PHO.words.length<2;document.querySelector('#phoView .phocard .sub2').hidden=PHO.words.length<2;PHO.words.forEach(function(x,i){var b=el('div','wb'+(i===PHO.idx?' cur':''));b.appendChild(el('b',null,x));b.appendChild(el('em',null,PHO.heard[x]?'きこえた→ '+PHO.heard[x]:''));wl.appendChild(b)});
- $m('phoCnt').textContent=PHO.done?'できたよ！ ルルの つぎの れんしゅうへ':'できるまで つづけるよ ・ いま '+PHO.ok+'/'+PHO.need+' かい';
- var a=$m('phoAct');a.textContent=PHO.done?'つぎへ ✈':(PHO.listening?'きいてます…':((PREF.silent||!SR)?'できた！':'おして よむ'));
- var pp=document.querySelectorAll('#phoView .phobar .pp i');pp.forEach(function(i,n){i.classList.toggle('on',n===0)})}
-function showPho(words,sample){
+ if(!PHO)return;phoSetPips();var card=$m('phoCard');card.textContent='';var act=$m('phoAct'),sk=$m('phoSkip');
+ var silent=(PREF.silent||!SR);
+ act.textContent=PHO.done?'つぎへ ✈':(PHO.listening?'きいてます…':(silent?'できた！':'おして よむ'));
+ sk.hidden=!(PHO.fails>=4&&!PHO.done);
+ var win=$m('phoWin'),chips=$m('phoChips');chips.hidden=PHO.stage!==1;
+ var tag=$m('phoTag');
+ if(PHO.stage===1){
+  $m('phoLips').style.display='';$m('phoBoard').hidden=true;tag.textContent='♪ リズムに のって！';$m('phoMsg').textContent='うえの はを したの くちびるに ちょん♪ こえは ださずに、いきだけ「f」';
+  var w=PHO.words[PHO.idx],ip=ipaOf(w);
+  var c3=document.querySelector('#phoView .pchip.c3');if(c3)c3.textContent=w;
+  card.appendChild(phoLab('れんしゅう '+Math.min(PHO.ok+1,PHO.need)+'/'+PHO.need));
+  var big=el('div','big'),b=el('b');b.appendChild(el('span',null,w.charAt(0)==='p'?'ph':'f'));b.appendChild(el('i',null,w.slice(w.charAt(0)==='p'?2:1)));big.appendChild(b);if(ip)big.appendChild(el('span',null,ip));card.appendChild(big);
+  if(PHO.words.length>1){card.appendChild(el('div','sub2','きみの カンペの F の ことば'));var wl=el('div','wl');PHO.words.forEach(function(x,i){var bx=el('div','wb'+(i===PHO.idx?' cur':''));bx.appendChild(el('b',null,x));bx.appendChild(el('em',null,PHO.heard[x]?'きこえた→ '+PHO.heard[x]:''));wl.appendChild(bx)});card.appendChild(wl)}
+  card.appendChild(el('div','stat','')).id='phoStat';
+  card.appendChild(el('div','cnt',PHO.done?'できたよ！ つぎへ すすもう':'できるまで つづけるよ ・ いま '+PHO.ok+'/'+PHO.need+' かい'));
+ }else if(PHO.stage===2){
+  phoBoardHide();var bd=$m('phoBoard');bd.hidden=false;bd.textContent='';bd.className='pboard w2';
+  tag.textContent='♪ ことばを きこう';$m('phoMsg').textContent='いえなかった ことば。ルルの おてほんの あとに つづけて いってみよう！';
+  var m=PHO.mw[PHO.idx],ip2=ipaOf(m.w);
+  var wd=el('div','bw',m.w);bd.appendChild(wd);if(ip2)bd.appendChild(el('div','bi',ip2));
+  var cmp=el('div','cmp');
+  if(m.h&&m.h!==m.w){var a=el('div','ng');a.appendChild(el('small',null,'いまの きみ'));a.appendChild(el('b',null,m.h+' ✕'));cmp.appendChild(a)}
+  var g=el('div','okc');g.appendChild(el('small',null,'めざす'));g.appendChild(el('b',null,m.w+' ◎'));cmp.appendChild(g);bd.appendChild(cmp);
+  card.appendChild(phoLab('れんしゅう '+Math.min(PHO.ok+1,PHO.need)+'/'+PHO.need));
+  var al=el('div','atts');PHO.atts.slice(-3).reverse().forEach(function(x){var r=el('div','att'+(x.ok?' good':''));r.appendChild(el('span','an','#'+x.n));var h=el('span','ah');h.appendChild(x.ok?document.createTextNode(x.h):el('b',null,x.h||'…'));r.appendChild(h);r.appendChild(el('span','bd '+(x.ok?'ok':(x.p>=70?'mid':'ng')),x.ok?'✓ つたわった':(x.p+'% '+(x.p>=70?'7わり以上':'7わり未満'))));al.appendChild(r)});card.appendChild(al);
+  card.appendChild(el('div','stat','')).id='phoStat';
+  card.appendChild(el('div','cnt',PHO.done?'できたよ！ つぎへ すすもう':'✓ つたわった '+PHO.ok+'/'+PHO.need+' かい（'+PHO.need+'かい できたら つぎへ）'));
+ }else{
+  phoBoardHide();var bd3=$m('phoBoard');bd3.hidden=false;bd3.textContent='';bd3.className='pboard w3';
+  tag.textContent='♪ つなげて いってみよう';$m('phoMsg').textContent='ぶんで いってみよう。つながる ところは ⌣ の しるし。';
+  var toks=parseCue(PHO.sents[PHO.idx]).map(function(k){return k.txt}),ips=toks.map(ipaOf),res=PHO.res;
+  toks.forEach(function(t,i){var c=el('div','tk'+(res&&res.words&&res.words[i]?(res.words[i].ok?' ok':' bad'):''));c.appendChild(el('b',null,t));c.appendChild(el('span',null,ips[i]));bd3.appendChild(c);if(i<toks.length-1&&linkAfter(ips[i],ips[i+1]))bd3.appendChild(el('i','lk','⌣'))});
+  card.appendChild(phoLab('ぶん '+(PHO.idx+1)+'/'+PHO.sents.length));
+  var hd=el('div','heard3','');if(res){if(res.heardRaw.length){hd.appendChild(document.createTextNode('きこえた→ '));res.heardRaw.forEach(function(w2,j){hd.appendChild(el(res.hflags[j]==='bad'?'b':'span',null,w2+' '))})}else hd.textContent='きこえませんでした'}card.appendChild(hd);
+  if(res){var pc=Math.round(res.ratio*100),okp=res.ratio>=0.7;var rs=el('div','res'+(okp?' ok':' ng'),(okp?'Nice! ':'')+res.okN+'/'+res.n+'語 '+pc+'% '+(okp?'✓ 7わり以上':'✕ 7わり未満'));card.appendChild(rs)}
+  card.appendChild(el('div','stat','')).id='phoStat';
+  card.appendChild(el('div','cnt',PHO.done?'できたよ！':'7わり以上 いえたら つぎへ'));
+ }
+ $m('phoDemo').textContent=PHO.stage===1?(PHO.beat?'とめる':'ルルの おてほん'):'ルルの おてほん'}
+function showPho(plan,sample){
  G.sid++;clearTimers();stopSay();Snd.go(null);G.view='pho';
- PHO={words:words,ok:0,idx:0,heard:{},need:3,sample:!!sample,beat:false,listening:false,rec:null,done:false,bt:[]};
+ PHO={plan:plan,stages:plan.stages,si:0,sample:!!sample,beat:false,listening:false,rec:null,bt:[]};
  $m('mapView').hidden=true;$m('sceneView').hidden=true;$m('boothView').hidden=true;$m('phoView').hidden=false;
- $m('phoDemo').textContent='ルルの おてほん';phoStat('');phoRender();phoRun(false);
- sayJp('エフの おとだよ。うえの はを、したの くちびるに、ちょん、って つけてね。そして、こえは ださずに、いきだけを だしてみよう。')}
+ phoStage()}
+function phoStage(){
+ var P=PHO;P.stage=P.stages[P.si];P.idx=0;P.ok=0;P.done=false;P.fails=0;P.heard={};P.atts=[];P.res=null;P.need=3;P.beat=false;
+ if(P.stage===1)P.words=P.plan.fw;else if(P.stage===2)P.mw=P.plan.mw;else{P.sents=P.plan.ss;P.need=1}
+ phoRun(false);phoRender();
+ sayJp(P.stage===1?'エフの おとだよ。うえの はを、したの くちびるに、ちょん、って つけてね。そして、こえは ださずに、いきだけを だしてみよう。':(P.stage===2?'つぎは、いえなかった ことば。ルルの あとに つづいて、いってみよう。':'さいごは、ぶんだよ。ことばを つなげて、いってみよう。'))}
 function phoBeat(on){
- if(!PHO)return;PHO.bt.forEach(clearTimeout);PHO.bt=[];PHO.beat=on;$m('phoDemo').textContent=on?'とめる':'ルルの おてほん';
+ if(!PHO||PHO.stage!==1)return;PHO.bt.forEach(clearTimeout);PHO.bt=[];PHO.beat=on;$m('phoDemo').textContent=on?'とめる':'ルルの おてほん';
  if(!on){Snd.beatStop();phoRun(false);return}
  stopSay();Snd.beatStart();phoRun(false);setTimeout(function(){if(PHO&&PHO.beat)phoRun(true)},120);
- var bar=function(){if(!PHO||!PHO.beat)return;var ok=function(){return PHO&&PHO.beat&&!PHO.listening};PHO.bt.push(setTimeout(function(){if(ok())say(PHO.words[PHO.idx],.8,Math.min(2,PHO.pitch||PREF.pitch))},1250));PHO.bt.push(setTimeout(bar,2400))};bar()}
-function phoOk(){
- PHO.ok++;PHO.heard[PHO.words[PHO.idx]]='';PHO.idx=(PHO.idx+1)%PHO.words.length;
- if(PHO.ok>=PHO.need){PHO.done=true;phoBeat(false);phoStat('✓ つたわった '+PHO.ok+'/'+PHO.need,'ok');sayJp('できたね！ すごい！')}
- else phoStat('✓ つたわった '+PHO.ok+'/'+PHO.need,'ok');
- phoRender()}
+ var bar=function(){if(!PHO||!PHO.beat)return;PHO.bt.push(setTimeout(function(){if(PHO&&PHO.beat&&!PHO.listening)luSay(PHO.words[PHO.idx],.8)},1250));PHO.bt.push(setTimeout(bar,2400))};bar()}
+function phoPass(){
+ var P=PHO;P.ok++;P.fails=0;
+ if(P.stage===1){P.heard[P.words[P.idx]]='';P.idx=(P.idx+1)%P.words.length}
+ else if(P.stage===2){P.idx=(P.idx+1)%P.mw.length}
+ if(P.ok>=P.need){P.done=true;phoBeat(false);sayJp(P.stage===3?'いいね！ ばっちり！':'できたね！ すごい！')}
+ phoRender();phoStat(P.stage===3?'':'✓ つたわった '+P.ok+'/'+P.need,'ok')}
+function phoFail(res,heardTxt){
+ var P=PHO;P.fails++;
+ if(P.stage===1){P.heard[P.words[P.idx]]=res.heardRaw.length?res.heardRaw.join(' '):'(きこえず)';phoRender();phoStat('もういちど！ ルルの おてほんを きいてみてね','ng')}
+ else if(P.stage===2){phoRender();phoStat('もういちど！','ng')}
+ else{phoRender();phoStat('もういちど！ ゆっくり つなげて','ng')}}
+function phoEval(txt){
+ var P=PHO,toks=P.stage===3?parseCue(P.sents[P.idx]).map(function(k){return k.txt}):[phoCur()],res=analyze(toks,txt);
+ if(P.stage===3){P.res=res;if(res.ratio>=0.7)phoPass();else phoFail(res,txt);return}
+ var hs=res.heardRaw.length?res.heardRaw.join(' '):'';
+ if(P.stage===2){var p=Math.round(100*(res.n?res.okN/res.n:0)),ws=res.words&&res.words[0],ok=res.okN===res.n;
+  if(!ok&&ws&&ws.h){p=Math.round(100*Math.max(0,1-lev(missKey(toks[0]),String(ws.h).replace(/[^a-z']/g,''))/Math.max(missKey(toks[0]).length,1)))}
+  P.atts.push({n:P.atts.length+1,h:hs,ok:ok,p:p});if(ok)phoPass();else phoFail(res,txt);return}
+ if(res.okN===res.n)phoPass();else phoFail(res,txt)}
 function phoListen(){
  stopSay();var r,act=$m('phoAct');try{r=new SR()}catch(e){phoStat('マイクが使えません','ng');return}
- if(PHO.beat)phoBeat(false);PHO.rec=r;PHO.listening=true;act.classList.add('down');phoRun(false);phoRender();phoStat('');
+ if(PHO.beat)phoBeat(false);PHO.rec=r;PHO.listening=true;act.classList.add('down');phoRun(false);act.textContent='きいてます…';phoStat('');
  r.lang='en-US';r.interimResults=true;r.maxAlternatives=3;r.continuous=false;var got=false,last='',err='';
  function done(txt){
-  if(!PHO||PHO.rec!==r)return;PHO.rec=null;PHO.listening=false;act.classList.remove('down');phoRun(false);
+  if(!PHO||PHO.rec!==r)return;PHO.rec=null;PHO.listening=false;act.classList.remove('down');
   if(err==='not-allowed'||err==='service-not-allowed'){phoRender();phoStat('マイクが許可されていません','ng');return}
   if(err==='audio-capture'){phoRender();phoStat('マイクが見つかりません','ng');return}
   if(err==='network'){phoRender();phoStat('ネットワークエラー','ng');return}
   if(!txt){phoRender();phoStat('きこえませんでした','ng');return}
-  var w=PHO.words[PHO.idx],res=analyze([w],txt);
-  if(res.okN===res.n)phoOk();else{PHO.heard[w]=res.heardRaw.length?res.heardRaw.join(' '):'(きこえず)';phoRender();phoStat('もういちど！ ルルの おてほんを きいてみてね','ng')}}
+  phoEval(txt)}
  r.onresult=function(ev){if(!PHO||PHO.rec!==r)return;var rs=ev.results[ev.results.length-1],alt=rs[0];if(rs.isFinal){got=true;done(alt.transcript)}else{last=alt.transcript}};
  r.onerror=function(ev){err=(ev&&ev.error)||'error'};
  r.onend=function(){Snd.duck(0);if(PHO&&PHO.rec===r)done(got?'':last)};
- try{Snd.duck(1);r.start();setTimeout(function(){if(PHO&&PHO.rec===r){try{r.stop()}catch(e){}}},12000)}catch(e){Snd.duck(0);PHO.rec=null;PHO.listening=false;act.classList.remove('down');phoRun(false);phoRender();phoStat('マイクが使えません','ng')}}
+ try{Snd.duck(1);r.start();setTimeout(function(){if(PHO&&PHO.rec===r){try{r.stop()}catch(e){}}},12000)}catch(e){Snd.duck(0);PHO.rec=null;PHO.listening=false;act.classList.remove('down');phoRender();phoStat('マイクが使えません','ng')}}
 $m('phoAct').addEventListener('click',function(){
- if(!PHO)return;if(PHO.done){phoExit(true);return}
+ if(!PHO)return;if(PHO.done){phoNext();return}
  if(PHO.listening){try{PHO.rec&&PHO.rec.stop()}catch(e){}return}
- if(PREF.silent||!SR){phoOk();return}
+ if(PREF.silent||!SR){if(PHO.stage===3)PHO.res=null;phoPass();return}
  phoListen()});
-$m('phoDemo').addEventListener('click',function(){if(PHO)phoBeat(!PHO.beat)});
+$m('phoSkip').addEventListener('click',function(){if(PHO)phoNext()});
+$m('phoDemo').addEventListener('click',function(){
+ if(!PHO)return;if(PHO.stage===1){phoBeat(!PHO.beat);return}
+ stopSay();luSay(phoCur(),.7)});
 $m('phoBack').addEventListener('click',function(){phoExit(false)});
-function phoExit(proceed){
- if(!PHO)return;var P=PHO;phoBeat(false);try{if(P.rec)P.rec.abort()}catch(e){}Snd.duck(0);PHO=null;stopSay();phoRun(false);
- $m('phoView').hidden=true;
+function phoNext(){
+ var P=PHO;if(!P)return;
+ if(P.stage===3&&P.idx<P.sents.length-1){P.idx++;P.ok=0;P.done=false;P.fails=0;P.res=null;phoRender();return}
+ if(P.si<P.stages.length-1){phoBeat(false);P.si++;phoStage();return}
+ phoFinish()}
+function phoCleanup(){var P=PHO;phoBeat(false);try{if(P.rec)P.rec.abort()}catch(e){}Snd.duck(0);stopSay();phoRun(false);$m('phoView').hidden=true;PHO=null;return P}
+function phoFinish(){
+ var P=phoCleanup();
  if(P.sample||!G.scene){showMap();return}
- G.sid++;clearTimers();G.view='scene';$m('sceneView').hidden=false;Snd.go(G.snd||null);
- if(proceed)startCampCore();else showCue()}
+ var done={};P.plan.ss.forEach(function(c){done[c]=1});save.weak=save.weak.filter(function(w){return !done[String(w.c||'').replace(/\*/g,'')]});storeSave();
+ G.camp={scene:G.scene,ti:G.ti,sp:speaker,lt:luTalk};G.sid++;clearTimers();G.view='scene';$m('sceneView').hidden=false;Snd.go(G.snd||null);campDone()}
+function phoExit(proceed){
+ if(!PHO)return;var P=phoCleanup();
+ if(P.sample||!G.scene){showMap();return}
+ G.sid++;clearTimers();G.view='scene';$m('sceneView').hidden=false;Snd.go(G.snd||null);showCue()}
 
 /* ---------- 単語バトル(英語+発音記号 → 日本語を3択) ---------- */
 function startWords(){
@@ -2410,7 +2511,7 @@ function frame(ts){
  requestAnimationFrame(frame)}
 window.addEventListener('resize',function(){if(G.view==='map')drawMapBg()});
 showMap();
-if(/[?&]pho=1/.test(location.search))showPho(["fine","fountain","flight"],true);
+var phoQ=/[?&]pho=(\d)/.exec(location.search);if(phoQ){var PLAN={fw:["fine","fountain","flight"],mw:[{w:"fine",h:"hine"},{w:"flight",h:"hlight"},{w:"food",h:"hood"}],ss:["That is fine. Please bring it to the room."]};var sn=+phoQ[1];showPho({fw:PLAN.fw,mw:PLAN.mw,ss:PLAN.ss,stages:sn===1?[1,2,3]:[sn]},true)}
 requestAnimationFrame(frame);
 })();
 </script>
