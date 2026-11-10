@@ -174,14 +174,14 @@ body.big .cue .w{font-size:30px}body.big .cue .w.s{font-size:52px}
 #phoWin{margin-top:6px}
 #phoWin p{font-size:18px;line-height:1.45;min-height:0;margin:0 0 8px}
 .pchips{display:flex;gap:8px}
-.pchip{display:block;flex:1;text-align:center;border:0;border-radius:8px;padding:9px 0;font-size:22px;font-weight:800;line-height:1.2;background:#1a2142;color:var(--line)}
+.pchip{display:block;flex:1;text-align:center;border:0;border-radius:8px;padding:6px 0;font-size:18px;font-weight:800;line-height:1.2;background:#1a2142;color:var(--line)}
 .pchip.w3{flex:1.5}
 .phocard{flex:1;min-height:0;overflow:auto;box-sizing:border-box;background:var(--paper);color:var(--ink);border:3px solid var(--brown);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
 .phocard .lb{align-self:flex-start;background:var(--ink);color:var(--gold);border-radius:4px;padding:1px 8px;font-size:11px;font-weight:800}
-.phocard .big{display:flex;align-items:baseline;justify-content:center;gap:12px;flex-wrap:wrap}
-.phocard .big b{font-size:40px;font-weight:800;line-height:1.1;letter-spacing:.04em;color:#c8182a}
+.phocard .big{display:flex;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:0}
+.phocard .big b{font-size:clamp(44px,16vw,72px);overflow-wrap:anywhere;text-align:center;font-weight:800;line-height:1.1;letter-spacing:.04em;color:#c8182a}
 .phocard .big b i{font-style:normal;color:var(--ink)}
-.phocard .big>span{font-size:20px;font-weight:800;color:#1f46c8;font-family:"Noto Sans","Segoe UI",system-ui,sans-serif}
+.phocard .big>span{font-size:clamp(26px,9vw,40px);font-weight:800;color:#1f46c8;font-family:"Noto Sans","Segoe UI",system-ui,sans-serif}
 .phocard .sub2{font-size:12px;font-weight:800;color:#4a3a2a}
 .phocard .wl{display:flex;flex-wrap:wrap;gap:6px}
 .phocard .wb{background:#fff;color:var(--ink);border:2px solid var(--brown);border-radius:10px;padding:4px 10px;text-align:left}
@@ -211,7 +211,7 @@ body.big .cue .w{font-size:30px}body.big .cue .w.s{font-size:52px}
 @keyframes phnod{0%,100%{transform:translateY(0)}50%{transform:translateY(1px)}}
 @keyframes phdot{0%,100%{opacity:.2}50%{opacity:1}}
 @media (prefers-reduced-motion:reduce){#phoView.run .pl,#phoView.run .pr,.phostage .hero,.phostage .lulu{animation:none}}
-@media (max-height:700px){.phocard .big b{font-size:32px}#phoWin p{font-size:16px}.pchip{font-size:19px}}
+@media (max-height:700px){.phocard .big b{font-size:44px}.phocard .big>span{font-size:26px}#phoWin p{font-size:16px}.pchip{font-size:19px}}
 </style>
 
 <div id="app">
@@ -296,7 +296,7 @@ body.big .cue .w{font-size:30px}body.big .cue .w.s{font-size:52px}
 <path d="M223 70l-2 8M233 71v9M243 70l2 8" stroke="#9fb4e8" stroke-width="2" stroke-linecap="round"/>
 </g>
 </svg></div>
-    <div class="win" id="phoWin"><span class="who">Lulu 先生</span><span class="tag info">♪ リズムに のって！</span><p>うえの はを したの くちびるに ちょん♪ いきだけ「フッ！」</p><div class="pchips"><span class="pchip c1">フッ</span><span class="pchip c2">フッ</span><span class="pchip c3 w3">フード</span></div></div>
+    <div class="win" id="phoWin"><span class="who">Lulu 先生</span><span class="tag info">♪ リズムに のって！</span><p>うえの はを したの くちびるに ちょん♪ こえは ださずに、いきだけ「f」</p><div class="pchips"><span class="pchip c1">f</span><span class="pchip c2">f</span><span class="pchip c3 w3">food</span></div></div>
     <div class="phocard"><span class="lb" id="phoLb">れんしゅう 0/3</span><div class="big"><b id="phoWord"></b><span id="phoIpa"></span></div><div class="sub2">F の ことば（きみの カンペから）</div><div class="wl" id="phoWl"></div><div class="stat" id="phoStat"></div><div class="cnt" id="phoCnt"></div></div>
     <div class="row"><button id="phoDemo" class="btn sub" type="button" style="flex:1;min-height:56px;font-size:18px">ルルの おてほん</button><button id="phoAct" class="btn act" type="button" style="font-size:20px">おして よむ</button></div>
   </div>
@@ -433,9 +433,10 @@ var Snd=(function(){
  function bGain(){if(!bg){bg=AC.createGain();bg.gain.value=bvol;bg.connect(master)}return bg}
  function bn(f,t,d,type,v){var o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(v,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(bGain());o.start(t);o.stop(t+d+.05)}
  function bz(t,d,v,fr){var s=AC.createBufferSource();s.buffer=noiseBuf;var f=AC.createBiquadFilter();f.type='highpass';f.frequency.value=fr;var g=AC.createGain();g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);s.connect(f);f.connect(g);g.connect(bGain());s.start(t);s.stop(t+d+.02)}
+ function bf(t,d,v){var sr=AC.createBufferSource();sr.buffer=noiseBuf;var h=AC.createBiquadFilter();h.type='highpass';h.frequency.value=3000;var l=AC.createBiquadFilter();l.type='lowpass';l.frequency.value=9000;var g=AC.createGain();g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+.03);g.gain.exponentialRampToValueAtTime(.0001,t+d);sr.connect(h);h.connect(l);l.connect(g);g.connect(bGain());sr.start(t);sr.stop(t+d+.02)}
  function bPlay(k,t){
-  if(k===0||k===2){bz(t,.08,.5,3500);bn(k?440:392,t,.14,'triangle',.22);bn(98,t,.2,'sine',.35)}
-  else if(k===4){bz(t,.4,.5,2500);bn(523,t,.5,'triangle',.22);bn(130.8,t,.5,'sine',.3)}
+  if(k===0||k===2){bf(t,.22,.55);bn(k?440:392,t,.14,'triangle',.22);bn(98,t,.2,'sine',.35)}
+  else if(k===4){bf(t,.45,.5);bn(523,t,.5,'triangle',.22);bn(130.8,t,.5,'sine',.3)}
   else{bz(t,.03,.12,6000);if(k===6)bn(98,t,.2,'sine',.25)}}
  function bSched(){if(!AC||!bTm)return;while(bNext<AC.currentTime+.35){bPlay(bStep%8,bNext);bNext+=.3;bStep++}}
  function beatStop(){if(bTm){clearInterval(bTm);bTm=null}}
@@ -1753,7 +1754,7 @@ function phoRender(){
  var wd=$m('phoWord');wd.textContent='';var f=el('span',null,w.charAt(0)=== 'p'?'ph':'f');wd.appendChild(f);wd.appendChild(el('i',null,w.slice(w.charAt(0)==='p'?2:1)));
  $m('phoIpa').textContent=ip;var c3=document.querySelector('#phoView .pchip.c3');if(c3)c3.textContent=w;
  $m('phoLb').textContent='れんしゅう '+Math.min(PHO.ok+1,PHO.need)+'/'+PHO.need;
- var wl=$m('phoWl');wl.textContent='';PHO.words.forEach(function(x,i){var b=el('div','wb'+(i===PHO.idx?' cur':''));b.appendChild(el('b',null,x));b.appendChild(el('em',null,PHO.heard[x]?'きこえた→ '+PHO.heard[x]:''));wl.appendChild(b)});
+ var wl=$m('phoWl');wl.textContent='';wl.hidden=PHO.words.length<2;document.querySelector('#phoView .phocard .sub2').hidden=PHO.words.length<2;PHO.words.forEach(function(x,i){var b=el('div','wb'+(i===PHO.idx?' cur':''));b.appendChild(el('b',null,x));b.appendChild(el('em',null,PHO.heard[x]?'きこえた→ '+PHO.heard[x]:''));wl.appendChild(b)});
  $m('phoCnt').textContent=PHO.done?'できたよ！ ルルの つぎの れんしゅうへ':'できるまで つづけるよ ・ いま '+PHO.ok+'/'+PHO.need+' かい';
  var a=$m('phoAct');a.textContent=PHO.done?'つぎへ ✈':(PHO.listening?'きいてます…':((PREF.silent||!SR)?'できた！':'おして よむ'));
  var pp=document.querySelectorAll('#phoView .phobar .pp i');pp.forEach(function(i,n){i.classList.toggle('on',n===0)})}
@@ -1762,12 +1763,12 @@ function showPho(words,sample){
  PHO={words:words,ok:0,idx:0,heard:{},need:3,sample:!!sample,beat:false,listening:false,rec:null,done:false,bt:[]};
  $m('mapView').hidden=true;$m('sceneView').hidden=true;$m('boothView').hidden=true;$m('phoView').hidden=false;
  $m('phoDemo').textContent='ルルの おてほん';phoStat('');phoRender();phoRun(false);
- sayJp('エフの おとだよ。うえの はを、したの くちびるに、ちょん、って つけてね。そして、いきだけで、ふっ、って いってみよう。ルルと いっしょに やろうね。')}
+ sayJp('エフの おとだよ。うえの はを、したの くちびるに、ちょん、って つけてね。そして、こえは ださずに、いきだけを だしてみよう。')}
 function phoBeat(on){
  if(!PHO)return;PHO.bt.forEach(clearTimeout);PHO.bt=[];PHO.beat=on;$m('phoDemo').textContent=on?'とめる':'ルルの おてほん';
  if(!on){Snd.beatStop();phoRun(false);return}
  stopSay();Snd.beatStart();phoRun(false);setTimeout(function(){if(PHO&&PHO.beat)phoRun(true)},120);
- var bar=function(){if(!PHO||!PHO.beat)return;var ok=function(){return PHO&&PHO.beat&&!PHO.listening};PHO.bt.push(setTimeout(function(){if(ok())sayJp('フッ',null,1)},40));PHO.bt.push(setTimeout(function(){if(ok())sayJp('フッ',null,1)},640));PHO.bt.push(setTimeout(function(){if(ok())say(PHO.words[PHO.idx],.8,Math.min(2,PHO.pitch||PREF.pitch))},1250));PHO.bt.push(setTimeout(bar,2400))};bar()}
+ var bar=function(){if(!PHO||!PHO.beat)return;var ok=function(){return PHO&&PHO.beat&&!PHO.listening};PHO.bt.push(setTimeout(function(){if(ok())say(PHO.words[PHO.idx],.8,Math.min(2,PHO.pitch||PREF.pitch))},1250));PHO.bt.push(setTimeout(bar,2400))};bar()}
 function phoOk(){
  PHO.ok++;PHO.heard[PHO.words[PHO.idx]]='';PHO.idx=(PHO.idx+1)%PHO.words.length;
  if(PHO.ok>=PHO.need){PHO.done=true;phoBeat(false);phoStat('✓ つたわった '+PHO.ok+'/'+PHO.need,'ok');sayJp('できたね！ すごい！')}
