@@ -1707,7 +1707,7 @@ function campDone(){
  showCue();var st=panel.querySelector('.stat');if(st){st.className='stat ok';st.textContent='強化合宿おわり！ ヘルプが '+HELPMAX+'回 ふっかつ'}}
 
 /* ---------- せってい(どのページからでも ひらける) ---------- */
-var PREF={bgm:70,beat:80,voice:100,rate:1,silent:0,big:0},PREFKEY='kd_prefs_v1';
+var PREF={bgm:70,beat:80,voice:100,rate:1,silent:0,big:0,pitch:1.6},PREFKEY='kd_prefs_v1';
 try{var p0=JSON.parse(localStorage.getItem(PREFKEY)||'null');if(p0&&typeof p0==='object')Object.keys(PREF).forEach(function(k){if(typeof p0[k]==='number'&&isFinite(p0[k]))PREF[k]=p0[k]})}catch(e){}
 function prefSave(){try{localStorage.setItem(PREFKEY,JSON.stringify(PREF))}catch(e){}}
 function prefApply(){Snd.setBgm(PREF.bgm);Snd.setBeat(PREF.beat);document.body.classList.toggle('big',!!PREF.big)}
@@ -1726,7 +1726,7 @@ function openSettings(){
  var b=$m('setBody');b.textContent='';
  var s1=sSec('こえ');s1.appendChild(sToggle('こえを ださない モード','マイクを つかわず、ボタンで すすむ。電車や お店の中でも あそべる','silent'));b.appendChild(s1);
  var s2=sSec('おんりょう');s2.appendChild(sSlider('おんがく(BGM・まちの おと)','bgm'));s2.appendChild(sSlider('リズムの おと(強化合宿)','beat'));s2.appendChild(sSlider('ルル・あいての こえ','voice'));b.appendChild(s2);
- var s3=sSec('よみあげ');s3.appendChild(el('div','tt','よみあげの はやさ'));s3.appendChild(sSeg([['ゆっくり',.75],['ふつう',1],['はやい',1.2]],'rate'));b.appendChild(s3);
+ var s3=sSec('よみあげ');s3.appendChild(el('div','tt','よみあげの はやさ'));s3.appendChild(sSeg([['ゆっくり',.75],['ふつう',1],['はやい',1.2]],'rate'));s3.appendChild(el('div','tt','ルルの こえの たかさ'));s3.appendChild(sSeg([['ふつう',1.2],['かわいい',1.6],['もっと',2]],'pitch'));b.appendChild(s3);
  var s4=sSec('ひょうじ');s4.appendChild(el('div','tt','カンペの もじの おおきさ'));s4.appendChild(sSeg([['ふつう',0],['おおきい',1]],'big'));b.appendChild(s4);
  $m('setView').hidden=false;$m('setBack').focus()}
 function closeSettings(){$m('setView').hidden=true}
@@ -1741,8 +1741,9 @@ prefApply();
 var PHO=null,IPAMAP=null;
 function ipaOf(w){if(!IPAMAP){IPAMAP={};Object.keys(DLG).forEach(function(k){(DLG[k].words||[]).forEach(function(x){IPAMAP[String(x[0]).toLowerCase()]=x[1]})})}return IPAMAP[w]||''}
 function fWords(){var out=[],seen={};save.weak.forEach(function(w){String(w.c||'').replace(/\*/g,'').split(/\s+/).forEach(function(t){var k=t.toLowerCase().replace(/[^a-z']/g,'');if(k.length>1&&/^(f|ph)/.test(k)&&!seen[k]){seen[k]=1;out.push(k)}})});return out.slice(0,3)}
-function sayJp(text,done){var my=++sayTok,fired=false;function fin(){if(fired||my!==sayTok)return;fired=true;if(done)done()}
- try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(text);u.lang='ja-JP';u.rate=PREF.rate;u.pitch=1.4;u.volume=PREF.voice/100;u.onend=fin;u.onerror=fin;speechSynthesis.speak(u)}catch(e){}
+function jpVoice(){try{var v=speechSynthesis.getVoices().filter(function(x){return /^ja/i.test(x.lang)});if(!v.length)return null;var f=v.filter(function(x){return /kyoko|o-ren|nanami|haruka|sayaka|google|female|女/i.test(x.name)});return f[0]||v[0]}catch(e){return null}}
+function sayJp(text,done,quick){var my=++sayTok,fired=false;function fin(){if(fired||my!==sayTok)return;fired=true;if(done)done()}
+ try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(text);u.lang='ja-JP';var vo=jpVoice();if(vo)u.voice=vo;u.rate=(quick?1:.95)*PREF.rate;u.pitch=Math.min(2,PREF.pitch);u.volume=PREF.voice/100;u.onend=fin;u.onerror=fin;speechSynthesis.speak(u)}catch(e){}
  setTimeout(fin,text.length*260+2500)}
 function phoRun(on){var v=$m('phoView');v.classList.remove('run');if(on){void v.offsetWidth;v.classList.add('run')}}
 function phoStat(t,k){var s=$m('phoStat');s.className='stat'+(k?' '+k:'');s.textContent=t||''}
@@ -1760,12 +1761,12 @@ function showPho(words,sample){
  PHO={words:words,ok:0,idx:0,heard:{},need:3,sample:!!sample,beat:false,listening:false,rec:null,done:false,bt:[]};
  $m('mapView').hidden=true;$m('sceneView').hidden=true;$m('boothView').hidden=true;$m('phoView').hidden=false;
  $m('phoDemo').textContent='ルルの おてほん';phoStat('');phoRender();phoRun(true);
- sayJp('F の おと！ うえの はを、したの くちびるに ちょん。いきだけで、フッ！ ルルと いっしょに やるよ')}
+ sayJp('エフの おとだよ。うえの はを、したの くちびるに、ちょん、って つけてね。そして、いきだけで、ふっ、って いってみよう。ルルと いっしょに やろうね。')}
 function phoBeat(on){
  if(!PHO)return;PHO.bt.forEach(clearTimeout);PHO.bt=[];PHO.beat=on;$m('phoDemo').textContent=on?'とめる':'ルルの おてほん';
  if(!on){Snd.beatStop();return}
  stopSay();Snd.beatStart();phoRun(false);setTimeout(function(){if(PHO&&PHO.beat)phoRun(true)},120);
- var bar=function(){if(!PHO||!PHO.beat)return;PHO.bt.push(setTimeout(function(){if(PHO&&PHO.beat&&!PHO.listening)say(PHO.words[PHO.idx],.8,1.3)},1250));PHO.bt.push(setTimeout(bar,2400))};bar()}
+ var bar=function(){if(!PHO||!PHO.beat)return;var ok=function(){return PHO&&PHO.beat&&!PHO.listening};PHO.bt.push(setTimeout(function(){if(ok())sayJp('フッ',null,1)},40));PHO.bt.push(setTimeout(function(){if(ok())sayJp('フッ',null,1)},640));PHO.bt.push(setTimeout(function(){if(ok())say(PHO.words[PHO.idx],.8,Math.min(2,PHO.pitch||PREF.pitch))},1250));PHO.bt.push(setTimeout(bar,2400))};bar()}
 function phoOk(){
  PHO.ok++;PHO.heard[PHO.words[PHO.idx]]='';PHO.idx=(PHO.idx+1)%PHO.words.length;
  if(PHO.ok>=PHO.need){PHO.done=true;phoBeat(false);phoStat('✓ つたわった '+PHO.ok+'/'+PHO.need,'ok');sayJp('できたね！ すごい！')}
