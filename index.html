@@ -174,7 +174,7 @@ body.big .cue .w{font-size:30px}body.big .cue .w.s{font-size:52px}
 #phoWin{margin-top:6px}
 #phoWin p{font-size:18px;line-height:1.45;min-height:0;margin:0 0 8px}
 .pchips{display:flex;gap:8px}
-.pchip{display:block;flex:1;text-align:center;border:3px solid var(--line);border-radius:10px;padding:6px 0;font-size:22px;font-weight:800;line-height:1.2;background:var(--win);color:var(--line)}
+.pchip{display:block;flex:1;text-align:center;border:0;border-radius:8px;padding:9px 0;font-size:22px;font-weight:800;line-height:1.2;background:#1a2142;color:var(--line)}
 .pchip.w3{flex:1.5}
 .phocard{flex:1;min-height:0;overflow:auto;box-sizing:border-box;background:var(--paper);color:var(--ink);border:3px solid var(--brown);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
 .phocard .lb{align-self:flex-start;background:var(--ink);color:var(--gold);border-radius:4px;padding:1px 8px;font-size:11px;font-weight:800}
@@ -195,16 +195,16 @@ body.big .cue .w{font-size:30px}body.big .cue .w.s{font-size:52px}
 .phostage .hero{animation:phnod 1.2s steps(1,end) infinite}
 .phostage .lulu{animation:phbob .6s steps(1,end) infinite}
 .phostage .dot{animation:phdot .9s ease-in-out infinite}.phostage .d2{animation-delay:.3s}.phostage .d3{animation-delay:.6s}
-.phostage .pl{opacity:0}.phostage .pr{opacity:0}
+.phostage .pl{opacity:1}.phostage .pr{opacity:1}
 #phoView.run .pl{animation:phpuffL 2.4s ease-out infinite}
 #phoView.run .pr{animation:phpuffR 2.4s ease-out infinite}
 .pchip.c1,.pchip.c2,.pchip.c3{transition:none}
 #phoView.run .pchip.c1{animation:phlit1 2.4s steps(1,end) infinite}
 #phoView.run .pchip.c2{animation:phlit2 2.4s steps(1,end) infinite}
 #phoView.run .pchip.c3{animation:phlit3 2.4s steps(1,end) infinite}
-@keyframes phlit1{0%,18%{background:var(--gold);color:var(--ink);transform:scale(1.1)}19%,100%{background:var(--win);color:var(--line);transform:scale(1)}}
-@keyframes phlit2{0%,24%{background:var(--win);color:var(--line);transform:scale(1)}25%,43%{background:var(--gold);color:var(--ink);transform:scale(1.1)}44%,100%{background:var(--win);color:var(--line);transform:scale(1)}}
-@keyframes phlit3{0%,49%{background:var(--win);color:var(--line);transform:scale(1)}50%,90%{background:var(--gold);color:var(--ink);transform:scale(1.1)}91%,100%{background:var(--win);color:var(--line);transform:scale(1)}}
+@keyframes phlit1{0%,18%{background:var(--gold);color:var(--ink)}19%,100%{background:#1a2142;color:var(--line)}}
+@keyframes phlit2{0%,24%{background:#1a2142;color:var(--line)}25%,43%{background:var(--gold);color:var(--ink)}44%,100%{background:#1a2142;color:var(--line)}}
+@keyframes phlit3{0%,49%{background:#1a2142;color:var(--line)}50%,90%{background:var(--gold);color:var(--ink)}91%,100%{background:#1a2142;color:var(--line)}}
 @keyframes phpuffL{0%{opacity:0;transform:translate(5px,-6px)}6%{opacity:1}20%{opacity:0;transform:translate(-7px,9px)}100%{opacity:0;transform:translate(-7px,9px)}}
 @keyframes phpuffR{0%{opacity:0;transform:translate(-5px,-6px)}6%{opacity:1}20%{opacity:0;transform:translate(7px,9px)}100%{opacity:0;transform:translate(7px,9px)}}
 @keyframes phbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
@@ -296,7 +296,7 @@ body.big .cue .w{font-size:30px}body.big .cue .w.s{font-size:52px}
 <path d="M223 70l-2 8M233 71v9M243 70l2 8" stroke="#9fb4e8" stroke-width="2" stroke-linecap="round"/>
 </g>
 </svg></div>
-    <div class="win" id="phoWin"><span class="who">Lulu 先生</span><span class="tag info">♪ リズムに のって！</span><p>うえの はを したの くちびるに ちょん♪ いきだけ「フッ！」ルルと いっしょに いくよ〜</p><div class="pchips"><span class="pchip c1">フッ</span><span class="pchip c2">フッ</span><span class="pchip c3 w3">フード</span></div></div>
+    <div class="win" id="phoWin"><span class="who">Lulu 先生</span><span class="tag info">♪ リズムに のって！</span><p>うえの はを したの くちびるに ちょん♪ いきだけ「フッ！」</p><div class="pchips"><span class="pchip c1">フッ</span><span class="pchip c2">フッ</span><span class="pchip c3 w3">フード</span></div></div>
     <div class="phocard"><span class="lb" id="phoLb">れんしゅう 0/3</span><div class="big"><b id="phoWord"></b><span id="phoIpa"></span></div><div class="sub2">F の ことば（きみの カンペから）</div><div class="wl" id="phoWl"></div><div class="stat" id="phoStat"></div><div class="cnt" id="phoCnt"></div></div>
     <div class="row"><button id="phoDemo" class="btn sub" type="button" style="flex:1;min-height:56px;font-size:18px">ルルの おてほん</button><button id="phoAct" class="btn act" type="button" style="font-size:20px">おして よむ</button></div>
   </div>
@@ -1739,7 +1739,8 @@ prefApply();
 
 /* ---------- 強化合宿 ① フォニックス(F の おと): ルルが リズムで 引っぱる ---------- */
 var PHO=null,IPAMAP=null;
-function ipaOf(w){if(!IPAMAP){IPAMAP={};Object.keys(DLG).forEach(function(k){(DLG[k].words||[]).forEach(function(x){IPAMAP[String(x[0]).toLowerCase()]=x[1]})})}return IPAMAP[w]||''}
+var IPAF={fab:'/fæb/',family:'/ˈfæməli/',fast:'/fæst/',fifteen:'/ˌfɪfˈtiːn/',fifty:'/ˈfɪfti/',fine:'/faɪn/',five:'/faɪv/',flowers:'/ˈflaʊərz/',food:'/fuːd/','for':'/fɔːr/',friend:'/frend/',from:'/frʌm/',fun:'/fʌn/',photo:'/ˈfoʊtoʊ/',photos:'/ˈfoʊtoʊz/',fountain:'/ˈfaʊntən/'};
+function ipaOf(w){if(!IPAMAP){IPAMAP={};Object.keys(DLG).forEach(function(k){(DLG[k].words||[]).forEach(function(x){IPAMAP[String(x[0]).toLowerCase()]=x[1]})})}return IPAMAP[w]||IPAF[w]||''}
 function fWords(){var out=[],seen={};save.weak.forEach(function(w){String(w.c||'').replace(/\*/g,'').split(/\s+/).forEach(function(t){var k=t.toLowerCase().replace(/[^a-z']/g,'');if(k.length>1&&/^(f|ph)/.test(k)&&!seen[k]){seen[k]=1;out.push(k)}})});return out.slice(0,3)}
 function jpVoice(){try{var v=speechSynthesis.getVoices().filter(function(x){return /^ja/i.test(x.lang)});if(!v.length)return null;var f=v.filter(function(x){return /kyoko|o-ren|nanami|haruka|sayaka|google|female|女/i.test(x.name)});return f[0]||v[0]}catch(e){return null}}
 function sayJp(text,done,quick){var my=++sayTok,fired=false;function fin(){if(fired||my!==sayTok)return;fired=true;if(done)done()}
@@ -1760,11 +1761,11 @@ function showPho(words,sample){
  G.sid++;clearTimers();stopSay();Snd.go(null);G.view='pho';
  PHO={words:words,ok:0,idx:0,heard:{},need:3,sample:!!sample,beat:false,listening:false,rec:null,done:false,bt:[]};
  $m('mapView').hidden=true;$m('sceneView').hidden=true;$m('boothView').hidden=true;$m('phoView').hidden=false;
- $m('phoDemo').textContent='ルルの おてほん';phoStat('');phoRender();phoRun(true);
+ $m('phoDemo').textContent='ルルの おてほん';phoStat('');phoRender();phoRun(false);
  sayJp('エフの おとだよ。うえの はを、したの くちびるに、ちょん、って つけてね。そして、いきだけで、ふっ、って いってみよう。ルルと いっしょに やろうね。')}
 function phoBeat(on){
  if(!PHO)return;PHO.bt.forEach(clearTimeout);PHO.bt=[];PHO.beat=on;$m('phoDemo').textContent=on?'とめる':'ルルの おてほん';
- if(!on){Snd.beatStop();return}
+ if(!on){Snd.beatStop();phoRun(false);return}
  stopSay();Snd.beatStart();phoRun(false);setTimeout(function(){if(PHO&&PHO.beat)phoRun(true)},120);
  var bar=function(){if(!PHO||!PHO.beat)return;var ok=function(){return PHO&&PHO.beat&&!PHO.listening};PHO.bt.push(setTimeout(function(){if(ok())sayJp('フッ',null,1)},40));PHO.bt.push(setTimeout(function(){if(ok())sayJp('フッ',null,1)},640));PHO.bt.push(setTimeout(function(){if(ok())say(PHO.words[PHO.idx],.8,Math.min(2,PHO.pitch||PREF.pitch))},1250));PHO.bt.push(setTimeout(bar,2400))};bar()}
 function phoOk(){
@@ -1777,7 +1778,7 @@ function phoListen(){
  if(PHO.beat)phoBeat(false);PHO.rec=r;PHO.listening=true;act.classList.add('down');phoRun(false);phoRender();phoStat('');
  r.lang='en-US';r.interimResults=true;r.maxAlternatives=3;r.continuous=false;var got=false,last='',err='';
  function done(txt){
-  if(!PHO||PHO.rec!==r)return;PHO.rec=null;PHO.listening=false;act.classList.remove('down');phoRun(true);
+  if(!PHO||PHO.rec!==r)return;PHO.rec=null;PHO.listening=false;act.classList.remove('down');phoRun(false);
   if(err==='not-allowed'||err==='service-not-allowed'){phoRender();phoStat('マイクが許可されていません','ng');return}
   if(err==='audio-capture'){phoRender();phoStat('マイクが見つかりません','ng');return}
   if(err==='network'){phoRender();phoStat('ネットワークエラー','ng');return}
@@ -1787,7 +1788,7 @@ function phoListen(){
  r.onresult=function(ev){if(!PHO||PHO.rec!==r)return;var rs=ev.results[ev.results.length-1],alt=rs[0];if(rs.isFinal){got=true;done(alt.transcript)}else{last=alt.transcript}};
  r.onerror=function(ev){err=(ev&&ev.error)||'error'};
  r.onend=function(){Snd.duck(0);if(PHO&&PHO.rec===r)done(got?'':last)};
- try{Snd.duck(1);r.start();setTimeout(function(){if(PHO&&PHO.rec===r){try{r.stop()}catch(e){}}},12000)}catch(e){Snd.duck(0);PHO.rec=null;PHO.listening=false;act.classList.remove('down');phoRun(true);phoRender();phoStat('マイクが使えません','ng')}}
+ try{Snd.duck(1);r.start();setTimeout(function(){if(PHO&&PHO.rec===r){try{r.stop()}catch(e){}}},12000)}catch(e){Snd.duck(0);PHO.rec=null;PHO.listening=false;act.classList.remove('down');phoRun(false);phoRender();phoStat('マイクが使えません','ng')}}
 $m('phoAct').addEventListener('click',function(){
  if(!PHO)return;if(PHO.done){phoExit(true);return}
  if(PHO.listening){try{PHO.rec&&PHO.rec.stop()}catch(e){}return}
