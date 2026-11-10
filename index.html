@@ -252,7 +252,7 @@ body.big .cue .w{font-size:30px}body.big .cue .w.s{font-size:52px}
     <div id="pips" aria-label="進み具合"></div>
     <div id="map"><svg id="paths" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg></div>
     <div id="modeBar" class="modebar"></div>
-    <button id="boothBtn" class="boothbtn" type="button">✈ 羽田空港 発音教室</button>
+    <button id="boothBtn" class="boothbtn" type="button">✈ 強化合宿</button>
   </div>
   <div id="boothView" hidden>
     <div class="mapbar"><h1>羽田空港 発音教室<small id="boothSub"></small></h1><button id="boothBack" class="btn sub" type="button" aria-label="マップにもどる">✕</button></div>
@@ -1672,8 +1672,8 @@ function boothPractice(tokens,key){
   if(listening){try{if(rec)rec.stop()}catch(e){}return}
   listen()});
  act.addEventListener('contextmenu',function(e){e.preventDefault()})}
-function refreshBoothBtn(){var n=boothCount();$m('boothBtn').textContent='✈ 羽田空港 発音教室  ・ 言えなかった単語 '+n+'語'}
-$m('boothBtn').addEventListener('click',function(){if(G.view==='map')showBooth()});
+function refreshBoothBtn(){var n=boothCount();$m('boothBtn').textContent='✈ 強化合宿 ・ 言えなかった単語 '+n+'語'}
+$m('boothBtn').addEventListener('click',function(){if(G.view==='map')startCamp()});
 $m('boothBack').addEventListener('click',function(){showMap()});
 
 function syl(w){return Math.max(1,(w.match(/[aeiouy]+/gi)||[]).length)}
@@ -1782,12 +1782,12 @@ function ipaOf(t){
  return ''}
 function fWords(){var out=[],seen={};save.weak.forEach(function(w){String(w.c||'').replace(/\*/g,'').split(/\s+/).forEach(function(t){var k=t.toLowerCase().replace(/[^a-z']/g,'');if(k.length>1&&/^(f|ph)/.test(k)&&!seen[k]){seen[k]=1;out.push(k)}})});return out.slice(0,3)}
 function missWords(skip){var out=[];try{boothStats().words.forEach(function(e){var k=String(e.w).toLowerCase();if(k.length>1&&out.length<3&&skip.indexOf(k)<0&&e.m>0){var top='',n=0;Object.keys(e.hs||{}).forEach(function(h){if(e.hs[h]>n){n=e.hs[h];top=h}});out.push({w:k,h:top==='(聞こえず)'?'':top})}})}catch(e){}return out}
-function weakSents(){var out=save.weak.slice(0,2).map(function(w){return String(w.c||'').replace(/\*/g,'')}).filter(Boolean);if(!out.length&&G.scene){var cur=G.scene.turns[G.ti];if(cur)out=[cueText(cur.cue)]}return out}
+function weakSents(){var out=save.weak.slice(0,2).map(function(w){return String(w.c||'').replace(/\*/g,'')}).filter(Boolean);if(!out.length&&G.scene&&G.view!=='map'){var cur=G.scene.turns[G.ti];if(cur)out=[cueText(cur.cue)]}return out}
 function startCamp(){
- var fw=fWords(),mw=missWords(fw),ss=weakSents(),st=[];
+ var fromMap=G.view==='map',fw=fWords(),mw=missWords(fw),ss=weakSents(),st=[];
  if(fw.length)st.push(1);if(mw.length)st.push(2);if(ss.length)st.push(3);
- if(!st.length){startCampCore();return}
- showPho({fw:fw,mw:mw,ss:ss,stages:st},false)}
+ if(!st.length){if(fromMap||!G.scene){showPho({fw:['fine','flight','food'],mw:[],ss:[],stages:[1],fromMap:fromMap},false);return}startCampCore();return}
+ showPho({fw:fw,mw:mw,ss:ss,stages:st,fromMap:fromMap},false)}
 function phoRun(on){var v=$m('phoView');v.classList.remove('run');if(on){void v.offsetWidth;v.classList.add('run')}}
 function phoStat(t,k){var s=$m('phoStat');if(!s)return;s.className='stat'+(k?' '+k:'');s.textContent=t||''}
 var VOWC='aeiouɑæʌəɔɪʊɛɜ';
@@ -1920,12 +1920,12 @@ function phoNext(){
 function phoCleanup(){var P=PHO;P.tk++;phoBeatOff();try{if(P.rec)P.rec.abort()}catch(e){}Snd.duck(0);stopSay();phoRun(false);$m('phoView').hidden=true;PHO=null;return P}
 function phoFinish(){
  var P=phoCleanup();
- if(P.sample||!G.scene){showMap();return}
+ if(P.sample||P.plan.fromMap||!G.scene){showMap();return}
  var done={};P.plan.ss.forEach(function(c){done[c]=1});save.weak=save.weak.filter(function(w){return !done[String(w.c||'').replace(/\*/g,'')]});storeSave();
  G.camp={scene:G.scene,ti:G.ti,sp:speaker,lt:luTalk};G.sid++;clearTimers();G.view='scene';$m('sceneView').hidden=false;Snd.go(G.snd||null);campDone()}
 function phoExit(proceed){
  if(!PHO)return;var P=phoCleanup();
- if(P.sample||!G.scene){showMap();return}
+ if(P.sample||P.plan.fromMap||!G.scene){showMap();return}
  G.sid++;clearTimers();G.view='scene';$m('sceneView').hidden=false;Snd.go(G.snd||null);showCue()}
 
 /* ---------- 単語バトル(英語+発音記号 → 日本語を3択) ---------- */
