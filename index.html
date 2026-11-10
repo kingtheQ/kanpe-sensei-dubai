@@ -1695,15 +1695,15 @@ function startCamp(){var fw=fWords();if(fw.length){showPho(fw,false);return}star
 function startCampCore(){
  var S0=G.scene,cur=S0.turns[G.ti],list=save.weak.slice();if(!list.length&&cur)list=[{c:cur.cue,j:cur.cueJp||''}];
  G.sid++;clearTimers();stopSay();luHelp=false;
- var cx=S0.d&&S0.d.story?Object.assign({},S0.ctx,{who:'Coach',sp:null}):null;
- G.camp={scene:S0,ti:G.ti};
- G.scene=Object.assign({},S0,{anim:null,camp:1,pitch:1.05,turns:list.map(function(w){var o={npc:'Say it again. Slowly, and clearly.',npcJp:'もういちど。ゆっくり、はっきり。',cue:w.c,cueJp:w.j,pitch:1.05};if(cx)o.ctx=cx;return o})});
- G.ti=0;G.tries=0;clearPanel();speaker=cx?null:speaker;setMsgInstant('強化合宿 '+list.length+'もん','Coach');
+ var cx=Object.assign({},S0.ctx||{hero:OUT.hero,lulu:OUT.lulu,gold:OUT.gold},{who:'Lulu 先生',sp:'lulu'});
+ G.camp={scene:S0,ti:G.ti,sp:speaker,lt:luTalk};
+ G.scene=Object.assign({},S0,{anim:null,camp:1,pitch:1.35,turns:list.map(function(w){var o={npc:'Say it again. Slowly, and clearly.',npcJp:'もういちど。ゆっくり、はっきり。',cue:w.c,cueJp:w.j,pitch:1.35};o.ctx=cx;return o})});
+ G.ti=0;G.tries=0;clearPanel();speaker=null;luTalk=true;setMsgInstant('強化合宿 '+list.length+'もん','Lulu 先生');
  later(900,npcTurn)}
 function campDone(){
  var sv=G.camp;G.camp=null;save.help=HELPMAX;storeSave();
  G.sid++;clearTimers();stopSay();G.scene=sv.scene;G.ti=sv.ti;G.tries=0;
- var T=G.scene.turns[G.ti];if(T.ctx)applyCtx(T.ctx);
+ var T=G.scene.turns[G.ti];if(T.ctx)applyCtx(T.ctx);else{speaker=sv.sp;luTalk=sv.lt;spX=360}
  setMsgInstant(T.npc,T.ctx?T.ctx.who:G.scene.d.who);spSay=false;
  showCue();var st=panel.querySelector('.stat');if(st){st.className='stat ok';st.textContent='強化合宿おわり！ ヘルプが '+HELPMAX+'回 ふっかつ'}}
 
