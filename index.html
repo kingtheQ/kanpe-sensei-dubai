@@ -467,13 +467,14 @@ var Snd=(function(){
  function bn(f,t,d,type,v){var o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(v,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(bGain());o.start(t);o.stop(t+d+.05)}
  function bz(t,d,v,fr){var s=AC.createBufferSource();s.buffer=noiseBuf;var f=AC.createBiquadFilter();f.type='highpass';f.frequency.value=fr;var g=AC.createGain();g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);s.connect(f);f.connect(g);g.connect(bGain());s.start(t);s.stop(t+d+.02)}
  function bf(t,d,v){var sr=AC.createBufferSource();sr.buffer=noiseBuf;var h=AC.createBiquadFilter();h.type='highpass';h.frequency.value=3000;var l=AC.createBiquadFilter();l.type='lowpass';l.frequency.value=9000;var g=AC.createGain();g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+.03);g.gain.exponentialRampToValueAtTime(.0001,t+d);sr.connect(h);h.connect(l);l.connect(g);g.connect(bGain());sr.start(t);sr.stop(t+d+.02)}
+ var bFric=true;
  function bPlay(k,t){
-  if(k===0||k===2){bf(t,.22,.55);bn(k?440:392,t,.14,'triangle',.22);bn(98,t,.2,'sine',.35)}
-  else if(k===4){bf(t,.45,.5);bn(523,t,.5,'triangle',.22);bn(130.8,t,.5,'sine',.3)}
+  if(k===0||k===2){if(bFric)bf(t,.22,.55);bn(k?440:392,t,.14,'triangle',.22);bn(98,t,.2,'sine',.35)}
+  else if(k===4){if(bFric)bf(t,.45,.5);bn(523,t,.5,'triangle',.22);bn(130.8,t,.5,'sine',.3)}
   else{bz(t,.03,.12,6000);if(k===6)bn(98,t,.2,'sine',.25)}}
  function bSched(){if(!AC||!bTm)return;while(bNext<AC.currentTime+.35){bPlay(bStep%8,bNext);bNext+=.3;bStep++}}
  function beatStop(){if(bTm){clearInterval(bTm);bTm=null}}
- function beatStart(){beatStop();if(!on||!init())return false;try{AC.resume()}catch(e){}bStep=0;bNext=AC.currentTime+.12;bTm=setInterval(bSched,100);bSched();return true}
+ function beatStart(fr){bFric=fr!==false;beatStop();if(!on||!init())return false;try{AC.resume()}catch(e){}bStep=0;bNext=AC.currentTime+.12;bTm=setInterval(bSched,100);bSched();return true}
  function setBgm(v){mv=.85*v/70;if(AC&&master)master.gain.value=mv}
  function setBeat(v){bvol=v/100;if(bg)bg.gain.value=bvol}
  document.addEventListener('visibilitychange',function(){if(document.hidden)beatStop()});
@@ -1783,11 +1784,69 @@ function ipaOf(t){
 function fWords(){var out=[],seen={};save.weak.forEach(function(w){String(w.c||'').replace(/\*/g,'').split(/\s+/).forEach(function(t){var k=t.toLowerCase().replace(/[^a-z']/g,'');if(k.length>1&&/^(f|ph)/.test(k)&&!seen[k]){seen[k]=1;out.push(k)}})});return out.slice(0,3)}
 function missWords(skip){var out=[];try{boothStats().words.forEach(function(e){var k=String(e.w).toLowerCase();if(k.length>1&&out.length<3&&skip.indexOf(k)<0&&e.m>0){var top='',n=0;Object.keys(e.hs||{}).forEach(function(h){if(e.hs[h]>n){n=e.hs[h];top=h}});out.push({w:k,h:top==='(聞こえず)'?'':top})}})}catch(e){}return out}
 function weakSents(){var out=save.weak.slice(0,2).map(function(w){return String(w.c||'').replace(/\*/g,'')}).filter(Boolean);if(!out.length&&G.scene&&G.view!=='map'){var cur=G.scene.turns[G.ti];if(cur)out=[cueText(cur.cue)]}return out}
+/* ---- 言えなかった単語から「その人の苦手な音」を選ぶ ---- */
+var SND={
+ f:{k:'f',re:/ph|f/,ipa:/f/,chip:'f',def:['fine','flight','food']},
+ v:{k:'v',re:/v/,ipa:/v/,chip:'v',def:['very','visa','five']},
+ th:{k:'th',re:/th/,ipa:/[θð]/,chip:'th',def:['think','thank','this']},
+ l:{k:'l',re:/l/,ipa:/l/,chip:'l',def:['light','lunch','left']},
+ r:{k:'r',re:/r/,ipa:/r/,chip:'r',def:['right','room','red']}};
+var SNDORDER=['f','th','l','r','v'];
+function hasSnd(id,w){var ip=ipaOf(w),d=SND[id];if(ip)return d.ipa.test(ip.slice(1,-1));return d.re.test(w)}
+function pickLesson(){
+ var sc={},ws={};SNDORDER.forEach(function(k){sc[k]=0;ws[k]=[]});
+ try{boothStats().words.forEach(function(e){var w=String(e.w).toLowerCase();if(w.length<2)return;var top='',n=0;Object.keys(e.hs||{}).forEach(function(h){if(e.hs[h]>n){n=e.hs[h];top=h}});if(top==='(聞こえず)')top='';
+  SNDORDER.forEach(function(k){if(hasSnd(k,w)){var lack=top&&!SND[k].re.test(top);sc[k]+=e.m*(lack?2:1);ws[k].push(w)}})})}catch(e){}
+ var best='',bs=0;SNDORDER.forEach(function(k){if(sc[k]>bs){bs=sc[k];best=k}});
+ if(!best)return null;
+ var w=ws[best].slice(0,3);SND[best].def.forEach(function(d){if(w.length<3&&w.indexOf(d)<0)w.push(d)});
+ return {snd:best,words:w}}
+var SVGF=null;
+function phoLipsSet(id){
+ var v=$m('phoLips');if(SVGF===null)SVGF=v.innerHTML;
+ if(id==='f'){v.innerHTML=SVGF;return}
+ var T=function(x,y,sz,col,t){return '<text x="'+x+'" y="'+y+'" text-anchor="middle" font-size="'+sz+'" font-weight="800" fill="'+col+'" font-family="\'M PLUS Rounded 1c\',sans-serif">'+t+'</text>'};
+ var head=function(e,a,b,j,c,d){return T(80,26,12,'#c8182a',e)+T(80,40,9,'#4a3a2a',a)+T(80,52,9,'#4a3a2a',b)+T(233,26,12,'#6b7390',j)+T(233,40,9,'#6b7390',c)+T(233,52,9,'#6b7390',d)+'<path d="M156 34v92" stroke="#c9c4b4" stroke-width="1.2" stroke-dasharray="3 3"/>'};
+ var INK='#10131f',DK='#5a1a2a',TG='#f0788a';
+ var side=function(tx,ty,kind,gray){
+  var g='<g transform="translate('+tx+' '+ty+') scale(.8)"'+(gray?' opacity=".8"':'')+'>';
+  g+='<path d="M14 26Q40 10 80 8Q112 8 124 22L124 74Q80 84 14 62Z" fill="'+DK+'" stroke="'+INK+'" stroke-width="1.5"/>';
+  g+='<path d="M24 24Q30 20 34 26L30 30Z" fill="#e8a09a"/>';
+  var tongue={L:'M124 74L124 46Q100 44 78 46Q52 46 36 36Q28 31 27 28Q24 36 30 46Q40 60 70 66Q100 72 124 74Z',
+   R:'M124 74L124 44Q104 40 92 34Q78 26 64 28Q56 28 58 36Q62 46 52 54Q46 60 64 65Q98 72 124 74Z',
+   N:'M124 74L124 46Q100 44 78 46Q52 46 38 40Q32 38 31 34Q28 40 33 48Q42 60 70 66Q100 72 124 74Z'}[kind];
+  g+='<path d="'+tongue+'" fill="'+TG+'" stroke="'+INK+'" stroke-width="1.5" stroke-linejoin="round"/>';
+  g+='<rect x="12" y="26" width="8" height="15" rx="2" fill="#fff" stroke="'+INK+'" stroke-width="1.2"/><rect x="12" y="48" width="8" height="13" rx="2" fill="#fff" stroke="'+INK+'" stroke-width="1.2"/>';
+  if(kind==='L')g+='<circle cx="27" cy="27" r="6" fill="none" stroke="#ffdd33" stroke-width="2.5"/>';
+  if(kind==='R')g+='<path d="M52 14L84 14M77 9L84 14L77 19" fill="none" stroke="#ffdd33" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
+  return g+'</g>'},
+ front=function(tx,ty,kind,gray){
+  var g='<g transform="translate('+tx+' '+ty+') scale(.8)"'+(gray?' opacity=".8"':'')+'>';
+  g+='<path d="M10 44Q65 6 120 44Q65 82 10 44Z" fill="'+DK+'" stroke="'+INK+'" stroke-width="1.5"/>';
+  if(kind==='th'){
+   g+='<path d="M42 48Q65 38 88 48Q84 72 65 74Q46 72 42 48Z" fill="'+TG+'" stroke="'+INK+'" stroke-width="1.5" stroke-linejoin="round"/>';
+   g+='<path d="M34 30Q65 22 96 30L94 44Q65 38 36 44Z" fill="#fff" stroke="'+INK+'" stroke-width="1.2"/><path d="M62 24V42" stroke="#cfc9b8"/>';
+  }else{
+   g+='<path d="M34 30Q65 22 96 30L94 46L36 46Z" fill="#fff" stroke="'+INK+'" stroke-width="1.2"/><path d="M36 46L94 46L92 60Q65 66 38 60Z" fill="#fff" stroke="'+INK+'" stroke-width="1.2"/><path d="M62 24V58" stroke="#cfc9b8"/>';
+  }
+  return g+'</g>'};
+ var ar=function(d){return '<path d="'+d+'" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="'+d+'" fill="none" stroke="#2f7ae5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'};
+ var out='';
+ if(id==='th'){
+  out=head('えいごの TH','したの さきを','はで かるく はさむ','にほんごの「さ」','したは くちの なか','（はの うしろ）')+front(28,56,'th',0)+ar('M48 100L34 116M34 110L34 116L40 114')+ar('M112 100L126 116M126 110L126 116L120 114')+front(181,56,'sa',1);
+ }else if(id==='l'){
+  out=head('えいごの L','したの さきを','はの うらに ちょん','にほんごの「ら」','したを さっと はじく','（いっしゅん）')+side(28,54,'L',0)+side(181,54,'N',1);
+ }else if(id==='r'){
+  out=head('えいごの R','したを うしろへ まるめる','どこにも さわらない','にほんごの「ら」','したを さっと はじく','（はの うらに ちょん）')+side(28,54,'R',0)+side(181,54,'N',1);
+ }else if(id==='v'){
+  out=SVGF.replace('えいごの F','えいごの V').replace('うえの はを','はを したの くちびるに').replace('したの くちびるに ちょん','ちょん＋こえを だして ブルル♪').replace('にほんごの「ふ」','にほんごの「ぶ」').replace('くちびるを まるめる','くちびるを とじる');
+ }
+ v.innerHTML=out}
 function startCamp(){
- var fromMap=G.view==='map',fw=fWords(),mw=missWords(fw),ss=weakSents(),st=[];
+ var fromMap=G.view==='map',ls=pickLesson(),fw=ls?ls.words:[],mw=missWords(fw),ss=weakSents(),st=[];
  if(fw.length)st.push(1);if(mw.length)st.push(2);if(ss.length)st.push(3);
- if(!st.length){if(fromMap||!G.scene){showPho({fw:['fine','flight','food'],mw:[],ss:[],stages:[1],fromMap:fromMap},false);return}startCampCore();return}
- showPho({fw:fw,mw:mw,ss:ss,stages:st,fromMap:fromMap},false)}
+ if(!st.length){if(fromMap||!G.scene){showPho({fw:SND.f.def.slice(),snd:'f',mw:[],ss:[],stages:[1],fromMap:fromMap},false);return}startCampCore();return}
+ showPho({fw:fw,snd:ls?ls.snd:'f',mw:mw,ss:ss,stages:st,fromMap:fromMap},false)}
 function phoRun(on){var v=$m('phoView');v.classList.remove('run');if(on){void v.offsetWidth;v.classList.add('run')}}
 function phoStat(t,k){var s=$m('phoStat');if(!s)return;s.className='stat'+(k?' '+k:'');s.textContent=t||''}
 var VOWC='aeiouɑæʌəɔɪʊɛɜ';
@@ -1831,7 +1890,7 @@ function phoRender(){
   card.appendChild(phoLab('ことば '+(PHO.idx+1)+'/'+(PHO.stage===1?PHO.words.length:PHO.mw.length)+'  ・  '+PHO.need+'かい いってね'));
   card.appendChild(reps());
   if(PHO.stage===1){
-   var ip=ipaOf(w),big=el('div','big'),b=el('b');b.appendChild(el('span',null,w.charAt(0)==='p'?'ph':'f'));b.appendChild(el('i',null,w.slice(w.charAt(0)==='p'?2:1)));big.appendChild(b);if(ip)big.appendChild(el('span',null,ip));card.appendChild(big);
+   var ip=ipaOf(w),big=el('div','big'),b=el('b'),mm=SND[PHO.snd||'f'].re.exec(w)||{index:0,0:w.charAt(0)};if(mm.index)b.appendChild(el('i',null,w.slice(0,mm.index)));b.appendChild(el('span',null,mm[0]));if(w.length>mm.index+mm[0].length)b.appendChild(el('i',null,w.slice(mm.index+mm[0].length)));big.appendChild(b);if(ip)big.appendChild(el('span',null,ip));card.appendChild(big);
   }else{
    var al=el('div','atts');PHO.atts.filter(function(x){return x.w===w}).slice(-3).reverse().forEach(function(x){var r=el('div','att'+(x.ok?' good':''));r.appendChild(el('span','an','#'+x.n));var h=el('span','ah');h.appendChild(x.ok?document.createTextNode(x.h):el('b',null,x.h||'…'));r.appendChild(h);r.appendChild(el('span','bd '+(x.ok?'ok':(x.p>=70?'mid':'ng')),x.ok?'✓ つたわった':(x.p+'% '+(x.p>=70?'7わり以上':'7わり未満'))));al.appendChild(r)});card.appendChild(al)}
   var st=el('div','stat','');st.id='phoStat';card.appendChild(st);
@@ -1845,7 +1904,7 @@ function showPho(plan,sample){
 function phoStage(){
  var P=PHO;P.stage=P.stages[P.si];P.idx=0;P.fails=0;P.atts=[];P.res=null;P.beat=false;
  P.need=P.stage===3?1:3;
- if(P.stage===1)P.words=P.plan.fw;else if(P.stage===2)P.mw=P.plan.mw;else P.sents=P.plan.ss;
+ if(P.stage===1){P.words=P.plan.fw;P.snd=P.plan.snd||'f';phoLipsSet(P.snd);var cc=document.querySelectorAll('#phoView .pchip');if(cc[0])cc[0].textContent=SND[P.snd].chip;if(cc[1])cc[1].textContent=SND[P.snd].chip}else if(P.stage===2)P.mw=P.plan.mw;else P.sents=P.plan.ss;
  phoItemStart()}
 /* ルルの おてほん(自動) → Repeat after me → きみが くりかえす(自動でマイク) */
 function phoGuard(){var t=PHO.tk;return function(fn){return function(){if(PHO&&PHO.tk===t)fn.apply(this,arguments)}}}
@@ -1862,7 +1921,7 @@ function phoItemStart(){
  }),350)}
 function phoBeatOff(){if(!PHO)return;PHO.bt.forEach(clearTimeout);PHO.bt=[];if(PHO.beat){PHO.beat=false;Snd.beatStop()}phoRun(false)}
 function phoDemoBeat(cb){
- var P=PHO;phoBeatOff();P.beat=true;stopSay();Snd.beatStart();phoRun(false);
+ var P=PHO;phoBeatOff();P.beat=true;stopSay();Snd.beatStart(!P.plan.snd||P.plan.snd==='f');phoRun(false);
  P.bt.push(setTimeout(function(){if(PHO&&PHO.beat)phoRun(true)},120));
  var bar=function(){if(!PHO||!PHO.beat)return;P.bt.push(setTimeout(function(){if(PHO&&PHO.beat)luSayRaw(phoCur(),.8)},1250));P.bt.push(setTimeout(bar,2400))};bar();
  P.bt.push(setTimeout(function(){if(!PHO||!PHO.beat)return;phoBeatOff();if(cb)cb()},4900))}
@@ -2534,7 +2593,7 @@ function frame(ts){
  requestAnimationFrame(frame)}
 window.addEventListener('resize',function(){if(G.view==='map')drawMapBg()});
 setMode('arr');
-var phoQ=/[?&]pho=(\d)/.exec(location.search);if(phoQ){var PLAN={fw:["fine","fountain","flight"],mw:[{w:"fine",h:"hine"},{w:"flight",h:"hlight"},{w:"food",h:"hood"}],ss:["That is fine. Please bring it to the room."]};var sn=+phoQ[1];showPho({fw:PLAN.fw,mw:PLAN.mw,ss:PLAN.ss,stages:sn===1?[1,2,3]:[sn]},true)}
+var phoQ=/[?&]pho=(\d)/.exec(location.search);if(phoQ){var PLAN={fw:["fine","fountain","flight"],mw:[{w:"fine",h:"hine"},{w:"flight",h:"hlight"},{w:"food",h:"hood"}],ss:["That is fine. Please bring it to the room."]};var sn=+phoQ[1],sq=/[&?]snd=(\w+)/.exec(location.search),sd=sq&&SND[sq[1]]?sq[1]:'f';if(sd!=='f')PLAN.fw=SND[sd].def.slice();showPho({fw:PLAN.fw,snd:sd,mw:PLAN.mw,ss:PLAN.ss,stages:sn===1?[1,2,3]:[sn]},true)}
 requestAnimationFrame(frame);
 })();
 </script>
