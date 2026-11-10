@@ -1309,7 +1309,7 @@ var CROWD=[],rnd=rng(20261106);
 
 /* ---------- マップ上の位置とアイコン(ターミナル3の見取り図ふう) ---------- */
 var PLACES=PLACES_AIR,MODE='air';
-var MAPPOS={info:{x:20,y:16,ico:'🚆'},cafe:{x:72,y:26,ico:'🥐'},s34:{x:28,y:44,ico:'🥙'},costa:{x:74,y:60,ico:'☕'},ahlan:{x:70,y:90,ico:'🛋️'},hall:{x:26,y:76,ico:'✈️'}};
+var MAPPOS={info:{x:20,y:16,ico:'🚆'},cafe:{x:72,y:26,ico:'🥐'},s34:{x:28,y:44,ico:'🥙'},costa:{x:74,y:60,ico:'☕'},ahlan:{x:26,y:76,ico:'🛋️'},hall:{x:70,y:90,ico:'✈️'}};
 var PBY={};PLACES_AIR.forEach(function(p){PBY[p.id]=p;p.x=MAPPOS[p.id].x;p.y=MAPPOS[p.id].y;p.ico=MAPPOS[p.id].ico});PLACES_CITY.forEach(function(p){PBY[p.id]=p});
 var TOTALV=PLACES.reduce(function(a,p){return a+p.v.length},0);
 
@@ -2510,8 +2510,8 @@ BGS.lost=function(){airWall('#ece6d6');floorAir('#d8d0bc','#c4bca6');signBox(90,
  R('#7a5a30',150,80,150,18);R('#d6c090',146,78,158,4);R('#14141a',250,64,14,14);R('#c8402a',252,66,6,4)};
 
 /* ---------- 4つのモード(空港⇄到着⇄街⇄出発) ---------- */
-var MODES={air:{p:PLACES_AIR,b:'✈ 空港',h:'ドバイ国際空港 ターミナル3<small>コンコースB・カンペ先生 試作</small>',snd:'map'},
- arr:{p:PLACES_ARR,b:'🛬 到着',h:'ドバイに到着<small>入国審査からタクシーまで</small>',snd:'map'},
+var MODES={arr:{p:PLACES_ARR,b:'🛬 到着',h:'ドバイに到着<small>入国審査からタクシーまで</small>',snd:'map'},
+ air:{p:PLACES_AIR,b:'✈ 空港',h:'ドバイ国際空港 ターミナル3<small>コンコースB・カンペ先生 試作</small>',snd:'map'},
  city:{p:PLACES_CITY,b:'🏙 街',h:'ドバイの街<small>バスで出かけよう・実在の場所</small>',snd:'city'},
  dep:{p:PLACES_DEP,b:'🛫 出発',h:'ドバイから出発<small>チェックインから機内まで</small>',snd:'map'}};
 function refreshCityBtn(){
@@ -2533,7 +2533,7 @@ function frame(ts){
   drawFront();if(A0&&A0.fg)A0.fg(p0,S0)}
  requestAnimationFrame(frame)}
 window.addEventListener('resize',function(){if(G.view==='map')drawMapBg()});
-showMap();
+setMode('arr');
 var phoQ=/[?&]pho=(\d)/.exec(location.search);if(phoQ){var PLAN={fw:["fine","fountain","flight"],mw:[{w:"fine",h:"hine"},{w:"flight",h:"hlight"},{w:"food",h:"hood"}],ss:["That is fine. Please bring it to the room."]};var sn=+phoQ[1];showPho({fw:PLAN.fw,mw:PLAN.mw,ss:PLAN.ss,stages:sn===1?[1,2,3]:[sn]},true)}
 requestAnimationFrame(frame);
 })();
