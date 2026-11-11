@@ -101,6 +101,7 @@ body{margin:0;box-sizing:border-box;background:var(--bg);color:var(--line);font-
 .cue{padding-bottom:92px}
 .cue .stat{position:absolute;left:12px;right:12px;bottom:6px;font-size:16px;min-height:0;line-height:1.2}
 #panel .row .btn{min-height:78px;font-size:22px}
+#panel .row.cuerow .btn{flex:1 1 0;min-width:0;padding-left:8px;padding-right:8px}
 #panel .row .btn.sub{min-height:78px;font-size:16px}
 .cue .heard{position:absolute;left:12px;right:12px;bottom:30px;font-size:22px;font-weight:800;line-height:1.3;color:#5a5340;max-height:66px;overflow:hidden}
 .cue .heard.nomic::before{content:none}
@@ -1489,10 +1490,11 @@ function showCue(){
  var card=el('div','cue');card.appendChild(el('span','lab','カンペ'));
  var spans=toks.map(function(k){var s=el('span','w'+(k.s?' s':''),k.txt);card.appendChild(s);return s});
  panel.appendChild(card);var stat=el('div','stat','');card.appendChild(stat);
- var row=el('div','row');var demo=el('button','btn sub','おてほん');demo.type='button';row.appendChild(demo);
+ var row=el('div','row cuerow');var demo=el('button','btn sub','おてほん');demo.type='button';row.appendChild(demo);
  demo.addEventListener('click',function(){say(cueText(T.cue),.8,1)});
- var act=el('button','btn','🎤 おして よむ');act.type='button';row.appendChild(act);panel.appendChild(row);fitCue(card);requestAnimationFrame(function(){fitCue(card)});
+ var act=el('button','btn','🎤 もういちど');act.type='button';row.appendChild(act);panel.appendChild(row);fitCue(card);requestAnimationFrame(function(){fitCue(card)});
  setupAction(act,stat,toks,spans,T);
+ if(SR&&!PREF.silent)later(500,function(){if(G.kick)G.kick()});
  if(!G.camp)addHelp(T)}
 /* ---------- 発音チェック: 目標の文と「聞こえた文字」を単語ごとに比べる ---------- */
 var ONES=['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
@@ -1579,7 +1581,7 @@ function setupAction(act,stat,toks,spans,T){
  var card=spans.length?spans[0].parentNode:null;
  if(!SR||!card||PREF.silent){setupActionTimer(act,stat,toks,spans,T);if(card)card.appendChild(el('div','heard nomic',PREF.silent?'こえを ださない モード(時間だけで判定)':'このブラウザは音声認識なし(時間だけで判定)'));return}
  var heardEl=el('div','heard','');card.appendChild(heardEl);
- var tgToks=toks.map(function(k){return k.txt}),sid=G.sid,rec=null,listening=false,got=false,lastInt='',errCode='',mode='say',IDLE='🎤 おして よむ';
+ var tgToks=toks.map(function(k){return k.txt}),sid=G.sid,rec=null,listening=false,got=false,lastInt='',errCode='',mode='say',IDLE='🎤 もういちど';
  function alive(){return G.sid===sid&&G.view==='scene'}
  function label(){return IDLE}
  function setIdle(){listening=false;act.classList.remove('down');act.textContent=label()}
@@ -1588,6 +1590,7 @@ function setupAction(act,stat,toks,spans,T){
   listening=false;var a2=act.cloneNode(false);a2.className='btn';a2.textContent=IDLE;act.parentNode.replaceChild(a2,act);
   setupActionTimer(a2,stat,toks,spans,T);stat.className='stat ng';stat.textContent=msg+'。長押しにもどします'}
  var noHear=0;
+ G.kick=function(){if((G.phase==='cue'||G.phase==='retry'||G.phase==='assist')&&alive()&&!listening&&!rec&&act.isConnected)start()};
  function finish(txt,conf){
   var res=analyze(tgToks,txt);renderEval(card,spans,toks,res,heardEl);
   plogAdd({ts:Date.now(),v:G.scene?G.scene.vid:'',tg:tgToks.join(' '),hd:String(txt||'').slice(0,200),cf:conf||0,ok:res.okN,n:res.n,
@@ -1614,7 +1617,7 @@ function setupAction(act,stat,toks,spans,T){
    setIdle();if(got)return;
    if(errCode==='network'){stat.className='stat ng';stat.textContent='ネットワークエラー';return}
    if(lastInt){finish(lastInt,0);return}
-   heardEl.textContent='…';stat.className='stat ng';stat.textContent='きこえませんでした';noHear++;if(noHear>=2){noHear=0;onFail()}};
+   heardEl.textContent='…';stat.className='stat ng';stat.textContent='きこえませんでした';noHear++;if(noHear>=2){noHear=0;onFail()}else later(800,function(){if(G.kick)G.kick()})};
   try{Snd.duck(1);r.start();listening=true;act.classList.add('down');act.textContent='きいてます…';
    later(15000,function(){if(rec===r){try{r.stop()}catch(e){}}})}
   catch(e){Snd.duck(0);blocked('マイクが使えません')}}
@@ -1741,7 +1744,7 @@ var THANKS=["Okay.","Sure.","I see.","Right.","Got it.","Of course."];
 function onFail(){
  Snd.jingle('buzz');A_shake();G.tries++;
  if(G.tries>=3){G.phase='assist';var T=G.scene.turns[G.ti];noteWeak(T);setMsgInstant('Listen, then try again.',whoNow());say(cueText(T.cue),.6,1,gd(function(){G.tries=0;later(300,function(){var st=panel.querySelector('.stat');if(st){st.className='stat';st.textContent=''}})}));return}
- G.phase='retry';var line=RETRY[Math.min(G.tries-1,RETRY.length-1)];setMsg(line,whoNow());say(line,.9,G.scene.pitch)}
+ G.phase='retry';var line=RETRY[Math.min(G.tries-1,RETRY.length-1)];setMsg(line,whoNow());say(line,.9,G.scene.pitch,gd(function(){later(400,function(){if(G.kick)G.kick()})}))}
 function A_shake(){var a=$m('app');a.classList.remove('shake');void a.offsetWidth;a.classList.add('shake')}
 function advance(){
  if(G.camp){var done=G.scene.turns[G.ti];save.weak=save.weak.filter(function(w){return w.c!==done.cue});storeSave();G.ti++;if(G.ti>=G.scene.turns.length)campDone();else npcTurn();return}
