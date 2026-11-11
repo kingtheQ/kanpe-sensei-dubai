@@ -2036,7 +2036,7 @@ function phoFail(res){
  if(P.stage===1&&res)P.heard=P.heard||{};
  phoRender();phoStat(P.stage===3?'もういちど！ ゆっくり つなげて':'もういちど！'+(P.lastHeard?'（きこえたのは "'+P.lastHeard+'"）':''),'ng');phoMsgSet('Try again.','もういちど！ ルルの こえを よく きいてね');
  phoSpeak('Try again.',.9,function(){if(P.auto<2){P.auto++;setTimeout(g(phoListenAuto),250)}})}
-var PHOMO={"i'll":['aisle','isle','ill','i','all','eye','oil','ail','aill','ale'],'ill':["i'll",'aisle','isle'],'right':['write','rite','light'],'light':['right','white'],'rice':['lice','rise'],'lice':['rice'],'very':['berry','bury'],'berry':['very'],'bus':['boss','bass'],'cup':['cop','cap'],'cat':['cut','kat'],'bad':['bed','bat'],'sing':['sin','thing'],'long':['lung','along']};
+var PHOMO={"i'll":['aisle','isle','ill','i','all','eye','oil','ail','aill','ale','hi','high','hike','i will','ai'],'ill':["i'll",'aisle','isle'],'right':['write','rite','light'],'light':['right','white'],'rice':['lice','rise'],'lice':['rice'],'very':['berry','bury'],'berry':['very'],'bus':['boss','bass'],'cup':['cop','cap'],'cat':['cut','kat'],'bad':['bed','bat'],'sing':['sin','thing'],'long':['lung','along']};
 function phoEval(txt){
  var P=PHO,toks=P.stage===3?parseCue(P.sents[P.idx]).map(function(k){return k.txt}):[phoCur()],res=analyze(toks,txt);
  if(P.stage===3){P.res=res;if(res.ratio>=0.7)phoPass();else phoFail(res);return}
