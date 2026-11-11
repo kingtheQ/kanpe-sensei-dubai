@@ -62,8 +62,8 @@ body{margin:0;box-sizing:border-box;background:var(--bg);color:var(--line);font-
 .win .tap{position:absolute;right:8px;bottom:4px;font-size:10px;color:var(--mute)}
 #panel{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;overflow:hidden}
 .cue{background:var(--paper);color:var(--ink);border:3px solid var(--brown);border-radius:10px;padding:12px 12px 10px;display:flex;flex-wrap:wrap;gap:2px 10px;align-items:baseline;align-content:center;flex:1;min-height:0;position:relative}
-.cue .w{font-weight:800;font-size:25px;color:#6b6552;transition:transform .12s,color .12s}
-.cue .w.s{font-size:46px;line-height:1.15;font-weight:900;color:var(--strong)}
+.cue .w{font-weight:800;font-size:28px;color:#6b6552;transition:transform .12s,color .12s}
+.cue .w.s{font-size:52px;line-height:1.15;font-weight:900;color:var(--strong)}
 .cue .w.on{transform:scale(1.15);color:#0a7c4a}
 .cue .lab{position:absolute;top:5px;right:10px;font-size:11px;color:#8a7b55;font-weight:800;letter-spacing:.06em}
 .row{display:flex;gap:8px;flex:none}
@@ -98,8 +98,11 @@ body{margin:0;box-sizing:border-box;background:var(--bg);color:var(--line);font-
 .reveal .who2{font-size:14px;color:var(--gold);font-weight:800;letter-spacing:.08em}
 .note{margin:0;font-size:11px;font-weight:500;color:var(--mute);line-height:1.5;flex:none}
 /* 発音チェック: 聞こえた文字・赤表示 */
-.cue{padding-bottom:64px}
-.cue .heard{position:absolute;left:12px;right:12px;bottom:8px;font-size:22px;font-weight:800;line-height:1.3;color:#5a5340;max-height:66px;overflow:hidden}
+.cue{padding-bottom:92px}
+.cue .stat{position:absolute;left:12px;right:12px;bottom:6px;font-size:16px;min-height:0;line-height:1.2}
+#panel .row .btn{min-height:78px;font-size:22px}
+#panel .row .btn.sub{min-height:78px;font-size:16px}
+.cue .heard{position:absolute;left:12px;right:12px;bottom:30px;font-size:22px;font-weight:800;line-height:1.3;color:#5a5340;max-height:66px;overflow:hidden}
 .cue .heard.nomic::before{content:none}
 .cue .heard.live{color:#8a7b55}
 .cue .heard b{color:#1d4ed8}
@@ -137,7 +140,7 @@ body{margin:0;box-sizing:border-box;background:var(--bg);color:var(--line);font-
 .citybtn{flex:none;font:inherit;font-weight:800;font-size:14px;color:#fff;background:#8a3b1e;border:3px solid var(--brown);border-radius:12px;padding:10px;box-shadow:0 4px 0 var(--brown);cursor:pointer;margin-bottom:8px}
 .citybtn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--brown)}
 :focus-visible{outline:3px solid #fff;outline-offset:2px}
-@media (max-height:700px){.cue .w.s{font-size:34px}.cue .w{font-size:21px}.win p{font-size:19px;min-height:56px}.win{min-height:64px}.prompt .en{font-size:38px}.prompt{min-height:84px}}
+@media (max-height:700px){.cue .w.s{font-size:38px}.cue .w{font-size:23px}.win p{font-size:19px;min-height:56px}.win{min-height:64px}.prompt .en{font-size:38px}.prompt{min-height:84px}}
 @media (prefers-reduced-motion:reduce){#app.shake{animation:none}}
 /* ---- せってい・強化合宿 ①フォニックス ---- */
 .setbtn{flex:none;width:44px;height:44px;box-sizing:border-box;border-radius:10px;border:2px solid var(--line);background:var(--win);color:var(--line);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer}
@@ -1470,7 +1473,7 @@ function showCue(){
  G.phase='cue';clearPanel();var T=G.scene.turns[G.ti],toks=parseCue(T.cue);clearInterval(G.typeTimer);msgText.textContent=T.npc;
  var card=el('div','cue');card.appendChild(el('span','lab','カンペ'));
  var spans=toks.map(function(k){var s=el('span','w'+(k.s?' s':''),k.txt);card.appendChild(s);return s});
- panel.appendChild(card);var stat=el('div','stat','');panel.appendChild(stat);
+ panel.appendChild(card);var stat=el('div','stat','');card.appendChild(stat);
  var row=el('div','row');var demo=el('button','btn sub','おてほん');demo.type='button';row.appendChild(demo);
  demo.addEventListener('click',function(){say(cueText(T.cue),.8,1)});
  var act=el('button','btn','🎤 おして よむ');act.type='button';row.appendChild(act);panel.appendChild(row);fitCue(card);requestAnimationFrame(function(){fitCue(card)});
@@ -1934,7 +1937,7 @@ function phoStage(){
 function phoGuard(){var t=PHO.tk;return function(fn){return function(){if(PHO&&PHO.tk===t)fn.apply(this,arguments)}}}
 function phoSpeak(text,rate,cb){var g=phoGuard();stopSay();say(text,rate,Math.min(2,PREF.pitch),cb?g(cb):null)}
 function phoItemStart(){
- var P=PHO;P.tk++;P.rep=0;P.fails=0;P.res=null;P.auto=0;if(P.listening){try{P.rec&&P.rec.abort()}catch(e){}P.rec=null;P.listening=false}
+ var P=PHO;P.tk++;P.retried=0;P.rep=0;P.fails=0;P.res=null;P.auto=0;if(P.listening){try{P.rec&&P.rec.abort()}catch(e){}P.rec=null;P.listening=false}
  phoBeatOff();phoRender();phoStat('');
  phoMsgSet('Listen.','ルルの おてほんを きいてね');
  var g=phoGuard(),after=function(){phoMsgSet('Repeat after me.','ルルの あとに つづけて いってね');phoSpeak('Repeat after me.',.9,phoListenAuto)};
@@ -1953,7 +1956,7 @@ function phoDemoBeat(cb){
 function luSayRaw(text,rate){say(text,rate||.8,Math.min(2,PREF.pitch))}
 function phoListenAuto(){if(!PHO||PREF.silent||!SR||PHO.listening)return;phoListen()}
 function phoPass(){
- var P=PHO,g=phoGuard();Snd.jingle('pass');P.fails=0;P.auto=0;P.rep++;
+ var P=PHO,g=phoGuard();Snd.jingle('pass');P.retried=0;P.fails=0;P.auto=0;P.rep++;
  if(P.stage===3){
   phoRender();phoStat('✓ つたわった！','ok');phoMsgSet('Great!','ばっちり！');
   phoSpeak('Great!',.9,function(){setTimeout(g(function(){if(P.idx<P.sents.length-1){P.idx++;phoItemStart()}else phoNext()}),500)});return}
@@ -1983,12 +1986,12 @@ function phoListen(){
   if(err==='not-allowed'||err==='service-not-allowed'){phoRender();phoStat('マイクが許可されていません','ng');return}
   if(err==='audio-capture'){phoRender();phoStat('マイクが見つかりません','ng');return}
   if(err==='network'){phoRender();phoStat('ネットワークエラー','ng');return}
-  if(!txt){phoRender();phoStat('きこえませんでした。「おして よむ」で もういちど'+(err?'（'+err+'）':''),'ng');return}
+  if(!txt){var tk1=PHO.tk;if(!PHO.retried&&(!err||err==='no-speech'||err==='aborted')){PHO.retried=1;phoRender();phoStat('もういちど きいてます…');setTimeout(function(){if(PHO&&PHO.tk===tk1&&!PHO.listening)phoListen()},450);return}phoRender();phoStat('きこえませんでした。「おして よむ」で もういちど'+(err?'（'+err+'）':''),'ng');return}
   phoEval(txt)}
  r.onresult=function(ev){if(!PHO||PHO.rec!==r)return;var rs=ev.results[ev.results.length-1],alt=rs[0];if(rs.isFinal){got=true;done(alt.transcript)}else{last=alt.transcript}};
  r.onerror=function(ev){err=(ev&&ev.error)||'error'};
- r.onend=function(){Snd.duck(0);if(PHO&&PHO.rec===r)done(got?'':last)};
- try{Snd.duck(1);r.start();setTimeout(function(){if(PHO&&PHO.rec===r){try{r.stop()}catch(e){}}},12000)}catch(e){Snd.duck(0);PHO.rec=null;PHO.listening=false;act.classList.remove('down');phoRender();phoStat('マイクが使えません','ng')}}
+ r.onend=function(){if(PHO&&PHO.rec===r)done(got?'':last)};
+ try{r.start();setTimeout(function(){if(PHO&&PHO.rec===r){try{r.stop()}catch(e){}}},12000)}catch(e){PHO.rec=null;PHO.listening=false;act.classList.remove('down');phoRender();phoStat('マイクが使えません','ng')}}
 $m('phoAct').addEventListener('click',function(){
  if(!PHO)return;
  if(PHO.listening){try{PHO.rec&&PHO.rec.stop()}catch(e){}return}
