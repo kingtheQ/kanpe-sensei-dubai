@@ -1835,14 +1835,12 @@ var SND={
 var SNDORDER=['f','th','l','r','v'];
 var SNDSAY={l:'luh',r:'ruh',th:'thuh',v:'vuh'};
 function hasSnd(id,w){var ip=ipaOf(w),d=SND[id];if(ip)return d.ipa.test(ip.slice(1,-1));return d.re.test(w)}
-function pickLesson(){
+function pickLessons(n){
  var sc={},ws={};SNDORDER.forEach(function(k){sc[k]=0;ws[k]=[]});
  try{boothStats().words.forEach(function(e){var w=String(e.w).toLowerCase();if(w.length<2)return;var top='',n=0;Object.keys(e.hs||{}).forEach(function(h){if(e.hs[h]>n){n=e.hs[h];top=h}});if(top==='(聞こえず)')top='';
   SNDORDER.forEach(function(k){if(hasSnd(k,w)){var lack=top&&!SND[k].re.test(top);sc[k]+=e.m*(lack?2:1);ws[k].push(w)}})})}catch(e){}
- var best='',bs=0;SNDORDER.forEach(function(k){if(sc[k]>bs){bs=sc[k];best=k}});
- if(!best)return null;
- var w=ws[best].slice(0,3);SND[best].def.forEach(function(d){if(w.length<3&&w.indexOf(d)<0)w.push(d)});
- return {snd:best,words:w}}
+ var order=SNDORDER.filter(function(k){return sc[k]>0}).sort(function(a,b){return sc[b]-sc[a]}).slice(0,n||1);
+ return order.map(function(best){var w=ws[best].slice(0,3);SND[best].def.forEach(function(d){if(w.length<3&&w.indexOf(d)<0)w.push(d)});return {snd:best,words:w}})}
 var SVGF=null;
 function phoLipsSet(id){
  var v=$m('phoLips');if(SVGF===null)SVGF=v.innerHTML;
@@ -1886,10 +1884,11 @@ function phoLipsSet(id){
  }
  v.innerHTML=out}
 function startCamp(){
- var fromMap=G.view==='map',ls=pickLesson(),fw=ls?ls.words:[],mw=missWords(fw),ss=weakSents(),st=[];
- if(fw.length)st.push(1);if(mw.length)st.push(2);if(ss.length)st.push(3);
+ var fromMap=G.view==='map',lss=pickLessons(2),ls=lss[0],fw=[],mw,ss=weakSents(),st=[];
+ lss.forEach(function(l){fw=fw.concat(l.words)});mw=missWords(fw);
+ lss.forEach(function(){st.push(1)});if(mw.length)st.push(2);if(ss.length)st.push(3);
  if(!st.length){if(fromMap||!G.scene){showPho({fw:SND.f.def.slice(),snd:'f',mw:[],ss:[],stages:[1],fromMap:fromMap},false);return}startCampCore();return}
- showPho({fw:fw,snd:ls?ls.snd:'f',mw:mw,ss:ss,stages:st,fromMap:fromMap},false)}
+ showPho({fw:ls?ls.words:[],snd:ls?ls.snd:'f',lessons:lss,mw:mw,ss:ss,stages:st,fromMap:fromMap},false)}
 function phoRun(on){var v=$m('phoView');v.classList.remove('run');if(on){void v.offsetWidth;v.classList.add('run')}}
 function phoStat(t,k){var s=$m('phoStat');if(!s)return;s.className='stat'+(k?' '+k:'');s.textContent=t||''}
 var VOWC='aeiouɑæʌəɔɪʊɛɜ';
@@ -1941,13 +1940,13 @@ function phoRender(){
  }}
 function showPho(plan,sample){
  G.sid++;clearTimers();stopSay();Snd.go(null);G.view='pho';
- PHO={plan:plan,stages:plan.stages,si:0,sample:!!sample,beat:false,listening:false,rec:null,bt:[],tk:0};
+ PHO={plan:plan,stages:plan.stages,si:0,l1:0,sample:!!sample,beat:false,listening:false,rec:null,bt:[],tk:0};
  $m('mapView').hidden=true;$m('sceneView').hidden=true;$m('boothView').hidden=true;$m('phoView').hidden=false;
  phoStage()}
 function phoStage(){
  var P=PHO;P.stage=P.stages[P.si];P.idx=0;P.fails=0;P.atts=[];P.res=null;P.beat=false;
  P.need=P.stage===3?1:3;
- if(P.stage===1){P.words=P.plan.fw;P.snd=P.plan.snd||'f';phoLipsSet(P.snd);var cc=document.querySelectorAll('#phoView .pchip');if(cc[0])cc[0].textContent=SND[P.snd].chip;if(cc[1])cc[1].textContent=SND[P.snd].chip}else if(P.stage===2)P.mw=P.plan.mw;else P.sents=P.plan.ss;
+ if(P.stage===1){var L1=P.plan.lessons&&P.plan.lessons[P.l1];P.l1++;P.words=L1?L1.words:P.plan.fw;P.snd=L1?L1.snd:(P.plan.snd||'f');phoLipsSet(P.snd);var cc=document.querySelectorAll('#phoView .pchip');if(cc[0])cc[0].textContent=SND[P.snd].chip;if(cc[1])cc[1].textContent=SND[P.snd].chip}else if(P.stage===2)P.mw=P.plan.mw;else P.sents=P.plan.ss;
  phoItemStart()}
 /* ルルの おてほん(自動) → Repeat after me → きみが くりかえす(自動でマイク) */
 function phoGuard(){var t=PHO.tk;return function(fn){return function(){if(PHO&&PHO.tk===t)fn.apply(this,arguments)}}}
@@ -1964,9 +1963,9 @@ function phoItemStart(){
  }),350)}
 function phoBeatOff(){if(!PHO)return;PHO.bt.forEach(clearTimeout);PHO.bt=[];if(PHO.beat){PHO.beat=false;Snd.beatStop()}phoRun(false)}
 function phoDemoBeat(cb){
- var P=PHO;phoBeatOff();P.beat=true;stopSay();Snd.beatStart(!P.plan.snd||P.plan.snd==='f');phoRun(false);
+ var P=PHO;phoBeatOff();P.beat=true;stopSay();Snd.beatStart(!P.snd||P.snd==='f');phoRun(false);
  P.bt.push(setTimeout(function(){if(PHO&&PHO.beat)phoRun(true)},120));
- var syl=SNDSAY[P.plan.snd||'f'];
+ var syl=SNDSAY[P.snd||'f'];
  var bar=function(){if(!PHO||!PHO.beat)return;if(syl){P.bt.push(setTimeout(function(){if(PHO&&PHO.beat)luSayRaw(syl,.9)},80));P.bt.push(setTimeout(function(){if(PHO&&PHO.beat)luSayRaw(syl,.9)},640))}P.bt.push(setTimeout(function(){if(PHO&&PHO.beat)luSayRaw(phoCur(),.8)},1250));P.bt.push(setTimeout(bar,2400))};bar();
  P.bt.push(setTimeout(function(){if(!PHO||!PHO.beat)return;phoBeatOff();if(cb)cb()},4900))}
 function luSayRaw(text,rate){say(text,rate||.8,Math.min(2,PREF.pitch))}
