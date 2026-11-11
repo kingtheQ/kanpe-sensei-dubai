@@ -144,6 +144,7 @@ body{margin:0;box-sizing:border-box;background:var(--bg);color:var(--line);font-
 @media (prefers-reduced-motion:reduce){#app.shake{animation:none}}
 /* ---- せってい・強化合宿 ①フォニックス ---- */
 .setbtn{flex:none;width:44px;height:44px;box-sizing:border-box;border-radius:10px;border:2px solid var(--line);background:var(--win);color:var(--line);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer}
+.stage .setbtn.wb{right:94px}
 .stage .setbtn{position:absolute;top:6px;right:50px;width:38px;height:38px;background:rgba(5,7,15,.75);z-index:3}
 #setView{position:absolute;top:-8px;bottom:-8px;left:-16px;right:-16px;z-index:20;background:var(--bg);display:flex;flex-direction:column;gap:14px;overflow-y:auto;padding:10px 16px}
 #setView[hidden]{display:none}
@@ -1782,6 +1783,7 @@ try{var p0=JSON.parse(localStorage.getItem(PREFKEY)||'null');if(p0&&typeof p0===
 function prefSave(){try{localStorage.setItem(PREFKEY,JSON.stringify(PREF))}catch(e){}}
 function prefApply(){Snd.setBgm(PREF.bgm);Snd.setBeat(PREF.beat);document.body.classList.toggle('big',!!PREF.big)}
 var SETICON='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f4f1e8" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="2.4" fill="#05070f"/><circle cx="15" cy="12" r="2.4" fill="#05070f"/><circle cx="8" cy="17" r="2.4" fill="#05070f"/></svg>';
+function mkWorldBtn(){var b=el('button','setbtn','🌏');b.type='button';b.setAttribute('aria-label','世界マップへ');b.style.fontSize='18px';b.addEventListener('click',function(){location.href='world/?map=1'});return b}
 function mkSetBtn(id){var b=id?$m(id):el('button','setbtn');b.type='button';b.setAttribute('aria-label','せってい');b.innerHTML=SETICON;b.addEventListener('click',openSettings);return b}
 function viewName(){var v=G.view;if(v==='map')return 'マップ';if(v==='booth')return '羽田空港 発音教室';if(v==='pho')return '強化合宿 ① フォニックス';if(v==='scene')return G.camp?'強化合宿':'会話の場面';return ''}
 function sSec(t){var s=el('section','sset');s.appendChild(el('span','stag',t));return s}
@@ -1802,9 +1804,9 @@ function openSettings(){
 function closeSettings(){$m('setView').hidden=true}
 $m('setBack').addEventListener('click',closeSettings);
 (function(){var mb=document.querySelector('#mapView .mapbar>div'),sb=$m('sndBtn');if(mb&&sb)mb.insertBefore(mkSetBtn(),sb);
- var bm=document.querySelector('#boothView .mapbar');if(bm)bm.insertBefore(mkSetBtn(),$m('boothBack'));
- var st=document.querySelector('#sceneView .stage');if(st)st.appendChild(mkSetBtn());
- mkSetBtn('phoSet')})();
+ var bm=document.querySelector('#boothView .mapbar');if(bm){var bw=mkWorldBtn();bm.insertBefore(bw,$m('boothBack'));bm.insertBefore(mkSetBtn(),$m('boothBack'))}
+ var st=document.querySelector('#sceneView .stage');if(st){var sw=mkWorldBtn();sw.classList.add('wb');st.appendChild(sw);st.appendChild(mkSetBtn())}
+ mkSetBtn('phoSet');var ps=$m('phoSet');if(ps&&ps.parentNode)ps.parentNode.insertBefore(mkWorldBtn(),ps.nextSibling)})();
 prefApply();
 
 /* ---------- 強化合宿(ルル先生): ①フォニックス → ②たんご → ③ぶん(発音記号つき) ---------- */
@@ -2517,7 +2519,7 @@ ANIM.show={
 function enterHub(pl){
  G.sid++;clearTimers();stopSay();Snd.go(G.snd=pl.snd||pl.id);
  G.scene={id:pl.id,vid:null,pl:pl,d:{who:''},turns:[],words:[],pitch:1,hub:true,anim:null,lastSp:null};
- resetOUT();speaker=null;applyCtx({bg:pl.hubBg||'room',who:'',sp:null,hero:'kandura',lulu:'plain',gold:1});
+ resetOUT();speaker=null;applyCtx({bg:pl.hubBg||'room',who:'',sp:null,hero:pl.hubHero||'kandura',lulu:'plain',gold:1});
  cam=0;spSay=false;G.view='scene';G.ti=0;G.tries=0;$m('mapView').hidden=true;$m('sceneView').hidden=false;
  hubMenu('main')}
 function hubMenu(w){
@@ -2526,6 +2528,7 @@ var box=el('div','dqbox'),plh=G.scene&&G.scene.pl;
  function item(label,seen,fn){var b=el('button','dq');b.type='button';b.appendChild(el('span','cur','▶'));b.appendChild(el('span','',label));if(seen)b.appendChild(el('span','ok','✓'));b.addEventListener('click',fn);box.appendChild(b)}
 if(plh&&plh.menu){
   setMsgInstant(plh.hubMsg||'どうする？','');
+  if(plh.hubEn){msgText.textContent='';msgText.appendChild(el('span',null,plh.hubEn));msgText.appendChild(document.createElement('br'));var jpl=el('span',null,plh.hubMsg||'');jpl.style.cssText='font-size:.62em;font-weight:600;opacity:.75;line-height:1.4;display:inline-block;margin-top:4px';msgText.appendChild(jpl);say(plh.hubEn,.9,1)}
   plh.menu.forEach(function(m){item(m[0],save.seen[m[1]],function(){runStory(m[1])})});
   item('マップに もどる',0,function(){showMap()});
   panel.appendChild(box);return}
@@ -2552,7 +2555,7 @@ var PLACES_ARR=[
  {id:'immig',name:'入国審査',snd:'info',x:22,y:16,ico:'🛂',tip:['入国審査(Passport Control)','パスポート・目的・滞在日数・ホテル名'],v:['arr_immig']},
  {id:'bag',name:'手荷物受け取り',snd:'hall',x:70,y:36,ico:'🧳',tip:['バゲージクレーム','スーツケースが出てこない！'],v:['arr_bag']},
  {id:'sim',name:'SIMカード売り場',snd:'info',x:24,y:58,ico:'📱',tip:['du と e& のSIM売り場','データ量と日数を選ぶ'],v:['arr_sim']},
- {id:'taxi',name:'タクシー・Dubai Metro',snd:'hall',x:70,y:84,ico:'🚕',tip:['タクシー乗り場と Dubai Metro','どちらで行く？ メトロの料金は RTA 公式を参考にした目安'],hub:true,hubBg:'taxi',hubMsg:'タクシー乗り場と Dubai Metro の案内。ホテルまで、どちらで行く？',menu:[['🚕 タクシーで いく','arr_taxi'],['🚆 メトロで いく','arr_metro']],v:['arr_taxi','arr_metro']}];
+ {id:'taxi',name:'タクシー・Dubai Metro',snd:'hall',x:70,y:84,ico:'🚕',tip:['タクシー乗り場と Dubai Metro','どちらで行く？ メトロの料金は RTA 公式を参考にした目安'],hub:true,hubBg:'taxi',hubHero:'blue',hubEn:'Would you like a taxi, or the metro?',hubMsg:'タクシー乗り場と Dubai Metro の案内。ホテルまで、どちらで行く？',menu:[['🚕 タクシーで いく','arr_taxi'],['🚆 メトロで いく','arr_metro']],v:['arr_taxi','arr_metro']}];
 var PLACES_DEP=[
  {id:'checkin',name:'チェックイン(Emirates)',snd:'info',x:22,y:12,ico:'🎫',tip:['Emirates チェックインカウンター','座席・荷物・搭乗券'],v:['dep_checkin']},
  {id:'security',name:'保安検査',snd:'info',x:72,y:26,ico:'🔍',tip:['保安検査','荷物・ベルト・液体'],v:['dep_security']},
@@ -2588,7 +2591,7 @@ BGS.sim=function(){airWall('#f1ede2');floorAir('#e0d8c4','#cfc6ae');signBox(40,1
  R('#d6d0be',30,84,250,14);R('#9a947f',30,84,250,2);for(var i=0;i<6;i++){R('#14141a',40+i*38,72,8,12);R('#5a8ad8',41+i*38,73,6,8)}};
 BGS.taxi=function(){grad(0,70,'#7cc4ee','#dff2fa',10);R('#cfd6e4',0,40,VW,28);for(var i=0;i<9;i++)R('#8aa0b8',i*36+4,44,28,20);
  R('#5a5a66',0,86,VW,64);R('#8a8a94',0,86,VW,3);R('#f2c200',0,126,VW,2);
- R('#143fb0',20,6,70,17);T('TAXI',55,14.5,11,'#fff');R('#c8182a',190,6,120,17);T('DUBAI METRO ▶',250,14.5,9,'#fff');
+ R('#143fb0',20,6,70,17);T('TAXI',55,14.5,11,'#fff');R('#c8182a',108,6,120,17);T('DUBAI METRO ▶',168,14.5,9,'#fff');
  for(var k=0;k<2;k++){var x=130+k*90;R('#e8d8a8',x,70,70,18);R('#d6c48c',x+10,60,46,12);R('#7ac0f0',x+14,62,16,9);R('#7ac0f0',x+34,62,16,9);R('#c8182a',x+16,56,34,4);R('#14141a',x+8,86,12,8);R('#14141a',x+50,86,12,8)}
  R('#2f7a4a',296,50,6,40);R('#2f7a4a',286,50,26,8)};
 BGS.metro=function(){airWall('#e4e8ee');floorAir('#cfd4de','#b9bfcc');signBox(90,8,140,'DUBAI METRO','#c8182a');

@@ -171,7 +171,7 @@ body{margin:0;box-sizing:border-box;background:var(--bg);color:var(--line);font-
 
 <div id="app">
   <div id="mapView" hidden>
-    <div class="mapbar"><div id="pips" aria-label="進み具合"></div><button class="btn sub" id="setBtn" type="button" aria-label="設定">⚙</button></div>
+    <div class="mapbar"><div id="pips" aria-label="進み具合"></div><button class="btn sub" id="worldBtn" type="button" aria-label="世界マップへ" style="margin-left:auto">🌏</button><button class="btn sub" id="setBtn" type="button" aria-label="設定">⚙</button></div>
     <div id="map"><svg id="paths" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg><div id="sky"></div><i class="cl" style="top:12%"></i><i class="cl" style="top:46%;animation-duration:80s;animation-delay:-30s"></i><i class="cl" style="top:80%;animation-duration:70s;animation-delay:-50s"></i><div id="clock" aria-live="off"></div></div>
   </div>
 
@@ -1468,6 +1468,7 @@ Array.prototype.forEach.call(document.querySelectorAll('.seg[data-key]'),functio
  Array.prototype.forEach.call(seg.querySelectorAll('button'),function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});set[seg.dataset.key]=b.dataset.v;onSet(seg.dataset.key)})});
 $('goBtn').addEventListener('click',function(){initAudio();$('ovStart').hidden=true;if(G.view==='none'||G.view==='map'){showMap()}});
 $('setBtn').addEventListener('click',function(){location.href='../world/#set&from=guam'});
+$('worldBtn').addEventListener('click',function(){location.href='../world/?map=1'});
 $('again').addEventListener('click',function(){$('ovEnd').hidden=true});
 var rst=$('resetBtn'),rstArm=false;
 rst.addEventListener('click',function(){
