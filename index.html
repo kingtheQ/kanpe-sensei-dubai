@@ -2028,7 +2028,7 @@ function phoPass(){
   phoRender();phoStat('✓ つたわった！','ok');phoMsgSet('Great!','ばっちり！');
   phoSpeak('Great!',.9,function(){setTimeout(g(function(){if(P.idx<P.sents.length-1){P.idx++;phoItemStart()}else phoNext()}),500)});return}
  phoRender();phoStat('✓ つたわった！ '+P.rep+'/'+P.need,'ok');
- if(P.rep<P.need){var en=P.rep===1?'Good. Second.':'Good. Third.';phoMsgSet(en,P.rep===1?'2かいめ！ もういちど':'3かいめ！ ラスト！');phoSpeak(en,.9,function(){setTimeout(g(phoListenAuto),250)});return}
+ if(P.rep<P.need){var en=P.rep===1?'Good. Second.':'Good. Third.';phoMsgSet(en,P.rep===1?'2かいめ！ もういちど':'3かいめ！ ラスト！');stopSay();setTimeout(g(phoListenAuto),900);return}
  phoMsgSet('Great!','ばっちり！ つぎへ');
  phoSpeak('Great!',.9,function(){setTimeout(g(function(){var n=(P.stage===1?P.words.length:P.mw.length);if(P.idx<n-1){P.idx++;phoItemStart()}else phoNext()}),500)})}
 function phoFail(res){
@@ -2054,8 +2054,8 @@ function prRun(job){
   r.onstart=function(){PR.ev.push('start')};r.onaudiostart=function(){PR.ev.push('audio')};r.onspeechstart=function(){PR.ev.push('speech')};
   r.onresult=function(e){var rs=e.results[e.results.length-1],alt=rs[0];PR.ev.push(rs.isFinal?'final':'interim');if(PR.cur)PR.cur.onresult(alt.transcript,rs.isFinal)};
   r.onerror=function(e){PR.err=(e&&e.error)||'error';PR.ev.push('err:'+PR.err)};
-  r.onend=function(){PR.ev.push('end');PR.busy=false;var jb=PR.cur;PR.cur=null;if(jb)jb.onend(PR.err,PR.ev.join(','));var w=PR.wait;PR.wait=null;if(w)setTimeout(function(){prRun(w)},200)}}
- try{PR.r.start()}catch(e){PR.r=null;PR.busy=false;PR.cur=null;job.onend('start-failed','')}
+  r.onend=function(){PR.ev.push('end');PR.busy=false;PR.r=null;Snd.duck(0);var jb=PR.cur;PR.cur=null;if(jb)jb.onend(PR.err,PR.ev.join(','));var w=PR.wait;PR.wait=null;if(w)setTimeout(function(){prRun(w)},200)}}
+ try{Snd.duck(1);PR.r.start()}catch(e){Snd.duck(0);PR.r=null;PR.busy=false;PR.cur=null;job.onend('start-failed','')}
  setTimeout(function(){if(PR.cur===job){try{PR.r.stop()}catch(e){}}},12000)}
 function phoListen(){
  stopSay();var act=$m('phoAct');
