@@ -1814,6 +1814,7 @@ var SND={
  l:{k:'l',re:/l/,ipa:/l/,chip:'l',def:['light','lunch','left']},
  r:{k:'r',re:/r/,ipa:/r/,chip:'r',def:['right','room','red']}};
 var SNDORDER=['f','th','l','r','v'];
+var SNDSAY={l:'luh',r:'ruh',th:'thuh',v:'vuh'};
 function hasSnd(id,w){var ip=ipaOf(w),d=SND[id];if(ip)return d.ipa.test(ip.slice(1,-1));return d.re.test(w)}
 function pickLesson(){
  var sc={},ws={};SNDORDER.forEach(function(k){sc[k]=0;ws[k]=[]});
@@ -1946,7 +1947,8 @@ function phoBeatOff(){if(!PHO)return;PHO.bt.forEach(clearTimeout);PHO.bt=[];if(P
 function phoDemoBeat(cb){
  var P=PHO;phoBeatOff();P.beat=true;stopSay();Snd.beatStart(!P.plan.snd||P.plan.snd==='f');phoRun(false);
  P.bt.push(setTimeout(function(){if(PHO&&PHO.beat)phoRun(true)},120));
- var bar=function(){if(!PHO||!PHO.beat)return;P.bt.push(setTimeout(function(){if(PHO&&PHO.beat)luSayRaw(phoCur(),.8)},1250));P.bt.push(setTimeout(bar,2400))};bar();
+ var syl=SNDSAY[P.plan.snd||'f'];
+ var bar=function(){if(!PHO||!PHO.beat)return;if(syl){P.bt.push(setTimeout(function(){if(PHO&&PHO.beat)luSayRaw(syl,.9)},80));P.bt.push(setTimeout(function(){if(PHO&&PHO.beat)luSayRaw(syl,.9)},640))}P.bt.push(setTimeout(function(){if(PHO&&PHO.beat)luSayRaw(phoCur(),.8)},1250));P.bt.push(setTimeout(bar,2400))};bar();
  P.bt.push(setTimeout(function(){if(!PHO||!PHO.beat)return;phoBeatOff();if(cb)cb()},4900))}
 function luSayRaw(text,rate){say(text,rate||.8,Math.min(2,PREF.pitch))}
 function phoListenAuto(){if(!PHO||PREF.silent||!SR||PHO.listening)return;phoListen()}
@@ -1981,7 +1983,7 @@ function phoListen(){
   if(err==='not-allowed'||err==='service-not-allowed'){phoRender();phoStat('マイクが許可されていません','ng');return}
   if(err==='audio-capture'){phoRender();phoStat('マイクが見つかりません','ng');return}
   if(err==='network'){phoRender();phoStat('ネットワークエラー','ng');return}
-  if(!txt){phoRender();phoStat('きこえませんでした。「おして よむ」で もういちど','ng');return}
+  if(!txt){phoRender();phoStat('きこえませんでした。「おして よむ」で もういちど'+(err?'（'+err+'）':''),'ng');return}
   phoEval(txt)}
  r.onresult=function(ev){if(!PHO||PHO.rec!==r)return;var rs=ev.results[ev.results.length-1],alt=rs[0];if(rs.isFinal){got=true;done(alt.transcript)}else{last=alt.transcript}};
  r.onerror=function(ev){err=(ev&&ev.error)||'error'};
@@ -1991,7 +1993,7 @@ $m('phoAct').addEventListener('click',function(){
  if(!PHO)return;
  if(PHO.listening){try{PHO.rec&&PHO.rec.stop()}catch(e){}return}
  if(PREF.silent||!SR){PHO.res=null;phoPass();return}
- stopSay();phoBeatOff();PHO.tk++;phoListen()});
+ stopSay();phoBeatOff();PHO.tk++;var tk0=PHO.tk;setTimeout(function(){if(PHO&&PHO.tk===tk0&&!PHO.listening)phoListen()},250)});
 $m('phoSkip').addEventListener('click',function(){if(PHO)phoNext()});
 $m('phoDemo').addEventListener('click',function(){if(PHO)phoItemStart()});
 $m('phoBack').addEventListener('click',function(){phoExit(false)});
