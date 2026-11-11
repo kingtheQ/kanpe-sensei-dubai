@@ -107,8 +107,8 @@ body{margin:0;box-sizing:border-box;background:var(--bg);color:var(--line);font-
 .cue .heard.live{color:#8a7b55}
 .cue .heard b{color:#1d4ed8}
 .cue.ev .w,.cue.ev .w.s{color:#0a7c4a}
-.cue.ev .w.bad,.cue.ev .w.s.bad{color:#1d4ed8;text-decoration:underline wavy #1d4ed8;text-underline-offset:5px}
-.cue.ev .w em{font-style:normal;color:#1d4ed8;text-decoration:underline wavy #1d4ed8;text-underline-offset:5px}
+.cue.ev .w.bad,.cue.ev .w.s.bad{color:#1d4ed8}
+.cue.ev .w em{font-style:normal;color:#1d4ed8}
 /* 羽田 発音教室 */
 .boothbtn{flex:none;font:inherit;font-weight:800;font-size:14px;color:var(--ink);background:var(--paper);border:3px solid var(--brown);border-radius:12px;padding:10px;box-shadow:0 4px 0 var(--brown);cursor:pointer}
 .boothbtn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--brown)}
@@ -230,7 +230,7 @@ body.big .cue .w{font-size:30px}body.big .cue .w.s{font-size:52px}
 .pboard.w3 .tk{display:flex;flex-direction:column;align-items:center;min-width:0}
 .pboard.w3 .tk b{font-size:clamp(14px,4.3vw,18px);font-weight:800;color:var(--ink);line-height:1.2}
 .pboard.w3 .tk span{font-size:clamp(10px,3vw,12px);font-weight:800;color:#1f46c8;white-space:nowrap;font-family:"Noto Sans","Segoe UI",system-ui,sans-serif;min-height:16px}
-.pboard.w3 .tk.ok b{color:#0a7c4a}.pboard.w3 .tk.bad b{color:#1d4ed8;text-decoration:underline wavy #1d4ed8;text-underline-offset:3px}
+.pboard.w3 .tk.ok b{color:#0a7c4a}.pboard.w3 .tk.bad b{color:#1d4ed8}
 .pboard.w3 .lk{font-style:normal;font-size:16px;font-weight:800;color:#6b7390;align-self:flex-start;margin:0 -6px}
 .phocard .heard3{font-size:15px;font-weight:800;color:#5a5340;line-height:1.4}.phocard .heard3 b{color:#1d4ed8}
 .phocard .res{font-size:15px;font-weight:800}.phocard .res.ok{color:#0a7c4a}.phocard .res.ng{color:#1d4ed8}
@@ -246,7 +246,7 @@ body.big .cue .w{font-size:30px}body.big .cue .w.s{font-size:52px}
 .phocard .tk{display:flex;flex-direction:column;align-items:center}
 .phocard .tk b{font-size:clamp(22px,6.8vw,30px);font-weight:800;line-height:1.2;color:var(--ink)}
 .phocard .tk span{font-size:clamp(15px,4.6vw,19px);font-weight:800;color:#1f46c8;font-family:"Noto Sans","Segoe UI",system-ui,sans-serif;white-space:nowrap}
-.phocard .tk.ok b{color:#0a7c4a}.phocard .tk.bad b{color:#1d4ed8;text-decoration:underline wavy #1d4ed8;text-underline-offset:4px}
+.phocard .tk.ok b{color:#0a7c4a}.phocard .tk.bad b{color:#1d4ed8}
 .phocard .lk{font-style:normal;font-size:24px;font-weight:800;color:#6b7390;align-self:flex-start;margin:0 -6px}
 @media (prefers-reduced-motion:reduce){#phoView.run .pl,#phoView.run .pr,.phostage .hero,.phostage .lulu{animation:none}}
 @media (max-height:700px){.phocard .big b{font-size:44px}.phocard .big>span{font-size:26px}#phoWin p{font-size:16px}.pchip{font-size:19px}}
@@ -2079,7 +2079,7 @@ function startReveal(){
  one()}
 function finishScene(){
  var S=G.scene;save.seen[S.vid]=(save.seen[S.vid]||0)+1;(S.d.inter||[]).forEach(function(n){if(n.set&&n.set.gold)save.gold=1});storeSave();worldSync();
- if(S.from==='hub'){enterHub(S.pl);return}showMap()}
+ if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}showMap()}
 
 /* ---------- お店の中(Veranda・S34・Costa・Ahlan): 入るたびに、食べている人と相手がかわる ---------- */
 var INSIDE={cafe:1,s34:1,costa:1,ahlan:1};
@@ -2563,7 +2563,7 @@ var PLACES_ARR=[
  {id:'immig',name:'入国審査',snd:'info',x:22,y:16,ico:'🛂',tip:['入国審査(Passport Control)','パスポート・目的・滞在日数・ホテル名'],v:['arr_immig']},
  {id:'bag',name:'手荷物受け取り',snd:'hall',x:70,y:36,ico:'🧳',tip:['バゲージクレーム','スーツケースが出てこない！'],v:['arr_bag']},
  {id:'sim',name:'SIMカード売り場',snd:'info',x:24,y:58,ico:'📱',tip:['du と e& のSIM売り場','データ量と日数を選ぶ'],v:['arr_sim']},
- {id:'taxi',name:'タクシー・Dubai Metro',snd:'hall',x:70,y:84,ico:'🚕',tip:['タクシー乗り場と Dubai Metro','どちらで行く？ メトロの料金は RTA 公式を参考にした目安'],hub:true,hubBg:'taxi',hubHero:'blue',hubEn:'Would you like a taxi, or the metro?',hubMsg:'タクシー乗り場と Dubai Metro の案内。ホテルまで、どちらで行く？',menu:[['🚕 タクシーで いく','arr_taxi'],['🚆 メトロで いく','arr_metro']],v:['arr_taxi','arr_metro']}];
+ {id:'taxi',name:'タクシー・Dubai Metro',snd:'hall',x:70,y:84,ico:'🚕',tip:['タクシー乗り場と Dubai Metro','どちらで行く？ メトロの料金は RTA 公式を参考にした目安'],hub:true,hubMap:1,hubBg:'taxi',hubHero:'blue',hubEn:'Would you like a taxi, or the metro?',hubMsg:'タクシー乗り場と Dubai Metro の案内。ホテルまで、どちらで行く？',menu:[['🚕 タクシーで いく','arr_taxi'],['🚆 メトロで いく','arr_metro']],v:['arr_taxi','arr_metro']}];
 var PLACES_DEP=[
  {id:'checkin',name:'チェックイン(Emirates)',snd:'info',x:22,y:12,ico:'🎫',tip:['Emirates チェックインカウンター','座席・荷物・搭乗券'],v:['dep_checkin']},
  {id:'security',name:'保安検査',snd:'info',x:72,y:26,ico:'🔍',tip:['保安検査','荷物・ベルト・液体'],v:['dep_security']},
