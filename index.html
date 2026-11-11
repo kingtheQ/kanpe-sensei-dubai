@@ -1831,14 +1831,22 @@ var SND={
  v:{k:'v',re:/v/,ipa:/v/,chip:'v',def:['very','visa','five']},
  th:{k:'th',re:/th/,ipa:/[θð]/,chip:'th',def:['think','thank','this']},
  l:{k:'l',re:/l/,ipa:/l/,chip:'l',def:['light','lunch','left']},
- r:{k:'r',re:/r/,ipa:/r/,chip:'r',def:['right','room','red']}};
-var SNDORDER=['f','th','l','r','v'];
-var SNDSAY={l:'luh',r:'ruh',th:'thuh',v:'vuh'};
+ r:{k:'r',re:/r/,ipa:/r/,chip:'r',def:['right','room','red']},
+ b:{k:'b',re:/b/,ipa:/b/,chip:'b',def:['book','bag','busy'],strict:1},
+ sh:{k:'sh',re:/sh|tion|ssion|cian/,ipa:/ʃ/,hre:/sh|ch|j|x/,chip:'sh',def:['she','shop','shower'],strict:1},
+ s:{k:'s',re:/s/,ipa:/s/,hre:/s(?!h)/,chip:'s',def:['sit','see','sea'],strict:1},
+ w:{k:'w',re:/wh|qu|w/,ipa:/w/,hre:/w|wh|qu/,chip:'w',def:['we','water','window'],strict:1},
+ ng:{k:'ng',re:/ng|nk/,ipa:/ŋ/,hre:/ng|nk/,chip:'ng',def:['sing','long','morning'],strict:1},
+ end:{k:'end',re:/[tdkp]$/,ipa:/[tdkpɡ]$/,hre:/[tdkp]$/,chip:'t d',def:['bed','bag','book'],strict:1},
+ ae:{k:'ae',re:/a/,ipa:/æ/,hre:/a/,chip:'æ',def:['cat','map','bad'],strict:1},
+ uh:{k:'uh',re:/u|o/,ipa:/ʌ/,hre:/u|o/,chip:'ʌ',def:['cup','bus','love'],strict:1}};
+var SNDORDER=['f','th','l','r','v','b','sh','s','w','ng','end','ae','uh'];
+var SNDSAY={l:'luh',r:'ruh',th:'thuh',v:'vuh',b:'buh',sh:'shuh',s:'suh',w:'wuh'};
 function hasSnd(id,w){var ip=ipaOf(w),d=SND[id];if(ip)return d.ipa.test(ip.slice(1,-1));return d.re.test(w)}
 function pickLessons(n){
  var sc={},ws={};SNDORDER.forEach(function(k){sc[k]=0;ws[k]=[]});
  try{boothStats().words.forEach(function(e){var w=String(e.w).toLowerCase();if(w.length<2)return;var top='',n=0;Object.keys(e.hs||{}).forEach(function(h){if(e.hs[h]>n){n=e.hs[h];top=h}});if(top==='(聞こえず)')top='';
-  SNDORDER.forEach(function(k){if(hasSnd(k,w)){var lack=top&&!SND[k].re.test(top);sc[k]+=e.m*(lack?2:1);ws[k].push(w)}})})}catch(e){}
+  SNDORDER.forEach(function(k){if(hasSnd(k,w)){var lack=top&&!(SND[k].hre||SND[k].re).test(top);if(SND[k].strict&&!lack)return;sc[k]+=e.m*(lack?2:1);ws[k].push(w)}})})}catch(e){}
  var order=SNDORDER.filter(function(k){return sc[k]>0}).sort(function(a,b){return sc[b]-sc[a]}).slice(0,n||1);
  return order.map(function(best){var w=ws[best].slice(0,3);SND[best].def.forEach(function(d){if(w.length<3&&w.indexOf(d)<0)w.push(d)});return {snd:best,words:w}})}
 var SVGF=null;
@@ -1849,17 +1857,43 @@ function phoLipsSet(id){
  var T=function(x,y,sz,col,t){return '<text x="'+x+'" y="'+y+'" text-anchor="middle" font-size="'+sz+'" font-weight="800" fill="'+col+'" font-family="\'M PLUS Rounded 1c\',sans-serif">'+t+'</text>'};
  var head=function(e,a,b,j,c,d){return T(80,26,12,'#c8182a',e)+T(80,40,9,'#4a3a2a',a)+T(80,52,9,'#4a3a2a',b)+T(233,26,12,'#6b7390',j)+T(233,40,9,'#6b7390',c)+T(233,52,9,'#6b7390',d)+'<path d="M156 34v92" stroke="#c9c4b4" stroke-width="1.2" stroke-dasharray="3 3"/>'};
  var INK='#10131f',DK='#5a1a2a',TG='#f0788a';
- var side=function(tx,ty,kind,gray){
-  var g='<g transform="translate('+tx+' '+ty+') scale(.8)"'+(gray?' opacity=".8"':'')+'>';
-  g+='<path d="M14 26Q40 10 80 8Q112 8 124 22L124 74Q80 84 14 62Z" fill="'+DK+'" stroke="'+INK+'" stroke-width="1.5"/>';
+
+ var side=function(tx,ty,kind,gray,dy){
+  dy=dy||0;var g='<g transform="translate('+tx+' '+ty+') scale(.8)"'+(gray?' opacity=".8"':'')+'>';
+  g+='<path d="M14 26Q40 10 80 8Q112 8 124 22L124 '+(74+dy)+'Q80 '+(84+dy)+' 14 '+(62+dy)+'Z" fill="'+DK+'" stroke="'+INK+'" stroke-width="1.5"/>';
   g+='<path d="M24 24Q30 20 34 26L30 30Z" fill="#e8a09a"/>';
   var tongue={L:'M124 74L124 46Q100 44 78 46Q52 46 36 36Q28 31 27 28Q24 36 30 46Q40 60 70 66Q100 72 124 74Z',
    R:'M124 74L124 44Q104 40 92 34Q78 26 64 28Q56 28 58 36Q62 46 52 54Q46 60 64 65Q98 72 124 74Z',
-   N:'M124 74L124 46Q100 44 78 46Q52 46 38 40Q32 38 31 34Q28 40 33 48Q42 60 70 66Q100 72 124 74Z'}[kind];
-  g+='<path d="'+tongue+'" fill="'+TG+'" stroke="'+INK+'" stroke-width="1.5" stroke-linejoin="round"/>';
-  g+='<rect x="12" y="26" width="8" height="15" rx="2" fill="#fff" stroke="'+INK+'" stroke-width="1.2"/><rect x="12" y="48" width="8" height="13" rx="2" fill="#fff" stroke="'+INK+'" stroke-width="1.2"/>';
+   N:'M124 74L124 46Q100 44 78 46Q52 46 38 40Q32 38 31 34Q28 40 33 48Q42 60 70 66Q100 72 124 74Z',
+   S:'M124 74L124 50Q100 46 80 42Q56 38 44 36Q34 38 30 48Q28 56 32 60Q50 68 76 68Q104 72 124 74Z',
+   SH:'M124 74L124 46Q104 38 86 34Q68 30 56 34Q48 38 50 46Q56 56 70 62Q96 70 124 74Z',
+   NG:'M124 74L124 40Q122 28 112 24Q102 24 98 34Q92 46 70 48Q50 50 40 52Q30 54 30 58Q32 64 50 66Q90 72 124 74Z',
+   A:'M124 74L124 50Q104 50 82 54Q58 58 40 56Q32 56 30 60Q30 68 42 70Q80 74 124 74Z',
+   U:'M124 74L124 46Q100 46 78 48Q54 50 40 46Q34 44 32 42Q30 50 34 56Q44 66 70 68Q100 72 124 74Z',
+   AJ:'M124 74L124 46Q100 44 78 46Q52 46 38 40Q32 38 31 34Q28 40 33 48Q42 60 70 66Q100 72 124 74Z'}[kind];
+  var vow=(kind==='A'||kind==='U'||kind==='AJ');
+  g+='<path d="'+tongue+'"'+(vow?' transform="translate(0 '+dy+')"':'')+' fill="'+TG+'" stroke="'+INK+'" stroke-width="1.5" stroke-linejoin="round"/>';
+  g+='<rect x="12" y="26" width="8" height="15" rx="2" fill="#fff" stroke="'+INK+'" stroke-width="1.2"/><rect x="12" y="'+(48+dy)+'" width="8" height="13" rx="2" fill="#fff" stroke="'+INK+'" stroke-width="1.2"/>';
   if(kind==='L')g+='<circle cx="27" cy="27" r="6" fill="none" stroke="#ffdd33" stroke-width="2.5"/>';
   if(kind==='R')g+='<path d="M52 14L84 14M77 9L84 14L77 19" fill="none" stroke="#ffdd33" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
+  var YA=function(d){return '<path d="'+d+'" fill="none" stroke="#ffdd33" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'};
+  if(kind==='S'||kind==='SH')g+=YA('M30 40L4 40M11 35L4 40L11 45');
+  if(kind==='SH')g+='<path d="M14 26Q0 30 0 44Q0 56 14 62" fill="none" stroke="#e8453c" stroke-width="4" stroke-linecap="round"/>';
+  if(kind==='NG'){g+='<circle cx="110" cy="25" r="6" fill="none" stroke="#ffdd33" stroke-width="2.5"/>'+YA('M118 12L118 0M112 6L118 0L124 6')}
+  if(vow&&kind!=='AJ')g+=YA('M40 34L40 '+(66+dy)+'M34 '+(58+dy)+'L40 '+(66+dy)+'L46 '+(58+dy));
+  return g+'</g>'},
+ lips=function(tx,ty,kind,gray){
+  var g='<g transform="translate('+tx+' '+ty+') scale(.8)"'+(gray?' opacity=".8"':'')+'>',E='#e8453c',E2='#f0584c';
+  if(kind==='closed'){
+   g+='<path d="M10 44Q40 22 65 30Q90 22 120 44Q90 52 65 50Q40 52 10 44Z" fill="'+E+'" stroke="'+INK+'" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 44Q40 52 65 50Q90 52 120 44Q96 70 65 70Q34 70 10 44Z" fill="'+E2+'" stroke="'+INK+'" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 44Q65 56 120 44" fill="none" stroke="'+INK+'" stroke-width="2" stroke-linecap="round"/>';
+   g+='<path d="M48 18L42 8M65 14L65 4M82 18L88 8" fill="none" stroke="#ffdd33" stroke-width="3" stroke-linecap="round"/>'}
+  else if(kind==='vteeth'){
+   g+='<path d="M10 44Q65 6 120 44Q65 82 10 44Z" fill="'+DK+'" stroke="'+INK+'" stroke-width="1.5"/><path d="M34 30Q65 22 96 30L94 46L36 46Z" fill="#fff" stroke="'+INK+'" stroke-width="1.2"/><path d="M62 24V44" stroke="#cfc9b8"/><path d="M36 46L94 46L92 62Q65 70 38 62Z" fill="'+TG+'" stroke="'+INK+'" stroke-width="1.5" stroke-linejoin="round"/>'}
+  else if(kind==='round'){
+   g+='<ellipse cx="65" cy="44" rx="28" ry="24" fill="'+E+'" stroke="'+INK+'" stroke-width="1.5"/><ellipse cx="65" cy="44" rx="11" ry="10" fill="'+DK+'" stroke="'+INK+'" stroke-width="1.2"/>';
+   g+='<path d="M24 14L32 22M106 14L98 22M24 74L32 66M106 74L98 66" fill="none" stroke="#ffdd33" stroke-width="3" stroke-linecap="round"/>'}
+  else{
+   g+='<ellipse cx="65" cy="44" rx="34" ry="13" fill="'+E+'" stroke="'+INK+'" stroke-width="1.5"/><ellipse cx="65" cy="44" rx="14" ry="3.5" fill="'+DK+'"/>'}
   return g+'</g>'},
  front=function(tx,ty,kind,gray){
   var g='<g transform="translate('+tx+' '+ty+') scale(.8)"'+(gray?' opacity=".8"':'')+'>';
@@ -1881,6 +1915,24 @@ function phoLipsSet(id){
   out=head('えいごの R','したを うしろへ まるめる','どこにも さわらない','にほんごの「ら」','したを さっと はじく','（はの うらに ちょん）')+side(28,54,'R',0)+side(181,54,'N',1);
  }else if(id==='v'){
   out=SVGF.replace('えいごの F','えいごの V').replace('うえの はを','はを したの くちびるに').replace('したの くちびるに ちょん','ちょん＋こえを だして ブルル♪').replace('にほんごの「ふ」','にほんごの「ぶ」').replace('くちびるを まるめる','くちびるを とじる').replace(/(<g class="pl"[^>]*>)[\s\S]*?<\/g>/g,function(m,o){return o+WV('M54 60Q44 68 52 76T48 92T42 106')+'</g>'}).replace(/(<g class="pr"[^>]*>)[\s\S]*?<\/g>/g,function(m,o){return o+WV('M106 60Q116 68 108 76T112 92T118 106')+'</g>'});
+ }
+ else if(id==='b'){
+  out=head('えいごの B','くちびるを ぎゅっと とじて','ぽん！と ひらく(こえ あり)','えいごの V(ちがう！)','うえの はを したの','くちびるに あてる')+lips(28,58,'closed',0)+lips(181,58,'vteeth',1);
+ }else if(id==='w'){
+  out=head('えいごの W','くちびるを まるく つきだす','そこから ぱっと ひらく','にほんごの「う」','くちびるは ひらべったい','(つきださない)')+lips(28,58,'round',0)+lips(181,58,'flat',1);
+ }else if(id==='s'){
+  out=head('えいごの S','くちびるは まるめない','はの すきまから「スーッ」','にほんごの「し」','くちびるを まるめて','したが うしろへ')+side(28,54,'S',0)+side(181,54,'SH',1);
+ }else if(id==='sh'){
+  out=head('えいごの SH','くちびるを まるめる','したを うしろに「シーッ」','えいごの S(ちがう！)','したは はの うらに','すきまから「スーッ」')+side(28,54,'SH',0)+side(181,54,'S',1);
+ }else if(id==='ng'){
+  out=head('えいごの NG','ベロの おくを うわあごへ','はなから「ん〜」','やりがち','ん ＋「グ」','「グ」は いらない')+side(28,54,'NG',0)+T(233,112,40,'#c8182a','グ ✕');
+ }else if(id==='end'){
+  var TS=function(x,y,sz,col,a,b2){return '<text x="'+x+'" y="'+y+'" text-anchor="middle" font-size="'+sz+'" font-weight="800" fill="'+col+'" font-family="\'M PLUS Rounded 1c\',sans-serif">'+a+'<tspan fill="#c8182a">'+b2+'</tspan></text>'};
+  out=head('えいごの さいごの おと','したや くちびるを とめて','いきを とめるだけ','にほんご ふうだと','bed →「べっど」','さいごに「お」が つく')+TS(80,110,44,'#10131f','be','d')+T(80,128,10,'#4a3a2a','「ド」と いわない！ とめる')+TS(233,112,36,'#6b7390','べっ','ど ✕');
+ }else if(id==='ae'){
+  out=head('えいごの a (cat)','あごを おもいきり さげる','よこに ひろげて「エァ」','にほんごの「あ」','あごは ふつう','(たてに ひらく)')+side(28,50,'A',0,22)+side(181,50,'AJ',1,10);
+ }else if(id==='uh'){
+  out=head('えいごの u (cup)','あごは すこしだけ','ちからを ぬいて みじかく「ア」','にほんごの「あ」','はっきり おおきく','あける')+side(28,52,'U',0,8)+side(181,52,'AJ',1,18);
  }
  v.innerHTML=out}
 function startCamp(){
