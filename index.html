@@ -991,17 +991,27 @@ Object.assign(DLG,{
    {y:"*Here* you are. *Thank* you *very* *much*!",jp:"どうぞ。ありがとうございます。"}],
   words:[["SIM card","/sɪm kɑːrd/","SIMカード"],["data","/ˈdeɪtə/","データ"],["gigabyte","/ˈɡɪɡəbaɪt/","ギガバイト"],["set up","/sɛt ʌp/","設定する"],["register","/ˈrɛdʒɪstər/","登録する"]]},
  arr_taxi:{who:'タクシー乗り場の係員',story:1,bg:'taxi',sp:'taxi_staff',hero:'blue',lulu:'plain',nogold:1,inter:[],
-  intro:'外に出ると、あたたかい風。タクシー乗り場と Dubai Metro の案内が見える。',
+  intro:'外に出ると、あたたかい風。タクシー乗り場に、係員が立っている。',
   lines:[
    {n:"Hello! Do you need a taxi?",jp:"こんにちは。タクシーが必要ですか。"},
    {y:"*Yes*. *How* *much* is it to the *JW* *Marriott* *Marquis*?",jp:"はい。JWマリオット・マーキスまでいくらですか。"},
-   {n:"About forty-five dirhams. Or you can take the Dubai Metro.",jp:"だいたい45ディルハムです。Dubai Metro も使えますよ。"},
-   {y:"*Where* is the *metro* *station*?",jp:"メトロの駅はどこですか。"},
-   {n:"Follow the signs. It is a short walk from the terminal.",jp:"案内に従ってください。ターミナルから少し歩きます。"},
+   {n:"About forty-five dirhams.",jp:"だいたい45ディルハムです。"},
    {y:"*Okay*. I'll *take* a *taxi*. It is *late*.",jp:"わかりました。タクシーにします。もう遅いので。"},
    {n:"Please get in. Do you have any luggage?",jp:"どうぞ乗ってください。荷物はありますか。"},
    {y:"*Only* a *backpack*. *Please* *take* us to the *hotel*.",jp:"リュックだけです。ホテルまでお願いします。"}],
-  words:[["taxi","/ˈtæksi/","タクシー"],["metro","/ˈmɛtroʊ/","地下鉄"],["station","/ˈsteɪʃən/","駅"],["short walk","/ʃɔːrt wɔːk/","少しの徒歩"],["luggage","/ˈlʌɡɪdʒ/","荷物"]]},
+  words:[["taxi","/ˈtæksi/","タクシー"],["dirham","/dɪrˈhæm/","ディルハム"],["hotel","/hoʊˈtɛl/","ホテル"],["get in","/ɡɛt ɪn/","乗る"],["luggage","/ˈlʌɡɪdʒ/","荷物"]]},
+ arr_metro:{who:'メトロ駅の係員',story:1,bg:'metro',sp:'metro_staff',hero:'blue',lulu:'plain',nogold:1,inter:[],
+  intro:'Dubai Metro の駅。券売機とゲートが見える。係員に声をかけよう。料金は RTA(ドバイ道路交通局)の公式ページの数字を参考にした目安。',
+  lines:[
+   {n:"Hello! Do you need help with the metro?",jp:"こんにちは。メトロのことでお手伝いしましょうか。"},
+   {y:"*Yes*. *How* *much* is it to the *JW* *Marriott* *Marquis*?",jp:"はい。JWマリオット・マーキスまでいくらですか。"},
+   {n:"About seven and a half dirhams. It is cheaper than a taxi.",jp:"だいたい7.5ディルハムです。タクシーより安いですよ。"},
+   {y:"*Good*. I *need* a *Nol* *card*. *Where* can I *buy* one?",jp:"いいですね。ノルカードが必要です。どこで買えますか。"},
+   {n:"Use the ticket machine over there. Then go through the gate.",jp:"あそこの券売機を使ってください。そのあとゲートを通ります。"},
+   {y:"*Okay*. *Which* *platform* is the *train* to the *city*?",jp:"わかりました。市内行きの電車は何番ホームですか。"},
+   {n:"Follow the red signs. The train comes every few minutes.",jp:"赤い案内に従ってください。電車は数分おきに来ます。"},
+   {y:"*Thank* you *very* much. *Have* a *nice* *day*!",jp:"ありがとうございます。よい一日を！"}],
+  words:[["metro","/ˈmɛtroʊ/","地下鉄"],["Nol card","/noʊl kɑːrd/","ノルカード"],["ticket machine","/ˈtɪkɪt məˈʃiːn/","券売機"],["platform","/ˈplætfɔːrm/","ホーム"],["cheaper","/ˈtʃiːpər/","より安い"]]},
  dep_checkin:{who:'Emirates のチェックイン係',story:1,bg:'checkin',sp:'checkin_staff',hero:'kandura',lulu:'plain',inter:[],
   intro:'帰りの日。ターミナル3のチェックインカウンターで、Emirates の係員に声をかけよう。',
   lines:[
@@ -2541,7 +2551,7 @@ var PLACES_ARR=[
  {id:'immig',name:'入国審査',snd:'info',x:22,y:16,ico:'🛂',tip:['入国審査(Passport Control)','パスポート・目的・滞在日数・ホテル名'],v:['arr_immig']},
  {id:'bag',name:'手荷物受け取り',snd:'hall',x:70,y:36,ico:'🧳',tip:['バゲージクレーム','スーツケースが出てこない！'],v:['arr_bag']},
  {id:'sim',name:'SIMカード売り場',snd:'info',x:24,y:58,ico:'📱',tip:['du と e& のSIM売り場','データ量と日数を選ぶ'],v:['arr_sim']},
- {id:'taxi',name:'タクシー・Dubai Metro',snd:'hall',x:70,y:84,ico:'🚕',tip:['タクシー乗り場と Dubai Metro','行き先と料金をたずねる'],v:['arr_taxi']}];
+ {id:'taxi',name:'タクシー・Dubai Metro',snd:'hall',x:70,y:84,ico:'🚕',tip:['タクシー乗り場と Dubai Metro','どちらで行く？ メトロの料金は RTA 公式を参考にした目安'],hub:true,hubBg:'taxi',hubMsg:'タクシー乗り場と Dubai Metro の案内。ホテルまで、どちらで行く？',menu:[['🚕 タクシーで いく','arr_taxi'],['🚆 メトロで いく','arr_metro']],v:['arr_taxi','arr_metro']}];
 var PLACES_DEP=[
  {id:'checkin',name:'チェックイン(Emirates)',snd:'info',x:22,y:12,ico:'🎫',tip:['Emirates チェックインカウンター','座席・荷物・搭乗券'],v:['dep_checkin']},
  {id:'security',name:'保安検査',snd:'info',x:72,y:26,ico:'🔍',tip:['保安検査','荷物・ベルト・液体'],v:['dep_security']},
@@ -2554,6 +2564,7 @@ SP.officer={pitch:.9,m:[[trav({hair:'cap'}),P(3,{o:'#2b3a5a',p:'#2b2b33',h:'#241
 SP.bag_staff={pitch:1,m:[[trav({}),P(2,{o:'#f2b705',p:'#2a2a33',h:'#241a14'})]]};
 SP.sim_staff={pitch:1.15,m:[[trav({hair:'long'}),P(1,{o:'#1d6aa8',p:'#2a2a33',h:'#241a14'})]]};
 SP.taxi_staff={pitch:.9,m:[[trav({hair:'cap'}),P(4,{o:'#e8d8a8',p:'#3a3a48',h:'#241a14'})]]};
+SP.metro_staff={pitch:1.1,m:[[trav({hair:'long'}),P(1,{o:'#c8182a',p:'#2a2a33',h:'#241a14'})]]};
 SP.checkin_staff={pitch:1.2,m:[[trav({hair:'long'}),P(1,{o:'#c8182a',p:'#2a2a33',h:'#241a14'})]]};
 SP.security_staff={pitch:.85,m:[[trav({hair:'cap'}),P(3,{o:'#14141a',p:'#14141a',h:'#241a14'})]]};
 SP.duty_staff={pitch:1.1,m:[[trav({}),P(2,{o:'#143fb0',p:'#2a2a33',h:'#241a14'})]]};
@@ -2579,6 +2590,10 @@ BGS.taxi=function(){grad(0,70,'#7cc4ee','#dff2fa',10);R('#cfd6e4',0,40,VW,28);fo
  R('#143fb0',20,6,70,17);T('TAXI',55,14.5,11,'#fff');R('#c8182a',190,6,120,17);T('DUBAI METRO ▶',250,14.5,9,'#fff');
  for(var k=0;k<2;k++){var x=130+k*90;R('#e8d8a8',x,70,70,18);R('#d6c48c',x+10,60,46,12);R('#7ac0f0',x+14,62,16,9);R('#7ac0f0',x+34,62,16,9);R('#c8182a',x+16,56,34,4);R('#14141a',x+8,86,12,8);R('#14141a',x+50,86,12,8)}
  R('#2f7a4a',296,50,6,40);R('#2f7a4a',286,50,26,8)};
+BGS.metro=function(){airWall('#e4e8ee');floorAir('#cfd4de','#b9bfcc');signBox(90,8,140,'DUBAI METRO','#c8182a');
+ for(var i=0;i<3;i++){var x=22+i*56;R('#2b3a5a',x,38,34,52);R('#9ad0f0',x+4,44,26,16);R('#14141a',x+8,68,18,4);R('#c8182a',x+12,78,10,4)}
+ R('#c8182a',0,32,VW,3);
+ for(i=0;i<3;i++){var gx=196+i*38;R('#8a8a94',gx,62,8,36);R('#8a8a94',gx+22,62,8,36);R(Math.floor(t*2+i)%2?'#3ad36a':'#2a8a4a',gx+11,70,8,10)}};
 BGS.checkin=function(){airWall('#eef0f4');floorAir('#d8dce6','#c4c8d4');
  for(var i=0;i<4;i++){var x=20+i*76;R('#c8182a',x,13,64,18);T('Emirates',x+32,22,10.5,'#fff');R('#d9d4c6',x,62,64,36);R('#9a947f',x,62,64,3);R('#14141a',x+22,50,20,12);R('#2a6a9a',x+24,52,16,8)}
  for(i=0;i<8;i++){R('#c9a03a',14+i*40,112,2,12);R('#8a1a2a',14+i*40,114,38,1)}};
