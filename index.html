@@ -2034,12 +2034,16 @@ function phoPass(){
 function phoFail(res){
  var P=PHO,g=phoGuard();Snd.jingle('buzz');P.fails++;
  if(P.stage===1&&res)P.heard=P.heard||{};
- phoRender();phoStat(P.stage===3?'もういちど！ ゆっくり つなげて':'もういちど！','ng');phoMsgSet('Try again.','もういちど！ ルルの こえを よく きいてね');
+ phoRender();phoStat(P.stage===3?'もういちど！ ゆっくり つなげて':'もういちど！'+(P.lastHeard?'（きこえたのは "'+P.lastHeard+'"）':''),'ng');phoMsgSet('Try again.','もういちど！ ルルの こえを よく きいてね');
  phoSpeak('Try again.',.9,function(){if(P.auto<2){P.auto++;setTimeout(g(phoListenAuto),250)}})}
+var PHOMO={"i'll":['aisle','isle','ill','i','all','eye','oil','ail','aill','ale'],'ill':["i'll",'aisle','isle'],'right':['write','rite','light'],'light':['right','white'],'rice':['lice','rise'],'lice':['rice'],'very':['berry','bury'],'berry':['very'],'bus':['boss','bass'],'cup':['cop','cap'],'cat':['cut','kat'],'bad':['bed','bat'],'sing':['sin','thing'],'long':['lung','along']};
 function phoEval(txt){
  var P=PHO,toks=P.stage===3?parseCue(P.sents[P.idx]).map(function(k){return k.txt}):[phoCur()],res=analyze(toks,txt);
  if(P.stage===3){P.res=res;if(res.ratio>=0.7)phoPass();else phoFail(res);return}
  var hs=res.heardRaw.length?res.heardRaw.join(' '):'',ok=res.okN===res.n;
+ /* 同じ音の別の綴り(聞き分けられない語)は合格にする */
+ if(!ok&&toks.length===1){var hk=missKey(toks[0]),hm=PHOMO[hk];if(hm&&res.heardRaw.some(function(w){var x=missKey(w);return x===hk||hm.indexOf(x)>=0}))ok=true}
+ P.lastHeard=hs;
  if(P.stage===2){var p=Math.round(100*(res.n?res.okN/res.n:0)),ws=res.words&&res.words[0];
   if(!ok&&ws&&ws.h){p=Math.round(100*Math.max(0,1-lev(missKey(toks[0]),String(ws.h).replace(/[^a-z']/g,''))/Math.max(missKey(toks[0]).length,1)))}
   P.atts.push({n:P.atts.length+1,h:hs,ok:ok,p:p,w:toks[0]})}
