@@ -250,7 +250,7 @@ body.big .cue .w{font-size:30px}body.big .cue .w.s{font-size:52px}
 
 <div id="app">
   <div id="mapView">
-    <div class="mapbar"><h1>ドバイ国際空港 ターミナル3<small>コンコースB・カンペ先生 試作</small></h1><div style="display:flex;gap:6px;align-items:center"><span class="badge">私用</span><button id="sndBtn" class="btn sub" type="button" aria-label="音のオンオフ">🔊</button></div></div>
+    <div class="mapbar"><h1>ドバイ国際空港 ターミナル3<small>コンコースB・カンペ先生 試作</small></h1><div style="display:flex;gap:6px;align-items:center"><span class="badge">私用</span><button id="worldBtn" class="btn sub" type="button" aria-label="世界マップへ">🌏</button><button id="sndBtn" class="btn sub" type="button" aria-label="音のオンオフ">🔊</button></div></div>
     <div id="pips" aria-label="進み具合"></div>
     <div id="map"><svg id="paths" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg></div>
     <div id="modeBar" class="modebar"></div>
@@ -1710,6 +1710,7 @@ function boothPractice(tokens,key){
  act.addEventListener('contextmenu',function(e){e.preventDefault()})}
 function refreshBoothBtn(){var n=boothCount();$m('boothBtn').textContent='✈ 強化合宿 ・ 言えなかった単語 '+n+'語'}
 $m('boothBtn').addEventListener('click',function(){if(G.view==='map')startCamp()});
+$m('worldBtn').addEventListener('click',function(){if(G.view==='map')location.href='world/?map=1'});
 $m('boothBack').addEventListener('click',function(){showMap()});
 
 function syl(w){return Math.max(1,(w.match(/[aeiouy]+/gi)||[]).length)}
