@@ -1217,7 +1217,7 @@ function showCue(){
  var spans=toks.map(function(k){var s=el('span','w'+(k.s?' s':''),k.txt);card.appendChild(s);return s});
  panel.appendChild(card);var stat=el('div','stat','');panel.appendChild(stat);
  var row=el('div','row');var demo=el('button','btn sub','おてほん');demo.type='button';row.appendChild(demo);
- demo.addEventListener('click',function(){say(cueText(T.cue),.8,1)});
+ demo.addEventListener('click',function(){if(set.vmode==='mic'&&G.rec){try{G.rec.abort()}catch(e){}G.rec=null}say(cueText(T.cue),.8,1,gd(function(){later(400,function(){if(set.vmode==='mic'&&act.isConnected&&!act.disabled&&(G.phase==='cue'||G.phase==='retry'||G.phase==='assist'))act.click()})}))});
  var act=el('button','btn',set.vmode==='mic'?'🎤 もういちど':'おして よむ');act.type='button';row.appendChild(act);panel.appendChild(row);
  setupAction(act,stat,toks,spans,T);
  if(!G.camp)addHelp(T);

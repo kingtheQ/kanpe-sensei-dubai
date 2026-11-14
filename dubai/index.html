@@ -1495,7 +1495,7 @@ function showCue(){
  var spans=toks.map(function(k){var s=el('span','w'+(k.s?' s':''),k.txt);card.appendChild(s);return s});
  panel.appendChild(card);var stat=el('div','stat','');card.appendChild(stat);
  var row=el('div','row cuerow');var demo=el('button','btn sub','おてほん');demo.type='button';row.appendChild(demo);
- demo.addEventListener('click',function(){say(cueText(T.cue),.8,1)});
+ demo.addEventListener('click',function(){var sd=G.sid;if(G.mute)G.mute();say(cueText(T.cue),.8,1,function(){later(400,function(){if(G.sid===sd&&G.kick)G.kick()})})});
  var act=el('button','btn','🎤 もういちど');act.type='button';row.appendChild(act);panel.appendChild(row);fitCue(card);requestAnimationFrame(function(){fitCue(card)});
  setupAction(act,stat,toks,spans,T);
  if(SR&&!PREF.silent)later(500,function(){if(G.kick)G.kick()});
@@ -1582,7 +1582,7 @@ function renderEval(card,spans,toks,res,heardEl){
  if(!res.heardRaw.length){heardEl.appendChild(document.createTextNode('…'));return}
  res.heardRaw.forEach(function(h,j){var e=document.createElement(res.hflags[j]==='bad'?'b':'span');e.textContent=h+' ';heardEl.appendChild(e)})}
 function setupAction(act,stat,toks,spans,T){
- var card=spans.length?spans[0].parentNode:null;
+ G.mute=null;var card=spans.length?spans[0].parentNode:null;
  if(!SR||!card||PREF.silent){setupActionTimer(act,stat,toks,spans,T);if(card)card.appendChild(el('div','heard nomic',PREF.silent?'こえを ださない モード(時間だけで判定)':'このブラウザは音声認識なし(時間だけで判定)'));return}
  var heardEl=el('div','heard','');card.appendChild(heardEl);
  var tgToks=toks.map(function(k){return k.txt}),sid=G.sid,rec=null,listening=false,got=false,lastInt='',errCode='',mode='say',IDLE='🎤 もういちど';
@@ -1595,6 +1595,8 @@ function setupAction(act,stat,toks,spans,T){
   setupActionTimer(a2,stat,toks,spans,T);stat.className='stat ng';stat.textContent=msg+'。長押しにもどします'}
  var noHear=0;
  G.kick=function(){if((G.phase==='cue'||G.phase==='retry'||G.phase==='assist')&&alive()&&!listening&&!rec&&act.isConnected)start()};
+ /* おてほんの あいだは 聞くのを止める(ルルの声で 合格にならないように) */
+ G.mute=function(){if(rec){var r0=rec;rec=null;try{r0.abort()}catch(e){}}listening=false;Snd.duck(0);if(act.isConnected)setIdle();heardEl.textContent=''};
  function finish(txt,conf){
   var res=analyze(tgToks,txt);renderEval(card,spans,toks,res,heardEl);
   plogAdd({ts:Date.now(),v:G.scene?G.scene.vid:'',tg:tgToks.join(' '),hd:String(txt||'').slice(0,200),cf:conf||0,ok:res.okN,n:res.n,
