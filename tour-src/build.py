@@ -232,7 +232,7 @@ o = rep(o, "if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}showMap()}",
         "if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}"
         "if(S.pl.id==='qplane'){worldAt('nairobi');Snd.go(null);location.href='../world/?fly=doha';return}"
         "showMap();if(S.pl.id==='ticket'&&save.ticket)setMode('arr');"
-        "if(S.pl.id==='gate'){setMode('dep');G.at='qplane';placeWalkers('qplane',true)}}")
+        "if(S.pl.id==='gate')setMode('dep')}")
 o = rep(o, KBASE, KBASE + "K.sage=K.hall;K.tdesk=K.info;"
         "K.nbo={bpm:function(){return 84},amb:function(){loopNoise(500,.7,.02,.1,.01,'lowpass')},"
         "st:function(s,t,e){var KN=[64,67,69,72,69,67,64,62];if(s%2===0)pluck(hz(KN[(s>>1)%8]),t,e*2.2,ngt?.08:.12);"

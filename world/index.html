@@ -30,6 +30,9 @@ button{font:inherit;color:inherit;cursor:pointer}
 .card{background:#05070f;border:4px double #f4f1e8;border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
 .row{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
 .dim{color:#9aa6c4}
+.card.here{background:#fff3b8;border:0;border-radius:10px;color:#14141a}
+.card.here .dim{color:#4a4a3a}
+.card.here .hint{font-size:17px;line-height:1.6;color:#14141a}
 .small{font-size:12px}
 .mid{font-size:13px;line-height:1.7}
 .place{font-size:24px}
@@ -182,12 +185,12 @@ button{font:inherit;color:inherit;cursor:pointer}
  </div>
  <div class="mapbox" id="mapBox"></div>
  <div class="lower">
-  <div class="card">
+  <div class="card here">
    <div class="row">
     <div><div class="small dim">いまの ばしょ</div><div class="place" id="curName"></div></div>
     <div class="mid" style="text-align:right"><div id="cntClear"></div><div id="cntOpen"></div></div>
    </div>
-   <div class="mid dim">？を おすと、つぎの 行き先を えらべます。</div>
+   <div class="hint">？を おすと、つぎの 行き先を えらべます。</div>
   </div>
   <div class="cmdwin cmdmap" id="mapCmd">
    <button type="button" class="copt" id="mSet"><span class="cur">▶</span>しゅっぱつ準備する</button>
@@ -262,11 +265,11 @@ var AP={
  guam:{n:'グアム',en:'Guam',lon:144.80,lat:13.48,url:'../guam/'},
  dubai:{n:'ドバイ',en:'Dubai',lon:55.37,lat:25.25,url:'../dubai/',mx:59.5,my:20.5},
  nairobi:{n:'ナイロビ',en:'Nairobi',lon:36.93,lat:-1.32,url:'../tour/'},
- doha:{n:'ドーハ',en:'Doha',lon:51.61,lat:25.27,url:'../tour/doha/',mx:45.5,my:30}
+ doha:{n:'ドーハ',en:'Doha',lon:51.61,lat:25.27,url:'../tour/doha/',mx:45.5,my:30,gw:1}
 };
 /* 第1版: 羽田-グアム、グアム-ドバイ(臨時の線。20か所が揃ったら見本の地図に直す) */
 /* 世界一周編: 羽田-ナイロビ-ドーハ(oneworld の順)。mx/my は地図の上だけの位置(ドバイとドーハの札が重ならないように少しずらす。距離は lon/lat で計算) */
-var NEI={haneda:['guam','nairobi'],guam:['haneda','dubai'],dubai:['guam'],nairobi:['haneda','doha'],doha:['nairobi']};
+var NEI={haneda:['guam','nairobi'],guam:['haneda','dubai'],dubai:['guam','doha'],nairobi:['haneda','doha'],doha:['nairobi','dubai']};
 var TOTAL=20;
 var VB={x:10,y:-66,w:148,h:167};
 var has=function(o,k){return Object.prototype.hasOwnProperty.call(o,k)};
@@ -378,9 +381,9 @@ function visibleSet(s){
  var v={};
  Object.keys(AP).forEach(function(id){
   if(s.cleared[id]||s.seen[id]||s.at===id)v[id]=1;
-  else if(NEI[id].some(function(n){return s.cleared[n]}))v[id]=1});
+  else if(NEI[id].some(function(n){return s.cleared[n]||(AP[n].gw&&s.at===n)}))v[id]=1});
  return v}
-function isOpen(s,id){return !s.cleared[id]&&NEI[id].some(function(n){return s.cleared[n]})}
+function isOpen(s,id){return id!==s.at&&!s.cleared[id]&&(!!s.seen[id]||NEI[id].some(function(n){return s.cleared[n]||(AP[n].gw&&s.at===n)}))}
 
 function node(s,id,onTap){
  var p=xy(id),cur=s.at===id,cl=!!s.cleared[id];
@@ -409,7 +412,7 @@ function renderMap(){
  var vis=visibleSet(S),box=$('mapBox');box.textContent='';
  var svg=baseMap(),pairs=[],seen={};
  Object.keys(vis).forEach(function(a){NEI[a].forEach(function(b){
-  if(!vis[b])return;if(!(S.cleared[a]||S.cleared[b]))return;
+  if(!vis[b])return;if(!(S.cleared[a]||S.cleared[b]||S.seen[a]&&S.seen[b]))return;
   var k=[a,b].sort().join('-');if(seen[k])return;seen[k]=1;pairs.push([a,b])})});
  drawEdges(svg,pairs,S);
  Object.keys(vis).forEach(function(id){svg.appendChild(node(S,id,openGate))});

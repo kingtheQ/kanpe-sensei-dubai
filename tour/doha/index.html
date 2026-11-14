@@ -1,4 +1,6 @@
-<!doctype html><html lang="ja" translate="no"><head><meta charset=utf8><meta name="google" content="notranslate"><meta http-equiv="content-language" content="ja"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body translate="no" class="notranslate">
+<!doctype html><html lang="ja" translate="no"><head><meta charset=utf8><meta name="google" content="notranslate"><meta http-equiv="content-language" content="ja"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+.node.lock{opacity:.38;filter:grayscale(1)}
+</style></head><body translate="no" class="notranslate">
 <title>空港えいご物語 世界一周編 ドーハ</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&display=swap">
@@ -1022,7 +1024,7 @@ Object.assign(DLG,{
   intro:'帰りの日。ターミナル3のチェックインカウンターで、Emirates の係員に声をかけよう。',
   lines:[
    {n:"Good evening. Passport and booking, please.",jp:"こんばんは。パスポートと予約情報をお願いします。"},
-   {y:"*Here* you are. I am *going* to *Tokyo*.",jp:"どうぞ。東京へ行きます。"},
+   {y:"*Here* you are. *One* *suitcase* to *check* in.",jp:"どうぞ。預ける荷物はスーツケース1つです。"},
    {n:"Would you like a window seat or an aisle seat?",jp:"窓側と通路側、どちらがいいですか。"},
    {y:"A *window* *seat*, *please*.",jp:"窓側をお願いします。"},
    {n:"Do you have any bags to check?",jp:"預ける荷物はありますか。"},
@@ -1063,7 +1065,7 @@ Object.assign(DLG,{
  dep_gate:{who:'ゲートの係員',story:1,bg:'gate',sp:'gate_agent',hero:'kandura',lulu:'plain',inter:[],
   intro:'ゲート B25。窓の外には Emirates の飛行機。アナウンスが流れた。',
   lines:[
-   {n:"Attention, passengers. The flight to Tokyo is now boarding at gate B25.",jp:"お客様にご案内です。東京行きは、B25ゲートで搭乗中です。"},
+   {n:"Attention, passengers. Your flight is now boarding at gate B25.",jp:"お客様にご案内です。ご搭乗の便は、B25ゲートで搭乗中です。"},
    {y:"That is our *flight*, *Lulu*! Let's *go*.",jp:"ぼくたちの便だ、ルル。行こう。"},
    {n:"Boarding pass and passport, please.",jp:"搭乗券とパスポートをお願いします。"},
    {y:"*Here* you are.",jp:"どうぞ。"},
@@ -1436,14 +1438,16 @@ function buildMap(){
 function placeWalkers(id,instant){var p=PBY[id];[heroEl,buddyEl].forEach(function(w){if(instant)w.style.transition='none';w.style.left=p.x+'%';w.style.top=p.y+'%'});if(instant){void heroEl.offsetWidth;heroEl.style.transition='';buddyEl.style.transition=''}}
 function refreshMap(){
  PLACES.forEach(function(p){var n=nodeEls[p.id],dots=n.querySelectorAll('.dots i'),c0=0;
-  p.v.forEach(function(v,i){var on=(save.seen[v]||0)>0;dots[i].classList.toggle('on',on);if(on)c0++});n.classList.toggle('done',c0===p.v.length)});
+  p.v.forEach(function(v,i){var on=(save.seen[v]||0)>0;dots[i].classList.toggle('on',on);if(on)c0++});n.classList.toggle('done',c0===p.v.length);n.classList.toggle('lock',lockedPlace(p.id))});
  var pips=$m('pips');pips.textContent='';var d=0;PLACES.forEach(function(p){p.v.forEach(function(v){if(save.seen[v])d++})});for(var i=0;i<TOTALV;i++)pips.appendChild(el('i',i<d?'on':''))}
 function showMap(){
  G.view='map';Snd.go(MODE==='city'?'city':'map');G.sid++;clearTimers();stopSay();G.scene=null;G.camp=null;luHelp=false;luTalk=false;G.phase='idle';speaker=null;
  $m('sceneView').hidden=true;$m('boothView').hidden=true;$m('mapView').hidden=false;refreshBoothBtn();refreshCityBtn();
  if(!heroEl||!heroEl.isConnected)buildMap();refreshMap();drawMapBg();placeWalkers(G.at,true)}
+function lockedPlace(id){if(MODE!=='arr'&&MODE!=='dep')return false;for(var k=0;k<PLACES.length;k++){if(PLACES[k].id===id)return false;if(!PLACES[k].v.some(function(v){return save.seen[v]>0}))return true}return false}
 function onNode(id){
  if(G.view!=='map')return;
+ if(lockedPlace(id)){try{Snd.jingle('buzz')}catch(e){}return}
  if(G.at===id){enterPlace(id);return}
  G.view='walk';G.at=id;placeWalkers(id,false);setTimeout(function(){enterPlace(id)},800)}
 
@@ -1486,7 +1490,7 @@ function fitCue(card){
   var cr=card.getBoundingClientRect(),av=cr.height-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom);return (bot-top)>av}
  for(var i=0;i<20&&over()&&k>.45;i++){k-=.05;ws.forEach(function(w,j){w.style.fontSize=(base[j]*k).toFixed(1)+'px'})}}
 function showCue(){
- G.phase='cue';clearPanel();var T=G.scene.turns[G.ti],toks=parseCue(T.cue);clearInterval(G.typeTimer);msgText.textContent=T.npc;
+ G.cueSil=PREF.silent;G.phase='cue';clearPanel();var T=G.scene.turns[G.ti],toks=parseCue(T.cue);clearInterval(G.typeTimer);msgText.textContent=T.npc;
  var card=el('div','cue');card.appendChild(el('span','lab','カンペ'));
  var spans=toks.map(function(k){var s=el('span','w'+(k.s?' s':''),k.txt);card.appendChild(s);return s});
  panel.appendChild(card);var stat=el('div','stat','');card.appendChild(stat);
@@ -1809,7 +1813,8 @@ function openSettings(){
  var s4=sSec('ひょうじ');s4.appendChild(el('div','tt','カンペの もじの おおきさ'));s4.appendChild(sSeg([['ふつう',0],['おおきい',1]],'big'));b.appendChild(s4);
  var s5=sSec('ルルの カバンの きろくちょう');s5.appendChild(el('div','tt','えらんだ チケット：'+(save.ticket==='star'?'Star Alliance':save.ticket==='ow'?'oneworld':'まだ えらんでいない')));var dn=0;TOUR_IDS.forEach(function(k){if(save.seen[k]>0)dn++});s5.appendChild(el('div','tt','ドーハのの かいわ：'+dn+' / '+TOUR_IDS.length));b.appendChild(s5);
  $m('setView').hidden=false;$m('setBack').focus()}
-function closeSettings(){$m('setView').hidden=true}
+function closeSettings(){$m('setView').hidden=true;
+ if(G.view==='scene'&&G.scene&&!G.scene.hub&&G.cueSil!==undefined&&G.cueSil!==PREF.silent&&(G.phase==='cue'||G.phase==='retry'||G.phase==='assist')){G.sid++;clearTimers();stopSay();showCue()}}
 $m('setBack').addEventListener('click',closeSettings);
 (function(){var mb=document.querySelector('#mapView .mapbar>div'),sb=$m('sndBtn');if(mb&&sb)mb.insertBefore(mkSetBtn(),sb);
  var bm=document.querySelector('#boothView .mapbar');if(bm){var bw=mkWorldBtn();bm.insertBefore(bw,$m('boothBack'));bm.insertBefore(mkSetBtn(),$m('boothBack'))}
@@ -1828,8 +1833,8 @@ function ipaOf(t){
  if(k.indexOf('-')>0){var ps=k.split('-').map(function(p){var x=IPAMAP[p]||IPAC[p];return x?x.slice(1,-1):''});if(ps.every(Boolean))return '/'+ps.join(' ')+'/'}
  return ''}
 function fWords(){var out=[],seen={};save.weak.forEach(function(w){String(w.c||'').replace(/\*/g,'').split(/\s+/).forEach(function(t){var k=t.toLowerCase().replace(/[^a-z']/g,'');if(k.length>1&&/^(f|ph)/.test(k)&&!seen[k]){seen[k]=1;out.push(k)}})});return out.slice(0,3)}
-function missWords(skip){var out=[];try{boothStats().words.forEach(function(e){var k=String(e.w).toLowerCase();if(k.length>1&&out.length<3&&skip.indexOf(k)<0&&e.m>0){var top='',n=0;Object.keys(e.hs||{}).forEach(function(h){if(e.hs[h]>n){n=e.hs[h];top=h}});out.push({w:k,h:top==='(聞こえず)'?'':top})}})}catch(e){}return out}
-function weakSents(){var out=save.weak.slice(0,2).map(function(w){return String(w.c||'').replace(/\*/g,'')}).filter(Boolean);if(!out.length&&G.scene&&G.view!=='map'){var cur=G.scene.turns[G.ti];if(cur)out=[cueText(cur.cue)]}return out}
+function missWords(skip){var out=[];try{boothStats().words.forEach(function(e){var k=String(e.w).toLowerCase();if(k.length>1&&out.length<2&&skip.indexOf(k)<0&&e.m>0){var top='',n=0;Object.keys(e.hs||{}).forEach(function(h){if(e.hs[h]>n){n=e.hs[h];top=h}});out.push({w:k,h:top==='(聞こえず)'?'':top})}})}catch(e){}return out}
+function weakSents(){var out=save.weak.slice(0,1).map(function(w){return String(w.c||'').replace(/\*/g,'')}).filter(Boolean);if(!out.length&&G.scene&&G.view!=='map'){var cur=G.scene.turns[G.ti];if(cur)out=[cueText(cur.cue)]}return out}
 /* ---- 言えなかった単語から「その人の苦手な音」を選ぶ ---- */
 var SND={
  f:{k:'f',re:/ph|f/,ipa:/f/,chip:'f',def:['fine','flight','food']},
@@ -1852,8 +1857,8 @@ function pickLessons(n){
  var sc={},ws={};SNDORDER.forEach(function(k){sc[k]=0;ws[k]=[]});
  try{boothStats().words.forEach(function(e){var w=String(e.w).toLowerCase();if(w.length<2)return;var top='',n=0;Object.keys(e.hs||{}).forEach(function(h){if(e.hs[h]>n){n=e.hs[h];top=h}});if(top==='(聞こえず)')top='';
   SNDORDER.forEach(function(k){if(hasSnd(k,w)){var lack=top&&!(SND[k].hre||SND[k].re).test(top);if(SND[k].strict&&!lack)return;sc[k]+=e.m*(lack?2:1);ws[k].push(w)}})})}catch(e){}
- var order=SNDORDER.filter(function(k){return sc[k]>0}).sort(function(a,b){return sc[b]-sc[a]}).slice(0,n||1);
- return order.map(function(best){var w=ws[best].slice(0,3);SND[best].def.forEach(function(d){if(w.length<3&&w.indexOf(d)<0)w.push(d)});return {snd:best,words:w}})}
+ var order=SNDORDER.filter(function(k){return sc[k]>0}).sort(function(a,b){return sc[b]-sc[a]}).slice(0,1);
+ return order.map(function(best){var w=ws[best].slice(0,2);SND[best].def.forEach(function(d){if(w.length<2&&w.indexOf(d)<0)w.push(d)});return {snd:best,words:w}})}
 var SVGF=null;
 function phoLipsSet(id){
  var v=$m('phoLips');if(SVGF===null)SVGF=v.innerHTML;
@@ -2002,7 +2007,7 @@ function showPho(plan,sample){
  phoStage()}
 function phoStage(){
  var P=PHO;P.stage=P.stages[P.si];P.idx=0;P.fails=0;P.atts=[];P.res=null;P.beat=false;
- P.need=P.stage===3?1:3;
+ P.need=P.stage===3?1:2;
  if(P.stage===1){var L1=P.plan.lessons&&P.plan.lessons[P.l1];P.l1++;P.words=L1?L1.words:P.plan.fw;P.snd=L1?L1.snd:(P.plan.snd||'f');phoLipsSet(P.snd);var cc=document.querySelectorAll('#phoView .pchip');if(cc[0])cc[0].textContent=SND[P.snd].chip;if(cc[1])cc[1].textContent=SND[P.snd].chip}else if(P.stage===2)P.mw=P.plan.mw;else P.sents=P.plan.ss;
  phoItemStart()}
 /* ルルの おてほん(自動) → Repeat after me → きみが くりかえす(自動でマイク) */
@@ -2102,12 +2107,12 @@ function phoNext(){
 function phoCleanup(){var P=PHO;P.tk++;phoBeatOff();try{if(P.rec)P.rec.abort()}catch(e){}Snd.duck(0);stopSay();phoRun(false);$m('phoView').hidden=true;PHO=null;return P}
 function phoFinish(){
  var P=phoCleanup();Snd.jingle('clear');
- if(P.sample||P.plan.fromMap||!G.scene){showMap();return}
+ if(P.sample||P.plan.fromMap||!G.scene){if(/[?&]back=guam/.test(location.search)){location.href='../guam/#w=1';return}showMap();return}
  var done={};P.plan.ss.forEach(function(c){done[c]=1});save.weak=save.weak.filter(function(w){return !done[String(w.c||'').replace(/\*/g,'')]});storeSave();
  G.camp={scene:G.scene,ti:G.ti,sp:speaker,lt:luTalk};G.sid++;clearTimers();G.view='scene';$m('sceneView').hidden=false;Snd.go(G.snd||null);campDone()}
 function phoExit(proceed){
  if(!PHO)return;var P=phoCleanup();
- if(P.sample||P.plan.fromMap||!G.scene){showMap();return}
+ if(P.sample||P.plan.fromMap||!G.scene){if(/[?&]back=guam/.test(location.search)){location.href='../guam/#w=1';return}showMap();return}
  G.sid++;clearTimers();G.view='scene';$m('sceneView').hidden=false;Snd.go(G.snd||null);showCue()}
 
 /* ---------- 単語バトル(英語+発音記号 → 日本語を3択) ---------- */
@@ -2735,6 +2740,8 @@ function frame(ts){
   drawFront();if(A0&&A0.fg)A0.fg(p0,S0)}
  requestAnimationFrame(frame)}
 window.addEventListener('resize',function(){if(G.view==='map')drawMapBg()});
+/* グアム編の「強化合宿」から来たとき(?camp=1&back=guam): すぐ合宿を始め、終わったらグアムへ戻る */
+if(/[?&]camp=1/.test(location.search))setTimeout(function(){if(G.view==='map')startCamp()},400);
 
 /* ===== 世界一周編: ドーハ(到着)。空港・街・出発はこれから ===== */
 var TOURDLG={"doh_immig1": {"who": "入国審査の係官", "story": 1, "bg": "dimmig", "sp": "d_officer", "hero": "blue", "lulu": "plain", "nogold": 1, "inter": [], "intro": "ドーハのハマド国際空港に到着。広くてしずかな入国審査。係官は、短くていねいに話す。", "lines": [{"n": "Good evening. Passport, please.", "jp": "こんばんは。パスポートをお願いします。"}, {"y": "*Good* *evening*. *Here* *you* *are*.", "jp": "こんばんは。どうぞ。"}, {"n": "How long will you stay in Qatar?", "jp": "カタールにはどのくらい滞在しますか。"}, {"y": "*Only* *one* *night*. *We* *fly* *to* *Helsinki* *tomorrow*.", "jp": "1泊だけです。明日ヘルシンキへ飛びます。"}, {"n": "Do you have your onward ticket?", "jp": "次の行き先への航空券はありますか。"}, {"y": "*Yes*. *It* *is* *on* *my* *phone*. *Here*.", "jp": "はい。スマホに入っています。これです。"}, {"n": "Thank you. Please look at the camera, and do not smile.", "jp": "ありがとうございます。カメラを見てください。笑わないでくださいね。"}, {"y": "*Okay*. *Like* *this*?", "jp": "はい。こうですか。"}, {"n": "Yes. You may go. Enjoy your stay in Qatar.", "jp": "はい。お進みください。カタールでの滞在を楽しんで。"}, {"y": "*Thank* *you* *very* *much*.", "jp": "どうもありがとうございます。"}], "words": [["stay", "/ˈsteɪ/", "滞在する"], ["tomorrow", "/təˈmɑːˌroʊ/", "明日"], ["onward ticket", "/ˈɔːnwɚd ˈtɪkət/", "次の行き先への航空券"], ["smile", "/ˈsmaɪl/", "ほほえむ"], ["enjoy", "/ˌɛnˈdʒɔɪ/", "楽しむ"]]}, "doh_immig2": {"who": "入国審査の係官", "story": 1, "bg": "dimmig", "sp": "d_officer2", "hero": "blue", "lulu": "plain", "nogold": 1, "inter": [], "intro": "別の窓口。ホテルの名前を聞かれて、頭がまっ白になった。", "lines": [{"n": "Next, please. Where will you stay tonight?", "jp": "次の方どうぞ。今夜はどこに泊まりますか。"}, {"y": "*At* *a* *hotel* *near* *Souq* *Waqif*.", "jp": "スーク・ワキーフの近くのホテルです。"}, {"n": "What is the name of the hotel?", "jp": "ホテルの名前は何ですか。"}, {"y": "*Sorry*, *I* *forgot* *the* *name*. *One* *moment*, *please*.", "jp": "すみません、名前を忘れました。少し待ってください。"}, {"n": "Take your time. Do you have the booking?", "jp": "ごゆっくりどうぞ。予約はありますか。"}, {"y": "*Yes*! *Here* *is* *the* *booking* *on* *my* *phone*.", "jp": "はい！スマホに予約があります。"}, {"n": "I see it. Thank you. What is the purpose of your visit?", "jp": "確認しました。ありがとうございます。訪問の目的は何ですか。"}, {"y": "*Sightseeing*. *We* *want* *to* *see* *the* *old* *market*.", "jp": "観光です。古い市場を見たいです。"}, {"n": "Very good. Welcome to Qatar.", "jp": "けっこうです。カタールへようこそ。"}, {"y": "*Thank* *you*. *Have* *a* *good* *night*.", "jp": "ありがとう。おやすみなさい。"}], "words": [["tonight", "/təˈnaɪt/", "今夜"], ["forgot", "/fɚˈɡɑːt/", "忘れた"], ["booking", "/ˈbʊkɪŋ/", "予約"], ["sightseeing", "/ˈsaɪˈtsiːɪŋ/", "観光"], ["market", "/ˈmɑːrkət/", "市場"]]}, "doh_bag1": {"who": "手荷物受け取りのスタッフ", "story": 1, "bg": "dbag", "sp": "d_bag", "hero": "blue", "lulu": "plain", "nogold": 1, "inter": [], "intro": "手荷物受け取り。制服のスタッフが、すぐに気づいて声をかけてくれた。", "lines": [{"n": "Good evening, sir. May I help you?", "jp": "こんばんは。お手伝いしましょうか。"}, {"y": "*Yes*, *please*. *Where* *is* *the* *bag* *from* *Nairobi*?", "jp": "お願いします。ナイロビからの荷物はどこですか。"}, {"n": "The flight from Nairobi is on belt number eight.", "jp": "ナイロビからの便は8番のベルトです。"}, {"y": "*Belt* *eight*. *Is* *it* *far* *from* *here*?", "jp": "8番ですね。ここから遠いですか。"}, {"n": "No, it is just over there, on your right.", "jp": "いいえ、すぐあそこ、右側です。"}, {"y": "*Thank* *you*. *May* *I* *use* *this* *trolley*?", "jp": "ありがとう。このカートを使ってもいいですか。"}, {"n": "Yes, of course. Please take one.", "jp": "はい、もちろんです。お使いください。"}, {"y": "*Great*. *How* *long* *will* *the* *bags* *take*?", "jp": "よかった。荷物はどのくらいで出てきますか。"}, {"n": "About ten minutes. Thank you for waiting.", "jp": "10分ほどです。お待ちいただきありがとうございます。"}, {"y": "*No* *problem*. *Thank* *you*!", "jp": "大丈夫です。ありがとう！"}], "words": [["belt", "/ˈbɛlt/", "ベルト(荷物のレーン)"], ["far", "/ˈfɑːr/", "遠い"], ["over there", "/ˈoʊvɚ ˈðɛr/", "あそこ"], ["trolley", "/ˈtrɑːliː/", "カート"], ["waiting", "/ˈweɪtɪŋ/", "待つこと"]]}, "doh_bag2": {"who": "となりの旅行者", "story": 1, "bg": "dbag", "sp": "d_traveler", "hero": "blue", "lulu": "plain", "nogold": 1, "inter": [], "intro": "ベルトの前。同じ黒いスーツケースに、となりの人も手をのばした。", "lines": [{"n": "Excuse me, I think this black suitcase is mine.", "jp": "すみません、この黒いスーツケースは私のだと思います。"}, {"y": "*Sorry*, *but* *I* *think* *it* *is* *ours*. *Look* *at* *the* *name* *tag*.", "jp": "すみません、私たちのだと思います。名札を見てください。"}, {"n": "Oh! You are right. It is not my name. I am so sorry.", "jp": "あっ！そのとおりです。私の名前ではありません。本当にごめんなさい。"}, {"y": "*That's* *okay*. *They* *look* *the* *same*.", "jp": "大丈夫です。そっくりですから。"}, {"n": "Mine has a red ribbon on the handle.", "jp": "私のは、持ち手に赤いリボンがついています。"}, {"y": "*A* *red* *ribbon*? *I* *see* *one* *over* *there*!", "jp": "赤いリボン？あそこに1つ見えます！"}, {"n": "Yes, that is mine! Thank you so much.", "jp": "そう、あれが私のです！本当にありがとう。"}, {"y": "*You're* *welcome*. *Where* *are* *you* *from*?", "jp": "どういたしまして。どちらからですか。"}, {"n": "I am from India. I work here in Doha. Welcome!", "jp": "インドからです。ここドーハで働いています。ようこそ！"}, {"y": "*Thank* *you*! *Have* *a* *good* *night*.", "jp": "ありがとう！おやすみなさい。"}], "words": [["mine", "/ˈmaɪn/", "私のもの"], ["name tag", "/ˈneɪm ˈtæɡ/", "名札"], ["the same", "/ðə ˈseɪm/", "同じ"], ["ribbon", "/ˈrɪbən/", "リボン"], ["handle", "/ˈhændəl/", "持ち手"]]}, "doh_sim1": {"who": "Ooredooの店員", "story": 1, "bg": "dsim", "sp": "d_sim", "hero": "blue", "lulu": "plain", "nogold": 1, "inter": [], "intro": "到着ロビーのOoredoo。店員は手ぎわがよく、話もはやい。", "lines": [{"n": "Welcome to Ooredoo. How can I help you today?", "jp": "Ooredooへようこそ。ご用件は何でしょうか。"}, {"y": "*Hello*. *I* *need* *a* *SIM* *card* *for* *one* *day*.", "jp": "こんにちは。1日だけ使うSIMカードがほしいです。"}, {"n": "We have a visitor SIM. It is good for seven days.", "jp": "旅行者用のSIMがあります。7日間使えます。"}, {"y": "*Seven* *days* *is* *fine*. *How* *much* *is* *it*?", "jp": "7日間でいいです。いくらですか。"}, {"n": "It is thirty riyals. May I have your passport?", "jp": "30リヤルです。パスポートをお借りできますか。"}, {"y": "*Here* *you* *are*. *Can* *I* *pay* *by* *card*?", "jp": "どうぞ。カードで払えますか。"}, {"n": "Yes, card is fine. I will set it up for you.", "jp": "はい、カードで大丈夫です。こちらで設定します。"}, {"y": "*Thank* *you*. *Does* *it* *work* *now*?", "jp": "ありがとう。もう使えますか。"}, {"n": "Yes, it is ready. Enjoy your stay in Doha.", "jp": "はい、準備できました。ドーハでの滞在を楽しんで。"}, {"y": "*That* *was* *fast*! *Thank* *you*.", "jp": "はやい！ありがとう。"}], "words": [["visitor", "/ˈvɪzɪtɚ/", "訪問者"], ["riyal", "/riːˈɑːl/", "リヤル(カタールのお金)"], ["pay by card", "/ˈpeɪ ˈbaɪ ˈkɑːrd/", "カードで払う"], ["set up", "/ˈsɛt ˈʌp/", "設定する"], ["ready", "/ˈrɛdiː/", "準備ができた"]]}, "doh_sim2": {"who": "Ooredooの店員", "story": 1, "bg": "dsim", "sp": "d_sim2", "hero": "blue", "lulu": "plain", "nogold": 1, "inter": [], "intro": "SIMを入れたのに、地図が開かない。もう一度カウンターへ。", "lines": [{"n": "Hello again. Is everything all right?", "jp": "またいらっしゃいましたね。何かありましたか。"}, {"y": "*No*. *The* *internet* *does* *not* *work*.", "jp": "いいえ。インターネットがつながりません。"}, {"n": "Let me see. May I have your phone?", "jp": "見てみましょう。スマホをお借りできますか。"}, {"y": "*Sure*. *Here* *it* *is*.", "jp": "はい。どうぞ。"}, {"n": "Ah. Mobile data is off. I will turn it on.", "jp": "ああ。モバイルデータがオフです。オンにしますね。"}, {"y": "*Oh*, *I* *see*. *Is* *it* *working* *now*?", "jp": "そうだったんですね。もう動いていますか。"}, {"n": "Yes. Please open a map and try.", "jp": "はい。地図を開いて試してください。"}, {"y": "*It* *works*! *I* *can* *see* *the* *map*.", "jp": "つながった！地図が見えます。"}, {"n": "Good. If you have any trouble, please come back.", "jp": "よかったです。こまったら、またいらしてください。"}, {"y": "*I* *will*. *Thank* *you* *for* *your* *help*.", "jp": "そうします。助かりました。"}], "words": [["internet", "/ˈɪntɚˌnɛt/", "インターネット"], ["mobile data", "/ˈmoʊbəl ˈdeɪtə/", "モバイルデータ通信"], ["turn on", "/ˈtɚn ˈɑːn/", "オンにする"], ["try", "/ˈtraɪ/", "試す"], ["trouble", "/ˈtrʌbəl/", "こまったこと"]]}, "doh_taxi": {"who": "Karwaタクシーの係員", "story": 1, "bg": "dtaxi", "sp": "d_taxi", "hero": "blue", "lulu": "plain", "nogold": 1, "inter": [], "intro": "到着ロビーのはしにあるタクシー乗り場。係員が、しずかに手で列を案内している。", "lines": [{"n": "Good evening. Taxi? This way, please.", "jp": "こんばんは。タクシーですか。こちらへどうぞ。"}, {"y": "*Yes*, *please*. *We* *are* *going* *to* *Souq* *Waqif*.", "jp": "お願いします。スーク・ワキーフへ行きます。"}, {"n": "Souq Waqif. It takes about twenty minutes.", "jp": "スーク・ワキーフですね。20分ほどです。"}, {"y": "*Good*. *Does* *the* *taxi* *use* *a* *meter*?", "jp": "よかった。タクシーはメーターを使いますか。"}, {"n": "Yes, all Karwa taxis use a meter.", "jp": "はい、Karwaのタクシーはすべてメーター制です。"}, {"y": "*Can* *I* *pay* *by* *card*?", "jp": "カードで払えますか。"}, {"n": "Yes, card or cash. Please take the next taxi in line.", "jp": "はい、カードでも現金でも。列の次のタクシーにお乗りください。"}, {"y": "*The* *next* *one*? *Thank* *you*.", "jp": "次のですね。ありがとう。"}, {"n": "Have a pleasant evening in Doha.", "jp": "ドーハでよい夜をおすごしください。"}, {"y": "*Thank* *you*. *Good* *night*!", "jp": "ありがとう。おやすみなさい！"}], "words": [["this way", "/ˈðɪs ˈweɪ/", "こちらへ"], ["meter", "/ˈmiːtɚ/", "メーター"], ["cash", "/ˈkæʃ/", "現金"], ["in line", "/ɪn ˈlaɪn/", "列にならんで"], ["pleasant", "/ˈplɛzənt/", "心地よい"]]}, "doh_metro": {"who": "Doha Metroの係員", "story": 1, "bg": "dmetro", "sp": "d_metro", "hero": "blue", "lulu": "plain", "nogold": 1, "inter": [], "intro": "空港の下にあるDoha Metroの駅。ぴかぴかの改札の前に、係員が立っている。", "lines": [{"n": "Hello. Welcome to Doha Metro. Where are you going?", "jp": "こんにちは。Doha Metroへようこそ。どちらへ行かれますか。"}, {"y": "*To* *the* *city* *center*. *Which* *line* *do* *I* *take*?", "jp": "街の中心へ。どの路線に乗ればいいですか。"}, {"n": "Take the Red Line to Msheireb. It is the main station.", "jp": "レッドラインでムシェイレブへ。中心の駅です。"}, {"y": "*The* *Red* *Line* *to* *Msheireb*. *Got* *it*.", "jp": "レッドラインでムシェイレブですね。わかりました。"}, {"n": "Do you have a travel card?", "jp": "乗車カードはお持ちですか。"}, {"y": "*No*, *not* *yet*. *Where* *can* *I* *buy* *one*?", "jp": "いいえ、まだです。どこで買えますか。"}, {"n": "At that machine. A day pass is good for all day.", "jp": "あの機械です。1日乗車券なら1日中使えます。"}, {"y": "*A* *day* *pass*, *then*. *How* *long* *does* *it* *take*?", "jp": "では1日乗車券にします。どのくらいかかりますか。"}, {"n": "About twenty-five minutes. Trains come every few minutes.", "jp": "25分ほどです。電車は数分おきに来ます。"}, {"y": "*Perfect*. *Thank* *you* *for* *your* *help*!", "jp": "完ぺきです。助かりました！"}], "words": [["line", "/ˈlaɪn/", "路線"], ["main station", "/ˈmeɪn ˈsteɪʃən/", "中心の駅"], ["travel card", "/ˈtrævəl ˈkɑːrd/", "乗車カード"], ["day pass", "/ˈdeɪ ˈpæs/", "1日乗車券"], ["every few minutes", "/ˈɛvɚiː ˈfjuː ˈmɪnəts/", "数分おきに"]]}};

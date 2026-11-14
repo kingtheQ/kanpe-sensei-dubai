@@ -213,7 +213,7 @@ body{margin:0;box-sizing:border-box;background:var(--bg);color:var(--line);font-
   <div class="ov" id="ovEnd" hidden>
     <h2>グアムの空港を、ぬけた</h2>
     <div class="stats" id="endStats"></div>
-    <button class="go" id="again" type="button">マップにもどる</button>
+    <button class="go" id="again" type="button">せかいマップへ</button>
   </div>
 
   <div class="ov" id="ovGet" hidden>
@@ -1218,7 +1218,7 @@ function showCue(){
  panel.appendChild(card);var stat=el('div','stat','');panel.appendChild(stat);
  var row=el('div','row');var demo=el('button','btn sub','おてほん');demo.type='button';row.appendChild(demo);
  demo.addEventListener('click',function(){say(cueText(T.cue),.8,1)});
- var act=el('button','btn',set.vmode==='mic'?'はなす':'おして よむ');act.type='button';row.appendChild(act);panel.appendChild(row);
+ var act=el('button','btn',set.vmode==='mic'?'🎤 もういちど':'おして よむ');act.type='button';row.appendChild(act);panel.appendChild(row);
  setupAction(act,stat,toks,spans,T);
  if(!G.camp)addHelp(T);
  fitCue(card);
@@ -1235,7 +1235,8 @@ function setupAction(act,stat,toks,spans,T){
     r.onresult=gd(function(e){var alts=[];for(var i=0;i<e.results[0].length;i++)alts.push(e.results[0][i].transcript);judgeMic(alts,toks,spans,stat,T)});
     r.onerror=function(e){act.disabled=false;stat.className='stat ng';stat.textContent=(e.error==='not-allowed'||e.error==='service-not-allowed')?'この画面ではマイクが使えません。長押しにもどします':'うまく聞こえませんでした';if(e.error==='not-allowed'||e.error==='service-not-allowed')set.vmode='hold'};
     r.onend=function(){if(G.phase!=='help')act.disabled=false};G.rec=r;r.start()}catch(err){stat.className='stat ng';stat.textContent='マイクを開始できません';act.disabled=false}
-  });return}
+  });
+  if(SR)later(500,function(){if(act.isConnected&&!act.disabled&&(G.phase==='cue'||G.phase==='retry'||G.phase==='assist'))act.click()});return}
  /* 長押し：押している間、強い語の順に光る。長さがちょうどよければ合格 */
  var raf=0,t0=0,pressed=false;
  function loop(){if(!pressed)return;var el0=(performance.now()-t0)/1000,f=el0/Tm,idx=-1;for(var i=0;i<toks.length;i++){if(f*tot>=cum[i])idx=i}
@@ -1258,7 +1259,9 @@ function judgeMic(alts,toks,spans,stat,T){
  alts.forEach(function(a){var got=norm(a),pool=got.slice(),hit=need.map(function(w){var i=pool.indexOf(w);if(i>=0){pool.splice(i,1);return true}return false});
   var sc=hit.filter(Boolean).length/need.length;if(sc>best){best=sc;bestSet=hit}});
  var hits=bestSet||need.map(function(){return false}),k=0;
- spans.forEach(function(s,i){var w=norm(toks[i].txt)[0];if(w){s.style.color=hits[k]?'#0a7c4a':'#b0382c';k++}});
+ spans.forEach(function(s,i){var w=norm(toks[i].txt)[0];if(w){s.style.color=hits[k]?'#0a7c4a':'#1d4ed8';k++}});
+ /* 発音の記録を ドバイ・世界一周編と同じ置き場に ためる(強化合宿が ここから苦手を選ぶ) */
+ try{var _k=function(x){return String(x).replace(/[^A-Za-z']/g,'').toLowerCase()},_a=JSON.parse(localStorage.getItem('kanpe-pron-v1')||'[]');if(!Array.isArray(_a))_a=[];_a.push({ts:Date.now(),v:'guam',tg:need.map(_k).join(' '),hd:String(alts[0]||'').slice(0,200),cf:0,ok:hits.filter(Boolean).length,n:need.length,miss:need.filter(function(w,i){return !hits[i]}).map(function(w){return {t:_k(w),h:null}})});if(_a.length>600)_a=_a.slice(-600);localStorage.setItem('kanpe-pron-v1',JSON.stringify(_a))}catch(e){}
  stat.textContent='';var hm=el('div','hm');hm.appendChild(el('span',null,'きこえた えいご'));hm.appendChild(el('span','hp',Math.round(best*100)+'%'));stat.appendChild(hm);stat.appendChild(el('div','hw',alts[0]||'…'));
  var okk=best>=0.7;stat.className='stat big '+(okk?'ok':'ng');fitCue(panel.querySelector('.cue'));
  if(okk)onPass();else onFail()
@@ -1279,7 +1282,7 @@ function addHelp(T){
  if(set.vmode==='pick')return;
  var h=el('button','btn help'),left=save.help;h.type='button';
  if(left>0){h.textContent='ヘルプ　残り'+left+'回';h.addEventListener('click',function(){useHelp(T)})}
- else{h.classList.add('camp');h.textContent='✈ 羽田空港にもどる（強化合宿）';h.addEventListener('click',function(){initAudio();startCamp()})}
+ else{h.classList.add('camp');h.textContent='✈ 羽田空港にもどる（強化合宿）';h.addEventListener('click',function(){location.href='../dubai/?camp=1&back=guam'})}
  panel.appendChild(h);
 }
 function useHelp(T){
@@ -1469,7 +1472,7 @@ Array.prototype.forEach.call(document.querySelectorAll('.seg[data-key]'),functio
 $('goBtn').addEventListener('click',function(){initAudio();$('ovStart').hidden=true;if(G.view==='none'||G.view==='map'){showMap()}});
 $('setBtn').addEventListener('click',function(){location.href='../world/#set&from=guam'});
 $('worldBtn').addEventListener('click',function(){location.href='../world/?map=1'});
-$('again').addEventListener('click',function(){$('ovEnd').hidden=true});
+$('again').addEventListener('click',function(){location.href='../world/?map=1'});
 var rst=$('resetBtn'),rstArm=false;
 rst.addEventListener('click',function(){
  if(!rstArm){rstArm=true;rst.textContent='もう一度おすと、進み具合が消えます';setTimeout(function(){rstArm=false;rst.textContent='はじめからやり直す'},3500);return}
