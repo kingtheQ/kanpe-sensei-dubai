@@ -260,12 +260,15 @@ var KEY='kanpe-world-v1';
 var AP={
  haneda:{n:'羽田',en:'Haneda',lon:139.78,lat:35.55,url:null},
  guam:{n:'グアム',en:'Guam',lon:144.80,lat:13.48,url:'../guam/'},
- dubai:{n:'ドバイ',en:'Dubai',lon:55.37,lat:25.25,url:'../'}
+ dubai:{n:'ドバイ',en:'Dubai',lon:55.37,lat:25.25,url:'../dubai/',mx:59.5,my:20.5},
+ nairobi:{n:'ナイロビ',en:'Nairobi',lon:36.93,lat:-1.32,url:'../tour/'},
+ doha:{n:'ドーハ',en:'Doha',lon:51.61,lat:25.27,url:'../tour/doha/',mx:45.5,my:30}
 };
 /* 第1版: 羽田-グアム、グアム-ドバイ(臨時の線。20か所が揃ったら見本の地図に直す) */
-var NEI={haneda:['guam'],guam:['haneda','dubai'],dubai:['guam']};
+/* 世界一周編: 羽田-ナイロビ-ドーハ(oneworld の順)。mx/my は地図の上だけの位置(ドバイとドーハの札が重ならないように少しずらす。距離は lon/lat で計算) */
+var NEI={haneda:['guam','nairobi'],guam:['haneda','dubai'],dubai:['guam'],nairobi:['haneda','doha'],doha:['nairobi']};
 var TOTAL=20;
-var VB={x:46,y:-66,w:112,h:126.4};
+var VB={x:10,y:-66,w:148,h:167};
 var has=function(o,k){return Object.prototype.hasOwnProperty.call(o,k)};
 var NS='http://www.w3.org/2000/svg';
 function se(tag,attrs){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);return e}
@@ -368,7 +371,7 @@ function baseMap(){
  '<path class="grid" d="M-180 -60H180M-180 -30H180M-180 0H180M-180 30H180M-180 60H180M-150 -90V90M-120 -90V90M-90 -90V90M-60 -90V90M-30 -90V90M0 -90V90M30 -90V90M60 -90V90M90 -90V90M120 -90V90M150 -90V90"/>'+
  '<g class="shore">'+LAND.replace(/class="land"/g,'class="land" fill="url(#'+uid+')"')+'</g>';
  return svg}
-function xy(id){return {x:AP[id].lon,y:-AP[id].lat}}
+function xy(id){var a=AP[id];return {x:a.mx!=null?a.mx:a.lon,y:-(a.my!=null?a.my:a.lat)}}
 
 /* ---------- 状態から見える空港 ---------- */
 function visibleSet(s){
@@ -810,7 +813,10 @@ window.addEventListener('pageshow',function(e){cancelAnimationFrame(flyTimer);if
 renderMap();
 var skipTitle=/(^|[?&])map=1(&|$)/.test(location.search);
 try{var ks=parseInt(sessionStorage.getItem('kw-started')||'0',10);if(ks&&Date.now()-ks<30*60*1000)skipTitle=true}catch(e){}
-if(/[#&]set(&|$)/.test(location.hash))openSet();else if(skipTitle)show('sMap');else show('sTitle');
+/* 機内の会話のあと(?fly=行き先): いまの空港から となりの空港へ 飛ぶ画面を出す */
+var flyQ=/(^|[?&])fly=([a-z]+)(&|$)/.exec(location.search);
+if(flyQ&&has(AP,flyQ[2])&&S.at!==flyQ[2]&&NEI[S.at].indexOf(flyQ[2])>=0){try{sessionStorage.setItem('kw-started',String(Date.now()))}catch(e){}show('sMap');(function(to){window.addEventListener('pageshow',function(e){if(!e.persisted)fly(to)},{once:true})})(flyQ[2])}
+else if(/[#&]set(&|$)/.test(location.hash))openSet();else if(skipTitle||flyQ)show('sMap');else show('sTitle');
 })();
 </script>
 </body>

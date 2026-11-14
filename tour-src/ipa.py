@@ -5,7 +5,7 @@ try:
 except Exception:
     _D = {}
 M = {'AA':'ɑː','AE':'æ','AH':'ə','AO':'ɔː','AW':'aʊ','AY':'aɪ','B':'b','CH':'tʃ','D':'d','DH':'ð','EH':'ɛ','ER':'ɚ','EY':'eɪ','F':'f','G':'ɡ','HH':'h','IH':'ɪ','IY':'iː','JH':'dʒ','K':'k','L':'l','M':'m','N':'n','NG':'ŋ','OW':'oʊ','OY':'ɔɪ','P':'p','R':'r','S':'s','SH':'ʃ','T':'t','TH':'θ','UH':'ʊ','UW':'uː','V':'v','W':'w','Y':'j','Z':'z','ZH':'ʒ'}
-X={'safaricom':'ˈsæfɑːrikɑːm','mpesa':'ɛm ˈpeɪsə','kenya':'ˈkɛnjə','nairobi':'naɪˈroʊbi','eta':'iː tiː eɪ','java':'ˈdʒɑːvə','artcaffe':'ɑːrt kæˈfeɪ','uber':'ˈuːbɚ','bolt':'boʊlt','wifi':'ˈwaɪfaɪ','kikoy':'kɪˈkɔɪ','jkia':'dʒeɪ keɪ aɪ eɪ','kes':'keɪ ɛs','swahili':'swɑːˈhiːli','asante':'ɑːˈsɑːnteɪ','jambo':'ˈdʒɑːmboʊ','pesa':'ˈpeɪsə','mombasa':'mɑːmˈbɑːsə','sim':'sɪm','usd':'juː ɛs diː'}
+X={'safaricom':'ˈsæfɑːrikɑːm','mpesa':'ɛm ˈpeɪsə','kenya':'ˈkɛnjə','nairobi':'naɪˈroʊbi','eta':'iː tiː eɪ','java':'ˈdʒɑːvə','artcaffe':'ɑːrt kæˈfeɪ','uber':'ˈuːbɚ','bolt':'boʊlt','wifi':'ˈwaɪfaɪ','kikoy':'kɪˈkɔɪ','jkia':'dʒeɪ keɪ aɪ eɪ','kes':'keɪ ɛs','swahili':'swɑːˈhiːli','asante':'ɑːˈsɑːnteɪ','jambo':'ˈdʒɑːmboʊ','pesa':'ˈpeɪsə','mombasa':'mɑːmˈbɑːsə','sim':'sɪm','usd':'juː ɛs diː','riyal':'riːˈɑːl','doha':'ˈdoʊhɑː','qatar':'ˈkɑːtɑːr','ooredoo':'uːˈrɛduː','karwa':'ˈkɑːrwə','msheireb':'mʊˈʃeɪrɛb','souq':'suːk','waqif':'ˈwɑːkɪf'}
 def word(w):
     w = re.sub(r"[^a-z']", '', w.lower())
     if w in X: return X[w]

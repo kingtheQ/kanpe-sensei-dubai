@@ -172,3 +172,108 @@ d('nbo_gate2','搭乗ゲートの係員','gate','gate_agent2','ゲートの前�
 ("Yes, on time. You will like the view from the window.","はい、定刻です。窓からの景色を気に入りますよ。","*I* *love* *the* *view*. *I* *can't* *wait*.","景色が大好きです。待ちきれません。"),
 ("Group two, please come forward now. Enjoy your trip!","グループ2の方、どうぞお進みください。旅を楽しんで！","*Thank* *you*. *Goodbye*, *Nairobi*!","ありがとう。さようなら、ナイロビ！")],
 [("attention","お知らせ"),("board","搭乗する"),("on time","定刻の"),("view","景色"),("come forward","前に進む")])
+
+# ---- 出発: ナイロビ(Qatar Airways でドーハへ) ----
+# 実在名: Qatar Airways。飛行時間 約5時間(2026-11-14 確認、資料は5時間〜5時間20分)。重さ・時刻・席番号は架空。
+d('nbo_checkin1','Qatar Airwaysのチェックイン係','checkinQ','qr_checkin','ナイロビの空港、Qatar Airwaysのカウンター。係の人が明るく手をふっている。',[
+("Jambo! Welcome to Qatar Airways. Where are you flying today?","ジャンボ！カタール航空へようこそ。今日はどちらへ？","*Jambo*! *We* *are* *flying* *to* *Doha*.","ジャンボ！ドーハへ行きます。"),
+("Lovely. Please put your suitcase on the scale.","いいですね。スーツケースをはかりにのせてください。","*Sure*. *Is* *it* *too* *heavy*?","はい。重すぎますか。"),
+("No, it is fine. Is Doha your final stop today?","いいえ、大丈夫です。今日の最終目的地はドーハですか。","*Yes*. *We* *will* *stay* *in* *Doha* *for* *one* *night*.","はい。ドーハに1泊します。"),
+("Then your bag goes to Doha. Here is your baggage tag.","では荷物はドーハまでです。こちらが手荷物の引換証です。","*Thank* *you*. *What* *time* *does* *boarding* *start*?","ありがとう。搭乗は何時に始まりますか。"),
+("Forty minutes before the flight. Have a good trip!","出発の40分前です。よい旅を！","*Asante*! *Goodbye*, *Nairobi*!","アサンテ！さよなら、ナイロビ！")],
+[("scale","はかり"),("heavy","重い"),("final stop","最終目的地"),("baggage tag","手荷物の引換証"),("boarding","搭乗")])
+d('nbo_checkin2','Qatar Airwaysのチェックイン係','checkinQ','qr_checkin2','となりのカウンター。係の人が、画面を見て少しこまった顔をしている。',[
+("Good evening. Passports, please. Two passengers?","こんばんは。パスポートをお願いします。お二人ですか。","*Yes*, *two*. *Here* *are* *our* *passports*.","はい、二人です。パスポートです。"),
+("Thank you. I am sorry, but your seats are not together.","ありがとうございます。すみません、お席がはなれています。","*Oh* *no*. *Can* *we* *sit* *together*, *please*?","そんな。いっしょに座れますか。"),
+("Let me check. One moment. I have two seats in row thirty.","お調べします。少々お待ちを。30列目に2席あります。","*Great*! *Is* *one* *of* *them* *a* *window* *seat*?","よかった！どちらかは窓側ですか。"),
+("Yes. Thirty A is by the window, and thirty B is next to it.","はい。30Aが窓側で、30Bがそのとなりです。","*Perfect*. *We* *will* *take* *them*.","完ぺきです。その席にします。"),
+("All done. Here are your new boarding passes.","できました。新しい搭乗券です。","*Thank* *you* *for* *your* *help*!","助かりました。ありがとう！")],
+[("passenger","乗客"),("together","いっしょに"),("one moment","少々お待ちください"),("row","列"),("next to","〜のとなり")])
+d('nbo_sec1','保安検査の係員','security','sec_n1','保安検査の列。係員はてきぱきと、でもやさしく声をかけている。',[
+("Next, please. Put your bags on the belt.","次の方どうぞ。荷物をベルトにのせてください。","*Okay*. *Do* *I* *take* *out* *my* *laptop*?","はい。ノートパソコンは出しますか。"),
+("Yes. Laptops and tablets go in a separate tray.","はい。パソコンとタブレットはべつのトレーに入れます。","*All* *right*. *What* *about* *my* *jacket*?","わかりました。上着はどうしますか。"),
+("Jackets off, please. And your belt and watch.","上着はぬいでください。ベルトと時計もお願いします。","*Okay*. *Here* *is* *my* *belt*.","はい。ベルトです。"),
+("Do you have any liquids in your bag?","かばんに液体は入っていますか。","*Only* *a* *small* *bottle* *of* *water*.","小さい水のボトルだけです。"),
+("Sorry, you cannot take water through. Please empty the bottle.","すみません、水は持ちこめません。ボトルを空にしてください。","*I* *see*. *I* *will* *drink* *it* *now*.","わかりました。今飲みます。")],
+[("laptop","ノートパソコン"),("separate","べつの"),("tray","トレー"),("liquids","液体"),("empty","空にする")])
+d('nbo_sec2','保安検査の係員','security','sec_n2','検査のあと、かばんが1つだけ横によけられた。係員が手まねきしている。',[
+("Excuse me. Is this your bag?","すみません。これはあなたのかばんですか。","*Yes*, *it* *is* *mine*. *Is* *there* *a* *problem*?","はい、私のです。何か問題がありますか。"),
+("I need to open it. Is that okay?","中を開けて見ます。よろしいですか。","*Sure*. *Go* *ahead*.","はい。どうぞ。"),
+("What is this long thing?","この長いものは何ですか。","*It* *is* *a* *wooden* *giraffe*. *It* *is* *a* *souvenir*.","木のキリンです。おみやげです。"),
+("Ah, a giraffe! Very nice. No problem.","ああ、キリンですね。すてきです。問題ありません。","*Thank* *you*. *Can* *I* *close* *my* *bag*?","ありがとう。かばんを閉めてもいいですか。"),
+("Yes. You are good to go. Have a safe flight.","はい。行って大丈夫です。安全な空の旅を。","*Thanks*. *Have* *a* *nice* *day*!","ありがとう。よい一日を！")],
+[("problem","問題"),("go ahead","どうぞ"),("wooden","木の"),("souvenir","おみやげ"),("safe flight","安全な空の旅")])
+d('nbo_plane1','Qatar Airwaysの客室乗務員','cabinQ','qr_crew','ついに機内へ。客室乗務員が、おだやかな声でむかえてくれた。',[
+("Good evening. Welcome aboard. May I see your boarding pass?","こんばんは。ご搭乗ありがとうございます。搭乗券を見せていただけますか。","*Good* *evening*. *Here* *it* *is*.","こんばんは。これです。"),
+("Thirty A. Go down this aisle. It is on your left.","30Aですね。この通路を進んでください。左側です。","*Thank* *you*. *Is* *there* *space* *for* *my* *bag*?","ありがとう。かばんを入れる場所はありますか。"),
+("Yes, in the overhead bin. Let me help you.","はい、頭上の荷物入れに。お手伝いします。","*That* *is* *very* *kind*. *Thank* *you*.","ご親切にどうも。ありがとう。"),
+("My pleasure. Would you like water or juice before takeoff?","どういたしまして。離陸の前に、水かジュースはいかがですか。","*Water*, *please*. *And* *may* *I* *have* *a* *blanket*?","水をお願いします。毛布もいただけますか。"),
+("Of course. The flight to Doha takes about five hours.","もちろんです。ドーハまでは約5時間です。","*Great*. *Goodbye*, *Nairobi*!","いいですね。さよなら、ナイロビ！")],
+[("aboard","搭乗して"),("aisle","通路"),("overhead bin","頭上の荷物入れ"),("takeoff","離陸"),("blanket","毛布")])
+d('nbo_plane2','Qatar Airwaysの客室乗務員','cabinQ','qr_crew2','雲の上。食事のカートが、しずかに近づいてきた。',[
+("Excuse me. Chicken with rice, or vegetable pasta?","失礼します。チキンとライス、または野菜のパスタ、どちらになさいますか。","*Sorry*, *could* *you* *say* *that* *again*?","すみません、もう一度言ってもらえますか。"),
+("Of course. Chicken with rice, or vegetable pasta?","もちろんです。チキンとライス、または野菜のパスタです。","*Chicken* *with* *rice*, *please*.","チキンとライスをお願いします。"),
+("Certainly. And something to drink?","かしこまりました。お飲み物はいかがですか。","*Do* *you* *have* *hot* *tea*?","温かい紅茶はありますか。"),
+("Yes, we do. With milk and sugar?","はい、ございます。ミルクと砂糖は入れますか。","*Just* *milk*, *please*.","ミルクだけお願いします。"),
+("Here you are. We will land in Doha in two hours.","どうぞ。あと2時間でドーハに着陸します。","*Thank* *you*. *I* *can't* *wait*!","ありがとう。待ちきれません！")],
+[("say that again","もう一度言う"),("vegetable","野菜"),("something to drink","飲み物"),("sugar","砂糖"),("land","着陸する")])
+
+# ---- 到着: ドーハ(ハマド国際空港) ----
+# 実在名: Hamad International Airport / Ooredoo(到着ロビーの売店) / Karwa(メーター制のタクシー) / Doha Metro Red Line / Msheireb(乗りかえ駅) / Souq Waqif
+# 2026-11-14 確認。値段・ベルト番号は架空。話し方は、ていねいで落ち着いた調子(ナイロビの明るさと変える)。
+d('doh_immig1','入国審査の係官','dimmig','d_officer','ドーハのハマド国際空港に到着。広くてしずかな入国審査。係官は、短くていねいに話す。',[
+("Good evening. Passport, please.","こんばんは。パスポートをお願いします。","*Good* *evening*. *Here* *you* *are*.","こんばんは。どうぞ。"),
+("How long will you stay in Qatar?","カタールにはどのくらい滞在しますか。","*Only* *one* *night*. *We* *fly* *to* *Helsinki* *tomorrow*.","1泊だけです。明日ヘルシンキへ飛びます。"),
+("Do you have your onward ticket?","次の行き先への航空券はありますか。","*Yes*. *It* *is* *on* *my* *phone*. *Here*.","はい。スマホに入っています。これです。"),
+("Thank you. Please look at the camera, and do not smile.","ありがとうございます。カメラを見てください。笑わないでくださいね。","*Okay*. *Like* *this*?","はい。こうですか。"),
+("Yes. You may go. Enjoy your stay in Qatar.","はい。お進みください。カタールでの滞在を楽しんで。","*Thank* *you* *very* *much*.","どうもありがとうございます。")],
+[("stay","滞在する"),("tomorrow","明日"),("onward ticket","次の行き先への航空券"),("smile","ほほえむ"),("enjoy","楽しむ")])
+d('doh_immig2','入国審査の係官','dimmig','d_officer2','別の窓口。ホテルの名前を聞かれて、頭がまっ白になった。',[
+("Next, please. Where will you stay tonight?","次の方どうぞ。今夜はどこに泊まりますか。","*At* *a* *hotel* *near* *Souq* *Waqif*.","スーク・ワキーフの近くのホテルです。"),
+("What is the name of the hotel?","ホテルの名前は何ですか。","*Sorry*, *I* *forgot* *the* *name*. *One* *moment*, *please*.","すみません、名前を忘れました。少し待ってください。"),
+("Take your time. Do you have the booking?","ごゆっくりどうぞ。予約はありますか。","*Yes*! *Here* *is* *the* *booking* *on* *my* *phone*.","はい！スマホに予約があります。"),
+("I see it. Thank you. What is the purpose of your visit?","確認しました。ありがとうございます。訪問の目的は何ですか。","*Sightseeing*. *We* *want* *to* *see* *the* *old* *market*.","観光です。古い市場を見たいです。"),
+("Very good. Welcome to Qatar.","けっこうです。カタールへようこそ。","*Thank* *you*. *Have* *a* *good* *night*.","ありがとう。おやすみなさい。")],
+[("tonight","今夜"),("forgot","忘れた"),("booking","予約"),("sightseeing","観光"),("market","市場")])
+d('doh_bag1','手荷物受け取りのスタッフ','dbag','d_bag','手荷物受け取り。制服のスタッフが、すぐに気づいて声をかけてくれた。',[
+("Good evening, sir. May I help you?","こんばんは。お手伝いしましょうか。","*Yes*, *please*. *Where* *is* *the* *bag* *from* *Nairobi*?","お願いします。ナイロビからの荷物はどこですか。"),
+("The flight from Nairobi is on belt number eight.","ナイロビからの便は8番のベルトです。","*Belt* *eight*. *Is* *it* *far* *from* *here*?","8番ですね。ここから遠いですか。"),
+("No, it is just over there, on your right.","いいえ、すぐあそこ、右側です。","*Thank* *you*. *May* *I* *use* *this* *trolley*?","ありがとう。このカートを使ってもいいですか。"),
+("Yes, of course. Please take one.","はい、もちろんです。お使いください。","*Great*. *How* *long* *will* *the* *bags* *take*?","よかった。荷物はどのくらいで出てきますか。"),
+("About ten minutes. Thank you for waiting.","10分ほどです。お待ちいただきありがとうございます。","*No* *problem*. *Thank* *you*!","大丈夫です。ありがとう！")],
+[("belt","ベルト(荷物のレーン)"),("far","遠い"),("over there","あそこ"),("trolley","カート"),("waiting","待つこと")])
+d('doh_bag2','となりの旅行者','dbag','d_traveler','ベルトの前。同じ黒いスーツケースに、となりの人も手をのばした。',[
+("Excuse me, I think this black suitcase is mine.","すみません、この黒いスーツケースは私のだと思います。","*Sorry*, *but* *I* *think* *it* *is* *ours*. *Look* *at* *the* *name* *tag*.","すみません、私たちのだと思います。名札を見てください。"),
+("Oh! You are right. It is not my name. I am so sorry.","あっ！そのとおりです。私の名前ではありません。本当にごめんなさい。","*That's* *okay*. *They* *look* *the* *same*.","大丈夫です。そっくりですから。"),
+("Mine has a red ribbon on the handle.","私のは、持ち手に赤いリボンがついています。","*A* *red* *ribbon*? *I* *see* *one* *over* *there*!","赤いリボン？あそこに1つ見えます！"),
+("Yes, that is mine! Thank you so much.","そう、あれが私のです！本当にありがとう。","*You're* *welcome*. *Where* *are* *you* *from*?","どういたしまして。どちらからですか。"),
+("I am from India. I work here in Doha. Welcome!","インドからです。ここドーハで働いています。ようこそ！","*Thank* *you*! *Have* *a* *good* *night*.","ありがとう！おやすみなさい。")],
+[("mine","私のもの"),("name tag","名札"),("the same","同じ"),("ribbon","リボン"),("handle","持ち手")])
+d('doh_sim1','Ooredooの店員','dsim','d_sim','到着ロビーのOoredoo。店員は手ぎわがよく、話もはやい。',[
+("Welcome to Ooredoo. How can I help you today?","Ooredooへようこそ。ご用件は何でしょうか。","*Hello*. *I* *need* *a* *SIM* *card* *for* *one* *day*.","こんにちは。1日だけ使うSIMカードがほしいです。"),
+("We have a visitor SIM. It is good for seven days.","旅行者用のSIMがあります。7日間使えます。","*Seven* *days* *is* *fine*. *How* *much* *is* *it*?","7日間でいいです。いくらですか。"),
+("It is thirty riyals. May I have your passport?","30リヤルです。パスポートをお借りできますか。","*Here* *you* *are*. *Can* *I* *pay* *by* *card*?","どうぞ。カードで払えますか。"),
+("Yes, card is fine. I will set it up for you.","はい、カードで大丈夫です。こちらで設定します。","*Thank* *you*. *Does* *it* *work* *now*?","ありがとう。もう使えますか。"),
+("Yes, it is ready. Enjoy your stay in Doha.","はい、準備できました。ドーハでの滞在を楽しんで。","*That* *was* *fast*! *Thank* *you*.","はやい！ありがとう。")],
+[("visitor","訪問者"),("riyal","リヤル(カタールのお金)"),("pay by card","カードで払う"),("set up","設定する"),("ready","準備ができた")])
+d('doh_sim2','Ooredooの店員','dsim','d_sim2','SIMを入れたのに、地図が開かない。もう一度カウンターへ。',[
+("Hello again. Is everything all right?","またいらっしゃいましたね。何かありましたか。","*No*. *The* *internet* *does* *not* *work*.","いいえ。インターネットがつながりません。"),
+("Let me see. May I have your phone?","見てみましょう。スマホをお借りできますか。","*Sure*. *Here* *it* *is*.","はい。どうぞ。"),
+("Ah. Mobile data is off. I will turn it on.","ああ。モバイルデータがオフです。オンにしますね。","*Oh*, *I* *see*. *Is* *it* *working* *now*?","そうだったんですね。もう動いていますか。"),
+("Yes. Please open a map and try.","はい。地図を開いて試してください。","*It* *works*! *I* *can* *see* *the* *map*.","つながった！地図が見えます。"),
+("Good. If you have any trouble, please come back.","よかったです。こまったら、またいらしてください。","*I* *will*. *Thank* *you* *for* *your* *help*.","そうします。助かりました。")],
+[("internet","インターネット"),("mobile data","モバイルデータ通信"),("turn on","オンにする"),("try","試す"),("trouble","こまったこと")])
+d('doh_taxi','Karwaタクシーの係員','dtaxi','d_taxi','到着ロビーのはしにあるタクシー乗り場。係員が、しずかに手で列を案内している。',[
+("Good evening. Taxi? This way, please.","こんばんは。タクシーですか。こちらへどうぞ。","*Yes*, *please*. *We* *are* *going* *to* *Souq* *Waqif*.","お願いします。スーク・ワキーフへ行きます。"),
+("Souq Waqif. It takes about twenty minutes.","スーク・ワキーフですね。20分ほどです。","*Good*. *Does* *the* *taxi* *use* *a* *meter*?","よかった。タクシーはメーターを使いますか。"),
+("Yes, all Karwa taxis use a meter.","はい、Karwaのタクシーはすべてメーター制です。","*Can* *I* *pay* *by* *card*?","カードで払えますか。"),
+("Yes, card or cash. Please take the next taxi in line.","はい、カードでも現金でも。列の次のタクシーにお乗りください。","*The* *next* *one*? *Thank* *you*.","次のですね。ありがとう。"),
+("Have a pleasant evening in Doha.","ドーハでよい夜をおすごしください。","*Thank* *you*. *Good* *night*!","ありがとう。おやすみなさい！")],
+[("this way","こちらへ"),("meter","メーター"),("cash","現金"),("in line","列にならんで"),("pleasant","心地よい")])
+d('doh_metro','Doha Metroの係員','dmetro','d_metro','空港の下にあるDoha Metroの駅。ぴかぴかの改札の前に、係員が立っている。',[
+("Hello. Welcome to Doha Metro. Where are you going?","こんにちは。Doha Metroへようこそ。どちらへ行かれますか。","*To* *the* *city* *center*. *Which* *line* *do* *I* *take*?","街の中心へ。どの路線に乗ればいいですか。"),
+("Take the Red Line to Msheireb. It is the main station.","レッドラインでムシェイレブへ。中心の駅です。","*The* *Red* *Line* *to* *Msheireb*. *Got* *it*.","レッドラインでムシェイレブですね。わかりました。"),
+("Do you have a travel card?","乗車カードはお持ちですか。","*No*, *not* *yet*. *Where* *can* *I* *buy* *one*?","いいえ、まだです。どこで買えますか。"),
+("At that machine. A day pass is good for all day.","あの機械です。1日乗車券なら1日中使えます。","*A* *day* *pass*, *then*. *How* *long* *does* *it* *take*?","では1日乗車券にします。どのくらいかかりますか。"),
+("About twenty-five minutes. Trains come every few minutes.","25分ほどです。電車は数分おきに来ます。","*Perfect*. *Thank* *you* *for* *your* *help*!","完ぺきです。助かりました！")],
+[("line","路線"),("main station","中心の駅"),("travel card","乗車カード"),("day pass","1日乗車券"),("every few minutes","数分おきに")])
