@@ -7,6 +7,7 @@
 2. `docs/handover.md` を読む（いまの状態・未決・次の候補）。
 3. 世界一周編を触るなら `docs/world-tour-design.md`、空港の中身を作るなら `docs/materials/event-materials.md` を読む。URLは `docs/sources.md`。
 4. ページ構成と作り方は `README.md`。
+5. 決定の正本は docs/pm/DECISIONS.md（PMの決定ログ）。docs/ の資料と食い違う場合は、キングの決定として DECISIONS.md を優先し、PMに確認する。
 
 ## 絶対に守ること（詳細は docs/rules.md）
 - 始める前に、クレジットの残量・完成の基準・範囲をキングに確認する。
