@@ -18,3 +18,7 @@
 ## 発音記号について
 
 強化合宿の発音記号は、CMU Pronouncing Dictionary(米国英語の公開辞書)から、このゲームの会話に出る単語分を作って埋め込んでいます。
+
+## 開発の記録・ルール（AIも人も最初に読む）
+
+`CLAUDE.md`（入口）、`docs/rules.md`（ルール）、`docs/handover.md`（引き継ぎ）、`docs/world-tour-design.md`（世界一周編の設計図）、`docs/materials/`（イベント素材集）、`docs/sources.md`（参考URL）。
