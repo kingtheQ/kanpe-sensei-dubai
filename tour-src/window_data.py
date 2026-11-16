@@ -1,0 +1,214 @@
+# -*- coding: utf-8 -*-
+# 世界一周編 窓口の台本（タスク012）。設計の正本: docs/pm/deliverables/003（会話）・004（診断）・011（宣言文）。
+# 会話1・2・5・7・8 は 003 のとおり。強調の＊印は star() が自動で付ける（冠詞・前置詞などは付けない）。
+# 値段は素材集の数字（確認レベルB・公式未確認）。個人名なし。
+import re
+
+STOP = set('a an the to of in on at and or for with from as is am are be it that this my your our so'.split())
+
+def star(s):
+    out = []
+    for tok in s.split(' '):
+        m = re.match(r"^([^A-Za-z0-9]*)(.*?[A-Za-z0-9])([^A-Za-z0-9]*)$", tok)
+        if not m or m.group(2).lower() in STOP:
+            out.append(tok)
+        else:
+            out.append(m.group(1) + '*' + m.group(2) + '*' + m.group(3))
+    return ' '.join(out)
+
+WHO = '世界一周の窓口係'
+
+def scene(D, id, turns, intro='The Round the World desk.', auto=1, bg='tdesk'):
+    D.append(dict(id=id, who=WHO, bg=bg, sp='desk_rtw', intro=intro, pairs=turns, words=[], win=1, auto=auto))
+
+def T(n, njp, y, yjp, **kw):
+    t = dict(n=n, njp=njp, y=star(y) if not kw.get('diag') else y, yjp=yjp)
+    t.update(kw)
+    return t
+
+def O(k, y, jp, **kw):
+    o = dict(k=k, y=star(y), jp=jp)
+    o.update(kw)
+    return o
+
+def OT(n, njp, opts, **kw):
+    t = dict(n=n, njp=njp, y='', yjp='', opts=opts)
+    t.update(kw)
+    return t
+
+# ---- 宣言文（011 の本文。70語・9文。まとまった1つの文として言う） ----
+DECL = ("This is my promise, Lulu. We will travel around the world together, and have fun every day. "
+        "My body is healthy, my mind is calm. I eat good food, sleep well, and never push too hard. "
+        "When I feel afraid, I breathe and think of you. We both help each other. "
+        "Let's see every village, hear every voice, and share every little treasure. "
+        "Thank you for being here. Let's go!")
+DECL_JP = ("これがわたしの約束だよ、ルル。ふたりで世界じゅうを旅して、毎日、楽しもう。からだは元気。心は穏やか。"
+           "おいしいものを食べて、よく眠って、無理はしすぎない。こわくなったら、深呼吸して、あなたのことを思う。"
+           "ふたりで、助け合う。すべての村を見て、すべての声を聞いて、小さな宝ものを分かち合おう。"
+           "そばにいてくれて、ありがとう。さあ、行こう！")
+
+# ---- 読み上げ確認（004 の S3。券で値段・大陸の数だけ変わる） ----
+def readback(price, cont):
+    return ("Let me read it back. Round the world, business class. %s continents in thirty days. "
+            "We leave from Haneda on the fifth, and my first destination is Nairobi. "
+            "I have one large bag and a small one. The price is %s yen. "
+            "Everything is right. I will take it. Please issue the ticket." % (cont, price))
+def readback_jp(price_jp, cont_jp):
+    return ("読み上げます。世界一周、ビジネスクラス。30日で%s大陸。5日に羽田を出て、最初の目的地はナイロビ。"
+            "大きいカバンが1つと小さいのが1つ。値段は%s円。すべて合っています。これにします。発券してください。" % (cont_jp, price_jp))
+
+# 値段（素材集の数字。確認レベルB・確認日2026-11-12・公式未確認）
+PRICE = {
+    'star': ('nine hundred fifty-eight thousand, nine hundred', '958,900', 'Five'),
+    'ow5':  ('one million, seventy-four thousand, three hundred', '1,074,300', 'Five'),
+    'ow4':  ('nine hundred thirty-six thousand, five hundred', '936,500', 'Four'),
+}
+TICKET_NAME = {'star': 'Star Alliance', 'ow5': 'oneworld Explorer', 'ow4': 'oneworld Explorer'}
+
+def add(D):
+    # ---------- 宣言 ----------
+    scene(D, 'win_decl', [
+        T("Good morning. Before we begin, please make your promise to Lulu. Take your time.",
+          "おはようございます。始める前に、ルルへの約束を宣言してください。ゆっくりどうぞ。",
+          DECL, DECL_JP, diag='decl',
+          rep=("Beautiful. Lulu is smiling.", "すてきです。ルルが笑っています。")),
+    ], intro='The Round the World desk. Lulu is beside you.', auto=0)
+
+    # ---------- 会話1：はじめての人 ----------
+    scene(D, 'win_c1', [
+        T("Welcome to the Round the World desk. Is this your first time?", "世界一周の窓口へようこそ。はじめてですか。",
+          "Yes, it is. I'm excited, but a little nervous.", "はい。わくわくしますが、少し緊張しています。"),
+        OT("That is normal. This is a big ticket. Do you already know where you want to go?",
+           "ふつうのことです。大きな券ですから。行きたい場所はもう決まっていますか。", [
+            O('A', "Not really. I just want to see famous cities.", "あまり。有名な街を見たいだけです。",
+              mt='star', why="You want to see famous cities."),
+            O('B', "Yes. I have four places on my map.", "はい。地図に4つ置いてあります。")]),
+        T("No problem.", "大丈夫。", "I see. What decides the price?", "なるほど。値段は何で決まるのですか。",
+          by={'A': ("No problem. Many people start that way. Star Alliance has simple rules and the most routes.",
+                    "大丈夫。そう始める人は多いです。スターアライアンスは決まりが簡単で、路線がいちばん多いです。"),
+              'B': ("Good. Then the places will choose the ticket for you.", "よかった。それなら、場所が券を選んでくれます。")}),
+        T("Star Alliance counts your miles. oneworld Explorer counts your continents.",
+          "スターアライアンスは飛ぶ距離を数えます。oneworld Explorer は大陸の数を数えます。",
+          "Miles or continents. That's interesting.", "距離か、大陸か。おもしろいですね。"),
+        T("So I will ask you a few questions. Take your time.", "ですから、いくつか質問をします。ゆっくりどうぞ。",
+          "Okay. Please ask me anything.", "はい。何でも聞いてください。"),
+    ])
+
+    # ---------- 会話2：大陸を数える ----------
+    scene(D, 'win_c2', [
+        T("Let me look at your map. Kenya, Finland, Peru, and Hawaii.", "地図を見せてください。ケニア、フィンランド、ペルー、ハワイ。",
+          "Yes. Those are my four dreams.", "はい。それがわたしの4つの夢です。"),
+        T("Let's count the continents together. Asia is one, because you start in Japan.",
+          "大陸をいっしょに数えましょう。アジアで1つ。日本から出発するからです。",
+          "Oh, Japan counts too?", "えっ、日本も数えるのですか。"),
+        T("Yes. Then Africa, Europe, South America, and North America. Hawaii is part of North America.",
+          "はい。それからアフリカ、欧州、南米、北米。ハワイは北米に入ります。",
+          "One, two, three, four, five. Five continents!", "1、2、3、4、5。5大陸！"),
+        OT("Five is a lot. Do you want to keep all five?", "5つは多いですよ。5つとも残しますか。", [
+            O('A', "Yes. I want all five.", "はい。5つとも行きたいです。", mt='ow', why="You said five continents.", cont=5),
+            O('B', "Maybe I can cut one.", "1つ減らせるかもしれません。", cont=4)]),
+        T("Then oneworld Explorer is strong.", "それなら oneworld Explorer が強いです。",
+          "Far places cost the same. I like that.", "遠い場所でも同じ値段。いいですね。",
+          by={'A': ("Then oneworld Explorer is strong. Distance does not matter, so far places cost the same.",
+                    "それなら oneworld Explorer が強いです。距離は関係ないので、遠い場所でも値段は同じです。"),
+              'B': ("Then the price goes down one step. We can check both ways.", "それなら値段が1段下がります。両方で見てみましょう。")},
+          cueBy={'B': (star("Okay. Let's check both ways."), "はい。両方で見てみましょう。")}),
+    ])
+
+    # ---------- 会話5：南米 ----------
+    scene(D, 'win_c5', [
+        T("Now, South America. You chose Cusco and Machu Picchu.", "次は南米です。クスコとマチュピチュを選びましたね。",
+          "Yes. I have wanted to go there for a long time.", "はい。ずっと前から行きたかった場所です。"),
+        OT("A lovely dream. Is South America the star of your trip?", "すてきな夢ですね。南米は、この旅の主役ですか。", [
+            O('A', "Yes. It is the main part.", "はい。いちばんの目的です。", mt='star', why="You said South America is the star of your trip."),
+            O('B', "It is one of my four dreams.", "4つの夢のうちの1つです。")]),
+        T("Then please listen carefully. oneworld has no home airline in South America.",
+          "それなら、よく聞いてください。oneworld には、南米を拠点にする航空会社がありません。",
+          "No home airline? Can I still go?", "拠点の航空会社がない？それでも行けますか。"),
+        T("Yes. You can fly to Lima. But from Lima to Cusco, you buy another ticket.",
+          "はい。リマまでは飛べます。でも、リマからクスコへは、別の切符を買います。",
+          "Another ticket. So I pay more.", "別の切符。つまり、もっと払うのですね。"),
+        T("With Star Alliance, Avianca can take you to Cusco. And one more thing: Machu Picchu needs a reservation.",
+          "スターアライアンスなら、アビアンカ航空でクスコまで行けます。それからもう1つ。マチュピチュは予約が要ります。",
+          "I'll book it early. I don't want to miss it.", "早めに予約します。見のがしたくないので。"),
+    ])
+
+    # ---------- 会話7：南の島とカナダ（Global Explorer は名前だけ） ----------
+    scene(D, 'win_c7', [
+        T("Do you like islands? Tahiti, for example.", "島は好きですか。たとえばタヒチ。",
+          "I love the sea. Hawaii is on my map.", "海は大好きです。ハワイは地図にあります。"),
+        T("Hawaii is easy. But Tahiti is different.", "ハワイは簡単です。でもタヒチは別です。",
+          "Different? How?", "別？どうちがうのですか。"),
+        T("Some flights use a partner's plane. oneworld Explorer cannot use those.",
+          "仲間の会社の飛行機で飛ぶ便があります。oneworld Explorer では、それは使えません。",
+          "So the same flight name, but a different plane?", "便の名前は同じでも、飛行機がちがうのですね。"),
+        T("Exactly. For those islands, there is a third ticket: Global Explorer. It also works well in Canada.",
+          "そのとおりです。そういう島のために、3つ目の券があります。Global Explorer です。カナダでも使いやすい券です。",
+          "A third ticket! I didn't know that.", "3つ目の券！知りませんでした。"),
+        OT("Do you want the far islands or Canada on this trip?", "この旅に、遠い島やカナダを入れたいですか。", [
+            O('A', "No. Hawaii is enough for me.", "いいえ。ハワイで十分です。",
+              rep=("Good. Hawaii is easy.", "よかった。ハワイは簡単です。")),
+            O('B', "Yes. I want to go to Tahiti.", "はい。タヒチに行きたいです。", mt='star', why="You want to see Tahiti.", memo='Tahiti',
+              rep=("Tahiti. I'll write it down for your next trip.", "タヒチ。次の旅のためにメモしておきます。")),
+            O('C', "Yes. I want to travel across Canada.", "はい。カナダを横断したいです。", mt='star', why="You want to travel across Canada.", memo='Canada',
+              rep=("Canada. I'll write it down for your next trip.", "カナダ。次の旅のためにメモしておきます。"))]),
+    ])
+
+    # ---------- 会話8：旅の長さ ----------
+    scene(D, 'win_c8', [
+        T("How long is your trip?", "旅はどのくらいの長さですか。",
+          "About one month. Thirty days.", "約1か月。30日です。"),
+        T("A month is good. With a very short trip, you are tired all the way.",
+          "1か月はいいですね。とても短い旅だと、最後までずっと疲れたままです。",
+          "I want to enjoy every city. So, one month.", "どの街も楽しみたいのです。だから1か月。"),
+        T("Some people go around the world in five days.", "5日で世界を一周する人もいます。",
+          "Five days? Is that possible?", "5日？そんなことができるのですか。"),
+        T("With oneworld, yes. With Star Alliance business class, you need ten nights or more.",
+          "oneworld ならできます。スターアライアンスのビジネスクラスは、10泊以上が必要です。",
+          "Ten nights or more. That's an important rule.", "10泊以上。大事な決まりですね。"),
+        OT("Is there any chance your trip gets shorter than ten days?", "旅が10日より短くなることは、ありそうですか。", [
+            O('A', "No. I have one full month.", "いいえ。まる1か月あります。"),
+            O('B', "Maybe. My work is busy.", "あるかもしれません。仕事が忙しいので。", mt='ow', why="You said your trip may be short.")]),
+    ])
+
+    # ---------- 線を引く（地図。route = 何本目の線まで引くか） ----------
+    scene(D, 'win_route', [
+        T("Now I will draw your trip on the map. We start in Japan, and we go west, to Kenya.",
+          "では、あなたの旅を地図に描きます。日本から出発して、西へ、ケニアへ。",
+          "Yes. West, to Kenya.", "はい。西へ、ケニアへ。", route=1),
+        T("Next, Finland, Peru, and Hawaii. Then home to Japan again.",
+          "次に、フィンランド、ペルー、ハワイ。そして、また日本へ。",
+          "Finland, Peru, Hawaii, and home.", "フィンランド、ペルー、ハワイ、そして家へ。", route=5),
+        T("Now look. If I draw a line back to Peru, the line stops. You cannot go back.",
+          "さあ、見て。ペルーへ戻る線を引くと、線は止まります。戻ることはできません。",
+          "I see. The line only goes one way.", "なるほど。線は一方向にしか進めないのですね。", route=6),
+    ], bg='rtmap')
+
+    # ---------- 値段（3通り） ----------
+    for key in ('star', 'ow5', 'ow4'):
+        words, num, _ = PRICE[key]
+        scene(D, 'win_price_' + key, [
+            T("The ticket is %s yen." % words, "券は%s円です。" % num,
+              (words[0].upper() + words[1:]) + " yen.", "%s円。" % num),
+            T("Fuel and taxes are extra. Do you want to buy it?", "燃油と税は別です。買いますか。",
+              "Okay. I'll take it.", "はい。これにします。"),
+        ])
+
+    # ---------- 読み上げ確認（004 の S3。3通り） ----------
+    for key in ('star', 'ow5', 'ow4'):
+        words, num, cont = PRICE[key]
+        cont_jp = {'Five': '5', 'Four': '4'}[cont]
+        scene(D, 'win_rb_' + key, [
+            T("Please read the ticket back to me. We must be sure everything is right.",
+              "券の控えを読み上げてください。すべて合っているか、確かめましょう。",
+              readback(words, cont), readback_jp(num, cont_jp), diag='readback',
+              rep=("Perfect. Everything is right.", "完璧です。すべて合っています。")),
+        ], intro='The Round the World desk. Your ticket is ready.')
+
+    # ---------- 名前の確認（003 フロー10の1往復） ----------
+    scene(D, 'win_name', [
+        T("Last check. Your name must match your passport, letter by letter. One wrong letter, and you cannot fly.",
+          "最後の確認です。名前はパスポートと1文字ずつ同じでなければなりません。1文字でもちがうと、乗れません。",
+          "Yes. Every letter is the same.", "はい。1文字ずつ同じです。",
+          rep=("Good. Please go to the airline desk for your boarding pass.", "よろしい。搭乗券は、航空会社の窓口で受け取ってください。")),
+    ])

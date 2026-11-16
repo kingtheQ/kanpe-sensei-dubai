@@ -277,3 +277,7 @@ d('doh_metro','Doha Metroの係員','dmetro','d_metro','空港の下にあるDoh
 ("At that machine. A day pass is good for all day.","あの機械です。1日乗車券なら1日中使えます。","*A* *day* *pass*, *then*. *How* *long* *does* *it* *take*?","では1日乗車券にします。どのくらいかかりますか。"),
 ("About twenty-five minutes. Trains come every few minutes.","25分ほどです。電車は数分おきに来ます。","*Perfect*. *Thank* *you* *for* *your* *help*!","完ぺきです。助かりました！")],
 [("line","路線"),("main station","中心の駅"),("travel card","乗車カード"),("day pass","1日乗車券"),("every few minutes","数分おきに")])
+
+# ---- 窓口（タスク012）: 宣言・聞き取り5本・線を引く・値段・読み上げ確認・名前の確認 ----
+import window_data
+window_data.add(D)
