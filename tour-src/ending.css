@@ -1,0 +1,22 @@
+/* 終わりの場面(タスク016): E4 ふたつの声・E5 音の変化・E6 次の旅のメモ。赤と緑は使わない。遠い単語は、色に加えて枠も太くする */
+.eres{background:var(--paper);color:var(--ink);border:3px solid var(--brown);border-radius:10px;padding:8px 10px;flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:8px}
+.ert{display:flex;flex-direction:column;gap:3px}
+.erh{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px}
+.erh b{font-size:13px;background:var(--ink);color:var(--gold);border-radius:4px;padding:0 8px;letter-spacing:.04em}
+.erh .enum{font-size:11px;font-weight:800;color:#4a3a2a}
+.ewords{font-size:12px;font-weight:800;line-height:1.6}
+.ew{padding:0 2px;border-radius:4px;border:2px solid transparent}
+.ew.c1{background:#fff1a8;border-color:#e6cf63}
+.ew.c2{background:#d6e4ff;border:3px solid #1d4ed8;padding:0 2px;color:#1d4ed8}
+.ew i{font-style:normal;color:#8a6200;font-size:11px}
+.ejoy{font-size:13px;font-weight:800;color:#6a4a00;border-top:2px dashed #d9cba0;padding-top:6px}
+.esl{display:flex;gap:14px;font-size:11px;font-weight:800;color:#4a3a2a}
+.esr{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:2px dashed #d9cba0}
+.esr .sk{width:52px;flex:none;text-align:center;font-size:28px;font-weight:900;font-family:"Noto Sans","Segoe UI",system-ui,sans-serif}
+.esr .bars{flex:1;display:flex;flex-direction:column;gap:4px}
+.sx{font-size:12px;font-weight:800;color:#4a3a2a}
+.eb{height:12px;background:#e8dfc4;border-radius:6px;overflow:hidden}
+.eb i{display:block;height:100%}
+.eb.a i{background:#8a7a60}.eb.b i{background:var(--gold)}
+.emem{align-items:center;justify-content:center;text-align:center}
+.emem .esk{font-size:54px;font-weight:900;line-height:1.1;font-family:"Noto Sans","Segoe UI",system-ui,sans-serif}

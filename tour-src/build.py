@@ -190,6 +190,8 @@ for(var _k in TOURDLG)DLG[_k]=TOURDLG[_k];
 %(sp)s
 %(bg)s
 %(world)s
+%(voice)s
+%(diag)s
 %(win)s
 var PLACES_SAGE=%(sage)s,PLACES_NARR=%(arr)s,PLACES_NAIR=%(air)s,PLACES_NDEP=%(dep)s;
 PLACES_AIR=PLACES_NAIR;
@@ -208,6 +210,7 @@ for(var _k in TOURDLG)DLG[_k]=TOURDLG[_k];
 %(sp)s
 %(bg)s
 %(world)s
+%(voice)s
 var PLACES_DARR=%(arr)s;
 PLACES_AIR=PLACES_DARR;
 PLACES_DARR.forEach(function(p){PBY[p.id]=p});
@@ -245,18 +248,37 @@ def wmap_rows():
     return rows
 WINJS = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'window.js'), encoding='utf-8').read().replace('/*WMAP*/[]', json.dumps(wmap_rows()))
 WINCSS = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'window.css'), encoding='utf-8').read()
+HERE = os.path.dirname(os.path.abspath(__file__))
+def _rd(n): return open(os.path.join(HERE, n), encoding='utf-8').read()
+def relay_url():
+    # 中継のURLはここ1か所(tour-src/relay-url.txt)。空なら Azure は使わない。環境変数 KANPE_RELAY_URL はヘッドレス確認用
+    u = os.environ.get('KANPE_RELAY_URL')
+    if u is None:
+        u = ''
+        for ln in _rd('relay-url.txt').splitlines():
+            ln = ln.strip()
+            if ln and not ln.startswith('#'): u = ln; break
+    u = u.strip().rstrip('/')
+    if u and not re.match(r'^https://[A-Za-z0-9._:-]+(/[A-Za-z0-9._~/-]*)?$', u): raise SystemExit('relay-url が https の URL ではありません: ' + u)
+    return u
+VOICEJS = _rd('voice.js').replace("/*RELAY_URL*/''", json.dumps(relay_url()))
+VOICECSS = _rd('voice.css')
+DIAGJS = _rd('diag.js')
 SPW = "SP.desk_rtw={pitch:1.05,m:[[trav({hair:'long'}),P(2,{o:'#143fb0',p:'#2a2a33',h:'#241a14'})]]};\n"
 
 def rep(s, a, b, cnt=1):
     n = s.count(a)
     if n != cnt: raise SystemExit('PATCH MISS (%d!=%d): %s' % (n, cnt, a[:60]))
     return s.replace(a, b)
+SNOTE_OLD = '<p class="snote">音声は 保存も 送信も しません。発音の きろくは この端末の中だけに のこります。</p>'
+SNOTE_NEW = ('<p class="snote">声は、ゲームでは 保存しません。マイクの声は ブラウザの音声認識が 文字にします(Chrome は Google、Safari は Apple の サーバーに 声が おくられます)。'
+             '「こえを おくる」を ONに した ときだけ、旅の はじめと おわりの 宣言の 声が、発音を しらべる ために Microsoft Azure に おくられます。発音の きろくは この端末の中だけに のこります。</p>')
 def sub(pref): return dict((k, v) for k, v in dl.items() if k.startswith(pref))
 KBASE = "K.fountain=K.hall;K.safari=K.ahlan;K.marina=K.s34;K.beach=K.costa;"
 REC = "b.appendChild(s4);\n $m('setView').hidden=false;"
 def record(label, memo=False):
     mm = ("var mq=memoLoad();if(mq.length)s5.appendChild(el('div','tt','つぎの たびの メモ：'+mq.join(', ')));" if memo else '')
-    return ("b.appendChild(s4);\n var s5=sSec('ルルの カバンの きろくちょう');s5.appendChild(el('div','tt','えらんだ チケット：'+(save.ticket==='star'?'Star Alliance':save.ticket==='ow'?'oneworld':'まだ えらんでいない')));"
+    return ("b.appendChild(s4);voiceSetSection(b);\n var s5=sSec('ルルの カバンの きろくちょう');s5.appendChild(el('div','tt','えらんだ チケット：'+(save.ticket==='star'?'Star Alliance':save.ticket==='ow'?'oneworld':'まだ えらんでいない')));"
             "var dn=0;TOUR_IDS.forEach(function(k){if(save.seen[k]>0)dn++});s5.appendChild(el('div','tt','" + label + "の かいわ：'+dn+' / '+TOUR_IDS.length));" + mm + "b.appendChild(s5);\n $m('setView').hidden=false;")
 def common(o, tz):
     o = rep(o, "timeZone:'Asia/Dubai'", "timeZone:'%s'" % tz)
@@ -266,7 +288,7 @@ def common(o, tz):
 
 # ---------- ナイロビ(tour/index.html) ----------
 dn = dict(sub('sage_')); dn.update(sub('ticket_')); dn.update(sub('win_')); dn.update(sub('nbo_'))
-main = MAIN % dict(dlg=J(dn), sp=SPJS + SPW, bg=BGJS + BGN, world=WORLDJS, win=WINJS, sage=J(SAGE), arr=J(ARR), air=J(AIR), dep=J(NDEP), ids=J(TOUR_IDS))
+main = MAIN % dict(dlg=J(dn), sp=SPJS + SPW, bg=BGJS + BGN, world=WORLDJS, voice=VOICEJS, diag=DIAGJS, win=WINJS, sage=J(SAGE), arr=J(ARR), air=J(AIR), dep=J(NDEP), ids=J(TOUR_IDS))
 o = common(src, 'Africa/Nairobi')
 # ---- 窓口フロー(タスク012)のためのエンジン側の追加。ナイロビ(tour)だけに入れる。ドバイ・ドーハは変えない ----
 o = rep(o, "if(s0&&(s0.ticket==='star'||s0.ticket==='ow'))save.ticket=s0.ticket;",
@@ -293,7 +315,7 @@ o = rep(o, "var card=el('div','cue');card.appendChild(el('span','lab','カンペ
         "var card=el('div','cue'+(T.diag?' diag':''));card.appendChild(el('span','lab','カンペ'));")
 o = rep(o, " if(!G.camp)addHelp(T)}", " if(!G.camp&&!T.diag)addHelp(T)}")
 o = rep(o, " G.mute=null;var card=spans.length?spans[0].parentNode:null;",
-        " G.mute=null;var card=spans.length?spans[0].parentNode:null;\n if(T.diag&&SR&&!PREF.silent&&card){setupDiag(act,stat,toks,spans,T,card);return}")
+        " G.mute=null;var card=spans.length?spans[0].parentNode:null;\n if(T.diag&&!PREF.silent&&card){var AZ=(T.diag==='decl'||T.diag==='decl_end')&&voiceAzureOn();if(AZ||SR){(AZ?setupDiagAz:setupDiag)(act,stat,toks,spans,T,card);return}}")
 # 長いカンペは、ブザーも合格音もなく、いつも先へ進む
 o = rep(o, "function onFail(){\n Snd.jingle('buzz');", "function onFail(){\n var Td=G.scene&&G.scene.turns[G.ti];if(Td&&Td.diag){diagDone();return}\n Snd.jingle('buzz');")
 o = rep(o, "function onPass(){\n Snd.jingle('pass');", "function onPass(){\n var Td=G.scene&&G.scene.turns[G.ti];if(Td&&Td.diag){diagDone();return}\n Snd.jingle('pass');")
@@ -306,10 +328,12 @@ o = rep(o, " setMsgInstant(S.d.intro||S.pl.tip[0],'');$m('tapHint').textContent=
         " setMsgInstant(S.d.intro||S.pl.tip[0],'');$m('tapHint').textContent='';\n if(S.d.auto){later(700,function(){playInter(-1,npcTurn)});return}\n var b=el('button','btn go','GO！');")
 o = rep(o, "function finishScene(){\n var S=G.scene;",
         "function finishScene(){\n var S=G.scene;if(S.d&&S.d.win){save.seen[S.vid]=(save.seen[S.vid]||0)+1;storeSave();winAfter(S);return}")
+o = rep(o, "function startScene(){\n clearPanel();var S=G.scene;", "function startScene(){\n clearPanel();var S=G.scene;if(S.d.hook==='consent'){consentScene(S);return}")
 o = rep(o, "function enterPlace(id){var pl=PBY[id];if(pl.hub){enterHub(pl);return}",
         "function enterPlace(id){var pl=PBY[id];if(pl.win&&!save.ticket){winStart();return}if(pl.hub){enterHub(pl);return}")
-o = rep(o, ".cue .heard.live{color:#8a7b55}", ".cue .heard.live{color:#8a7b55}\n" + WINCSS)
+o = rep(o, ".cue .heard.live{color:#8a7b55}", ".cue .heard.live{color:#8a7b55}\n" + WINCSS + VOICECSS)
 o = rep(o, '<title>カンペ先生 ドバイ編</title>', '<title>空港えいご物語 世界一周編 ナイロビ</title>')
+o = rep(o, SNOTE_OLD, SNOTE_NEW)
 o = rep(o, "worldMark('dubai')", "worldMark('nairobi')")
 o = rep(o, "function runStory(vid){startVid(G.scene.pl,vid,'hub')}",
         "function runStory(vid){if(vid==='ticket_star'||vid==='ticket_ow'){save.ticket=vid==='ticket_star'?'star':'ow';storeSave();worldAt('nairobi')}startVid(G.scene.pl,vid,'hub')}")
@@ -330,6 +354,7 @@ o = rep(o, REC, record('ナイロビ', True))
 o = rep(o, "b.classList.toggle('on',b.dataset.m===MODE)});", "b.classList.toggle('on',b.dataset.m===MODE);if(b.dataset.m==='sage')b.hidden=!!save.ticket});")
 o = rep(o, "dep:['#e9e2f2','#d9d0e8','#8a7ac0']}[MODE]", "dep:['#e9e2f2','#d9d0e8','#8a7ac0'],sage:['#e4dff2','#d3cbe8','#8a7ac0']}[MODE]")
 o = rep(o, "g.fillStyle='#143fb0';g.fillRect(0,0,5,ch);g.fillRect(cw-5,0,5,ch)", "g.fillStyle='#2f7a4a';g.fillRect(0,0,5,ch);g.fillRect(cw-5,0,5,ch)")
+o_pre = o   # 終わりの場面の土台(エンジンの部品はナイロビと同じ)
 o = rep(o, "setMode('arr');\nvar phoQ", main + "\nsetMode(save.ticket?'arr':'sage');\nvar phoQ")
 os.makedirs(os.path.join(ROOT, 'tour'), exist_ok=True)
 open(os.path.join(ROOT, 'tour', 'index.html'), 'w', encoding='utf-8').write(o)
@@ -337,9 +362,11 @@ print('nairobi built', len(o), 'bytes; dialogues', len(dn), 'words', sum(len(v['
 
 # ---------- ドーハ(tour/doha/index.html) ----------
 dd = sub('doh_')
-main = MAIN_DOH % dict(dlg=J(dd), sp=SPD, bg=BGD, world=WORLDJS, arr=J(DARR), ids=J(DOH_IDS))
+main = MAIN_DOH % dict(dlg=J(dd), sp=SPD, bg=BGD, world=WORLDJS, voice=VOICEJS, arr=J(DARR), ids=J(DOH_IDS))
 o = common(src, 'Asia/Qatar')
 o = rep(o, '<title>カンペ先生 ドバイ編</title>', '<title>空港えいご物語 世界一周編 ドーハ</title>')
+o = rep(o, SNOTE_OLD, SNOTE_NEW)
+o = rep(o, ".cue .heard.live{color:#8a7b55}", ".cue .heard.live{color:#8a7b55}\n" + VOICECSS)
 o = rep(o, "'../world/?map=1'", "'../../world/?map=1'", 2)
 o = rep(o, "worldMark('dubai')", "void 0")   # ドーハはまだ到着だけ。クリアの印はつけない
 o = rep(o, KBASE, KBASE +
@@ -353,3 +380,20 @@ os.makedirs(os.path.join(ROOT, 'tour', 'doha'), exist_ok=True)
 open(os.path.join(ROOT, 'tour', 'doha', 'index.html'), 'w', encoding='utf-8').write(o)
 print('doha built', len(o), 'bytes; dialogues', len(dd), 'words', sum(len(v['words']) for v in dd.values()))
 print('missing IPA:', missing)
+
+# ---------- 終わりの場面(tour/ending/index.html): 旅の一か月後のリビングで、アルバムの白いページを埋める ----------
+import window_data
+ENDJS = _rd('ending.js').replace("/*DECL*/''", json.dumps(window_data.DECL))
+ENDCSS = _rd('ending.css')
+e = o_pre
+e = rep(e, '<title>空港えいご物語 世界一周編 ナイロビ</title>', '<title>空港えいご物語 世界一周編 アルバム</title>')
+e = rep(e, "'../world/?map=1'", "'../../world/?map=1'", 2)
+e = rep(e, "worldMark('nairobi')", "void 0")
+e = rep(e, "K.sage=K.hall;", "K.sage=K.hall;K.home=K.hall;")
+e = rep(e, "else if(k==='poof')whoosh(t0,.5,.07,400,3000);", "else if(k==='poof')whoosh(t0,.5,.07,400,3000);else if(k==='page'){noise(t0,.09,.12,1800,'highpass');noise(t0+.08,.06,.08,2600,'highpass')}")
+e = rep(e, ".cue .heard.live{color:#8a7b55}", ".cue .heard.live{color:#8a7b55}\n" + ENDCSS)
+e = rep(e, "'ナイロビの かいわ：'", "'アルバムの かいわ：'")
+e = rep(e, "setMode('arr');\nvar phoQ", "\n" + VOICEJS + "\n" + DIAGJS + "\n" + ENDJS + "\nMODES={arr:{p:[],b:'',h:'',snd:'home'}};MODE='arr';PLACES=[];\nendingStart();\nvar phoQ")
+os.makedirs(os.path.join(ROOT, 'tour', 'ending'), exist_ok=True)
+open(os.path.join(ROOT, 'tour', 'ending', 'index.html'), 'w', encoding='utf-8').write(e)
+print('ending built', len(e), 'bytes')
