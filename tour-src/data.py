@@ -115,7 +115,7 @@ d('nbo_java2','となりのお客さん','cafeK','cafe_staff2','店は混んで�
 ("Wow! How do you like Nairobi so far?","わあ！ナイロビはここまでどうですか。","*It's* *great*. *The* *people* *are* *very* *kind*.","すばらしいです。人々がとても親切で。"),
 ("Thank you. You must try nyama choma before you leave.","ありがとう。帰る前にニャマチョマ（焼き肉）を食べてみて。","*Nyama* *choma*? *What* *is* *that*?","ニャマチョマ？それは何ですか。"),
 ("Grilled meat! It is our favorite. Enjoy your trip!","焼いたお肉です！みんな大好きなんですよ。旅を楽しんで！","*I* *will*. *Thank* *you* *for* *the* *tip*!","そうします。教えてくれてありがとう！")],
-[("seat","席"),("traveling","旅行している"),("kind","親切な"),("grilled","焼いた"),("tip","アドバイス・コツ")])
+[("seat","席"),("traveling","旅行している"),("kind","親切な"),("grilled","焼いた"),("tip","アドバイス・コツ")],kind='trav')
 d('nbo_art1','Artcaffeの店員','cafeK','cafe_staff3','Artcaffe に入った。パンのやけるにおいがする。',[
 ("Hello! Welcome to Artcaffe. Eat in or take away?","こんにちは！Artcaffeへようこそ。店内ですか、お持ち帰りですか。","*Eat* *in*, *please*.","店内でお願いします。"),
 ("Okay. Here is the menu. Would you like some water?","はい。こちらがメニューです。お水はいかがですか。","*Yes*, *please*. *What* *do* *you* *recommend*?","はい、お願いします。おすすめは何ですか。"),
@@ -143,7 +143,7 @@ d('nbo_lounge2','ラウンジの隣の席のお客さん','lounge','lounge_guest
 ("Wonderful! Did you feed them?","すばらしい！えさをあげましたか。","*Yes*! *They* *were* *very* *gentle*.","はい！とてもおだやかでした。"),
 ("They love the snacks! Was it safe for you?","おやつが大好きなんですよ！こわくなかったですか。","*Yes*. *I* *can't* *wait* *to* *come* *back*!","はい。また来るのが待ちきれません！"),
 ("Enjoy! Safari njema! That means good journey.","楽しんで！サファリ・ンジェマ！「よい旅を」という意味です。","*Safari* *njema*! *Thank* *you*!","サファリ・ンジェマ！ありがとう！")],
-[("giraffe","キリン"),("feed","えさをあげる"),("safe","安全な"),("gentle","おだやかな"),("journey","旅")])
+[("giraffe","キリン"),("feed","えさをあげる"),("safe","安全な"),("gentle","おだやかな"),("journey","旅")],kind='trav')
 d('nbo_duty1','免税店の店員','duty','duty_staff','免税店で、ケニアのコーヒーを見つけた。',[
 ("Welcome! Are you looking for something special?","いらっしゃいませ！何かお探しですか。","*Yes*. *I* *want* *Kenyan* *coffee* *for* *my* *family*.","はい。家族にケニアのコーヒーをおみやげにしたいです。"),
 ("Good choice. This one is from the mountains. It is very smooth.","いい選択です。これは山で育ったコーヒーです。とてもまろやかですよ。","*How* *much* *is* *it*?","いくらですか。"),
@@ -247,8 +247,8 @@ d('doh_bag2','となりの旅行者','dbag','d_traveler','ベルトの前。同�
 ("Oh! You are right. It is not my name. I am so sorry.","あっ！そのとおりです。私の名前ではありません。本当にごめんなさい。","*That's* *okay*. *They* *look* *the* *same*.","大丈夫です。そっくりですから。"),
 ("Mine has a red ribbon on the handle.","私のは、持ち手に赤いリボンがついています。","*A* *red* *ribbon*? *I* *see* *one* *over* *there*!","赤いリボン？あそこに1つ見えます！"),
 ("Yes, that is mine! Thank you so much.","そう、あれが私のです！本当にありがとう。","*You're* *welcome*. *Where* *are* *you* *from*?","どういたしまして。どちらからですか。"),
-("I am from India. I work here in Doha. Welcome!","インドからです。ここドーハで働いています。ようこそ！","*Thank* *you*! *Have* *a* *good* *night*.","ありがとう！おやすみなさい。")],
-[("mine","私のもの"),("name tag","名札"),("the same","同じ"),("ribbon","リボン"),("handle","持ち手")])
+("I live in Doha now. I just came back from Nairobi. Welcome!","いまはドーハに住んでいます。ナイロビから帰ってきたところです。ようこそ！","*Thank* *you*! *Have* *a* *good* *night*.","ありがとう！おやすみなさい。")],
+[("mine","私のもの"),("name tag","名札"),("the same","同じ"),("ribbon","リボン"),("handle","持ち手")],kind='trav')
 d('doh_sim1','Ooredooの店員','dsim','d_sim','到着ロビーのOoredoo。店員は手ぎわがよく、話もはやい。',[
 ("Welcome to Ooredoo. How can I help you today?","Ooredooへようこそ。ご用件は何でしょうか。","*Hello*. *I* *need* *a* *SIM* *card* *for* *one* *day*.","こんにちは。1日だけ使うSIMカードがほしいです。"),
 ("We have a visitor SIM. It is good for seven days.","旅行者用のSIMがあります。7日間使えます。","*Seven* *days* *is* *fine*. *How* *much* *is* *it*?","7日間でいいです。いくらですか。"),
@@ -281,3 +281,7 @@ d('doh_metro','Doha Metroの係員','dmetro','d_metro','空港の下にあるDoh
 # ---- 窓口（タスク012）: 宣言・聞き取り5本・線を引く・値段・読み上げ確認・名前の確認 ----
 import window_data
 window_data.add(D)
+
+# ---- 割りこみ・顔なじみ・持ち越し（タスク014。設計 005）----
+import event_data
+event_data.add(D)
