@@ -43,11 +43,11 @@ AIR = [
  place('java', 'Java House', 'cafe', 22, 14, '☕', ['Java House', 'ラテとケーキ・値段は架空'], ['nbo_java1', 'nbo_java2']),
  place('art', 'Artcaffe', 'cafe', 70, 32, '🥐', ['Artcaffe', 'パンとジュース・値段は架空'], ['nbo_art1', 'nbo_art2']),
  place('lounge', 'Pride Lounge', 'ahlan', 24, 52, '🛋️', ['Pride Lounge', 'ラウンジの受付と、となりの人'], ['nbo_lounge1', 'nbo_lounge2']),
- place('duty', 'Duty Free', 'cafe', 70, 68, '🛍️', ['免税店', 'コーヒーと紅茶・値段は架空'], ['nbo_duty1', 'nbo_duty2']),
- place('gate', '搭乗ゲート', 'hall', 26, 86, '🚪', ['搭乗ゲート', '搭乗のアナウンス'], ['nbo_gate1', 'nbo_gate2'])]
+ place('duty', 'Duty Free', 'cafe', 70, 68, '🛍️', ['免税店', 'コーヒーと紅茶・値段は架空'], ['nbo_duty1', 'nbo_duty2'])]
 NDEP = [
  place('qcheckin', 'Qatar Airways', 'info', 24, 18, '🎫', ['Qatar Airways チェックイン', '荷物の重さ・席・搭乗券'], ['nbo_checkin1', 'nbo_checkin2']),
  place('nsec', '保安検査', 'info', 70, 46, '🔍', ['保安検査', '荷物・上着・液体'], ['nbo_sec1', 'nbo_sec2']),
+ place('gate', '搭乗ゲート', 'hall', 70, 76, '🚪', ['搭乗ゲート', '搭乗のアナウンス'], ['nbo_gate1', 'nbo_gate2']),
  place('qplane', '機内(Qatar Airways)', 'atop', 26, 76, '✈️', ['機内', '客室乗務員との会話。終わるとドーハへ飛ぶ'], ['nbo_plane1', 'nbo_plane2'])]
 TOUR_IDS = [i for p in ARR + AIR + NDEP for i in p['v']]
 DARR = [
@@ -138,7 +138,7 @@ BGS.dimmig=function(){airWall('#efe6d2');hiaRoof();floorAir('#e2d6bc','#cfc2a4')
  R('#8a1538',0,124,VW,2)};
 BGS.dbag=function(){airWall('#efe6d2');hiaRoof();floorAir('#e2d6bc','#cfc2a4');signBox(30,12,128,'BAGGAGE CLAIM','#8a1538');
  R('#05070f',132,36,60,24);T('BELT 8',162,44,8,'#ffd36a');T('NAIROBI',162,54,6.5,'#fff');
- R('#2a2a33',0,76,VW,22);R('#4a4a56',0,76,VW,3);var cl=['#14141a','#2d8f8a','#14141a','#7a3b8a','#d9a441'];
+ R('#2a2a33',0,76,VW,22);R('#4a4a56',0,76,VW,3);var cl=['#2f5bb0','#2d8f8a','#2f5bb0','#7a3b8a','#d9a441'];
  for(var i=0;i<5;i++){var x=((t*22+i*72)%390)-30;R(cl[i],x,64,26,14);R('#3a3a46',x+10,60,6,4);if(i===2)R('#c8182a',x+11,58,4,3)}
  R('#a0a0aa',0,96,VW,3)};
 BGS.dsim=function(){airWall('#efe6d2');hiaRoof();floorAir('#e2d6bc','#cfc2a4');
@@ -232,7 +232,7 @@ o = rep(o, "if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}showMap()}",
         "if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}"
         "if(S.pl.id==='qplane'){worldAt('nairobi');Snd.go(null);location.href='../world/?fly=doha';return}"
         "showMap();if(S.pl.id==='ticket'&&save.ticket)setMode('arr');"
-        "if(S.pl.id==='gate')setMode('dep')}")
+        "}")
 o = rep(o, KBASE, KBASE + "K.sage=K.hall;K.tdesk=K.info;"
         "K.nbo={bpm:function(){return 84},amb:function(){loopNoise(500,.7,.02,.1,.01,'lowpass')},"
         "st:function(s,t,e){var KN=[64,67,69,72,69,67,64,62];if(s%2===0)pluck(hz(KN[(s>>1)%8]),t,e*2.2,ngt?.08:.12);"

@@ -109,7 +109,7 @@ d('nbo_java1','Java Houseの店員','cafeK','cafe_staff','Java House に入っ�
 ("Okay. That is eight hundred shillings.","はい。800シリングです。","*Can* *I* *pay* *by* *card*?","カードで払えますか。"),
 ("Yes. Here you go. Enjoy!","はい。どうぞ。ごゆっくり。","*Thank* *you*. *Asante*!","ありがとう。アサンテ！")],
 [("latte","ラテ"),("iced","冷たい・氷入りの"),("slice","ひと切れ"),("carrot cake","キャロットケーキ"),("shillings","シリング(ケニアのお金)")])
-d('nbo_java2','Java Houseの店員','cafeK','cafe_staff2','店は混んでいる。隣のお客さんが話しかけてきた。',[
+d('nbo_java2','となりのお客さん','cafeK','cafe_staff2','店は混んでいる。隣のお客さんが話しかけてきた。',[
 ("Excuse me. Is this seat free?","すみません。この席は空いていますか。","*Yes*, *it* *is*. *Please* *sit* *down*.","はい、空いています。どうぞ座ってください。"),
 ("Thank you. Are you traveling?","ありがとう。旅行中ですか。","*Yes*. *We* *are* *traveling* *around* *the* *world*.","はい。世界一周をしています。"),
 ("Wow! How do you like Nairobi so far?","わあ！ナイロビはここまでどうですか。","*It's* *great*. *The* *people* *are* *very* *kind*.","すばらしいです。人々がとても親切で。"),
@@ -138,10 +138,10 @@ d('nbo_lounge1','Pride Loungeの受付','lounge','lounge_staff','Pride Lounge �
 ("Yes, at the back. Please relax and enjoy.","はい、奥にあります。ゆっくりくつろいでください。","*Thank* *you* *very* *much*.","ありがとうございます。")],
 [("lounge","ラウンジ"),("password","パスワード"),("connect","接続する"),("quiet","静かな"),("relax","くつろぐ")])
 d('nbo_lounge2','ラウンジの隣の席のお客さん','lounge','lounge_guest','ラウンジのソファ。隣のお客さんが笑顔であいさつしてくれた。',[
-("Hello! Is this your first time in Kenya?","こんにちは！ケニアは初めてですか。","*Yes*, *it* *is*. *We* *just* *arrived*.","はい。着いたばかりです。"),
-("Welcome! What are you going to do here?","ようこそ！ここで何をする予定ですか。","*We* *want* *to* *see* *the* *giraffes*.","キリンを見たいです。"),
-("There is a giraffe center near Nairobi. You can feed them!","ナイロビの近くにキリンセンターがあります。えさをあげられますよ！","*That* *sounds* *fun*! *Is* *it* *safe*?","楽しそう！安全ですか。"),
-("Yes. The giraffes are gentle. They love the snacks.","はい。キリンはおだやかです。おやつが大好きなんですよ。","*I* *can't* *wait*. *Thank* *you*!","待ちきれません。ありがとう！"),
+("Hello! Are you leaving Kenya today?","こんにちは！今日ケニアを出発しますか。","*Yes*. *We* *fly* *to* *Doha* *soon*.","はい。もうすぐドーハへ飛びます。"),
+("Safe travels! Did you enjoy your time here?","気をつけて！ここでの時間は楽しめましたか。","*Yes*. *We* *saw* *the* *giraffes*.","はい。キリンを見ました。"),
+("Wonderful! Did you feed them?","すばらしい！えさをあげましたか。","*Yes*! *They* *were* *very* *gentle*.","はい！とてもおだやかでした。"),
+("They love the snacks! Was it safe for you?","おやつが大好きなんですよ！こわくなかったですか。","*Yes*. *I* *can't* *wait* *to* *come* *back*!","はい。また来るのが待ちきれません！"),
 ("Enjoy! Safari njema! That means good journey.","楽しんで！サファリ・ンジェマ！「よい旅を」という意味です。","*Safari* *njema*! *Thank* *you*!","サファリ・ンジェマ！ありがとう！")],
 [("giraffe","キリン"),("feed","えさをあげる"),("safe","安全な"),("gentle","おだやかな"),("journey","旅")])
 d('nbo_duty1','免税店の店員','duty','duty_staff','免税店で、ケニアのコーヒーを見つけた。',[
@@ -242,8 +242,8 @@ d('doh_bag1','手荷物受け取りのスタッフ','dbag','d_bag','手荷物受
 ("Yes, of course. Please take one.","はい、もちろんです。お使いください。","*Great*. *How* *long* *will* *the* *bags* *take*?","よかった。荷物はどのくらいで出てきますか。"),
 ("About ten minutes. Thank you for waiting.","10分ほどです。お待ちいただきありがとうございます。","*No* *problem*. *Thank* *you*!","大丈夫です。ありがとう！")],
 [("belt","ベルト(荷物のレーン)"),("far","遠い"),("over there","あそこ"),("trolley","カート"),("waiting","待つこと")])
-d('doh_bag2','となりの旅行者','dbag','d_traveler','ベルトの前。同じ黒いスーツケースに、となりの人も手をのばした。',[
-("Excuse me, I think this black suitcase is mine.","すみません、この黒いスーツケースは私のだと思います。","*Sorry*, *but* *I* *think* *it* *is* *ours*. *Look* *at* *the* *name* *tag*.","すみません、私たちのだと思います。名札を見てください。"),
+d('doh_bag2','となりの旅行者','dbag','d_traveler','ベルトの前。同じ青いスーツケースに、となりの人も手をのばした。',[
+("Excuse me, I think this blue suitcase is mine.","すみません、この青いスーツケースは私のだと思います。","*Sorry*, *but* *I* *think* *it* *is* *ours*. *Look* *at* *the* *name* *tag*.","すみません、私たちのだと思います。名札を見てください。"),
 ("Oh! You are right. It is not my name. I am so sorry.","あっ！そのとおりです。私の名前ではありません。本当にごめんなさい。","*That's* *okay*. *They* *look* *the* *same*.","大丈夫です。そっくりですから。"),
 ("Mine has a red ribbon on the handle.","私のは、持ち手に赤いリボンがついています。","*A* *red* *ribbon*? *I* *see* *one* *over* *there*!","赤いリボン？あそこに1つ見えます！"),
 ("Yes, that is mine! Thank you so much.","そう、あれが私のです！本当にありがとう。","*You're* *welcome*. *Where* *are* *you* *from*?","どういたしまして。どちらからですか。"),
