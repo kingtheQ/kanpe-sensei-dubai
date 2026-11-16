@@ -109,7 +109,7 @@ d('nbo_java1','Java Houseの店員','cafeK','cafe_staff','Java House に入っ�
 ("Okay. That is eight hundred shillings.","はい。800シリングです。","*Can* *I* *pay* *by* *card*?","カードで払えますか。"),
 ("Yes. Here you go. Enjoy!","はい。どうぞ。ごゆっくり。","*Thank* *you*. *Asante*!","ありがとう。アサンテ！")],
 [("latte","ラテ"),("iced","冷たい・氷入りの"),("slice","ひと切れ"),("carrot cake","キャロットケーキ"),("shillings","シリング(ケニアのお金)")])
-d('nbo_java2','Java Houseの店員','cafeK','cafe_staff2','店は混んでいる。隣のお客さんが話しかけてきた。',[
+d('nbo_java2','Java Houseの隣の席のお客さん','cafeK','cafe_staff2','店は混んでいる。隣のお客さんが話しかけてきた。',[
 ("Excuse me. Is this seat free?","すみません。この席は空いていますか。","*Yes*, *it* *is*. *Please* *sit* *down*.","はい、空いています。どうぞ座ってください。"),
 ("Thank you. Are you traveling?","ありがとう。旅行中ですか。","*Yes*. *We* *are* *traveling* *around* *the* *world*.","はい。世界一周をしています。"),
 ("Wow! How do you like Nairobi so far?","わあ！ナイロビはここまでどうですか。","*It's* *great*. *The* *people* *are* *very* *kind*.","すばらしいです。人々がとても親切で。"),
@@ -138,11 +138,11 @@ d('nbo_lounge1','Pride Loungeの受付','lounge','lounge_staff','Pride Lounge �
 ("Yes, at the back. Please relax and enjoy.","はい、奥にあります。ゆっくりくつろいでください。","*Thank* *you* *very* *much*.","ありがとうございます。")],
 [("lounge","ラウンジ"),("password","パスワード"),("connect","接続する"),("quiet","静かな"),("relax","くつろぐ")])
 d('nbo_lounge2','ラウンジの隣の席のお客さん','lounge','lounge_guest','ラウンジのソファ。隣のお客さんが笑顔であいさつしてくれた。',[
-("Hello! Is this your first time in Kenya?","こんにちは！ケニアは初めてですか。","*Yes*, *it* *is*. *We* *just* *arrived*.","はい。着いたばかりです。"),
-("Welcome! What are you going to do here?","ようこそ！ここで何をする予定ですか。","*We* *want* *to* *see* *the* *giraffes*.","キリンを見たいです。"),
-("There is a giraffe center near Nairobi. You can feed them!","ナイロビの近くにキリンセンターがあります。えさをあげられますよ！","*That* *sounds* *fun*! *Is* *it* *safe*?","楽しそう！安全ですか。"),
-("Yes. The giraffes are gentle. They love the snacks.","はい。キリンはおだやかです。おやつが大好きなんですよ。","*I* *can't* *wait*. *Thank* *you*!","待ちきれません。ありがとう！"),
-("Enjoy! Safari njema! That means good journey.","楽しんで！サファリ・ンジェマ！「よい旅を」という意味です。","*Safari* *njema*! *Thank* *you*!","サファリ・ンジェマ！ありがとう！")],
+("Hello! Is this your first time in Kenya?","こんにちは！ケニアは初めてですか。","*Yes*, *it* *is*. *We* *had* *a* *good* *time* *here*.","はい。ここで楽しい時間を過ごしました。"),
+("Nice! What was your favorite thing in Kenya?","いいですね！ケニアでいちばん気に入ったものは何ですか。","*The* *giraffe* *was* *great*!","キリンが最高でした！"),
+("Ah, the giraffe center near Nairobi! You could feed them!","ああ、ナイロビの近くのキリンセンターですね！えさをあげられましたよね！","*Yes*! *It* *was* *fun*, *and* *it* *was* *safe*.","はい！楽しくて、安全でした。"),
+("Yes. The giraffes are gentle. They love the snacks.","はい。キリンはおだやかです。おやつが大好きなんですよ。","*They* *were* *so* *gentle*. *I* *miss* *them*!","とてもおだやかでした。もう恋しいです！"),
+("Have a safe flight! Safari njema! That means good journey.","よい空の旅を！サファリ・ンジェマ！「よい旅を」という意味です。","*Safari* *njema*! *Thank* *you*!","サファリ・ンジェマ！ありがとう！")],
 [("giraffe","キリン"),("feed","えさをあげる"),("safe","安全な"),("gentle","おだやかな"),("journey","旅")])
 d('nbo_duty1','免税店の店員','duty','duty_staff','免税店で、ケニアのコーヒーを見つけた。',[
 ("Welcome! Are you looking for something special?","いらっしゃいませ！何かお探しですか。","*Yes*. *I* *want* *Kenyan* *coffee* *for* *my* *family*.","はい。家族にケニアのコーヒーをおみやげにしたいです。"),
