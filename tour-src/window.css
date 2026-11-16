@@ -1,0 +1,7 @@
+/* 窓口フロー: 長いカンペ(宣言・読み上げ確認)。判定の色・％・点数は出さない */
+.cue.diag{padding-bottom:12px}
+.cue.diag .w{font-size:19px;font-weight:700}
+.cue.diag .stat{display:none}
+.cue.diag .heard{position:static;flex-basis:100%;max-height:none;font-size:15px;margin-top:6px}
+.cue.diag.shown .w{display:none}
+.cue.diag .heard.fin{font-size:19px;line-height:1.4;overflow:auto;max-height:100%;color:#3a3526}
