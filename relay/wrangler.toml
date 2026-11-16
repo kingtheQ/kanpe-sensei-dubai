@@ -1,0 +1,9 @@
+# 空港えいご物語 の中継。キーはここに書かない（シークレットで登録する）。
+name = "kanpe-speech-relay"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+[vars]
+# ゲームを置いている場所（GitHub Pages）だけに、トークンを配る。
+ALLOWED_ORIGINS = "https://kingtheq.github.io"
+AZURE_SPEECH_REGION = "eastus"

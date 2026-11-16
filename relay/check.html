@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>中継の動作確認</title>
+<style>body{font:16px/1.6 system-ui,sans-serif;max-width:640px;margin:16px auto;padding:0 12px;background:#fff;color:#111}
+input,button,textarea{font:inherit;padding:10px;width:100%;box-sizing:border-box;margin:4px 0}button{background:#245;color:#fff;border:0;border-radius:4px}
+button:disabled{opacity:.4}pre{background:#f3f3f3;padding:10px;white-space:pre-wrap;word-break:break-all}.ok{color:#064}.ng{color:#036;font-weight:bold}</style></head><body>
+<h1>中継の動作確認</h1>
+<p>手順書（relay/SETUP.md）のステップ5で使います。ここでは声を Azure に送ります。キーは入力しません（トークンだけを使います）。</p>
+<label>中継のURL（例：https://kanpe-speech-relay.○○.workers.dev）<input id="relay" placeholder="https://..."></label>
+<button id="b1">① トークンをもらう</button><pre id="o1">（まだ）</pre>
+<label>言う文<textarea id="ref" rows="2">We will travel around the world together, and have fun every day.</textarea></label>
+<button id="b2" disabled>② マイクで言って採点する</button><pre id="o2">（まだ）</pre>
+<script src="https://cdn.jsdelivr.net/npm/microsoft-cognitiveservices-speech-sdk@1.45.0/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle-min.js" integrity="sha384-RrysmqdtkBJHdL3yBqslKJR4EMsU7hA1rz+HpC9qMY001mmfKeRcKisr+NyuyI6H" crossorigin="anonymous"></script>
+<script>
+var $=function(i){return document.getElementById(i)},tok=null;
+try{$('relay').value=localStorage.getItem('kanpe-relay-url')||''}catch(e){}
+$('b1').onclick=async function(){
+ var u=$('relay').value.trim().replace(/\/+$/,'');$('o1').className='';
+ try{var r=await fetch(u+'/token');var j=await r.json();
+  if(!r.ok){$('o1').className='ng';$('o1').textContent='失敗：'+r.status+' '+JSON.stringify(j);return}
+  tok=j;try{localStorage.setItem('kanpe-relay-url',u)}catch(e){}
+  $('o1').className='ok';$('o1').textContent='成功：トークンを受け取りました（長さ '+j.token.length+'、リージョン '+j.region+'、あと '+j.expiresInSec+' 秒有効）';$('b2').disabled=false;
+ }catch(e){$('o1').className='ng';$('o1').textContent='失敗：つながりません（'+e.message+'）'}};
+$('b2').onclick=function(){
+ var S=window.SpeechSDK;if(!S||!tok){$('o2').textContent='先に①をやってください';return}
+ $('b2').disabled=true;$('o2').className='';$('o2').textContent='聞いています…言い終えたら少し待ってください';
+ var cfg=S.SpeechConfig.fromAuthorizationToken(tok.token,tok.region);cfg.speechRecognitionLanguage='en-US';
+ var pa=new S.PronunciationAssessmentConfig($('ref').value.trim(),S.PronunciationAssessmentGradingSystem.HundredMark,S.PronunciationAssessmentGranularity.Phoneme,true);
+ var rec=new S.SpeechRecognizer(cfg,S.AudioConfig.fromDefaultMicrophoneInput());pa.applyTo(rec);
+ rec.recognizeOnceAsync(function(res){
+  try{
+   if(res.reason!==S.ResultReason.RecognizedSpeech){$('o2').className='ng';$('o2').textContent='失敗：'+S.ResultReason[res.reason]+' '+(res.errorDetails||'');return}
+   var p=S.PronunciationAssessmentResult.fromResult(res),d=JSON.parse(res.properties.getProperty(S.PropertyId.SpeechServiceResponse_JsonResult)),w=(d.NBest&&d.NBest[0]&&d.NBest[0].Words)||[];
+   var t='成功：発音評価が1回動きました\n聞こえた文：'+res.text+'\n全体 '+p.pronunciationScore+' / 正確さ '+p.accuracyScore+' / 流暢さ '+p.fluencyScore+' / 言い切り度 '+p.completenessScore+'\n';
+   w.forEach(function(x){var a=x.PronunciationAssessment||{};t+=x.Word+' '+a.AccuracyScore+(a.ErrorType&&a.ErrorType!=='None'?' ('+a.ErrorType+')':'')+'\n'});
+   $('o2').className='ok';$('o2').textContent=t;
+  }catch(e){$('o2').className='ng';$('o2').textContent='失敗：'+e.message}finally{rec.close();$('b2').disabled=false}},
+  function(e){$('o2').className='ng';$('o2').textContent='失敗：'+e;rec.close();$('b2').disabled=false});};
+</script></body></html>
