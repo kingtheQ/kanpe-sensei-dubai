@@ -3097,6 +3097,48 @@ function setupDiag(act,stat,toks,spans,T,card){
  stat.className='stat';stat.textContent=''}
 
 
+
+/* ===== 割りこみ・持ち越し・顔なじみ(タスク014 / 005案 A+B+F) =====
+   save.ev = {fired:{枠:1}, streak, last}。「飽きのサイン」は未決定(決定005-3)。いまの仮の定義は EVC.sameN だけ。 */
+var EVSLOTS=[{"id": "a", "vid": "nbo_ev_a_dropped", "at": "after", "key": "immig", "sign": 1}, {"id": "b", "vid": "nbo_ev_b_leak", "at": "enter", "key": "bag", "sign": 1}, {"id": "c", "vid": "nbo_ev_c_phone", "at": "enter", "key": "qcheckin", "sign": 1}, {"id": "d", "vid": "nbo_ev_d_lulu", "at": "after", "key": "duty", "sign": 1}, {"id": "e", "vid": "nbo_ev_e_gate", "at": "enter", "key": "gate", "sign": 1}, {"id": "f", "vid": "nbo_ev_f_captain", "at": "after", "key": "qplane", "sign": 1}, {"id": "g", "vid": "doh_ev_g_card", "at": "vid", "key": "doh_metro", "sign": 1}, {"id": "f1", "vid": "nbo_ev_f1_ribbon", "at": "enter", "key": "qplane", "sign": 0}, {"id": "f2", "vid": "doh_ev_f2_customs", "at": "after", "key": "dbag", "sign": 0, "need": "nbo_sec2"}];
+var EVC={sameN:2};   /* 未決定: 同じ型の場面が何回つづいたら「飽き」とみなすか(仮に2) */
+var EVQ=(location.search.match(/[?&]ev=(\w+)/)||[])[1]||'';
+function evS(){var e=save.ev;if(!e||typeof e!=='object')e=save.ev={};if(!e.fired||typeof e.fired!=='object')e.fired={};if(typeof e.streak!=='number')e.streak=0;if(typeof e.last!=='string')e.last='';return e}
+function evFx(k){try{Snd.fx('ding')}catch(e){}}
+function evNote(S){
+ if(!S||!S.d||S.d.win)return;var e=evS(),k=S.d.kind||'std';
+ if(k==='ev'||k==='short'){e.streak=0;e.last=k}
+ else if(k===e.last)e.streak++;else{e.last=k;e.streak=1}
+ storeSave()}
+function evBored(){return EVQ==='all'||evS().streak>=EVC.sameN}
+function evGate(at,key,cont){
+ if(EVQ==='off')return false;var e=evS();
+ for(var i=0;i<EVSLOTS.length;i++){var x=EVSLOTS[i];
+  if(x.at!==at||x.key!==key||e.fired[x.id]||!DLG[x.vid])continue;
+  if(x.need&&!(save.seen[x.need]>0))continue;
+  if(x.sign&&!evBored())continue;
+  e.fired[x.id]=1;e.streak=0;e.last='ev';storeSave();
+  var pl=PBY[key]||(G.scene&&G.scene.pl)||PBY[Object.keys(PBY)[0]];
+  G.evCont=cont;startVid(pl,x.vid,'ev');return true}
+ return false}
+function evFinish(S){
+ save.seen[S.vid]=(save.seen[S.vid]||0)+1;storeSave();
+ var c=G.evCont;G.evCont=null;if(c)c();else showMap()}
+function evOpts(T){
+ G.phase='opts';clearPanel();clearInterval(G.typeTimer);msgText.textContent=T.npc;var S=G.scene,sid=G.sid;
+ var box=el('div','dqbox'),bs=[];
+ T.opts.forEach(function(o){var b=el('button','dq');b.type='button';b.appendChild(el('span','cur','▶'));b.appendChild(el('span','',cueText(o.y)));
+  b.addEventListener('click',function(){evPick(T,o)});box.appendChild(b);bs.push(b)});
+ panel.appendChild(box);
+ function sel(i){bs.forEach(function(b,j){b.classList.toggle('sel',j===i)})}
+ bs.forEach(function(b,i){['focus','pointerenter','pointerdown'].forEach(function(ev){b.addEventListener(ev,function(){sel(i)})})});
+ sel(0);
+ (function rd(i){if(G.sid!==sid||G.phase!=='opts'||i>=T.opts.length)return;sel(i);say(cueText(T.opts[i].y),.9,1,gd(function(){later(300,function(){if(G.phase==='opts')rd(i+1)})}))})(0)}
+function evPick(T,o){
+ if(G.phase!=='opts')return;stopSay();var S=G.scene;
+ S.pick=o.k;T.pk=o.k;T.cue=o.y;T.cueJp=o.jp;if(o.rep)T.rep=o.rep;
+ showCue()}
+
 /* ===== 世界一周編: 終わりの場面(タスク016) =====
    帰国から1か月後のリビング。アルバムの最後の白いページを、旅の始めの約束(宣言文)をもう一度読んで埋める。
    設計の正本: docs/pm/deliverables/013-ending-scores-design-v1.md (E1〜E6・使えない場合 a〜e・記録 kanpe-voice-v1)。
