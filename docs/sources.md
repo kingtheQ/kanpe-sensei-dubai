@@ -103,3 +103,10 @@
 - HIS 航空会社一覧PDF：https://rtw.his-j.com/wp/wp-content/themes/around/asset/before/images/support_airlist.pdf
 
 ※ 素材集（`docs/materials/event-materials.md`）の各出来事にも、それぞれ出典URLと確認レベル（A公式／B高信頼／C体験談・口コミ／D未確認）が付いている。
+
+## タスク016（終わりの場面・Azure）で参照
+- 発音評価：https://learn.microsoft.com/en-us/azure/ai-services/speech-service/how-to-pronunciation-assessment
+- Speech SDK SpeechConfig：https://learn.microsoft.com/en-us/javascript/api/microsoft-cognitiveservices-speech-sdk/speechconfig
+- データとプライバシー：https://learn.microsoft.com/legal/cognitive-services/speech-service/speech-to-text/data-privacy-security
+- 料金：https://azure.microsoft.com/en-us/pricing/details/speech/
+- Web Speech API：https://developer.mozilla.org/docs/Web/API/Web_Speech_API/Using_the_Web_Speech_API
