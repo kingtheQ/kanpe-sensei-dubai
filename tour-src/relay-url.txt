@@ -1,0 +1,2 @@
+# 中継(relay/)の URL を1行だけ書く。空のあいだ、ゲームは Azure を使わない(同意の画面も出ない)。
+# 例: https://kanpe-speech-relay.xxxx.workers.dev  (キーは書かない。URLは公開してよい)

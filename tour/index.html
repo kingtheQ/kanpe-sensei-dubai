@@ -115,6 +115,12 @@ body{margin:0;box-sizing:border-box;background:var(--bg);color:var(--line);font-
 .cue.diag .heard{position:static;flex-basis:100%;max-height:none;font-size:15px;margin-top:6px}
 .cue.diag.shown .w{display:none}
 .cue.diag .heard.fin{font-size:19px;line-height:1.4;overflow:auto;max-height:100%;color:#3a3526}
+/* 声(タスク016): 同意の1枚・せっていの注記 */
+.vcons{background:var(--paper);color:var(--ink);border:3px solid var(--brown);border-radius:10px;padding:12px 14px;flex:1;min-height:0;overflow:auto;font-size:15px;line-height:1.55;font-weight:700}
+.vcons .vh{font-size:22px;font-weight:900;margin-bottom:6px}
+.vcons p{margin:0 0 8px}
+.vcons ul{margin:0;padding-left:1.1em}.vcons li{margin-bottom:6px}
+.sset .dd2{font-size:12px;font-weight:500;line-height:1.4;color:var(--mute)}
 
 .cue .heard b{color:#1d4ed8}
 .cue.ev .w,.cue.ev .w.s{color:#0a7c4a}
@@ -351,7 +357,7 @@ body.big .cue .w{font-size:30px}body.big .cue .w.s{font-size:52px}
     <button id="phoOk" class="btn sub" type="button" hidden style="min-height:44px;font-size:14px">これで OK（にんしきの まちがい）</button>
     <button id="phoSkip" class="btn sub" type="button" hidden style="min-height:40px;font-size:13px">うまく いかない ときは つぎへ ›</button>
   </div>
-  <div id="setView" hidden><div class="sbar"><button id="setBack" class="btn sub" type="button" aria-label="もどる">‹ もどる</button><b>せってい</b><span style="width:84px;flex:none"></span></div><div class="sctx" id="setCtx"></div><div id="setBody" style="display:flex;flex-direction:column;gap:18px"></div><p class="snote">音声は 保存も 送信も しません。発音の きろくは この端末の中だけに のこります。</p></div>
+  <div id="setView" hidden><div class="sbar"><button id="setBack" class="btn sub" type="button" aria-label="もどる">‹ もどる</button><b>せってい</b><span style="width:84px;flex:none"></span></div><div class="sctx" id="setCtx"></div><div id="setBody" style="display:flex;flex-direction:column;gap:18px"></div><p class="snote">声は、ゲームでは 保存しません。マイクの声は ブラウザの音声認識が 文字にします(Chrome は Google、Safari は Apple の サーバーに 声が おくられます)。「こえを おくる」を ONに した ときだけ、旅の はじめと おわりの 宣言の 声が、発音を しらべる ために Microsoft Azure に おくられます。発音の きろくは この端末の中だけに のこります。</p></div>
 </div>
 
 <script>
@@ -1477,7 +1483,7 @@ function startVid(pl,vid,from){
  G.view='scene';G.ti=0;G.tries=0;$m('mapView').hidden=true;$m('sceneView').hidden=false;
  startScene()}
 function startScene(){
- clearPanel();var S=G.scene;
+ clearPanel();var S=G.scene;if(S.d.hook==='consent'){consentScene(S);return}
  if(S.d.story)applyCtx(S.turns[0].ctx);
  setMsgInstant(S.d.intro||S.pl.tip[0],'');$m('tapHint').textContent='';
  if(S.d.auto){later(700,function(){playInter(-1,npcTurn)});return}
@@ -1597,7 +1603,7 @@ function renderEval(card,spans,toks,res,heardEl){
  res.heardRaw.forEach(function(h,j){var e=document.createElement(res.hflags[j]==='bad'?'b':'span');e.textContent=h+' ';heardEl.appendChild(e)})}
 function setupAction(act,stat,toks,spans,T){
  G.mute=null;var card=spans.length?spans[0].parentNode:null;
- if(T.diag&&SR&&!PREF.silent&&card){setupDiag(act,stat,toks,spans,T,card);return}
+ if(T.diag&&!PREF.silent&&card){var AZ=(T.diag==='decl'||T.diag==='decl_end')&&voiceAzureOn();if(AZ||SR){(AZ?setupDiagAz:setupDiag)(act,stat,toks,spans,T,card);return}}
  if(!SR||!card||PREF.silent){setupActionTimer(act,stat,toks,spans,T);if(card)card.appendChild(el('div','heard nomic',PREF.silent?'こえを ださない モード(時間だけで判定)':'このブラウザは音声認識なし(時間だけで判定)'));return}
  var heardEl=el('div','heard','');card.appendChild(heardEl);
  var tgToks=toks.map(function(k){return k.txt}),sid=G.sid,rec=null,listening=false,got=false,lastInt='',errCode='',mode='say',IDLE='🎤 もういちど';
@@ -1833,7 +1839,7 @@ function openSettings(){
  var s1=sSec('こえ');s1.appendChild(sToggle('こえを ださない モード','マイクを つかわず、ボタンで すすむ。電車や お店の中でも あそべる','silent'));b.appendChild(s1);
  var s2=sSec('おんりょう');s2.appendChild(sSlider('おんがく(BGM・まちの おと)','bgm'));s2.appendChild(sSlider('リズムの おと(強化合宿)','beat'));s2.appendChild(sSlider('ルル・あいての こえ','voice'));b.appendChild(s2);
  var s3=sSec('よみあげ');s3.appendChild(el('div','tt','よみあげの はやさ'));s3.appendChild(sSeg([['ゆっくり',.75],['ふつう',1],['はやい',1.2]],'rate'));s3.appendChild(el('div','tt','ルルの こえの たかさ'));s3.appendChild(sSeg([['ふつう',1.2],['かわいい',1.6],['もっと',2]],'pitch'));b.appendChild(s3);
- var s4=sSec('ひょうじ');s4.appendChild(el('div','tt','カンペの もじの おおきさ'));s4.appendChild(sSeg([['ふつう',0],['おおきい',1]],'big'));b.appendChild(s4);
+ var s4=sSec('ひょうじ');s4.appendChild(el('div','tt','カンペの もじの おおきさ'));s4.appendChild(sSeg([['ふつう',0],['おおきい',1]],'big'));b.appendChild(s4);voiceSetSection(b);
  var s5=sSec('ルルの カバンの きろくちょう');s5.appendChild(el('div','tt','えらんだ チケット：'+(save.ticket==='star'?'Star Alliance':save.ticket==='ow'?'oneworld':'まだ えらんでいない')));var dn=0;TOUR_IDS.forEach(function(k){if(save.seen[k]>0)dn++});s5.appendChild(el('div','tt','ナイロビの かいわ：'+dn+' / '+TOUR_IDS.length));var mq=memoLoad();if(mq.length)s5.appendChild(el('div','tt','つぎの たびの メモ：'+mq.join(', ')));b.appendChild(s5);
  $m('setView').hidden=false;$m('setBack').focus()}
 function closeSettings(){$m('setView').hidden=true;
@@ -2863,76 +2869,232 @@ BGS.cabinQ=function(){R('#e4dfe2',0,0,VW,98);R('#b8aeb6',0,0,VW,22);R('#cfc6cc',
 /* 世界マップの「いま いる 空港」を合わせる(クリアは変えない) */
 function worldAt(k){try{var w=JSON.parse(localStorage.getItem('kanpe-world-v1')||'null');if(!w||typeof w!=='object')w={v:1,at:'haneda',seen:{haneda:1},cleared:{haneda:1}};w.seen=w.seen&&typeof w.seen==='object'?w.seen:{};w.cleared=w.cleared&&typeof w.cleared==='object'?w.cleared:{};if(w.at!==k)w.from=w.at;w.at=k;w.seen[k]=1;localStorage.setItem('kanpe-world-v1',JSON.stringify(w))}catch(e){}}
 
-/* ===== 世界一周編: 窓口フロー(タスク012) =====
-   宣言 → 聞き取り5本 → 線を引く → おすすめ → 値段 → 読み上げ確認 → 名前の確認 → 搭乗券(既存 ticket_star / ticket_ow)
-   設計の正本: docs/pm/deliverables/003・004・011。build.py が tour/index.html に差しこむ。 */
-var WSTEP=['win_decl','win_c1','win_c2','win_c5','win_c7','win_c8','win_route','win_rec','win_price','win_rb','win_name','win_pass'];
-var ORD=['','first','second','third','fourth','fifth','sixth','seventh','eighth','ninth','tenth','eleventh','twelfth','thirteenth','fourteenth','fifteenth','sixteenth','seventeenth','eighteenth','nineteenth','twentieth','twenty first','twenty second','twenty third','twenty fourth','twenty fifth','twenty sixth','twenty seventh','twenty eighth','twenty ninth','thirtieth','thirty first'];
-var WSTOP={a:1,an:1,the:1,to:1,of:1,'in':1,on:1,at:1,and:1,or:1,'for':1,'with':1,from:1,as:1,is:1,am:1,are:1,be:1,it:1,that:1,'this':1,my:1,your:1,our:1,so:1};
-/* カンペの強調(＊): 冠詞・前置詞などのほかを太字にする(data 側の star() と同じ規則) */
-function wst(s){return s.split(' ').map(function(tok){var m=/^([^A-Za-z0-9]*)(.*?[A-Za-z0-9])([^A-Za-z0-9]*)$/.exec(tok);if(!m||WSTOP[m[2].toLowerCase()])return tok;return m[1]+'*'+m[2]+'*'+m[3]}).join(' ')}
+/* ===== 声(タスク016): 同意・記録(kanpe-voice-v1)・Azure 発音評価・設定 =====
+   設計の正本: docs/pm/deliverables/013-ending-scores-design-v1.md
+   声の行き先: ブラウザの音声認識(いつも) / Azure(同意した人の、旅の始めと終わりの宣言の2回だけ)。
+   キーはゲームに置かない。中継(relay/)が10分だけ使えるトークンを渡す。中継の URL が空なら Azure は使わない。
+   build.py が "" の中身を tour-src/relay-url.txt から差しこむ(中継のURLは、そこ1か所だけ)。 */
+var VOICEKEY='kanpe-voice-v1',VREF='decl-v1';
+var RELAY_URL="";
+var SDK_URL='https://cdn.jsdelivr.net/npm/microsoft-cognitiveservices-speech-sdk@1.45.0/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle-min.js';
+var SDK_SRI='sha384-RrysmqdtkBJHdL3yBqslKJR4EMsU7hA1rz+HpC9qMY001mmfKeRcKisr+NyuyI6H';
 
-/* ---- 次の旅のメモ(はじめからでも消えない別のキー。端末の中だけ) ---- */
-var MEMOKEY='kanpe-tour-memo-v1';
-function memoLoad(){try{var a=JSON.parse(localStorage.getItem(MEMOKEY)||'[]');return Array.isArray(a)?a.filter(function(x){return typeof x==='string'&&x.length<40}).slice(0,12):[]}catch(e){return[]}}
-function winMemo(en){var a=memoLoad();if(a.indexOf(en)<0)a.push(en);try{localStorage.setItem(MEMOKEY,JSON.stringify(a))}catch(e){}}
+/* ---- 保存: consent・旅ごとの始め/終わり・次の旅のメモ。「はじめから」でも消さない別のキー(苦手な音と同じ扱い) ---- */
+function vLoad(){
+ var v=null;try{v=JSON.parse(localStorage.getItem(VOICEKEY)||'null')}catch(e){}
+ if(!v||typeof v!=='object'||v.v!==1)v={v:1,consent:null,trips:[],next:null};
+ if(!Array.isArray(v.trips))v.trips=[];
+ if(!v.consent||typeof v.consent!=='object'||typeof v.consent.az!=='boolean')v.consent=null;
+ if(!v.next||typeof v.next!=='object')v.next=null;
+ return v}
+function vSave(v){try{localStorage.setItem(VOICEKEY,JSON.stringify(v))}catch(e){}}
+function voiceRelayOn(){return /^https:\/\//.test(RELAY_URL)}
+function voiceConsent(){var c=vLoad().consent;return c?c.az:null}
+function voiceNeedConsent(){return voiceRelayOn()&&voiceConsent()===null}      /* 中継がなければ、送る先がないので聞かない */
+function voiceAzureOn(){return voiceRelayOn()&&voiceConsent()===true}
+function voiceSetConsent(b){var v=vLoad();v.consent={az:!!b,at:Date.now(),ver:1};vSave(v)}
+function voiceClear(){var v=vLoad();v.trips=[];v.next=null;vSave(v)}              /* 同意の選びは残す(切り替えは別) */
+function voiceSetNext(o){var v=vLoad();v.next=o;vSave(v)}
+function voiceTripCur(){var v=vLoad();return v.trips.length?v.trips[v.trips.length-1]:null}
+/* kind: 'decl'=旅の始め / 'decl_end'=旅の終わり。2周目の始めは、前の旅に終わりがあれば新しい旅として測り直す */
+function voiceSetM(kind,M){
+ var v=vLoad(),tr=v.trips.length?v.trips[v.trips.length-1]:null;
+ if(kind==='decl'){if(!tr||tr.end)v.trips.push(tr={id:tr?tr.id+1:1,ref:VREF,start:null,end:null});tr.ref=VREF;tr.start=M}
+ else{if(!tr)v.trips.push(tr={id:1,ref:VREF,start:null,end:null});tr.end=M}
+ if(v.trips.length>20)v.trips=v.trips.slice(-20);
+ vSave(v)}
+/* ブラウザの音声認識だけで読んだとき(同意なし・通信なし)の記録。数字は null、単語ごとは bits だけ */
+function voiceSaveSR(kind,tg,res,txt){
+ voiceSetM(kind,{ts:Date.now(),src:'sr',tot:null,acc:null,flu:null,cmp:null,w:null,
+  bits:res.words.map(function(w){return w.ok?'1':'0'}).join(''),heard:String(txt||'').slice(0,600)})}
 
-/* ---- 状態: save.win = {step, m:{場面:{t,why}}, cont:大陸の数, pick:'star'|'ow', done} ---- */
-function winStart(){
- var W=save.win;if(!W||typeof W!=='object'||W.done)W=save.win={step:0,m:{},cont:5,pick:null};
- if(!W.m||typeof W.m!=='object')W.m={};if(typeof W.step!=='number'||W.step<0||W.step>=WSTEP.length)W.step=0;
- storeSave();winRun()}
-function winVid(k){
- var W=save.win,tk=W.pick==='ow'?('ow'+(W.cont===4?4:5)):'star';
- if(k==='win_price')return 'win_price_'+tk;if(k==='win_rb')return 'win_rb_'+tk;if(k==='win_pass')return 'ticket_'+(W.pick==='ow'?'ow':'star');return k}
-function winRun(){
- var W=save.win,k=WSTEP[W.step];if(!k){showMap();return}
- if(k==='win_rec')winRecBuild();if(k==='win_decl')winDeclPrep();
- var vid=winVid(k),pl=PBY.ticket;
- if(k==='win_pass'){save.ticket=W.pick==='ow'?'ow':'star';W.done=1;storeSave();worldAt('nairobi');startVid(pl,vid,'hub');return}
- startVid(pl,vid,'win')}
-function winAfter(S){var W=save.win;W.step++;storeSave();winRun()}
+/* ---- 中継からトークンをもらう(8秒で見切る)・Speech SDK を読みこむ(同意した人が読むときだけ) ---- */
+var _vt=null,_sdkP=null;
+function voiceToken(){
+ if(_vt&&_vt.exp>Date.now())return Promise.resolve(_vt);
+ return new Promise(function(res,rej){
+  var done=false,ac=(typeof AbortController!=='undefined')?new AbortController():null;
+  var tm=setTimeout(function(){if(done)return;done=true;try{if(ac)ac.abort()}catch(e){}rej('token_timeout')},8000);
+  var fail=function(e){if(done)return;done=true;clearTimeout(tm);rej(String(e))};
+  try{fetch(RELAY_URL.replace(/\/+$/,'')+'/token',{cache:'no-store',signal:ac?ac.signal:undefined}).then(function(r){if(!r.ok)throw 'http'+r.status;return r.json()}).then(function(j){
+   if(done)return;if(!j||typeof j.token!=='string'||!j.token)throw 'bad_token';
+   done=true;clearTimeout(tm);_vt={token:j.token,region:String(j.region||'eastus'),exp:Date.now()+Math.max(60,+j.expiresInSec||60)*1000-20000};res(_vt)}).catch(fail)}
+  catch(e){fail(e)}})}
+function voiceSdk(){
+ if(window.SpeechSDK)return Promise.resolve(window.SpeechSDK);
+ if(_sdkP)return _sdkP;
+ _sdkP=new Promise(function(res,rej){
+  var s=document.createElement('script');s.src=SDK_URL;s.integrity=SDK_SRI;s.crossOrigin='anonymous';s.async=true;
+  var tm=setTimeout(function(){rej('sdk_timeout')},12000);
+  s.onload=function(){clearTimeout(tm);if(window.SpeechSDK)res(window.SpeechSDK);else rej('sdk_missing')};
+  s.onerror=function(){clearTimeout(tm);rej('sdk_error')};
+  document.head.appendChild(s)});
+ _sdkP.catch(function(){_sdkP=null});
+ return _sdkP}
 
-/* 次の旅のメモがあれば、係員が切り出す(2周目の窓口) */
-function winDeclPrep(){
- var L=DLG.win_decl.lines[0];if(!L.n0)L.n0=L.n;var mm=memoLoad();
- L.n=mm.length?("Good morning. Last time, you wanted to see "+mm.join(' and ')+". I wrote it down for your next trip. Now, please make your promise to Lulu."):L.n0}
+/* ---- Azure の発音評価(連続認識。70語は約40秒なので、30秒を超える音声は連続で扱う) ----
+   cb: started() / live(文字) / seg({text,pa,words}) / canceled(エラー文) / fail(理由)。返す H.stop(done) で止めて、まだ来る最後の結果も待つ。
+   抑揚(prosody)は別料金なので使わない。 */
+function voiceAzStart(ref,cb){
+ var H={dead:false,rec:null,segs:[]};
+ H.abort=function(){H.dead=true;try{if(H.rec)H.rec.close()}catch(e){}H.rec=null};
+ H.stop=function(done){
+  var fin=false,r=H.rec;function f(){if(fin)return;fin=true;H.abort();if(done)done()}
+  if(!r){f();return}
+  var tm=setTimeout(f,4000);
+  try{r.stopContinuousRecognitionAsync(function(){clearTimeout(tm);f()},function(){clearTimeout(tm);f()})}catch(e){clearTimeout(tm);f()}};
+ Promise.all([voiceToken(),voiceSdk()]).then(function(r){
+  if(H.dead)return;
+  var tk=r[0],S=r[1],rec;
+  try{
+   var cfg=S.SpeechConfig.fromAuthorizationToken(tk.token,tk.region);cfg.speechRecognitionLanguage='en-US';
+   var pa=new S.PronunciationAssessmentConfig(ref,S.PronunciationAssessmentGradingSystem.HundredMark,S.PronunciationAssessmentGranularity.Phoneme,true);
+   try{pa.phonemeAlphabet='IPA'}catch(e){}
+   rec=new S.SpeechRecognizer(cfg,S.AudioConfig.fromDefaultMicrophoneInput());pa.applyTo(rec)}
+  catch(e){cb.fail('init');return}
+  H.rec=rec;
+  rec.recognizing=function(s,e){if(!H.dead&&e&&e.result)cb.live(String(e.result.text||''))};
+  rec.recognized=function(s,e){
+   if(H.dead||!e||!e.result)return;var res=e.result;
+   if(res.reason!==S.ResultReason.RecognizedSpeech)return;
+   var j=null;try{j=JSON.parse(res.properties.getProperty(S.PropertyId.SpeechServiceResponse_JsonResult))}catch(x){}
+   var nb=j&&j.NBest&&j.NBest[0];
+   var sg={text:String(res.text||''),pa:(nb&&nb.PronunciationAssessment)||null,words:(nb&&nb.Words)||[]};
+   H.segs.push(sg);cb.seg(sg)};
+  rec.canceled=function(s,e){if(H.dead)return;cb.canceled(e&&e.reason===S.CancellationReason.Error?String(e.errorDetails||'error'):'')};
+  rec.startContinuousRecognitionAsync(function(){if(!H.dead)cb.started()},function(err){if(!H.dead)cb.fail(String(err))})
+ },function(e){if(!H.dead)cb.fail(String(e))});
+ return H}
 
-/* 分かれ目(▶): 英文だけを出して読み上げる。選んだ文をそのまま言う */
-function winOpts(T){
- G.phase='opts';clearPanel();clearInterval(G.typeTimer);msgText.textContent=T.npc;var S=G.scene,sid=G.sid;
- var box=el('div','dqbox'),bs=[];
- T.opts.forEach(function(o){var b=el('button','dq');b.type='button';b.appendChild(el('span','cur','▶'));b.appendChild(el('span','',cueText(o.y)));
-  b.addEventListener('click',function(){pickOpt(T,o)});box.appendChild(b);bs.push(b)});
- panel.appendChild(box);
- function sel(i){bs.forEach(function(b,j){b.classList.toggle('sel',j===i)})}
- bs.forEach(function(b,i){['focus','pointerenter','pointerdown'].forEach(function(ev){b.addEventListener(ev,function(){sel(i)})})});
- sel(0);
- (function rd(i){if(G.sid!==sid||G.phase!=='opts'||i>=T.opts.length)return;sel(i);say(cueText(T.opts[i].y),.9,1,gd(function(){later(300,function(){if(G.phase==='opts')rd(i+1)})}))})(0)}
-function pickOpt(T,o){
- if(G.phase!=='opts')return;stopSay();var S=G.scene;
- S.pick=o.k;T.pk=o.k;T.cue=o.y;T.cueJp=o.jp;if(o.rep)T.rep=o.rep;
- winMark(S.vid,o);if(o.memo)winMemo(o.memo);
- showCue()}
-function winMark(vid,o){
- var W=save.win;if(!W)return;if(!W.m)W.m={};delete W.m[vid];
- if(o.mt)W.m[vid]={t:o.mt,why:o.why||''};if(o.cont)W.cont=o.cont;if(o.tk)W.pick=o.tk;storeSave()}
+/* ---- 結果を、紙の単語(宣言文70語)の順にそろえて持つ。Azure の言葉と紙の言葉を、近い順に対応づける ---- */
+function vnorm(s){return String(s).toLowerCase().replace(/[^a-z0-9']/g,'')}
+function valign(rn,an){
+ var n=rn.length,m=an.length,D=[],B=[],i,j;
+ for(i=0;i<=n;i++){D.push([]);B.push([]);for(j=0;j<=m;j++){D[i].push(0);B[i].push(0)}}
+ for(i=1;i<=n;i++){D[i][0]=i;B[i][0]=1}for(j=1;j<=m;j++){D[0][j]=j;B[0][j]=2}
+ for(i=1;i<=n;i++)for(j=1;j<=m;j++){
+  var sub=D[i-1][j-1]+(rn[i-1]===an[j-1]?0:1.2),del=D[i-1][j]+1,ins=D[i][j-1]+1;
+  if(sub<=del&&sub<=ins){D[i][j]=sub;B[i][j]=0}else if(del<=ins){D[i][j]=del;B[i][j]=1}else{D[i][j]=ins;B[i][j]=2}}
+ var map=[];for(i=0;i<n;i++)map.push(-1);i=n;j=m;
+ while(i>0||j>0){var b=B[i][j];if(i>0&&j>0&&b===0){map[i-1]=j-1;i--;j--}else if(i>0&&(j===0||b===1)){i--}else{j--}}
+ return map}
+/* tg=紙の単語, segs=Azure の区切りごとの結果, txt=聞こえた文, res=analyze の結果。
+   単語の半分以上が対応づかなければ、Azure の結果は使わない(src='sr'。数字なし) */
+function voiceBuildM(tg,segs,txt,res){
+ var rn=tg.map(vnorm),aw=[],durs=0,fs=0,fw=0;
+ segs.forEach(function(sg){
+  var pa=sg.pa,wd=0;
+  (sg.words||[]).forEach(function(w){
+   var a=w.PronunciationAssessment||{};wd+=+w.Duration||0;
+   if(a.ErrorType==='Insertion'||a.ErrorType==='Omission')return;
+   aw.push({n:vnorm(w.Word),a:typeof a.AccuracyScore==='number'?a.AccuracyScore:null,e:a.ErrorType||'None',
+    p:(w.Phonemes||[]).map(function(p){var q=p.PronunciationAssessment||{};return [String(p.Phoneme||''),Math.round(typeof q.AccuracyScore==='number'?q.AccuracyScore:0)]})})});
+  if(pa&&typeof pa.FluencyScore==='number'){var wt=wd||1;fs+=pa.FluencyScore*wt;fw+=wt}});
+ var map=valign(rn,aw.map(function(x){return x.n})),w=[],accs=[],matched=0;
+ rn.forEach(function(r,i){
+  var j=map[i],x=j>=0?aw[j]:null,ok=x&&x.a!=null&&(x.n===r||lev(x.n,r)<=Math.max(1,Math.floor(r.length*.5)));
+  if(ok){matched++;accs.push(x.a);w.push([tg[i],Math.round(x.a),x.e,x.p])}else w.push([tg[i],null,'Omission',[]])});
+ var cov=tg.length?matched/tg.length:0,usable=cov>=.5&&fw>0;
+ var M={ts:Date.now(),src:usable?'az':'sr',tot:null,acc:null,flu:null,cmp:null,w:null,
+  bits:res.words.map(function(x){return x.ok?'1':'0'}).join(''),heard:String(txt||'').slice(0,600)};
+ if(usable){
+  var acc=accs.reduce(function(a,b){return a+b},0)/Math.max(1,accs.length),flu=fs/fw,cmp=cov*100;
+  /* 4つの数字: このゲームの計算式(同じ式で始めと終わりを測る)。Azure の画面の総合点とは一致しないことがある */
+  M.acc=Math.round(acc);M.flu=Math.round(flu);M.cmp=Math.round(cmp);M.tot=Math.round(acc*.6+flu*.2+cmp*.2);M.w=w}
+ return M}
 
-/* おすすめ: 印の多い券と理由。同数ならキングが▶で決める。印がなければスター(003 2-3) */
-function winRecBuild(){
- var W=save.win,m=W.m||{},cnt={star:0,ow:0},why={star:[],ow:[]};
- Object.keys(m).forEach(function(k){var x=m[k];if(cnt[x.t]!=null){cnt[x.t]++;if(x.why)why[x.t].push(x.why)}});
- var NM={star:'Star Alliance',ow:'oneworld Explorer'},tie=cnt.star===cnt.ow&&cnt.star>0,none=cnt.star===0&&cnt.ow===0,lead=cnt.ow>cnt.star?'ow':'star',oth=lead==='ow'?'star':'ow',intro,ans;
- if(none){intro="You are still deciding, so I recommend Star Alliance. The rules are simple, and it has the most routes.";ans="Thank you. That makes sense."}
- else if(tie){intro="Your dreams point to two tickets. "+why.ow.slice(0,1).concat(why.star.slice(0,1)).join(' ')+" Both are good.";ans="Two tickets. I see."}
- else{intro="Let me look at your answers. "+why[lead].slice(0,2).join(' ')+" So I recommend "+NM[lead]+".";ans="Thank you. That makes sense."}
- var order=tie||none?['star','ow']:[lead,oth];
- function op(k){return {k:k,y:wst("I'll take "+NM[k]+", please."),jp:'',tk:k}}
- DLG.win_rec={who:'世界一周の窓口係',story:1,bg:'tdesk',sp:'desk_rtw',hero:'blue',lulu:'plain',nogold:1,inter:[],intro:'The Round the World desk.',win:1,auto:1,words:[],
-  lines:[{n:intro,jp:''},{y:wst(ans),jp:''},{n:"Which ticket will you take?",jp:'どちらの券にしますか。'},{y:'',jp:'',opts:order.map(op)}]}}
+/* ---- 同意の1枚(ゲーム内の紙)。ボタンは同じ大きさ。ここだけ日本語(013 3-4) ---- */
+function consentCard(done){
+ clearPanel();G.phase='consent';
+ var card=el('div','vcons');card.appendChild(el('div','vh','声を送ってもいい？'));
+ card.appendChild(el('p','','旅のはじめと、おわりに、同じ文を言います。そのときの声だけを、発音を調べるために Microsoft のサービス（Azure）に送ります。'));
+ var ul=el('ul');
+ ['送るのは、この2回だけ。ほかの場面の声は、このサービスには送りません。（ほかの場面では、ブラウザの音声認識が声を文字にします。Chrome なら Google、Safari なら Apple のサービスです。）',
+  'ゲームは声を保存しません。Microsoft は、この方法では声を保存しないと説明しています。',
+  '結果は、この端末の中だけに残ります。',
+  '送らなくても、ゲームは最後まで同じように遊べます。いつでも、設定で変えられます。'].forEach(function(t){ul.appendChild(el('li','',t))});
+ card.appendChild(ul);panel.appendChild(card);
+ var row=el('div','row cuerow'),ok=el('button','btn sub','送ってOK'),no=el('button','btn sub','送らない'),used=false;
+ [ok,no].forEach(function(b){b.type='button'});
+ function pick(v){if(used)return;used=true;voiceSetConsent(v);done()}
+ ok.addEventListener('click',function(){pick(true)});no.addEventListener('click',function(){pick(false)});
+ row.appendChild(ok);row.appendChild(no);panel.appendChild(row)}
+
+/* ---- せってい: 「こえの おくりさき」(切り替え・記録を消す) ---- */
+function voiceSetSection(b){
+ var s=sSec('こえの おくりさき');
+ if(voiceRelayOn()){
+  var r=el('div','stg'),tx=el('div','tx');tx.appendChild(el('div','tt','こえを Microsoft に おくる'));
+  tx.appendChild(el('div','dd','はじめと おわりの せんげん(2かい)だけ。ほかの ばめんでは おくりません'));
+  var tg=el('button','tgl');tg.type='button';tg.setAttribute('aria-label','こえを おくる');tg.setAttribute('aria-pressed',voiceConsent()===true?'true':'false');
+  tg.addEventListener('click',function(){var nv=voiceConsent()!==true;voiceSetConsent(nv);tg.setAttribute('aria-pressed',nv?'true':'false')});
+  r.appendChild(tx);r.appendChild(tg);s.appendChild(r)}
+ var cl=el('button','btn sub','こえの きろくを けす'),armed=false;cl.type='button';
+ cl.addEventListener('click',function(){
+  if(!armed){armed=true;cl.textContent='ほんとうに けす？ もういちど おす';setTimeout(function(){if(armed){armed=false;cl.textContent='こえの きろくを けす'}},4000);return}
+  voiceClear();armed=false;cl.textContent='けしました'});
+ s.appendChild(cl);s.appendChild(el('div','dd2','はじめと おわりを くらべる きろくだけ けします。ほかの はつおんの きろくは そのままです'));
+ b.appendChild(s)}
+
+/* ---- Azure で読む長いカンペ(宣言)。見た目と進み方は setupDiag(ブラウザの音声認識)と同じ。使えないときは、そちらにかえる ---- */
+function setupDiagAz(act,stat,toks,spans,T,card){
+ var sid=G.sid,tg=toks.map(function(k){return k.txt}),ref=tg.join(' '),heardEl=el('div','heard',''),IDLE='🎤 もういちど',
+  H=null,listening=false,starting=false,fin=false,segs=[],lastInt='',lastAt=0,silent=0,t0=Date.now(),tick=0;
+ card.appendChild(heardEl);
+ function alive(){return G.sid===sid&&G.view==='scene'&&!fin}
+ function setIdle(){listening=false;act.classList.remove('down');act.textContent=IDLE}
+ function segTxt(){return segs.map(function(s){return s.text}).join(' ')}
+ function heardTxt(){return segTxt()+(lastInt?' '+lastInt:'')}
+ function hl(){var r=analyze(tg,heardTxt()),last=-1;r.words.forEach(function(w,i){if(w.ok&&w.h!=null)last=i});spans.forEach(function(s,i){s.classList.toggle('on',i===last)})}
+ function enough(){var r=analyze(tg,segTxt()),n=r.words.length;return r.ratio>=.97||(r.okN>=n*.5&&r.words.slice(-3).every(function(w){return w.ok}))}
+ function kill(){clearInterval(tick);if(H){var h0=H;H=null;h0.abort()}Snd.duck(0)}
+ function toSR(why){   /* Azure をやめて、ブラウザの音声認識で続ける(通信できない・SDKが読めない・認証が通らない) */
+  if(fin)return;fin=true;kill();listening=false;starting=false;G.azFail=String(why||1).slice(0,40);
+  var a2=act.cloneNode(false);a2.className='btn';a2.textContent=IDLE;if(act.parentNode)act.parentNode.replaceChild(a2,act);
+  if(heardEl.parentNode)heardEl.parentNode.removeChild(heardEl);
+  if(SR){setupDiag(a2,stat,toks,spans,T,card);if(G.kick)later(300,G.kick);return}
+  if(G.onBlocked){var ob=G.onBlocked;G.onBlocked=null;ob('azure');return}
+  setupActionTimer(a2,stat,toks,spans,T);card.appendChild(el('div','heard nomic','マイクが使えません'))}
+ function finish(why){
+  if(fin)return;fin=true;listening=false;act.disabled=true;clearInterval(tick);var h0=H;H=null;
+  function go(){
+   Snd.duck(0);
+   var txt=segTxt().trim(),res=analyze(tg,txt),M=voiceBuildM(tg,segs,txt,res);
+   plogAdd({ts:M.ts,v:G.scene?G.scene.vid:'',tg:tg.join(' '),hd:txt.slice(0,600),cf:0,ok:res.okN,n:res.n,
+    miss:res.words.filter(function(w){return !w.ok}).slice(0,40).map(function(w){return {t:missKey(w.t),h:w.h,k:w.k}}),
+    diag:T.diag,why:why,seg:segs.length,bits:M.bits,alts:[],src:M.src});
+   voiceSetM(T.diag,M);
+   card.classList.add('shown');heardEl.className='heard fin';heardEl.textContent=txt||'…';
+   later(Math.min(6500,2600+txt.length*16),diagDone)}
+  if(h0)h0.stop(go);else go()}
+ function start(){
+  if(fin||listening||starting)return;stopSay();starting=true;heardEl.className='heard live';heardEl.textContent='…';stat.className='stat';stat.textContent='';
+  Snd.duck(1);lastAt=Date.now();
+  H=voiceAzStart(ref,{
+   started:function(){starting=false;if(!alive())return;listening=true;lastAt=Date.now();act.classList.add('down');act.textContent='きいてます…'},
+   live:function(tx){if(!alive())return;lastInt=tx;lastAt=Date.now();heardEl.textContent=heardTxt();hl()},
+   seg:function(sg){if(!alive())return;segs.push(sg);lastInt='';lastAt=Date.now();silent=0;heardEl.textContent=heardTxt();hl();if(enough())finish('enough')},
+   canceled:function(){if(!alive())return;if(segs.length)finish('cancel');else toSR('canceled')},
+   fail:function(e){starting=false;if(!alive())return;toSR(e)}});
+  clearInterval(tick);
+  tick=setInterval(function(){
+   if(!alive()||!listening)return;var now=Date.now();
+   if(now-t0>110000||(segs.length&&now-lastAt>9000)){finish(segs.length?'silence':'none');return}
+   if(!segs.length&&now-lastAt>15000){silent++;kill();setIdle();starting=false;if(silent>=2){finish('none');return}later(300,function(){if(alive())start()})}},500)}
+ G.kick=function(){if(G.phase==='cue'&&alive()&&!listening&&!starting&&act.isConnected)start()};
+ G.mute=function(){kill();listening=false;starting=false;segs=[];lastInt='';silent=0;t0=Date.now();if(act.isConnected)setIdle();heardEl.textContent=''};
+ act.addEventListener('click',function(){
+  if(fin)return;
+  if(listening||starting){
+   if(segs.length||lastInt){if(!segs.length)segs.push({text:String(lastInt).trim(),pa:null,words:[]});lastInt='';finish('manual')}
+   else{kill();starting=false;setIdle()}
+   return}
+  start()});
+ act.addEventListener('contextmenu',function(e){e.preventDefault()});
+ stat.className='stat';stat.textContent=''}
 
 /* ---- 長いカンペ(宣言・読み上げ確認): 合否で止めない。点・色・音は出さず、最後に「きこえたこと」だけ見せる ---- */
-function diagDone(){if(!G.scene)return;G.phase='pass';G.tries=0;advance()}
+function diagDone(){if(!G.scene)return;if(G.scene.end&&typeof endAfterRead==='function'){endAfterRead();return}G.phase='pass';G.tries=0;advance()}
 function setupDiag(act,stat,toks,spans,T,card){
  var sid=G.sid,tg=toks.map(function(k){return k.txt}),heardEl=el('div','heard',''),rec=null,listening=false,fin=false,pend=false,got=false,segs=[],alts=[],lastInt='',silent=0,cfSum=0,cfN=0,t0=Date.now(),IDLE='🎤 もういちど';
  card.appendChild(heardEl);
@@ -2942,6 +3104,7 @@ function setupDiag(act,stat,toks,spans,T,card){
  function hl(){var r=analyze(tg,hear()),last=-1;r.words.forEach(function(w,i){if(w.ok&&w.h!=null)last=i});spans.forEach(function(s,i){s.classList.toggle('on',i===last)})}
  function enough(){var r=analyze(tg,segs.join(' ')),n=r.words.length;return r.ratio>=.97||(r.okN>=n*.5&&r.words.slice(-3).every(function(w){return w.ok}))}  /* 最後の3語まで聞こえたら終わり。途中の一息では切らない */
  function fallback(msg){
+  if(G.onBlocked){var ob=G.onBlocked;G.onBlocked=null;fin=true;ob(msg);return}  /* 終わりの場面: マイクが使えないときは、ルルが読む形にかえる */
   var a2=act.cloneNode(false);a2.className='btn';a2.textContent=IDLE;act.parentNode.replaceChild(a2,act);listening=false;
   setupActionTimer(a2,stat,toks,spans,T);card.appendChild(el('div','heard nomic',msg))}
  function finish(why){
@@ -2951,6 +3114,7 @@ function setupDiag(act,stat,toks,spans,T,card){
   plogAdd({ts:Date.now(),v:G.scene?G.scene.vid:'',tg:tg.join(' '),hd:txt.slice(0,600),cf:cfN?cfSum/cfN:0,ok:res.okN,n:res.n,
    miss:res.words.filter(function(w){return !w.ok}).slice(0,40).map(function(w){return {t:missKey(w.t),h:w.h,k:w.k}}),
    diag:T.diag,why:why,seg:segs.length,bits:res.words.map(function(w){return w.ok?'1':'0'}).join(''),alts:alts.slice(0,12)});
+  if(T.diag==='decl'||T.diag==='decl_end')voiceSaveSR(T.diag,tg,res,txt);  /* 始め・終わりの宣言は、比べるための別の記録(kanpe-voice-v1)にも残す */
   card.classList.add('shown');heardEl.className='heard fin';heardEl.textContent=txt||'…';
   later(Math.min(6500,2600+txt.length*16),diagDone)}
  function start(){
@@ -2985,6 +3149,86 @@ function setupDiag(act,stat,toks,spans,T,card){
   start()});
  act.addEventListener('contextmenu',function(e){e.preventDefault()});
  stat.className='stat';stat.textContent=''}
+
+
+/* ===== 世界一周編: 窓口フロー(タスク012) =====
+   宣言 → 聞き取り5本 → 線を引く → おすすめ → 値段 → 読み上げ確認 → 名前の確認 → 搭乗券(既存 ticket_star / ticket_ow)
+   設計の正本: docs/pm/deliverables/003・004・011。build.py が tour/index.html に差しこむ。 */
+var WSTEP=['win_decl','win_c1','win_c2','win_c5','win_c7','win_c8','win_route','win_rec','win_price','win_rb','win_name','win_pass'];
+var ORD=['','first','second','third','fourth','fifth','sixth','seventh','eighth','ninth','tenth','eleventh','twelfth','thirteenth','fourteenth','fifteenth','sixteenth','seventeenth','eighteenth','nineteenth','twentieth','twenty first','twenty second','twenty third','twenty fourth','twenty fifth','twenty sixth','twenty seventh','twenty eighth','twenty ninth','thirtieth','thirty first'];
+var WSTOP={a:1,an:1,the:1,to:1,of:1,'in':1,on:1,at:1,and:1,or:1,'for':1,'with':1,from:1,as:1,is:1,am:1,are:1,be:1,it:1,that:1,'this':1,my:1,your:1,our:1,so:1};
+/* カンペの強調(＊): 冠詞・前置詞などのほかを太字にする(data 側の star() と同じ規則) */
+function wst(s){return s.split(' ').map(function(tok){var m=/^([^A-Za-z0-9]*)(.*?[A-Za-z0-9])([^A-Za-z0-9]*)$/.exec(tok);if(!m||WSTOP[m[2].toLowerCase()])return tok;return m[1]+'*'+m[2]+'*'+m[3]}).join(' ')}
+
+/* ---- 次の旅のメモ(はじめからでも消えない別のキー。端末の中だけ) ---- */
+var MEMOKEY='kanpe-tour-memo-v1';
+function memoLoad(){try{var a=JSON.parse(localStorage.getItem(MEMOKEY)||'[]');return Array.isArray(a)?a.filter(function(x){return typeof x==='string'&&x.length<40}).slice(0,12):[]}catch(e){return[]}}
+function winMemo(en){var a=memoLoad();if(a.indexOf(en)<0)a.push(en);try{localStorage.setItem(MEMOKEY,JSON.stringify(a))}catch(e){}}
+
+/* ---- 状態: save.win = {step, m:{場面:{t,why}}, cont:大陸の数, pick:'star'|'ow', done} ---- */
+function winStart(){
+ var W=save.win;if(!W||typeof W!=='object'||W.done)W=save.win={step:0,m:{},cont:5,pick:null};
+ if(!W.m||typeof W.m!=='object')W.m={};if(typeof W.step!=='number'||W.step<0||W.step>=WSTEP.length)W.step=0;
+ storeSave();winRun()}
+function winVid(k){
+ var W=save.win,tk=W.pick==='ow'?('ow'+(W.cont===4?4:5)):'star';
+ if(k==='win_price')return 'win_price_'+tk;if(k==='win_rb')return 'win_rb_'+tk;if(k==='win_pass')return 'ticket_'+(W.pick==='ow'?'ow':'star');return k}
+function winRun(){
+ var W=save.win,k=WSTEP[W.step];if(!k){showMap();return}
+ if(k==='win_decl'&&voiceNeedConsent()){winConsent();return}   /* 宣言の直前に、声を送ってよいかを一度だけ聞く(013 3-3) */
+ if(k==='win_rec')winRecBuild();if(k==='win_decl')winDeclPrep();
+ var vid=winVid(k),pl=PBY.ticket;
+ if(k==='win_pass'){save.ticket=W.pick==='ow'?'ow':'star';W.done=1;storeSave();worldAt('nairobi');startVid(pl,vid,'hub');return}
+ startVid(pl,vid,'win')}
+function winAfter(S){var W=save.win;W.step++;storeSave();winRun()}
+
+/* 同意の1枚: 賢者の見送りのあと、宣言の直前。ルルが紙をわたす。選んだら宣言へ進む */
+function winConsent(){
+ DLG.win_consent=DLG.win_consent||{who:'Lulu',story:0,bg:'tdesk',sp:'',hero:'blue',lulu:'plain',nogold:1,inter:[],intro:'',lines:[],words:[],win:1,auto:1,hook:'consent'};
+ startVid(PBY.ticket,'win_consent','win')}
+function consentScene(S){
+ applyCtx({bg:'tdesk',who:'Lulu',sp:'lulu',hero:'blue',lulu:'plain',gold:0});
+ var en='King, one question before we start.';setMsgInstant(en,'Lulu');spSay=false;say(en,.95,1.35);
+ consentCard(function(){winRun()})}
+
+/* 次の旅のメモがあれば、係員が切り出す(2周目の窓口) */
+function winDeclPrep(){
+ var L=DLG.win_decl.lines[0];if(!L.n0)L.n0=L.n;var mm=memoLoad();
+ var nx=vLoad().next,sn=nx&&nx.k?(" Last time, the \""+nx.k+"\" sound was a little hard. Let's meet it again on the road."):"";
+ L.n=mm.length?("Good morning. Last time, you wanted to see "+mm.join(' and ')+". I wrote it down for your next trip."+sn+" Now, please make your promise to Lulu."):(sn?("Good morning."+sn+" Now, please make your promise to Lulu."):L.n0)}
+
+/* 分かれ目(▶): 英文だけを出して読み上げる。選んだ文をそのまま言う */
+function winOpts(T){
+ G.phase='opts';clearPanel();clearInterval(G.typeTimer);msgText.textContent=T.npc;var S=G.scene,sid=G.sid;
+ var box=el('div','dqbox'),bs=[];
+ T.opts.forEach(function(o){var b=el('button','dq');b.type='button';b.appendChild(el('span','cur','▶'));b.appendChild(el('span','',cueText(o.y)));
+  b.addEventListener('click',function(){pickOpt(T,o)});box.appendChild(b);bs.push(b)});
+ panel.appendChild(box);
+ function sel(i){bs.forEach(function(b,j){b.classList.toggle('sel',j===i)})}
+ bs.forEach(function(b,i){['focus','pointerenter','pointerdown'].forEach(function(ev){b.addEventListener(ev,function(){sel(i)})})});
+ sel(0);
+ (function rd(i){if(G.sid!==sid||G.phase!=='opts'||i>=T.opts.length)return;sel(i);say(cueText(T.opts[i].y),.9,1,gd(function(){later(300,function(){if(G.phase==='opts')rd(i+1)})}))})(0)}
+function pickOpt(T,o){
+ if(G.phase!=='opts')return;stopSay();var S=G.scene;
+ S.pick=o.k;T.pk=o.k;T.cue=o.y;T.cueJp=o.jp;if(o.rep)T.rep=o.rep;
+ winMark(S.vid,o);if(o.memo)winMemo(o.memo);
+ showCue()}
+function winMark(vid,o){
+ var W=save.win;if(!W)return;if(!W.m)W.m={};delete W.m[vid];
+ if(o.mt)W.m[vid]={t:o.mt,why:o.why||''};if(o.cont)W.cont=o.cont;if(o.tk)W.pick=o.tk;storeSave()}
+
+/* おすすめ: 印の多い券と理由。同数ならキングが▶で決める。印がなければスター(003 2-3) */
+function winRecBuild(){
+ var W=save.win,m=W.m||{},cnt={star:0,ow:0},why={star:[],ow:[]};
+ Object.keys(m).forEach(function(k){var x=m[k];if(cnt[x.t]!=null){cnt[x.t]++;if(x.why)why[x.t].push(x.why)}});
+ var NM={star:'Star Alliance',ow:'oneworld Explorer'},tie=cnt.star===cnt.ow&&cnt.star>0,none=cnt.star===0&&cnt.ow===0,lead=cnt.ow>cnt.star?'ow':'star',oth=lead==='ow'?'star':'ow',intro,ans;
+ if(none){intro="You are still deciding, so I recommend Star Alliance. The rules are simple, and it has the most routes.";ans="Thank you. That makes sense."}
+ else if(tie){intro="Your dreams point to two tickets. "+why.ow.slice(0,1).concat(why.star.slice(0,1)).join(' ')+" Both are good.";ans="Two tickets. I see."}
+ else{intro="Let me look at your answers. "+why[lead].slice(0,2).join(' ')+" So I recommend "+NM[lead]+".";ans="Thank you. That makes sense."}
+ var order=tie||none?['star','ow']:[lead,oth];
+ function op(k){return {k:k,y:wst("I'll take "+NM[k]+", please."),jp:'',tk:k}}
+ DLG.win_rec={who:'世界一周の窓口係',story:1,bg:'tdesk',sp:'desk_rtw',hero:'blue',lulu:'plain',nogold:1,inter:[],intro:'The Round the World desk.',win:1,auto:1,words:[],
+  lines:[{n:intro,jp:''},{y:wst(ans),jp:''},{n:"Which ticket will you take?",jp:'どちらの券にしますか。'},{y:'',jp:'',opts:order.map(op)}]}}
 
 /* ---- 線を引く地図(窓口の壁): 西まわりに 羽田→ナイロビ→ロヴァニエミ→クスコ→ホノルル→羽田。もどる線は止まる ---- */
 var WM=["..................#####.......###########......................#######################......", "...##########################...####............##########################################..", "............###################..............#..###################################.........", "..............################................###################################...........", "...............############.................##...#.#.########################.#.............", ".................########..................###########.######################...............", "..................###.....................###################...###########.................", ".......................#..................#################......#.....###..................", "..........................#####.............##############.............#....................", ".........................##########.............########....................................", "..........................###########............#######....................................", "............................#######..............#######.....................######.........", "............................######................#####....................##########.......", "............................###.................................................####........", "...........................##...............................................................", "...........................##..............................................................."];
