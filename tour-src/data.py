@@ -15,10 +15,10 @@ d('sage_1','達人賢者','sage','sage','星の見える広間。達人賢者が
 d('sage_2','達人賢者','sage','sage','達人賢者に、航空券のえらび方をきいてみよう。',[
 ("Do you know the two big groups of airlines?","航空会社の大きなグループを2つ知っていますか。","*No*, *I* *don't*. *Please* *tell* me.","いいえ。教えてください。"),
 ("They are Star Alliance and oneworld. Each group has many airlines.","スターアライアンスとワンワールドです。どちらもたくさんの航空会社があります。","*What's* the *difference*?","何がちがうのですか。"),
-("The airlines are different, so the routes are different. But both can take you to every airport on your list.","航空会社がちがうので、ルートもちがいます。でも、どちらでも、あなたの行きたい空港すべてに行けます。","*Can* I *change* my *mind* *later*?","あとで気が変わってもいいですか。"),
-("Choose one for this trip. You can choose the other one next time.","この旅ではひとつ選びます。もうひとつは、次の機会に選べます。","*Which* *one* *is* *better*?","どちらがいいですか。"),
-("Neither is better. Pick the one that feels fun. A trip should be fun!","どちらがよいということはありません。楽しそうな方を選びなさい。旅は楽しくなくては。","*Okay*. *I'll* *choose* *now*!","わかりました。いま選びます。")],
-[("alliance","航空会社の連合"),("route","ルート"),("difference","ちがい"),("change my mind","気が変わる"),("choose","選ぶ")])
+("The airlines are different, so the routes are different. Which one suits you depends on how you travel.","航空会社がちがうので、ルートもちがいます。どちらが合うかは、あなたの旅の仕方で決まります。","*Can* I *change* my *mind* *later*?","あとで気が変わってもいいですか。"),
+("Choose one for this trip. You can choose the other one next time.","この旅ではひとつ選びます。もうひとつは、次の機会に選べます。","*But* *how* *do* *we* *know* *which* *one* *suits* *us*?","でも、どちらが私たちに合うか、どうやってわかりますか。"),
+("Go to the ticket desk and talk it over well. Tell them how you want to travel.","航空券の窓口へ行って、よく相談しなさい。どんな旅をしたいか、伝えるのです。","*Okay*. *We'll* *go* *and* *talk* *with* *them* *now*!","わかりました。これから窓口で相談してきます。")],
+[("alliance","航空会社の連合"),("route","ルート"),("suit","合う"),("change my mind","気が変わる"),("ticket desk","航空券の窓口")])
 d('sage_3','達人賢者','sage','sage','達人賢者から、旅の英語のコツをきこう。',[
 ("Here is a secret about travel English. Short is good.","旅の英語のひみつを教えましょう。短くて大丈夫です。","*Short* *is* *good*? *Really*?","短くていいのですか。本当に？"),
 ("Yes. Say 'Excuse me,' then say what you need. People will help you.","はい。『すみません』と言ってから、必要なことを言う。人は助けてくれます。","*What* *if* I *don't* *understand*?","わからなかったらどうしますか。"),
