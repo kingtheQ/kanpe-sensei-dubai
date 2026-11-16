@@ -1393,7 +1393,7 @@ var $m=function(i){return document.getElementById(i)};
 var cam=0,t=0,speaker=null,spX=360,spSay=false,lastId=null,LIMIT=5000;
 var G={view:'map',at:'info',scene:null,ti:0,tries:0,phase:'idle',sid:0,timers:[],typeTimer:0,camp:null},luHelp=false;
 var HELPMAX=5,save={seen:{},help:HELPMAX,weak:[],missed:[]},SAVEKEY='kanpe-tour-save-v1';
-try{var s0=JSON.parse(localStorage.getItem(SAVEKEY)||'null');if(s0&&s0.seen&&typeof s0.seen==='object')save.seen=s0.seen;if(s0&&s0.gold)save.gold=1;if(s0&&(s0.ticket==='star'||s0.ticket==='ow'))save.ticket=s0.ticket;if(s0&&s0.win&&typeof s0.win==='object')save.win=s0.win;if(s0&&typeof s0.help==='number'&&s0.help>=0&&s0.help<=HELPMAX)save.help=Math.floor(s0.help);if(s0&&Array.isArray(s0.weak))save.weak=s0.weak.filter(function(w){return w&&typeof w.c==='string'}).slice(0,8);if(s0&&Array.isArray(s0.missed))save.missed=s0.missed.filter(function(w){return Array.isArray(w)&&typeof w[0]==='string'}).slice(0,16)}catch(e){}
+try{var s0=JSON.parse(localStorage.getItem(SAVEKEY)||'null');if(s0&&s0.seen&&typeof s0.seen==='object')save.seen=s0.seen;if(s0&&s0.gold)save.gold=1;if(s0&&s0.ev&&typeof s0.ev==='object')save.ev=s0.ev;if(s0&&(s0.ticket==='star'||s0.ticket==='ow'))save.ticket=s0.ticket;if(s0&&s0.win&&typeof s0.win==='object')save.win=s0.win;if(s0&&typeof s0.help==='number'&&s0.help>=0&&s0.help<=HELPMAX)save.help=Math.floor(s0.help);if(s0&&Array.isArray(s0.weak))save.weak=s0.weak.filter(function(w){return w&&typeof w.c==='string'}).slice(0,8);if(s0&&Array.isArray(s0.missed))save.missed=s0.missed.filter(function(w){return Array.isArray(w)&&typeof w[0]==='string'}).slice(0,16)}catch(e){}
 function storeSave(){try{localStorage.setItem(SAVEKEY,JSON.stringify(save))}catch(e){}}
 /* 世界マップへ「クリア」を伝える: 6つの場所を、それぞれ1回以上あそんだら */
 function worldMark(k){try{var w=JSON.parse(localStorage.getItem('kanpe-world-v1')||'null');if(!w||typeof w!=='object')w={v:1,at:'haneda',seen:{haneda:1},cleared:{haneda:1}};w.seen=w.seen&&typeof w.seen==='object'?w.seen:{};w.cleared=w.cleared&&typeof w.cleared==='object'?w.cleared:{};w.seen[k]=1;w.cleared[k]=1;localStorage.setItem('kanpe-world-v1',JSON.stringify(w))}catch(e){}}
@@ -1417,7 +1417,7 @@ function say(text,rate,pitch,done){
 function stopSay(){sayTok++;try{speechSynthesis.cancel()}catch(e){}}
 function cueText(c){return c.replace(/\*/g,'')}
 function parseCue(c){return c.split(' ').map(function(k){return {txt:k.replace(/\*/g,''),s:k.indexOf('*')>=0}})}
-function turnsOf(id){var L=DLG[id].lines,T=[],i=0;while(i<L.length){var n=L[i];if(n.n&&L[i+1]&&L[i+1].y!==undefined){var Y=L[i+1];T.push({npc:n.n,npcJp:n.jp,cue:Y.y,cueJp:Y.jp,by:n.by,cueBy:Y.cueBy,opts:Y.opts,diag:Y.diag,rep:Y.rep,route:n.route});i+=2}else i++}return T}
+function turnsOf(id){var L=DLG[id].lines,T=[],i=0;while(i<L.length){var n=L[i];if(n.n&&L[i+1]&&L[i+1].y!==undefined){var Y=L[i+1];T.push({npc:n.n,npcJp:n.jp,cue:Y.y,cueJp:Y.jp,by:n.by,vr:n.vr,cueBy:Y.cueBy,opts:Y.opts,diag:Y.diag,rep:Y.rep,route:n.route});i+=2}else i++}return T}
 
 /* ---------- 描く(場面) ---------- */
 function sp2(map,pal,x,y,px){for(var r=0;r<map.length;r++){var row=map[r];for(var k=0;k<row.length;k++){var ch=row.charAt(k);if(ch!=='.'){c.fillStyle=pal[ch]||'#f0f';c.fillRect(Math.round(x+k*px),Math.round(y+r*px),px,px)}}}}
@@ -1495,8 +1495,9 @@ function pickV(pl){
  if(!pool.length)pool=ids.filter(function(i){return i!==lastId});
  if(!pool.length)pool=ids.slice();
  return pool[Math.floor(Math.random()*pool.length)]}
-function enterPlace(id){var pl=PBY[id];if(pl.win&&!save.ticket){winStart();return}if(pl.hub){enterHub(pl);return}startVid(pl,pickV(pl),null)}
+function enterPlace(id){var pl=PBY[id];if(evGate('enter',id,function(){enterPlace(id)}))return;if(pl.win&&!save.ticket){winStart();return}if(pl.hub){enterHub(pl);return}startVid(pl,pickV(pl),null)}
 function startVid(pl,vid,from){
+ if(from!=='ev'&&evGate('vid',vid,function(){startVid(pl,vid,from)}))return;
  var d=DLG[vid];lastId=vid;G.sid++;clearTimers();stopSay();Snd.go(G.snd=pl.snd||pl.id);resetOUT();
  G.scene={id:pl.id,vid:vid,pl:pl,d:d,turns:turnsOf(vid),words:d.words,pitch:SP[vid]?SP[vid].pitch:1,from:from||null,anim:null,lastSp:null,tables:null};
  var S=G.scene;
@@ -1509,11 +1510,12 @@ function startScene(){
  clearPanel();var S=G.scene;if(S.d.hook==='consent'){consentScene(S);return}
  if(S.d.story)applyCtx(S.turns[0].ctx);
  setMsgInstant(S.d.intro||S.pl.tip[0],'');$m('tapHint').textContent='';
- if(S.d.auto){later(700,function(){playInter(-1,npcTurn)});return}
+ if(S.d.auto){if(S.d.fx)evFx(S.d.fx);later(700,function(){playInter(-1,npcTurn)});return}
  var b=el('button','btn go','GO！');b.type='button';panel.appendChild(b);setTimeout(function(){if(b.isConnected)b.classList.add('shake')},3000);
  b.addEventListener('click',function(){if(S.d.story)playInter(-1,npcTurn);else npcTurn()})}
 function npcTurn(){
  clearPanel();G.phase='npc';var S=G.scene,T=S.turns[G.ti];
+ if(T.vr&&!T.vd){T.vd=1;for(var vi=0;vi<T.vr.length;vi++){var vv=T.vr[vi];if(save.seen[vv.s]>0){T.npc=vv.n;T.npcJp=vv.jp;if(vv.y){T.cue=vv.y;T.cueJp=vv.yjp}break}}}
  var bv=T.by&&S.pick&&T.by[S.pick];if(bv){T.npc=bv.n;T.npcJp=bv.jp}var cv=T.cueBy&&S.pick&&T.cueBy[S.pick];if(cv){T.cue=cv.y;T.cueJp=cv.jp}
  if(T.route!=null){S.rf=S.rn||0;S.rn=T.route;S.rt=t}
  if(T.ctx)applyCtx(T.ctx);
@@ -1530,7 +1532,7 @@ function fitCue(card){
   var cr=card.getBoundingClientRect(),av=cr.height-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom);return (bot-top)>av}
  for(var i=0;i<20&&over()&&k>.45;i++){k-=.05;ws.forEach(function(w,j){w.style.fontSize=(base[j]*k).toFixed(1)+'px'})}}
 function showCue(){
- G.cueSil=PREF.silent;G.phase='cue';clearPanel();var T=G.scene.turns[G.ti];if(T.opts&&!T.pk){winOpts(T);return}var toks=parseCue(T.cue);clearInterval(G.typeTimer);msgText.textContent=T.npc;
+ G.cueSil=PREF.silent;G.phase='cue';clearPanel();var T=G.scene.turns[G.ti];if(T.opts&&!T.pk){((G.scene.d.ev||typeof winOpts!=='function')?evOpts:winOpts)(T);return}var toks=parseCue(T.cue);clearInterval(G.typeTimer);msgText.textContent=T.npc;
  var card=el('div','cue'+(T.diag?' diag':''));card.appendChild(el('span','lab','カンペ'));
  var spans=toks.map(function(k){var s=el('span','w'+(k.s?' s':''),k.txt);card.appendChild(s);return s});
  panel.appendChild(card);var stat=el('div','stat','');card.appendChild(stat);
@@ -1539,7 +1541,7 @@ function showCue(){
  var act=el('button','btn','🎤 もういちど');act.type='button';row.appendChild(act);panel.appendChild(row);fitCue(card);requestAnimationFrame(function(){fitCue(card)});
  setupAction(act,stat,toks,spans,T);
  if(SR&&!PREF.silent)later(500,function(){if(G.kick)G.kick()});
- if(!G.camp&&!T.diag)addHelp(T)}
+ if(!G.camp&&!T.diag&&!G.scene.d.nohelp)addHelp(T)}
 /* ---------- 発音チェック: 目標の文と「聞こえた文字」を単語ごとに比べる ---------- */
 var ONES=['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
 var TENS=['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
@@ -1801,9 +1803,9 @@ function onFail(){
  G.phase='retry';var line=RETRY[Math.min(G.tries-1,RETRY.length-1)];setMsg(line,whoNow());say(line,.9,G.scene.pitch,gd(function(){later(400,function(){if(G.kick)G.kick()})}))}
 function A_shake(){var a=$m('app');a.classList.remove('shake');void a.offsetWidth;a.classList.add('shake')}
 function advance(){
- if(!G.camp){var D0=G.scene.turns[G.ti];if(D0&&D0.rep&&!D0.repd){D0.repd=1;G.phase='rep';setMsg(D0.rep.n,whoNow());spSay=true;say(D0.rep.n,.95,G.scene.pitch,gd(function(){spSay=false;later(450,advance)}));return}}
+ if(!G.camp){var D0=G.scene.turns[G.ti];if(D0&&D0.rep&&!D0.repd){D0.repd=1;G.phase='rep';setMsg(D0.rep.n,D0.rep.who||whoNow());spSay=true;say(D0.rep.n,.95,G.scene.pitch,gd(function(){spSay=false;later(450,advance)}));return}}
  if(G.camp){var done=G.scene.turns[G.ti];save.weak=save.weak.filter(function(w){return w.c!==done.cue});storeSave();G.ti++;if(G.ti>=G.scene.turns.length)campDone();else npcTurn();return}
- G.ti++;playInter(G.ti-1,function(){if(G.ti>=G.scene.turns.length){G.phase='clear';Snd.jingle('clear');var W0=G.scene.d&&G.scene.d.win;setMsgInstant(W0?'Clear!':'Clear!  ぜんぶ いえた！',whoNow());later(W0?1300:2000,W0?finishScene:startWords)}else npcTurn()})}
+ G.ti++;playInter(G.ti-1,function(){if(G.ti>=G.scene.turns.length){G.phase='clear';Snd.jingle('clear');var W0=G.scene.d&&(G.scene.d.win||G.scene.d.ev);setMsgInstant(W0?'Clear!':'Clear!  ぜんぶ いえた！',whoNow());later(W0?1300:2000,W0?finishScene:startWords)}else npcTurn()})}
 function onPass(){
  var Td=G.scene&&G.scene.turns[G.ti];if(Td&&Td.diag){diagDone();return}
  Snd.jingle('pass');G.phase='pass';G.tries=0;var th=THANKS[Math.floor(Math.random()*THANKS.length)];setMsg(th,whoNow());spSay=true;
@@ -2232,7 +2234,7 @@ function startReveal(){
   skip.addEventListener('click',function(){tok++;i++;one()})}
  one()}
 function finishScene(){
- var S=G.scene;if(S.d&&S.d.win){save.seen[S.vid]=(save.seen[S.vid]||0)+1;storeSave();winAfter(S);return}save.seen[S.vid]=(save.seen[S.vid]||0)+1;(S.d.inter||[]).forEach(function(n){if(n.set&&n.set.gold)save.gold=1});storeSave();worldSync();
+ var S=G.scene;if(S.d&&S.d.win){save.seen[S.vid]=(save.seen[S.vid]||0)+1;storeSave();winAfter(S);return}if(S.d&&S.d.ev){evFinish(S);return}if(!S.evd){S.evd=1;evNote(S);if(evGate('after',S.pl.id,function(){G.scene=S;finishScene()}))return}save.seen[S.vid]=(save.seen[S.vid]||0)+1;(S.d.inter||[]).forEach(function(n){if(n.set&&n.set.gold)save.gold=1});storeSave();worldSync();
  if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}if(S.pl.id==='qplane'){worldAt('nairobi');Snd.go(null);location.href='../world/?fly=doha';return}showMap();if(S.pl.id==='ticket'&&save.ticket)setMode('arr');}
 
 /* ---------- お店の中(Veranda・S34・Costa・Ahlan): 入るたびに、食べている人と相手がかわる ---------- */
@@ -2315,11 +2317,11 @@ function drawTables(tb,id){
 var OUT={hero:'blue',lulu:'plain',gold:0,hvis:1,lvis:1,hdx:0,hdy:0,ldx:0,ldy:0},luTalk=false;
 function resetOUT(){OUT.hero='blue';OUT.lulu='plain';OUT.gold=0;OUT.hvis=1;OUT.lvis=1;OUT.hdx=OUT.hdy=OUT.ldx=OUT.ldy=0;luTalk=false}
 function ctxAt(d,i){
- var c0={bg:d.bg,who:d.who,sp:d.sp,hero:d.hero||'blue',lulu:d.lulu||'plain',gold:d.nogold?0:(d.gold||(save.gold?1:0)),sign:d.sign,tv:d.tv};
+ var c0={bg:d.bg,who:d.who,sp:d.sp,hero:d.hero||'blue',lulu:d.lulu||'plain',gold:d.nogold?0:(d.gold||(save.gold?1:0)),sign:d.sign,tv:d.tv,lvis:d.lvis};
  (d.inter||[]).forEach(function(n){if(n.after<i&&n.set)for(var k in n.set)c0[k]=n.set[k]});
  return c0}
 function applyCtx(ctx){
- var S=G.scene;S.ctx=ctx;OUT.hero=ctx.hero;OUT.lulu=ctx.lulu;OUT.gold=ctx.gold?1:0;OUT.hvis=1;OUT.lvis=1;OUT.hdx=OUT.hdy=OUT.ldx=OUT.ldy=0;
+ var S=G.scene;S.ctx=ctx;OUT.hero=ctx.hero;OUT.lulu=ctx.lulu;OUT.gold=ctx.gold?1:0;OUT.hvis=1;OUT.lvis=ctx.lvis===0?0:1;OUT.hdx=OUT.hdy=OUT.ldx=OUT.ldy=0;
  var k=ctx.sp,np=(k&&SP[k])?SP[k]:null;luTalk=(k==='lulu');
  if(np!==speaker||S.lastSp!==k)spX=360;
  speaker=np;S.lastSp=k;S.pitch=luTalk?1.35:(np?np.pitch:1)}

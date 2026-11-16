@@ -16,6 +16,10 @@ def bgfor(x):
     if x['id'].startswith('nbo_java'): return 'javaK'
     if x['id'].startswith('nbo_art'): return 'artK'
     return x['bg']
+def repo(v):   # 会話のあとの一言 (n, jp[, 話す人])
+    r = {'n': v[0], 'jp': v[1]}
+    if len(v) > 2: r['who'] = v[2]
+    return r
 dl = {}
 for x in data.D:
     lines = []
@@ -25,7 +29,7 @@ for x in data.D:
             if 'by' in p: nl['by'] = dict((k, {'n': v[0], 'jp': v[1]}) for k, v in p['by'].items())
             if 'route' in p: nl['route'] = p['route']
             yl = {'y': p.get('y', ''), 'jp': p.get('yjp', '')}
-            if 'opts' in p: yl['opts'] = [dict((k2, v2) if k2 != 'rep' else (k2, {'n': v2[0], 'jp': v2[1]}) for k2, v2 in o.items()) for o in p['opts']]
+            if 'opts' in p: yl['opts'] = [dict((k2, v2) if k2 != 'rep' else (k2, repo(v2)) for k2, v2 in o.items()) for o in p['opts']]
             if 'cueBy' in p: yl['cueBy'] = dict((k, {'y': v[0], 'jp': v[1]}) for k, v in p['cueBy'].items())
             if 'diag' in p: yl['diag'] = p['diag']
             if 'rep' in p: yl['rep'] = {'n': p['rep'][0], 'jp': p['rep'][1]}
@@ -34,8 +38,21 @@ for x in data.D:
             (n, njp, y, yjp) = p
             lines.append({'n': n, 'jp': njp}); lines.append({'y': y, 'jp': yjp})
     dl[x['id']] = {'who': x['who'], 'story': 1, 'bg': bgfor(x), 'sp': x['sp'], 'hero': 'blue', 'lulu': 'plain', 'nogold': 1,
-                   'inter': [], 'intro': x['intro'], 'lines': lines, 'words': [wd(a, b) for a, b in x['words']]}
+                   'inter': x.get('inter', []), 'intro': x['intro'], 'lines': lines, 'words': [wd(a, b) for a, b in x['words']]}
     if x.get('win'): dl[x['id']]['win'] = 1; dl[x['id']]['auto'] = x.get('auto', 1)
+    if x.get('ev'):   # 割りこみ・ひとこと場面(タスク014)。自動で始まり、単語バトルに入らず、終わると元の流れにもどる
+        dl[x['id']]['ev'] = 1; dl[x['id']]['auto'] = 1
+        for k in ('lvis', 'nohelp', 'fx'):
+            if x.get(k) is not None: dl[x['id']][k] = x[k]
+    if x.get('kind'): dl[x['id']]['kind'] = x['kind']
+# ---------- 持ち越し(005案B): 相手のセリフの差しかえ。種の場面(save.seen)を遊んでいたときだけ返る ----------
+import event_data, window_data
+for (sc, ti, seed, nn, njp, yy, yjp) in event_data.VARIANTS:
+    ln = dl[sc]['lines'][2 * ti]
+    assert 'n' in ln, (sc, ti)
+    v = {'s': seed, 'n': nn, 'jp': njp}
+    if yy: v['y'] = window_data.star(yy); v['yjp'] = yjp
+    ln.setdefault('vr', []).append(v)
 J = lambda o: json.dumps(o, ensure_ascii=False)
 
 def place(id, name, snd, x, y, ico, tip, v, **kw):
@@ -99,6 +116,12 @@ SP.sec_n1={pitch:.85,m:[[trav({hair:'cap'}),P(5,{o:'#1b2a55',p:'#14141a',h:'#241
 SP.sec_n2={pitch:1.1,m:[[trav({hair:'long'}),P(4,{o:'#1b2a55',p:'#14141a',h:'#241a14'})]]};
 SP.qr_crew={pitch:1.2,m:[[trav({hair:'long'}),P(2,{o:'#5c0632',p:'#5c0632',h:'#241a14'})]]};
 SP.qr_crew2={pitch:1,m:[[trav({}),P(1,{o:'#5c0632',p:'#3a3a48',h:'#3b2a1f'})]]};
+/* 割りこみ・顔なじみの相手(タスク014)。相手は係員だけに寄せない(005 配役D)。ev_ribbon は doh の d_traveler と同じ見た目(同じ旅行者) */
+SP.ev_runner={pitch:1.1,m:[[trav({hair:'curly'}),P(2,{o:'#c0504a',p:'#44464f',h:'#241a14'})]]};
+SP.ev_wet={pitch:.95,m:[[trav({}),P(4,{o:'#3a8f7a',p:'#2a2a33',h:'#14141a'})]]};
+SP.ev_trav3={pitch:1.05,m:[[trav({hair:'long'}),P(3,{o:'#d9a441',p:'#2a2a33',h:'#241a14'})]]};
+SP.ev_ribbon={pitch:.95,m:[[trav({}),P(4,{o:'#2d8f8a',p:'#44464f',h:'#14141a',pack:1})]]};
+SP.ev_phone={ghost:1,pitch:1.1,m:[[trav({hair:'long'}),P(4,{o:'#5c0632',p:'#2a2a33',h:'#241a14'})]]};
 """
 BGJS = r"""
 BGS.sage=function(){grad(0,98,'#10143a','#2a2f6a',14);for(var i=0;i<26;i++){var sx=(i*47)%320,sy=(i*29)%60;if((Math.floor(t*2)+i)%5)R('#ffe9a8',sx,sy,2,2);else R('#fff',sx,sy,1,1)}
@@ -171,7 +194,8 @@ BGS.dmetro=function(){airWall('#e8e4da');hiaRoof();floorAir('#d8d2c2','#c4bca8')
 BGN = r"""
 BGS.checkinQ=function(){airWall('#eef0f4');floorAir('#d8dce6','#c4c8d4');
  for(var i=0;i<3;i++){var x=14+i*102;R('#5c0632',x,13,90,18);T('QATAR AIRWAYS',x+45,22,8,'#fff');R('#d9d4c6',x,62,90,36);R('#9a947f',x,62,90,3);R('#14141a',x+34,50,20,12);R('#2a6a9a',x+36,52,16,8);R('#6a6a76',x+62,90,24,8)}
- for(i=0;i<8;i++){R('#c9a03a',14+i*40,112,2,12);R('#5c0632',14+i*40,114,38,1)}};
+ for(i=0;i<8;i++){R('#c9a03a',14+i*40,112,2,12);R('#5c0632',14+i*40,114,38,1)}
+ sp2r(trav({}),P(4,{o:'#2d8f8a',p:'#44464f',h:'#14141a',pack:1}),270,94,2,14);R('#2f5bb0',254,108,14,12);R('#1e3d80',254,108,14,2);R('#c8182a',259,105,3,4)};
 BGS.cabinQ=function(){R('#e4dfe2',0,0,VW,98);R('#b8aeb6',0,0,VW,22);R('#cfc6cc',0,18,VW,5);
  for(var i=0;i<4;i++){R('#9a8e98',10+i*76,24,60,4)}
  R('#6a4a5a',0,98,VW,52);R('#5a3a4a',100,98,120,52);R('#7a5a6a',104,98,3,52);R('#7a5a6a',213,98,3,52);
@@ -192,6 +216,7 @@ for(var _k in TOURDLG)DLG[_k]=TOURDLG[_k];
 %(world)s
 %(voice)s
 %(diag)s
+%(ev)s
 %(win)s
 var PLACES_SAGE=%(sage)s,PLACES_NARR=%(arr)s,PLACES_NAIR=%(air)s,PLACES_NDEP=%(dep)s;
 PLACES_AIR=PLACES_NAIR;
@@ -211,6 +236,7 @@ for(var _k in TOURDLG)DLG[_k]=TOURDLG[_k];
 %(bg)s
 %(world)s
 %(voice)s
+%(ev)s
 var PLACES_DARR=%(arr)s;
 PLACES_AIR=PLACES_DARR;
 PLACES_DARR.forEach(function(p){PBY[p.id]=p});
@@ -280,6 +306,82 @@ def record(label, memo=False):
     mm = ("var mq=memoLoad();if(mq.length)s5.appendChild(el('div','tt','つぎの たびの メモ：'+mq.join(', ')));" if memo else '')
     return ("b.appendChild(s4);voiceSetSection(b);\n var s5=sSec('ルルの カバンの きろくちょう');s5.appendChild(el('div','tt','えらんだ チケット：'+(save.ticket==='star'?'Star Alliance':save.ticket==='ow'?'oneworld':'まだ えらんでいない')));"
             "var dn=0;TOUR_IDS.forEach(function(k){if(save.seen[k]>0)dn++});s5.appendChild(el('div','tt','" + label + "の かいわ：'+dn+' / '+TOUR_IDS.length));" + mm + "b.appendChild(s5);\n $m('setView').hidden=false;")
+# ---- 場面の部品(ナイロビ・ドーハ共通) ----
+# 分かれ目(opts)・相手の言い分け(by)・持ち越しの差しかえ(vr)・あとの一言(rep)・自動で始まる場面(auto)・単語バトルに入らない場面(win/ev)
+SHARED = [
+ ("if(n.n&&L[i+1]&&L[i+1].y){T.push({npc:n.n,npcJp:n.jp,cue:L[i+1].y,cueJp:L[i+1].jp});i+=2}",
+  "if(n.n&&L[i+1]&&L[i+1].y!==undefined){var Y=L[i+1];T.push({npc:n.n,npcJp:n.jp,cue:Y.y,cueJp:Y.jp,by:n.by,vr:n.vr,cueBy:Y.cueBy,opts:Y.opts,diag:Y.diag,rep:Y.rep,route:n.route});i+=2}"),
+ (" clearPanel();G.phase='npc';var S=G.scene,T=S.turns[G.ti];\n if(T.ctx)applyCtx(T.ctx);",
+  " clearPanel();G.phase='npc';var S=G.scene,T=S.turns[G.ti];\n"
+  " if(T.vr&&!T.vd){T.vd=1;for(var vi=0;vi<T.vr.length;vi++){var vv=T.vr[vi];if(save.seen[vv.s]>0){T.npc=vv.n;T.npcJp=vv.jp;if(vv.y){T.cue=vv.y;T.cueJp=vv.yjp}break}}}\n"
+  " var bv=T.by&&S.pick&&T.by[S.pick];if(bv){T.npc=bv.n;T.npcJp=bv.jp}var cv=T.cueBy&&S.pick&&T.cueBy[S.pick];if(cv){T.cue=cv.y;T.cueJp=cv.jp}\n"
+  " if(T.route!=null){S.rf=S.rn||0;S.rn=T.route;S.rt=t}\n"
+  " if(T.ctx)applyCtx(T.ctx);"),
+ ("var T=G.scene.turns[G.ti],toks=parseCue(T.cue);clearInterval(G.typeTimer);msgText.textContent=T.npc;",
+  "var T=G.scene.turns[G.ti];if(T.opts&&!T.pk){((G.scene.d.ev||typeof winOpts!=='function')?evOpts:winOpts)(T);return}var toks=parseCue(T.cue);clearInterval(G.typeTimer);msgText.textContent=T.npc;"),
+ ("function advance(){\n",
+  "function advance(){\n if(!G.camp){var D0=G.scene.turns[G.ti];if(D0&&D0.rep&&!D0.repd){D0.repd=1;G.phase='rep';setMsg(D0.rep.n,D0.rep.who||whoNow());spSay=true;say(D0.rep.n,.95,G.scene.pitch,gd(function(){spSay=false;later(450,advance)}));return}}\n"),
+ ("setMsgInstant('Clear!  ぜんぶ いえた！',whoNow());later(2000,startWords)",
+  "var W0=G.scene.d&&(G.scene.d.win||G.scene.d.ev);setMsgInstant(W0?'Clear!':'Clear!  ぜんぶ いえた！',whoNow());later(W0?1300:2000,W0?finishScene:startWords)"),
+ (" setMsgInstant(S.d.intro||S.pl.tip[0],'');$m('tapHint').textContent='';\n var b=el('button','btn go','GO！');",
+  " setMsgInstant(S.d.intro||S.pl.tip[0],'');$m('tapHint').textContent='';\n if(S.d.auto){if(S.d.fx)evFx(S.d.fx);later(700,function(){playInter(-1,npcTurn)});return}\n var b=el('button','btn go','GO！');"),
+]
+
+EVJS = r"""
+/* ===== 割りこみ・持ち越し・顔なじみ(タスク014 / 005案 A+B+F) =====
+   save.ev = {fired:{枠:1}, streak, last}。「飽きのサイン」は未決定(決定005-3)。いまの仮の定義は EVC.sameN だけ。 */
+var EVSLOTS=EVSLOTS_JSON;
+var EVC={sameN:2};   /* 未決定: 同じ型の場面が何回つづいたら「飽き」とみなすか(仮に2) */
+var EVQ=(location.search.match(/[?&]ev=(\\w+)/)||[])[1]||'';
+function evS(){var e=save.ev;if(!e||typeof e!=='object')e=save.ev={};if(!e.fired||typeof e.fired!=='object')e.fired={};if(typeof e.streak!=='number')e.streak=0;if(typeof e.last!=='string')e.last='';return e}
+function evFx(k){try{Snd.fx('ding')}catch(e){}}
+function evNote(S){
+ if(!S||!S.d||S.d.win)return;var e=evS(),k=S.d.kind||'std';
+ if(k==='ev'||k==='short'){e.streak=0;e.last=k}
+ else if(k===e.last)e.streak++;else{e.last=k;e.streak=1}
+ storeSave()}
+function evBored(){return EVQ==='all'||evS().streak>=EVC.sameN}
+function evGate(at,key,cont){
+ if(EVQ==='off')return false;var e=evS();
+ for(var i=0;i<EVSLOTS.length;i++){var x=EVSLOTS[i];
+  if(x.at!==at||x.key!==key||e.fired[x.id]||!DLG[x.vid])continue;
+  if(x.need&&!(save.seen[x.need]>0))continue;
+  if(x.sign&&!evBored())continue;
+  e.fired[x.id]=1;e.streak=0;e.last='ev';storeSave();
+  var pl=PBY[key]||(G.scene&&G.scene.pl)||PBY[Object.keys(PBY)[0]];
+  G.evCont=cont;startVid(pl,x.vid,'ev');return true}
+ return false}
+function evFinish(S){
+ save.seen[S.vid]=(save.seen[S.vid]||0)+1;storeSave();
+ var c=G.evCont;G.evCont=null;if(c)c();else showMap()}
+function evOpts(T){
+ G.phase='opts';clearPanel();clearInterval(G.typeTimer);msgText.textContent=T.npc;var S=G.scene,sid=G.sid;
+ var box=el('div','dqbox'),bs=[];
+ T.opts.forEach(function(o){var b=el('button','dq');b.type='button';b.appendChild(el('span','cur','▶'));b.appendChild(el('span','',cueText(o.y)));
+  b.addEventListener('click',function(){evPick(T,o)});box.appendChild(b);bs.push(b)});
+ panel.appendChild(box);
+ function sel(i){bs.forEach(function(b,j){b.classList.toggle('sel',j===i)})}
+ bs.forEach(function(b,i){['focus','pointerenter','pointerdown'].forEach(function(ev){b.addEventListener(ev,function(){sel(i)})})});
+ sel(0);
+ (function rd(i){if(G.sid!==sid||G.phase!=='opts'||i>=T.opts.length)return;sel(i);say(cueText(T.opts[i].y),.9,1,gd(function(){later(300,function(){if(G.phase==='opts')rd(i+1)})}))})(0)}
+function evPick(T,o){
+ if(G.phase!=='opts')return;stopSay();var S=G.scene;
+ S.pick=o.k;T.pk=o.k;T.cue=o.y;T.cueJp=o.jp;if(o.rep)T.rep=o.rep;
+ showCue()}
+"""
+EVJS = EVJS.replace('EVSLOTS_JSON', json.dumps(event_data.SLOTS, ensure_ascii=False)).replace('\\\\w', '\\w')
+
+def ev_patches(o):
+    o = rep(o, "if(s0&&s0.gold)save.gold=1;", "if(s0&&s0.gold)save.gold=1;if(s0&&s0.ev&&typeof s0.ev==='object')save.ev=s0.ev;")
+    o = rep(o, "sign:d.sign,tv:d.tv};", "sign:d.sign,tv:d.tv,lvis:d.lvis};")
+    o = rep(o, "OUT.gold=ctx.gold?1:0;OUT.hvis=1;OUT.lvis=1;", "OUT.gold=ctx.gold?1:0;OUT.hvis=1;OUT.lvis=ctx.lvis===0?0:1;")
+    o = rep(o, "function finishScene(){\n var S=G.scene;",
+            "function finishScene(){\n var S=G.scene;if(S.d&&S.d.ev){evFinish(S);return}"
+            "if(!S.evd){S.evd=1;evNote(S);if(evGate('after',S.pl.id,function(){G.scene=S;finishScene()}))return}")
+    o = rep(o, "function enterPlace(id){var pl=PBY[id];", "function enterPlace(id){var pl=PBY[id];if(evGate('enter',id,function(){enterPlace(id)}))return;")
+    o = rep(o, "function startVid(pl,vid,from){\n", "function startVid(pl,vid,from){\n if(from!=='ev'&&evGate('vid',vid,function(){startVid(pl,vid,from)}))return;\n")
+    return o
+
 def common(o, tz):
     o = rep(o, "timeZone:'Asia/Dubai'", "timeZone:'%s'" % tz)
     o = rep(o, "SAVEKEY='kanpe-dubai-save-v2'", "SAVEKEY='kanpe-tour-save-v1'")
@@ -288,8 +390,8 @@ def common(o, tz):
 
 # ---------- ナイロビ(tour/index.html) ----------
 dn = dict(sub('sage_')); dn.update(sub('ticket_')); dn.update(sub('win_')); dn.update(sub('nbo_'))
-main = MAIN % dict(dlg=J(dn), sp=SPJS + SPW, bg=BGJS + BGN, world=WORLDJS, voice=VOICEJS, diag=DIAGJS, win=WINJS, sage=J(SAGE), arr=J(ARR), air=J(AIR), dep=J(NDEP), ids=J(TOUR_IDS))
-o = common(src, 'Africa/Nairobi')
+main = MAIN % dict(dlg=J(dn), sp=SPJS + SPW, bg=BGJS + BGN, world=WORLDJS, voice=VOICEJS, diag=DIAGJS, ev=EVJS, win=WINJS, sage=J(SAGE), arr=J(ARR), air=J(AIR), dep=J(NDEP), ids=J(TOUR_IDS))
+o = ev_patches(common(src, 'Africa/Nairobi'))
 # ---- 窓口フロー(タスク012)のためのエンジン側の追加。ナイロビ(tour)だけに入れる。ドバイ・ドーハは変えない ----
 o = rep(o, "if(s0&&(s0.ticket==='star'||s0.ticket==='ow'))save.ticket=s0.ticket;",
         "if(s0&&(s0.ticket==='star'||s0.ticket==='ow'))save.ticket=s0.ticket;if(s0&&s0.win&&typeof s0.win==='object')save.win=s0.win;")
@@ -301,36 +403,20 @@ o = rep(o, " if(n<1000)return [ONES[Math.floor(n/100)],'hundred'].concat(n%100?n
 o = rep(o, "  if(/^[0-9]+$/.test(p)){var nw=numWords(parseInt(p,10));",
         "  var om=/^([0-9]+)(st|nd|rd|th)$/.exec(p);if(om&&ORD[+om[1]]){out=out.concat(ORD[+om[1]].split(' '));return}\n"
         "  if(/^[0-9]+$/.test(p)){var nw=numWords(parseInt(p,10));")
-# 場面の部品: 分かれ目(opts)・相手の言い分け(by)・長いカンペ(diag)・あとの一言(rep)・地図の線(route)
-o = rep(o, "if(n.n&&L[i+1]&&L[i+1].y){T.push({npc:n.n,npcJp:n.jp,cue:L[i+1].y,cueJp:L[i+1].jp});i+=2}",
-        "if(n.n&&L[i+1]&&L[i+1].y!==undefined){var Y=L[i+1];T.push({npc:n.n,npcJp:n.jp,cue:Y.y,cueJp:Y.jp,by:n.by,cueBy:Y.cueBy,opts:Y.opts,diag:Y.diag,rep:Y.rep,route:n.route});i+=2}")
-o = rep(o, " clearPanel();G.phase='npc';var S=G.scene,T=S.turns[G.ti];\n if(T.ctx)applyCtx(T.ctx);",
-        " clearPanel();G.phase='npc';var S=G.scene,T=S.turns[G.ti];\n"
-        " var bv=T.by&&S.pick&&T.by[S.pick];if(bv){T.npc=bv.n;T.npcJp=bv.jp}var cv=T.cueBy&&S.pick&&T.cueBy[S.pick];if(cv){T.cue=cv.y;T.cueJp=cv.jp}\n"
-        " if(T.route!=null){S.rf=S.rn||0;S.rn=T.route;S.rt=t}\n"
-        " if(T.ctx)applyCtx(T.ctx);")
-o = rep(o, "var T=G.scene.turns[G.ti],toks=parseCue(T.cue);clearInterval(G.typeTimer);msgText.textContent=T.npc;",
-        "var T=G.scene.turns[G.ti];if(T.opts&&!T.pk){winOpts(T);return}var toks=parseCue(T.cue);clearInterval(G.typeTimer);msgText.textContent=T.npc;")
+for _a, _b in SHARED: o = rep(o, _a, _b)   # 場面の部品(窓口・割りこみ・持ち越しで共有。ドーハ版にも同じものを入れる)
 o = rep(o, "var card=el('div','cue');card.appendChild(el('span','lab','カンペ'));",
         "var card=el('div','cue'+(T.diag?' diag':''));card.appendChild(el('span','lab','カンペ'));")
-o = rep(o, " if(!G.camp)addHelp(T)}", " if(!G.camp&&!T.diag)addHelp(T)}")
+o = rep(o, " if(!G.camp)addHelp(T)}", " if(!G.camp&&!T.diag&&!G.scene.d.nohelp)addHelp(T)}")
 o = rep(o, " G.mute=null;var card=spans.length?spans[0].parentNode:null;",
         " G.mute=null;var card=spans.length?spans[0].parentNode:null;\n if(T.diag&&!PREF.silent&&card){var AZ=(T.diag==='decl'||T.diag==='decl_end')&&voiceAzureOn();if(AZ||SR){(AZ?setupDiagAz:setupDiag)(act,stat,toks,spans,T,card);return}}")
 # 長いカンペは、ブザーも合格音もなく、いつも先へ進む
 o = rep(o, "function onFail(){\n Snd.jingle('buzz');", "function onFail(){\n var Td=G.scene&&G.scene.turns[G.ti];if(Td&&Td.diag){diagDone();return}\n Snd.jingle('buzz');")
 o = rep(o, "function onPass(){\n Snd.jingle('pass');", "function onPass(){\n var Td=G.scene&&G.scene.turns[G.ti];if(Td&&Td.diag){diagDone();return}\n Snd.jingle('pass');")
-# 会話のあとの相手の一言(rep)。窓口の場面は、単語バトルと日本語の答え合わせに入らず、次の場面へ
-o = rep(o, "function advance(){\n",
-        "function advance(){\n if(!G.camp){var D0=G.scene.turns[G.ti];if(D0&&D0.rep&&!D0.repd){D0.repd=1;G.phase='rep';setMsg(D0.rep.n,whoNow());spSay=true;say(D0.rep.n,.95,G.scene.pitch,gd(function(){spSay=false;later(450,advance)}));return}}\n")
-o = rep(o, "setMsgInstant('Clear!  ぜんぶ いえた！',whoNow());later(2000,startWords)",
-        "var W0=G.scene.d&&G.scene.d.win;setMsgInstant(W0?'Clear!':'Clear!  ぜんぶ いえた！',whoNow());later(W0?1300:2000,W0?finishScene:startWords)")
-o = rep(o, " setMsgInstant(S.d.intro||S.pl.tip[0],'');$m('tapHint').textContent='';\n var b=el('button','btn go','GO！');",
-        " setMsgInstant(S.d.intro||S.pl.tip[0],'');$m('tapHint').textContent='';\n if(S.d.auto){later(700,function(){playInter(-1,npcTurn)});return}\n var b=el('button','btn go','GO！');")
 o = rep(o, "function finishScene(){\n var S=G.scene;",
         "function finishScene(){\n var S=G.scene;if(S.d&&S.d.win){save.seen[S.vid]=(save.seen[S.vid]||0)+1;storeSave();winAfter(S);return}")
 o = rep(o, "function startScene(){\n clearPanel();var S=G.scene;", "function startScene(){\n clearPanel();var S=G.scene;if(S.d.hook==='consent'){consentScene(S);return}")
-o = rep(o, "function enterPlace(id){var pl=PBY[id];if(pl.hub){enterHub(pl);return}",
-        "function enterPlace(id){var pl=PBY[id];if(pl.win&&!save.ticket){winStart();return}if(pl.hub){enterHub(pl);return}")
+o = rep(o, "if(evGate('enter',id,function(){enterPlace(id)}))return;if(pl.hub){enterHub(pl);return}",
+        "if(evGate('enter',id,function(){enterPlace(id)}))return;if(pl.win&&!save.ticket){winStart();return}if(pl.hub){enterHub(pl);return}")
 o = rep(o, ".cue .heard.live{color:#8a7b55}", ".cue .heard.live{color:#8a7b55}\n" + WINCSS + VOICECSS)
 o = rep(o, '<title>カンペ先生 ドバイ編</title>', '<title>空港えいご物語 世界一周編 ナイロビ</title>')
 o = rep(o, SNOTE_OLD, SNOTE_NEW)
@@ -362,8 +448,10 @@ print('nairobi built', len(o), 'bytes; dialogues', len(dn), 'words', sum(len(v['
 
 # ---------- ドーハ(tour/doha/index.html) ----------
 dd = sub('doh_')
-main = MAIN_DOH % dict(dlg=J(dd), sp=SPD, bg=BGD, world=WORLDJS, voice=VOICEJS, arr=J(DARR), ids=J(DOH_IDS))
-o = common(src, 'Asia/Qatar')
+main = MAIN_DOH % dict(dlg=J(dd), sp=SPD, bg=BGD, world=WORLDJS, voice=VOICEJS, ev=EVJS, arr=J(DARR), ids=J(DOH_IDS))
+o = ev_patches(common(src, 'Asia/Qatar'))
+for _a, _b in SHARED: o = rep(o, _a, _b)
+o = rep(o, " if(!G.camp)addHelp(T)}", " if(!G.camp&&!G.scene.d.nohelp)addHelp(T)}")
 o = rep(o, '<title>カンペ先生 ドバイ編</title>', '<title>空港えいご物語 世界一周編 ドーハ</title>')
 o = rep(o, SNOTE_OLD, SNOTE_NEW)
 o = rep(o, ".cue .heard.live{color:#8a7b55}", ".cue .heard.live{color:#8a7b55}\n" + VOICECSS)
