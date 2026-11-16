@@ -1356,7 +1356,7 @@ var $m=function(i){return document.getElementById(i)};
 var cam=0,t=0,speaker=null,spX=360,spSay=false,lastId=null,LIMIT=5000;
 var G={view:'map',at:'info',scene:null,ti:0,tries:0,phase:'idle',sid:0,timers:[],typeTimer:0,camp:null},luHelp=false;
 var HELPMAX=5,save={seen:{},help:HELPMAX,weak:[]},SAVEKEY='kanpe-dubai-save-v2';
-try{var s0=JSON.parse(localStorage.getItem(SAVEKEY)||'null');if(s0&&s0.seen&&typeof s0.seen==='object')save.seen=s0.seen;if(s0&&s0.gold)save.gold=1;if(s0&&typeof s0.help==='number'&&s0.help>=0&&s0.help<=HELPMAX)save.help=Math.floor(s0.help);if(s0&&Array.isArray(s0.weak))save.weak=s0.weak.filter(function(w){return w&&typeof w.c==='string'}).slice(0,8)}catch(e){}
+try{var s0=JSON.parse(localStorage.getItem(SAVEKEY)||'null');if(s0&&s0.seen&&typeof s0.seen==='object')save.seen=s0.seen;if(s0&&s0.gold)save.gold=1;if(s0&&typeof s0.help==='number'&&s0.help>=0&&s0.help<=HELPMAX)save.help=Math.floor(s0.help);if(s0&&Array.isArray(s0.weak))save.weak=s0.weak.filter(function(w){return w&&typeof w.c==='string'}).slice(0,8);if(s0&&Array.isArray(s0.missed))save.missed=s0.missed.filter(function(w){return Array.isArray(w)&&typeof w[0]==='string'}).slice(0,16)}catch(e){}
 function storeSave(){try{localStorage.setItem(SAVEKEY,JSON.stringify(save))}catch(e){}}
 /* 世界マップへ「クリア」を伝える: 6つの場所を、それぞれ1回以上あそんだら */
 function worldMark(k){try{var w=JSON.parse(localStorage.getItem('kanpe-world-v1')||'null');if(!w||typeof w!=='object')w={v:1,at:'haneda',seen:{haneda:1},cleared:{haneda:1}};w.seen=w.seen&&typeof w.seen==='object'?w.seen:{};w.cleared=w.cleared&&typeof w.cleared==='object'?w.cleared:{};w.seen[k]=1;w.cleared[k]=1;localStorage.setItem('kanpe-world-v1',JSON.stringify(w))}catch(e){}}
@@ -1642,6 +1642,9 @@ function lev(a,b){var m=a.length,n=b.length,d=[],i,j;for(i=0;i<=m;i++){d.push([i
 function boothStats(){
  var a=plogLoad(),Wd={},Sn={};
  a.forEach(function(r){
+  if(r.c){/* 合宿で言えた: その語(または文)の「言えなかった」を0に戻す */
+   var ck=String(r.tg||'').split(' ').map(missKey).filter(Boolean);if(ck.length===1&&Wd[ck[0]]){Wd[ck[0]].m=0;Wd[ck[0]].hs={}}
+   var ct=String(r.tg||'');if(Sn[ct])Sn[ct].m=0}
   String(r.tg||'').split(' ').forEach(function(tk){var k=missKey(tk);if(!k)return;(Wd[k]=Wd[k]||{w:k,a:0,m:0,hs:{}}).a++});
   (r.miss||[]).forEach(function(m){var k=m.t;if(!k)return;var e=Wd[k]=Wd[k]||{w:k,a:0,m:0,hs:{}};e.m++;var h=m.h==null?'(聞こえず)':m.h;e.hs[h]=(e.hs[h]||0)+1});
   var tg=String(r.tg||'');if(tg){var s=Sn[tg]=Sn[tg]||{tg:tg,a:0,m:0};s.a++;if(r.ok<r.n)s.m++}});
@@ -1834,7 +1837,13 @@ function ipaOf(t){
  if(k.indexOf('-')>0){var ps=k.split('-').map(function(p){var x=IPAMAP[p]||IPAC[p];return x?x.slice(1,-1):''});if(ps.every(Boolean))return '/'+ps.join(' ')+'/'}
  return ''}
 function fWords(){var out=[],seen={};save.weak.forEach(function(w){String(w.c||'').replace(/\*/g,'').split(/\s+/).forEach(function(t){var k=t.toLowerCase().replace(/[^a-z']/g,'');if(k.length>1&&/^(f|ph)/.test(k)&&!seen[k]){seen[k]=1;out.push(k)}})});return out.slice(0,3)}
-function missWords(skip){var out=[];try{boothStats().words.forEach(function(e){var k=String(e.w).toLowerCase();if(k.length>1&&out.length<2&&skip.indexOf(k)<0&&e.m>0){var top='',n=0;Object.keys(e.hs||{}).forEach(function(h){if(e.hs[h]>n){n=e.hs[h];top=h}});out.push({w:k,h:top==='(聞こえず)'?'':top})}})}catch(e){}return out}
+/* ---- 続けて同じ音・同じ単語を出さない: 直近に出したものは後ろに回す(なくなりはしない) ---- */
+var CAMPREC='kanpe-camp-recent-v1';
+function campRecent(){try{var o=JSON.parse(localStorage.getItem(CAMPREC)||'{}');return {s:Array.isArray(o.s)?o.s:[],w:Array.isArray(o.w)?o.w:[]}}catch(e){return {s:[],w:[]}}}
+function campBack(arr,recent){var fresh=arr.filter(function(x){return recent.indexOf(x)<0}),old=arr.filter(function(x){return recent.indexOf(x)>=0}).sort(function(a,b){return recent.indexOf(b)-recent.indexOf(a)});return fresh.concat(old)}
+function campMark(snds,words){var r=campRecent();snds.slice().reverse().forEach(function(k){r.s=[k].concat(r.s.filter(function(x){return x!==k}))});words.slice().reverse().forEach(function(k){r.w=[k].concat(r.w.filter(function(x){return x!==k}))});r.s=r.s.slice(0,4);r.w=r.w.slice(0,12);try{localStorage.setItem(CAMPREC,JSON.stringify(r))}catch(e){}}
+function missWords(skip){var all=[];try{boothStats().words.forEach(function(e){var k=String(e.w).toLowerCase();if(k.length>1&&skip.indexOf(k)<0&&e.m>0){var top='',n=0;Object.keys(e.hs||{}).forEach(function(h){if(e.hs[h]>n){n=e.hs[h];top=h}});all.push({w:k,h:top==='(聞こえず)'?'':top})}})}catch(e){}
+ var by={};all.forEach(function(x){by[x.w]=x});return campBack(all.map(function(x){return x.w}),campRecent().w).slice(0,2).map(function(k){return by[k]})}
 function weakSents(){var out=save.weak.slice(0,1).map(function(w){return String(w.c||'').replace(/\*/g,'')}).filter(Boolean);if(!out.length&&G.scene&&G.view!=='map'){var cur=G.scene.turns[G.ti];if(cur)out=[cueText(cur.cue)]}return out}
 /* ---- 言えなかった単語から「その人の苦手な音」を選ぶ ---- */
 var SND={
@@ -1858,8 +1867,8 @@ function pickLessons(n){
  var sc={},ws={};SNDORDER.forEach(function(k){sc[k]=0;ws[k]=[]});
  try{boothStats().words.forEach(function(e){var w=String(e.w).toLowerCase();if(w.length<2)return;var top='',n=0;Object.keys(e.hs||{}).forEach(function(h){if(e.hs[h]>n){n=e.hs[h];top=h}});if(top==='(聞こえず)')top='';
   SNDORDER.forEach(function(k){if(hasSnd(k,w)){var lack=top&&!(SND[k].hre||SND[k].re).test(top);if(SND[k].strict&&!lack)return;sc[k]+=e.m*(lack?2:1);ws[k].push(w)}})})}catch(e){}
- var order=SNDORDER.filter(function(k){return sc[k]>0}).sort(function(a,b){return sc[b]-sc[a]}).slice(0,1);
- return order.map(function(best){var w=ws[best].slice(0,2);SND[best].def.forEach(function(d){if(w.length<2&&w.indexOf(d)<0)w.push(d)});return {snd:best,words:w}})}
+ var rc=campRecent(),order=campBack(SNDORDER.filter(function(k){return sc[k]>0}).sort(function(a,b){return sc[b]-sc[a]}),rc.s).slice(0,1);
+ return order.map(function(best){var w=campBack(ws[best],rc.w).slice(0,2);campBack(SND[best].def,rc.w).forEach(function(d){if(w.length<2&&w.indexOf(d)<0)w.push(d)});return {snd:best,words:w}})}
 var SVGF=null;
 function phoLipsSet(id){
  var v=$m('phoLips');if(SVGF===null)SVGF=v.innerHTML;
@@ -1949,6 +1958,7 @@ function phoLipsSet(id){
 function startCamp(){
  var fromMap=G.view==='map',lss=pickLessons(2),ls=lss[0],fw=[],mw,ss=weakSents(),st=[];
  lss.forEach(function(l){fw=fw.concat(l.words)});mw=missWords(fw);
+ campMark(lss.map(function(l){return l.snd}),fw.concat(mw.map(function(m){return m.w})));
  lss.forEach(function(){st.push(1)});if(mw.length)st.push(2);if(ss.length)st.push(3);
  if(!st.length){if(fromMap||!G.scene){showPho({fw:SND.f.def.slice(),snd:'f',mw:[],ss:[],stages:[1],fromMap:fromMap},false);return}startCampCore();return}
  showPho({fw:ls?ls.words:[],snd:ls?ls.snd:'f',lessons:lss,mw:mw,ss:ss,stages:st,fromMap:fromMap},false)}
@@ -2033,8 +2043,13 @@ function phoDemoBeat(cb){
  P.bt.push(setTimeout(function(){if(!PHO||!PHO.beat)return;phoBeatOff();if(cb)cb()},4900))}
 function luSayRaw(text,rate){say(text,rate||.8,Math.min(2,PREF.pitch))}
 function phoListenAuto(){if(!PHO||PREF.silent||!SR||PHO.listening)return;phoListen()}
+/* 合宿で言えた結果を、数える元の記録(羽田の発音記録)に戻す。1つ分が終わったとき c=1 にして「言えなかった」から外す */
+function phoRecord(done){
+ var P=PHO,tg;if(P.sample)return;try{tg=P.stage===3?parseCue(P.sents[P.idx]).map(function(k){return k.txt}).join(' '):missKey(phoCur())}catch(e){return}
+ if(!tg)return;var r={ts:Date.now(),v:'camp',tg:tg,hd:'',cf:0,ok:1,n:1,miss:[],camp:1};if(done)r.c=1;plogAdd(r)}
 function phoPass(){
  var P=PHO,g=phoGuard();Snd.jingle('pass');P.okOffer=null;P.retried=0;P.fails=0;P.auto=0;P.rep++;
+ phoRecord(P.stage===3||P.rep>=P.need);
  if(P.stage===3){
   phoRender();phoStat('✓ つたわった！','ok');phoMsgSet('Great!','ばっちり！');
   phoSpeak('Great!',.9,function(){setTimeout(g(function(){if(P.idx<P.sents.length-1){P.idx++;phoItemStart()}else phoNext()}),500)});return}
@@ -2108,8 +2123,8 @@ function phoNext(){
 function phoCleanup(){var P=PHO;P.tk++;phoBeatOff();try{if(P.rec)P.rec.abort()}catch(e){}Snd.duck(0);stopSay();phoRun(false);$m('phoView').hidden=true;PHO=null;return P}
 function phoFinish(){
  var P=phoCleanup();Snd.jingle('clear');
+ if(!P.sample){var done={};P.plan.ss.forEach(function(c){done[c]=1});save.weak=save.weak.filter(function(w){return !done[String(w.c||'').replace(/\*/g,'')]});storeSave()}
  if(P.sample||P.plan.fromMap||!G.scene){if(/[?&]back=guam/.test(location.search)){location.href='../guam/#w=1';return}showMap();return}
- var done={};P.plan.ss.forEach(function(c){done[c]=1});save.weak=save.weak.filter(function(w){return !done[String(w.c||'').replace(/\*/g,'')]});storeSave();
  G.camp={scene:G.scene,ti:G.ti,sp:speaker,lt:luTalk};G.sid++;clearTimers();G.view='scene';$m('sceneView').hidden=false;Snd.go(G.snd||null);campDone()}
 function phoExit(proceed){
  if(!PHO)return;var P=phoCleanup();
@@ -2131,13 +2146,15 @@ function startWords(){
   var bar=el('div','bar'),fill=el('i');bar.appendChild(fill);panel.appendChild(bar);
   var wrong=shuffle(allJp.filter(function(x){return x!==q[2]})).slice(0,2),opts=shuffle([q[2]].concat(wrong)),box=el('div','choices'),btns=[],tmo;
   function lock(){answered=true;clearTimeout(tmo);btns.forEach(function(x){x.disabled=true})}
-  function miss(b){lock();combo=0;queue.push(queue.shift());A_shake();btns.forEach(function(x){if(x.textContent===q[2])x.classList.add('good')});if(b)b.classList.add('bad');say(q[0],.9,1);later(900,next)}
+  function miss(b){lock();combo=0;noteMiss(q,b?'間違い':'時間切れ');queue.push(queue.shift());A_shake();btns.forEach(function(x){if(x.textContent===q[2])x.classList.add('good')});if(b)b.classList.add('bad');say(q[0],.9,1);later(900,next)}
   opts.forEach(function(o){var b=el('button','ch',o);b.type='button';btns.push(b);b.addEventListener('click',function(){if(answered)return;
    if(o===q[2]){lock();combo++;b.classList.add('good');queue.shift();done++;later(380,next)}else miss(b)});box.appendChild(b)});
   panel.appendChild(box);say(q[0],.9,1);
   fill.style.transition='none';fill.style.width='100%';void fill.offsetWidth;fill.style.transition='width '+LIMIT+'ms linear';fill.style.width='0%';
   tmo=later(LIMIT,function(){if(!answered)miss(null)})}
  next()}
+/* 単語バトルで止まった語の記録(グアム編と同じ形 [単語, 発音記号, 意味] に、理由を足す)。出口はまだ作っていない */
+function noteMiss(q,why){if(!save.missed)save.missed=[];save.missed=save.missed.filter(function(w){return w[0]!==q[0]});save.missed.unshift([q[0],q[1],q[2],why]);if(save.missed.length>16)save.missed.length=16;storeSave()}
 function wordsClear(){later(700,startReveal)}
 
 /* ---------- 5秒だけ日本語(全部読んでくれる) ---------- */
