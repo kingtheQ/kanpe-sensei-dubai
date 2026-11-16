@@ -128,7 +128,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .copt:hover .cur,.copt:focus-visible .cur{visibility:visible}
 .copt:focus-visible{outline:2px solid #ffc72c;outline-offset:-2px}
 .copt[aria-disabled="true"]{color:#5b6690}
-.ask{font-size:16px;line-height:1.7;padding:6px 6px 4px}
+.ask{font-size:16px;line-height:1.7;padding:6px 6px 4px;word-break:keep-all;overflow-wrap:anywhere}
 .row2{display:flex;gap:6px}
 .row2 .copt{flex:1;justify-content:center;padding-left:6px}
 .cmdmap .copt .cur{visibility:visible;color:#ffc72c}
@@ -169,7 +169,7 @@ button{font:inherit;color:inherit;cursor:pointer}
    <button type="button" class="copt" id="cCont"><span class="cur">▶</span>つづきから</button>
   </div>
   <div class="cmdwin" id="cmdAsk" hidden>
-   <div class="ask">せかいの きろくを けして、はじめます。いいですか？</div>
+   <div class="ask">せかいマップと せかいいっしゅうの きろくを けして、はじめます。いいですか？</div>
    <div class="row2">
     <button type="button" class="copt" id="cNo"><span class="cur">▶</span>いいえ</button>
     <button type="button" class="copt" id="cYes"><span class="cur">▶</span>はい</button>
@@ -808,10 +808,11 @@ function openCmd(){
  $('cmdMain').hidden=false;$('cmdAsk').hidden=true;$('cmd').hidden=false;$('startBtn').hidden=true;
  (hs?cc:$('cNew')).focus({preventScroll:true})}
 $('startBtn').addEventListener('click',function(){jingle();openCmd()});
-$('cNew').addEventListener('click',function(){blip();S=load();if(hasSave(S)){$('cmdMain').hidden=true;$('cmdAsk').hidden=false;$('cNo').focus({preventScroll:true})}else enterMap()});
+function hasTour(){try{return localStorage.getItem('kanpe-tour-save-v1')!==null}catch(e){return false}}
+$('cNew').addEventListener('click',function(){blip();S=load();if(hasSave(S)||hasTour()){$('cmdMain').hidden=true;$('cmdAsk').hidden=false;$('cNo').focus({preventScroll:true})}else enterMap()});
 $('cCont').addEventListener('click',function(){if($('cCont').getAttribute('aria-disabled')==='true')return;blip();enterMap()});
 $('cNo').addEventListener('click',function(){blip();$('cmdAsk').hidden=true;$('cmdMain').hidden=false;$('cNew').focus({preventScroll:true})});
-$('cYes').addEventListener('click',function(){blip();try{localStorage.removeItem(KEY)}catch(e){}enterMap()});
+$('cYes').addEventListener('click',function(){blip();try{localStorage.removeItem(KEY)}catch(e){}try{localStorage.removeItem('kanpe-tour-save-v1')}catch(e){}enterMap()});  /* 世界一周編の記録も消す(タスク022)。旅のメモ kanpe-tour-memo-v1 と 声の記録 kanpe-voice-v1 は残す */
 window.addEventListener('pageshow',function(e){cancelAnimationFrame(flyTimer);if(e.persisted){renderMap();show('sMap')}});
 renderMap();
 var skipTitle=/(^|[?&])map=1(&|$)/.test(location.search);
