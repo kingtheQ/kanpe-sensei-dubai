@@ -1355,8 +1355,8 @@ var TOTALV=PLACES.reduce(function(a,p){return a+p.v.length},0);
 var $m=function(i){return document.getElementById(i)};
 var cam=0,t=0,speaker=null,spX=360,spSay=false,lastId=null,LIMIT=5000;
 var G={view:'map',at:'info',scene:null,ti:0,tries:0,phase:'idle',sid:0,timers:[],typeTimer:0,camp:null},luHelp=false;
-var HELPMAX=5,save={seen:{},help:HELPMAX,weak:[]},SAVEKEY='kanpe-tour-save-v1';
-try{var s0=JSON.parse(localStorage.getItem(SAVEKEY)||'null');if(s0&&s0.seen&&typeof s0.seen==='object')save.seen=s0.seen;if(s0&&s0.gold)save.gold=1;if(s0&&(s0.ticket==='star'||s0.ticket==='ow'))save.ticket=s0.ticket;if(s0&&typeof s0.help==='number'&&s0.help>=0&&s0.help<=HELPMAX)save.help=Math.floor(s0.help);if(s0&&Array.isArray(s0.weak))save.weak=s0.weak.filter(function(w){return w&&typeof w.c==='string'}).slice(0,8)}catch(e){}
+var HELPMAX=5,save={seen:{},help:HELPMAX,weak:[],missed:[]},SAVEKEY='kanpe-tour-save-v1';
+try{var s0=JSON.parse(localStorage.getItem(SAVEKEY)||'null');if(s0&&s0.seen&&typeof s0.seen==='object')save.seen=s0.seen;if(s0&&s0.gold)save.gold=1;if(s0&&(s0.ticket==='star'||s0.ticket==='ow'))save.ticket=s0.ticket;if(s0&&typeof s0.help==='number'&&s0.help>=0&&s0.help<=HELPMAX)save.help=Math.floor(s0.help);if(s0&&Array.isArray(s0.weak))save.weak=s0.weak.filter(function(w){return w&&typeof w.c==='string'}).slice(0,8);if(s0&&Array.isArray(s0.missed))save.missed=s0.missed.filter(function(w){return Array.isArray(w)&&typeof w[0]==='string'}).slice(0,16)}catch(e){}
 function storeSave(){try{localStorage.setItem(SAVEKEY,JSON.stringify(save))}catch(e){}}
 /* 世界マップへ「クリア」を伝える: 6つの場所を、それぞれ1回以上あそんだら */
 function worldMark(k){try{var w=JSON.parse(localStorage.getItem('kanpe-world-v1')||'null');if(!w||typeof w!=='object')w={v:1,at:'haneda',seen:{haneda:1},cleared:{haneda:1}};w.seen=w.seen&&typeof w.seen==='object'?w.seen:{};w.cleared=w.cleared&&typeof w.cleared==='object'?w.cleared:{};w.seen[k]=1;w.cleared[k]=1;localStorage.setItem('kanpe-world-v1',JSON.stringify(w))}catch(e){}}
@@ -1639,14 +1639,17 @@ function pracLoad(){try{var o=JSON.parse(localStorage.getItem(PRAC)||'{}');retur
 function pracAdd(key,ok){var o=pracLoad(),r=o[key]||{a:0,ok:0};r.a++;if(ok)r.ok++;o[key]=r;try{localStorage.setItem(PRAC,JSON.stringify(o))}catch(e){}}
 function lev(a,b){var m=a.length,n=b.length,d=[],i,j;for(i=0;i<=m;i++){d.push([i])}for(j=1;j<=n;j++)d[0][j]=j;
  for(i=1;i<=m;i++)for(j=1;j<=n;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a.charAt(i-1)===b.charAt(j-1)?0:1));return d[m][n]}
+/* 合宿で言えた(ot)のが、最後に言えなかった(mt)より新しければ、「言えなかった」から外す */
+function campOpen(e){return e.m>0&&!((e.ot||0)>(e.mt||0))}
 function boothStats(){
  var a=plogLoad(),Wd={},Sn={};
  a.forEach(function(r){
   String(r.tg||'').split(' ').forEach(function(tk){var k=missKey(tk);if(!k)return;(Wd[k]=Wd[k]||{w:k,a:0,m:0,hs:{}}).a++});
-  (r.miss||[]).forEach(function(m){var k=m.t;if(!k)return;var e=Wd[k]=Wd[k]||{w:k,a:0,m:0,hs:{}};e.m++;var h=m.h==null?'(聞こえず)':m.h;e.hs[h]=(e.hs[h]||0)+1});
-  var tg=String(r.tg||'');if(tg){var s=Sn[tg]=Sn[tg]||{tg:tg,a:0,m:0};s.a++;if(r.ok<r.n)s.m++}});
- var words=Object.keys(Wd).map(function(k){return Wd[k]}).filter(function(e){return e.m>0});
- var sents=Object.keys(Sn).map(function(k){return Sn[k]}).filter(function(e){return e.m>0});
+  (r.okw||[]).forEach(function(k){if(!k)return;var e=Wd[k]=Wd[k]||{w:k,a:0,m:0,hs:{}};e.ot=r.ts||0});
+  (r.miss||[]).forEach(function(m){var k=m.t;if(!k)return;var e=Wd[k]=Wd[k]||{w:k,a:0,m:0,hs:{}};e.m++;e.mt=r.ts||0;var h=m.h==null?'(聞こえず)':m.h;e.hs[h]=(e.hs[h]||0)+1});
+  var tg=String(r.tg||'');if(tg){var s=Sn[tg]=Sn[tg]||{tg:tg,a:0,m:0};s.a++;if(r.camp){if(r.sok)s.ot=r.ts||0}else if(r.ok<r.n){s.m++;s.mt=r.ts||0}}});
+ var words=Object.keys(Wd).map(function(k){return Wd[k]}).filter(campOpen);
+ var sents=Object.keys(Sn).map(function(k){return Sn[k]}).filter(campOpen);
  function cmp(x,y){return (y.m-x.m)||((y.m/y.a)-(x.m/x.a))}
  words.sort(function(x,y){return cmp(x,y)||(x.w<y.w?-1:1)});sents.sort(cmp);
  return {words:words.slice(0,80),sents:sents.slice(0,40),total:a.length}}
@@ -1835,7 +1838,12 @@ function ipaOf(t){
  if(k.indexOf('-')>0){var ps=k.split('-').map(function(p){var x=IPAMAP[p]||IPAC[p];return x?x.slice(1,-1):''});if(ps.every(Boolean))return '/'+ps.join(' ')+'/'}
  return ''}
 function fWords(){var out=[],seen={};save.weak.forEach(function(w){String(w.c||'').replace(/\*/g,'').split(/\s+/).forEach(function(t){var k=t.toLowerCase().replace(/[^a-z']/g,'');if(k.length>1&&/^(f|ph)/.test(k)&&!seen[k]){seen[k]=1;out.push(k)}})});return out.slice(0,3)}
-function missWords(skip){var out=[];try{boothStats().words.forEach(function(e){var k=String(e.w).toLowerCase();if(k.length>1&&out.length<2&&skip.indexOf(k)<0&&e.m>0){var top='',n=0;Object.keys(e.hs||{}).forEach(function(h){if(e.hs[h]>n){n=e.hs[h];top=h}});out.push({w:k,h:top==='(聞こえず)'?'':top})}})}catch(e){}return out}
+/* 直近の合宿で出した音・単語は、候補の後ろに回す(続けて同じものを出さない。候補がそれしかないときは出す) */
+var CAMPRECENT='kanpe-camp-recent-v1';
+function recentGet(){try{var o=JSON.parse(localStorage.getItem(CAMPRECENT)||'null');return {s:Array.isArray(o&&o.s)?o.s:[],w:Array.isArray(o&&o.w)?o.w:[]}}catch(e){return {s:[],w:[]}}}
+function recentAdd(snds,words){var o=recentGet();try{localStorage.setItem(CAMPRECENT,JSON.stringify({s:snds.concat(o.s).filter(function(x,i,r){return r.indexOf(x)===i}).slice(0,2),w:words.concat(o.w).filter(function(x,i,r){return r.indexOf(x)===i}).slice(0,8)}))}catch(e){}}
+function backOf(arr,rec,key){var a=[],b=[];arr.forEach(function(x){(rec.indexOf(key(x))>=0?b:a).push(x)});return a.concat(b)}
+function missWords(skip){var out=[];try{boothStats().words.forEach(function(e){var k=String(e.w).toLowerCase();if(k.length>1&&skip.indexOf(k)<0&&e.m>0){var top='',n=0;Object.keys(e.hs||{}).forEach(function(h){if(e.hs[h]>n){n=e.hs[h];top=h}});out.push({w:k,h:top==='(聞こえず)'?'':top})}})}catch(e){}return backOf(out,recentGet().w,function(x){return x.w}).slice(0,2)}
 function weakSents(){var out=save.weak.slice(0,1).map(function(w){return String(w.c||'').replace(/\*/g,'')}).filter(Boolean);if(!out.length&&G.scene&&G.view!=='map'){var cur=G.scene.turns[G.ti];if(cur)out=[cueText(cur.cue)]}return out}
 /* ---- 言えなかった単語から「その人の苦手な音」を選ぶ ---- */
 var SND={
@@ -1859,8 +1867,8 @@ function pickLessons(n){
  var sc={},ws={};SNDORDER.forEach(function(k){sc[k]=0;ws[k]=[]});
  try{boothStats().words.forEach(function(e){var w=String(e.w).toLowerCase();if(w.length<2)return;var top='',n=0;Object.keys(e.hs||{}).forEach(function(h){if(e.hs[h]>n){n=e.hs[h];top=h}});if(top==='(聞こえず)')top='';
   SNDORDER.forEach(function(k){if(hasSnd(k,w)){var lack=top&&!(SND[k].hre||SND[k].re).test(top);if(SND[k].strict&&!lack)return;sc[k]+=e.m*(lack?2:1);ws[k].push(w)}})})}catch(e){}
- var order=SNDORDER.filter(function(k){return sc[k]>0}).sort(function(a,b){return sc[b]-sc[a]}).slice(0,1);
- return order.map(function(best){var w=ws[best].slice(0,2);SND[best].def.forEach(function(d){if(w.length<2&&w.indexOf(d)<0)w.push(d)});return {snd:best,words:w}})}
+ var rc=recentGet(),order=backOf(SNDORDER.filter(function(k){return sc[k]>0}).sort(function(a,b){return sc[b]-sc[a]}),rc.s,function(k){return k}).slice(0,1);
+ return order.map(function(best){var c=ws[best].slice();SND[best].def.forEach(function(d){if(c.indexOf(d)<0)c.push(d)});var w=backOf(c,rc.w,function(x){return x}).slice(0,2);return {snd:best,words:w}})}
 var SVGF=null;
 function phoLipsSet(id){
  var v=$m('phoLips');if(SVGF===null)SVGF=v.innerHTML;
@@ -1950,8 +1958,9 @@ function phoLipsSet(id){
 function startCamp(){
  var fromMap=G.view==='map',lss=pickLessons(2),ls=lss[0],fw=[],mw,ss=weakSents(),st=[];
  lss.forEach(function(l){fw=fw.concat(l.words)});mw=missWords(fw);
+ recentAdd(lss.map(function(l){return l.snd}),fw.concat(mw.map(function(m){return m.w})));
  lss.forEach(function(){st.push(1)});if(mw.length)st.push(2);if(ss.length)st.push(3);
- if(!st.length){if(fromMap||!G.scene){showPho({fw:SND.f.def.slice(),snd:'f',mw:[],ss:[],stages:[1],fromMap:fromMap},false);return}startCampCore();return}
+ if(!st.length){if(fromMap||!G.scene){var dfw=backOf(SND.f.def.slice(),recentGet().w,function(x){return x});recentAdd(['f'],dfw.slice(0,2));showPho({fw:dfw,snd:'f',mw:[],ss:[],stages:[1],fromMap:fromMap},false);return}startCampCore();return}
  showPho({fw:ls?ls.words:[],snd:ls?ls.snd:'f',lessons:lss,mw:mw,ss:ss,stages:st,fromMap:fromMap},false)}
 function phoRun(on){var v=$m('phoView');v.classList.remove('run');if(on){void v.offsetWidth;v.classList.add('run')}}
 function phoStat(t,k){var s=$m('phoStat');if(!s)return;s.className='stat'+(k?' '+k:'');s.textContent=t||''}
@@ -2034,13 +2043,22 @@ function phoDemoBeat(cb){
  P.bt.push(setTimeout(function(){if(!PHO||!PHO.beat)return;phoBeatOff();if(cb)cb()},4900))}
 function luSayRaw(text,rate){say(text,rate||.8,Math.min(2,PREF.pitch))}
 function phoListenAuto(){if(!PHO||PREF.silent||!SR||PHO.listening)return;phoListen()}
+/* 合宿で言えた結果を発音の記録に戻す(real=本当に声で言えたときだけ)。ボタンの数字・言えなかった一覧から外れる */
+function phoRecordOk(){
+ var P=PHO;try{
+  if(P.stage===3){var res=P.res;if(!res)return;var toks=parseCue(P.sents[P.idx]).map(function(k){return k.txt});
+   plogAdd({ts:Date.now(),v:'camp',camp:1,sok:1,tg:toks.join(' '),hd:'',cf:0,ok:res.okN,n:res.n,miss:res.words.filter(function(w){return !w.ok}).map(function(w){return {t:missKey(w.t),h:w.h,k:w.k}}),okw:res.words.filter(function(w){return w.ok}).map(function(w){return missKey(w.t)})})}
+  else{var w=missKey(phoCur());if(w)plogAdd({ts:Date.now(),v:'camp',camp:1,sok:1,tg:w,hd:'',cf:0,ok:1,n:1,miss:[],okw:[w]})}
+ }catch(e){}}
 function phoPass(){
- var P=PHO,g=phoGuard();Snd.jingle('pass');P.okOffer=null;P.retried=0;P.fails=0;P.auto=0;P.rep++;
+ var P=PHO,g=phoGuard(),real=!!P.real;P.real=false;Snd.jingle('pass');P.okOffer=null;P.retried=0;P.fails=0;P.auto=0;P.rep++;
  if(P.stage===3){
+  (P.passed=P.passed||[]).push(P.sents[P.idx]);if(real)phoRecordOk();
   phoRender();phoStat('✓ つたわった！','ok');phoMsgSet('Great!','ばっちり！');
   phoSpeak('Great!',.9,function(){setTimeout(g(function(){if(P.idx<P.sents.length-1){P.idx++;phoItemStart()}else phoNext()}),500)});return}
  phoRender();phoStat('✓ つたわった！ '+P.rep+'/'+P.need,'ok');
  if(P.rep<P.need){var en=P.rep===1?'Good. Second.':'Good. Third.';phoMsgSet(en,P.rep===1?'2かいめ！ もういちど':'3かいめ！ ラスト！');stopSay();setTimeout(g(phoListenAuto),900);return}
+ if(real)phoRecordOk();
  phoMsgSet('Great!','ばっちり！ つぎへ');
  phoSpeak('Great!',.9,function(){setTimeout(g(function(){var n=(P.stage===1?P.words.length:P.mw.length);if(P.idx<n-1){P.idx++;phoItemStart()}else phoNext()}),500)})}
 function phoFail(res){
@@ -2052,7 +2070,7 @@ var PHOU='kanpe-homo-v1';function phoUserGet(){try{var o=JSON.parse(localStorage
 var PHOMO={'lulu':['hello','lulu','lulu\'s','loulou','lou lou','loo loo','lu lu','lou','hallo','yellow','allo'],"i'll":['aisle','isle','ill','i','all','eye','oil','ail','aill','ale','hi','high','hike','i will','ai'],'ill':["i'll",'aisle','isle'],'right':['write','rite','light'],'light':['right','white'],'rice':['lice','rise'],'lice':['rice'],'very':['berry','bury'],'berry':['very'],'bus':['boss','bass'],'cup':['cop','cap'],'cat':['cut','kat'],'bad':['bed','bat'],'sing':['sin','thing'],'long':['lung','along']};
 function phoEval(txt){
  var P=PHO,toks=P.stage===3?parseCue(P.sents[P.idx]).map(function(k){return k.txt}):[phoCur()],res=analyze(toks,txt);
- if(P.stage===3){P.res=res;if(res.ratio>=0.7)phoPass();else phoFail(res);return}
+ if(P.stage===3){P.res=res;if(res.ratio>=0.7){P.real=true;phoPass()}else phoFail(res);return}
  var hs=res.heardRaw.length?res.heardRaw.join(' '):'',ok=res.okN===res.n;
  /* 同じ音の別の綴り(聞き分けられない語)は合格にする */
  if(!ok&&toks.length===1){var hk=missKey(toks[0]),hm=(PHOMO[hk]||[]).concat(phoUserGet()[hk]||[]);if(hm.length&&res.heardRaw.some(function(w){var x=missKey(w);return x===hk||hm.indexOf(x)>=0}))ok=true}
@@ -2060,7 +2078,7 @@ function phoEval(txt){
  if(P.stage===2){var p=Math.round(100*(res.n?res.okN/res.n:0)),ws=res.words&&res.words[0];
   if(!ok&&ws&&ws.h){p=Math.round(100*Math.max(0,1-lev(missKey(toks[0]),String(ws.h).replace(/[^a-z']/g,''))/Math.max(missKey(toks[0]).length,1)))}
   P.atts.push({n:P.atts.length+1,h:hs,ok:ok,p:p,w:toks[0]})}
- if(ok)phoPass();else phoFail(res)}
+ if(ok){P.real=true;phoPass()}else phoFail(res)}
 /* 強化合宿のマイク: 認識の部品を1つだけ作って使い回す(前の認識が完全に終わってから次を始める)。何が起きたかを ev に残す */
 var PR={r:null,busy:false,cur:null,wait:null,ev:[],err:'',t0:0};
 function prRun(job){
@@ -2098,7 +2116,7 @@ $m('phoOk').addEventListener('click',function(){
  var P=PHO;if(!P||!P.okOffer)return;var o=P.okOffer,u=phoUserGet();u[o.t]=u[o.t]||[];
  String(o.h).split(/\s+/).forEach(function(w){w=missKey(w);if(w&&u[o.t].indexOf(w)<0)u[o.t].push(w)});
  try{localStorage.setItem(PHOU,JSON.stringify(u))}catch(e){}
- P.okOffer=null;phoPass()});
+ P.okOffer=null;P.real=true;phoPass()});
 $m('phoSkip').addEventListener('click',function(){if(PHO)phoNext()});
 $m('phoDemo').addEventListener('click',function(){if(PHO)phoItemStart()});
 $m('phoBack').addEventListener('click',function(){phoExit(false)});
@@ -2109,8 +2127,9 @@ function phoNext(){
 function phoCleanup(){var P=PHO;P.tk++;phoBeatOff();try{if(P.rec)P.rec.abort()}catch(e){}Snd.duck(0);stopSay();phoRun(false);$m('phoView').hidden=true;PHO=null;return P}
 function phoFinish(){
  var P=phoCleanup();Snd.jingle('clear');
+ /* 言えた文だけを「言えなかった文」から消す(マップから入っても、会話中から入っても同じ) */
+ var done={};(P.passed||[]).forEach(function(c){done[c]=1});if(Object.keys(done).length){save.weak=save.weak.filter(function(w){return !done[String(w.c||'').replace(/\*/g,'')]});storeSave()}
  if(P.sample||P.plan.fromMap||!G.scene){if(/[?&]back=guam/.test(location.search)){location.href='../guam/#w=1';return}showMap();return}
- var done={};P.plan.ss.forEach(function(c){done[c]=1});save.weak=save.weak.filter(function(w){return !done[String(w.c||'').replace(/\*/g,'')]});storeSave();
  G.camp={scene:G.scene,ti:G.ti,sp:speaker,lt:luTalk};G.sid++;clearTimers();G.view='scene';$m('sceneView').hidden=false;Snd.go(G.snd||null);campDone()}
 function phoExit(proceed){
  if(!PHO)return;var P=phoCleanup();
@@ -2132,13 +2151,15 @@ function startWords(){
   var bar=el('div','bar'),fill=el('i');bar.appendChild(fill);panel.appendChild(bar);
   var wrong=shuffle(allJp.filter(function(x){return x!==q[2]})).slice(0,2),opts=shuffle([q[2]].concat(wrong)),box=el('div','choices'),btns=[],tmo;
   function lock(){answered=true;clearTimeout(tmo);btns.forEach(function(x){x.disabled=true})}
-  function miss(b){lock();combo=0;queue.push(queue.shift());A_shake();btns.forEach(function(x){if(x.textContent===q[2])x.classList.add('good')});if(b)b.classList.add('bad');say(q[0],.9,1);later(900,next)}
+  function miss(b){lock();combo=0;noteMiss(q,b?'間違い':'時間切れ');queue.push(queue.shift());A_shake();btns.forEach(function(x){if(x.textContent===q[2])x.classList.add('good')});if(b)b.classList.add('bad');say(q[0],.9,1);later(900,next)}
   opts.forEach(function(o){var b=el('button','ch',o);b.type='button';btns.push(b);b.addEventListener('click',function(){if(answered)return;
    if(o===q[2]){lock();combo++;b.classList.add('good');queue.shift();done++;later(380,next)}else miss(b)});box.appendChild(b)});
   panel.appendChild(box);say(q[0],.9,1);
   fill.style.transition='none';fill.style.width='100%';void fill.offsetWidth;fill.style.transition='width '+LIMIT+'ms linear';fill.style.width='0%';
   tmo=later(LIMIT,function(){if(!answered)miss(null)})}
  next()}
+/* 単語バトルの間違い・時間切れの記録(グアム編と同じ形 [単語・発音記号・意味] に、理由 '間違い'/'時間切れ' を足す)。出口(夢など)は未作成で、記録だけ */
+function noteMiss(q,why){if(!save.missed)save.missed=[];save.missed=save.missed.filter(function(w){return w[0]!==q[0]});save.missed.unshift([q[0],q[1],q[2],why]);if(save.missed.length>16)save.missed.length=16;storeSave()}
 function wordsClear(){later(700,startReveal)}
 
 /* ---------- 5秒だけ日本語(全部読んでくれる) ---------- */
