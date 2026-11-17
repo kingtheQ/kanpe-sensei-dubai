@@ -492,11 +492,31 @@ def common(o, tz):
     o = rep(o, "timeZone:'Asia/Dubai'", "timeZone:'%s'" % tz)
     o = rep(o, "SAVEKEY='kanpe-dubai-save-v2'", "SAVEKEY='kanpe-tour-save-v1'")
     o = rep(o, "if(s0&&s0.gold)save.gold=1;", "if(s0&&s0.gold)save.gold=1;if(s0&&(s0.ticket==='star'||s0.ticket==='ow'))save.ticket=s0.ticket;")
+    # ---- 場面の絵は枠なし・フルブリード(タスク028): 画面の横と上にぴったり。会話欄とカンペは下のまま ----
+    o = rep(o, '<canvas id="scene" width="320" height="150" aria-label="場面"></canvas>',
+            '<canvas id="scene" width="320" height="150" aria-label="場面"></canvas>\n      <canvas id="sceneA" width="1536" height="960" aria-hidden="true" hidden></canvas>')
+    o = rep(o, "#scene{display:block;width:100%;aspect-ratio:320/150;image-rendering:pixelated;border:3px solid var(--line);border-radius:6px;background:#222}", FULLBLEED_CSS)
+    # ---- 場面の環境音の口(対応表は art.js)。ミュート・マイク中の停止は今ある音の設定に合わせる ----
+    o = rep(o, " function go(kind){want=kind||null;if(!AC)return;", " function go(kind){want=kind||null;if(window.__ambGo)window.__ambGo(want);if(!AC)return;")
+    o = rep(o, "  if(!AC)return;clearTimeout(duckT);", "  if(window.__ambDuck)window.__ambDuck(flag);if(!AC)return;clearTimeout(duckT);")
+    o = rep(o, "try{localStorage.setItem('kd_snd',v?'on':'off')}catch(e){}if(v){", "try{localStorage.setItem('kd_snd',v?'on':'off')}catch(e){}if(window.__ambSync)setTimeout(window.__ambSync,0);if(v){")
+    o = rep(o, " var S=G.scene;\n if(d.story){S.turns.forEach(", " var S=G.scene;if(window.__ambScene)window.__ambScene(G.snd,d.bg);\n if(d.story){S.turns.forEach(")
+    # ---- 新しい絵の場面を描く(art.js)。新しい絵でなければ今までの描き方 ----
+    o = rep(o, "  if(A0&&A0.tick)A0.tick(p0,S0);\n  if(A0&&A0.bg)A0.bg(p0,S0);else",
+            "  if(A0&&A0.tick)A0.tick(p0,S0);\n  if(typeof ARTframe==='function'&&ARTframe(S0,A0,dt)){requestAnimationFrame(frame);return}\n  if(A0&&A0.bg)A0.bg(p0,S0);else")
     return o
+FULLBLEED_CSS = (
+ ".stage{margin:calc(-8px - env(safe-area-inset-top,0px)) calc(-1*max(16px,env(safe-area-inset-right,0px))) 0 calc(-1*max(16px,env(safe-area-inset-left,0px)))}\n"
+ "@media (min-width:512px){.stage{margin-left:0;margin-right:0}}\n"
+ "#scene,#sceneA{display:block;width:100%;border:0;border-radius:0;background:#222}\n"
+ "#scene{aspect-ratio:320/150;image-rendering:pixelated}#sceneA{aspect-ratio:1536/960}\n"
+ "#sceneView .stage #exitBtn,#sceneView .stage #tip,#sceneView .stage .setbtn{top:calc(6px + env(safe-area-inset-top,0px))}")
+def art_js(base, sel): return _rd('art.js').replace("/*ARTBASE*/", base).replace("/*ARTSEL*/", sel)
 
 # ---------- ナイロビ(tour/index.html) ----------
 dn = dict(sub('sage_')); dn.update(sub('ticket_')); dn.update(sub('win_')); dn.update(sub('nbo_'))
 main = MAIN % dict(dlg=J(dn), sp=SPJS + SPW, bg=BGJS + BGN, world=WORLDJS, voice=VOICEJS, diag=DIAGJS, ev=EVJS, win=WINJS, sage=J(SAGE), arr=J(ARR), air=J(AIR), dep=J(NDEP), ids=J(TOUR_IDS))
+main += art_js('assets/art/', "function artIdFor(S){return S&&S.d&&S.d.bg==='taxi'?'nairobi':null}")   # ナイロビ到着(タクシー乗り場)
 o = ev_patches(common(src, 'Africa/Nairobi'))
 # ---- 窓口フロー(タスク012)のためのエンジン側の追加。ナイロビ(tour)だけに入れる。ドバイ・ドーハは変えない ----
 o = rep(o, "if(s0&&(s0.ticket==='star'||s0.ticket==='ow'))save.ticket=s0.ticket;",
@@ -558,6 +578,7 @@ print('nairobi built', len(o), 'bytes; dialogues', len(dn), 'words', sum(len(v['
 # ---------- ドーハ(tour/doha/index.html) ----------
 dd = sub('doh_')
 main = MAIN_DOH % dict(dlg=J(dd), sp=SPD, bg=BGD, world=WORLDJS, voice=VOICEJS, ev=EVJS, arr=J(DARR), city=J(DCITY), dep=J(DDEP), ids=J(DOH_IDS))
+main += art_js('../assets/art/', "function artIdFor(S){return S&&S.vid==='doh_city_h1'?'hotel':null}")   # ホテルのフロント
 o = ev_patches(common(src, 'Asia/Qatar'))
 for _a, _b in SHARED: o = rep(o, _a, _b)
 o = rep(o, " if(!G.camp)addHelp(T)}", " if(!G.camp&&!G.scene.d.nohelp)addHelp(T)}")

@@ -49,7 +49,11 @@ body{margin:0;box-sizing:border-box;background:var(--bg);color:var(--line);font-
 /* ---- 場面 ---- */
 #sceneView{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;position:relative}
 .stage{position:relative;flex:none}
-#scene{display:block;width:100%;aspect-ratio:320/150;image-rendering:pixelated;border:3px solid var(--line);border-radius:6px;background:#222}
+.stage{margin:calc(-8px - env(safe-area-inset-top,0px)) calc(-1*max(16px,env(safe-area-inset-right,0px))) 0 calc(-1*max(16px,env(safe-area-inset-left,0px)))}
+@media (min-width:512px){.stage{margin-left:0;margin-right:0}}
+#scene,#sceneA{display:block;width:100%;border:0;border-radius:0;background:#222}
+#scene{aspect-ratio:320/150;image-rendering:pixelated}#sceneA{aspect-ratio:1536/960}
+#sceneView .stage #exitBtn,#sceneView .stage #tip,#sceneView .stage .setbtn{top:calc(6px + env(safe-area-inset-top,0px))}
 #exitBtn{position:absolute;top:6px;right:6px;width:38px;height:38px;border-radius:10px;border:2px solid var(--line);background:rgba(5,7,15,.75);color:var(--line);font:inherit;font-size:18px;font-weight:800;cursor:pointer;z-index:3;padding:0}
 #tip{position:absolute;left:6px;top:6px;max-width:72%;background:rgba(5,7,15,.85);border:2px solid var(--line);border-radius:8px;padding:3px 8px;font-size:12px;font-weight:800;line-height:1.35;pointer-events:none}
 #tip small{display:block;font-weight:500;color:var(--gold);font-size:11px}
@@ -307,6 +311,7 @@ body.big .cue .w{font-size:30px}body.big .cue .w.s{font-size:52px}
   <div id="sceneView" hidden>
     <div class="stage">
       <canvas id="scene" width="320" height="150" aria-label="場面"></canvas>
+      <canvas id="sceneA" width="1536" height="960" aria-hidden="true" hidden></canvas>
       <button id="exitBtn" type="button" aria-label="マップにもどる">✕</button>
     </div>
     <div class="win" id="msg"><span class="who" id="who"></span><p id="msgText"></p><span class="tap" id="tapHint"></span></div>
@@ -484,12 +489,12 @@ var Snd=(function(){
   kg=AC.createGain();kg.gain.setValueAtTime(.0001,AC.currentTime);kg.gain.linearRampToValueAtTime(.3,AC.currentTime+.5);kg.connect(master);kg.connect(send);
   cur=kind;step=0;next=AC.currentTime+.08;K[kind].amb();tm=setInterval(sched,100);sched()}
  function nightNow(){try{var h=+new Intl.DateTimeFormat('en-GB',{timeZone:'Africa/Nairobi',hour:'2-digit',hourCycle:'h23'}).format(new Date());return h>=19||h<5}catch(e){return false}}
- function go(kind){want=kind||null;if(!AC)return;if(want)begin(want);else halt()}
+ function go(kind){want=kind||null;if(window.__ambGo)window.__ambGo(want);if(!AC)return;if(want)begin(want);else halt()}
  function duck(flag){                       /* マイクで聞いているあいだは音を止める(BGMがマイクに入らないように) */
-  if(!AC)return;clearTimeout(duckT);
+  if(window.__ambDuck)window.__ambDuck(flag);if(!AC)return;clearTimeout(duckT);
   if(flag){master.gain.cancelScheduledValues(AC.currentTime);master.gain.setValueAtTime(master.gain.value,AC.currentTime);master.gain.linearRampToValueAtTime(.0001,AC.currentTime+.08);master.gain.value=.0001;try{AC.suspend()}catch(e){}duckT=setTimeout(function(){duck(0)},20000)}
   else{try{AC.resume()}catch(e){}master.gain.cancelScheduledValues(AC.currentTime);master.gain.setValueAtTime(Math.max(.0001,master.gain.value),AC.currentTime);master.gain.linearRampToValueAtTime(mv,AC.currentTime+.5)}}
- function setOn(v){on=v;try{localStorage.setItem('kd_snd',v?'on':'off')}catch(e){}if(v){if(init())go(want)}else if(AC)halt();label()}
+ function setOn(v){on=v;try{localStorage.setItem('kd_snd',v?'on':'off')}catch(e){}if(window.__ambSync)setTimeout(window.__ambSync,0);if(v){if(init())go(want)}else if(AC)halt();label()}
  var btn=document.getElementById('sndBtn');
  function label(){if(btn){btn.textContent=on?'🔊':'🔇';btn.setAttribute('aria-pressed',on?'true':'false')}}
  if(btn)btn.addEventListener('click',function(){setOn(!on)});
@@ -1500,7 +1505,7 @@ function startVid(pl,vid,from){
  if(from!=='ev'&&evGate('vid',vid,function(){startVid(pl,vid,from)}))return;
  var d=DLG[vid];lastId=vid;G.sid++;clearTimers();stopSay();Snd.go(G.snd=pl.snd||pl.id);resetOUT();
  G.scene={id:pl.id,vid:vid,pl:pl,d:d,turns:turnsOf(vid),words:d.words,pitch:SP[vid]?SP[vid].pitch:1,from:from||null,anim:null,lastSp:null,tables:null};
- var S=G.scene;
+ var S=G.scene;if(window.__ambScene)window.__ambScene(G.snd,d.bg);
  if(d.story){S.turns.forEach(function(T,i){T.ctx=ctxAt(d,i);T.pitch=T.ctx.sp==='lulu'?1.35:(SP[T.ctx.sp]?SP[T.ctx.sp].pitch:1)});speaker=null}
  else{S.tables=INSIDE[pl.id]?makeTables():null;speaker=INSIDE[pl.id]?varySp(SP[vid]):SP[vid]}
  cam=pl.cam||0;spX=360;spSay=false;
@@ -2808,6 +2813,7 @@ function frame(ts){
  var dt=Math.min(.05,(ts-last)/1000||0);last=ts;t+=dt;
  if(G.view==='scene'){var S0=G.scene,an0=S0&&S0.anim,A0=an0&&ANIM[an0.n],p0=an0?t-an0.t0:0;if(speaker&&spX>0)spX=Math.max(0,spX-dt*520);
   if(A0&&A0.tick)A0.tick(p0,S0);
+  if(typeof ARTframe==='function'&&ARTframe(S0,A0,dt)){requestAnimationFrame(frame);return}
   if(A0&&A0.bg)A0.bg(p0,S0);else if(S0&&S0.ctx&&S0.ctx.bg&&BGS[S0.ctx.bg])BGS[S0.ctx.bg](S0.ctx,S0);else if(S0&&S0.tables){bgInside(S0.pl.id);drawTables(S0.tables,S0.pl.id)}else{bg();drawCrowd()}
   drawFront();if(A0&&A0.fg)A0.fg(p0,S0)}
  requestAnimationFrame(frame)}
