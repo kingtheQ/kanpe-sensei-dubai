@@ -1371,6 +1371,7 @@ var cam=0,t=0,speaker=null,spX=360,spSay=false,lastId=null,LIMIT=5000;
 var G={view:'map',at:'info',scene:null,ti:0,tries:0,phase:'idle',sid:0,timers:[],typeTimer:0,camp:null},luHelp=false;
 var HELPMAX=5,save={seen:{},help:HELPMAX,weak:[],missed:[]},SAVEKEY='kanpe-tour-save-v1';
 try{var s0=JSON.parse(localStorage.getItem(SAVEKEY)||'null');if(s0&&s0.seen&&typeof s0.seen==='object')save.seen=s0.seen;if(s0&&s0.gold)save.gold=1;if(s0&&s0.ev&&typeof s0.ev==='object')save.ev=s0.ev;if(s0&&(s0.ticket==='star'||s0.ticket==='ow'))save.ticket=s0.ticket;if(s0&&s0.win&&typeof s0.win==='object')save.win=s0.win;if(s0&&typeof s0.help==='number'&&s0.help>=0&&s0.help<=HELPMAX)save.help=Math.floor(s0.help);if(s0&&Array.isArray(s0.weak))save.weak=s0.weak.filter(function(w){return w&&typeof w.c==='string'}).slice(0,8);if(s0&&Array.isArray(s0.missed))save.missed=s0.missed.filter(function(w){return Array.isArray(w)&&typeof w[0]==='string'}).slice(0,16)}catch(e){}
+var TOUR_FRESH=(function(){try{return localStorage.getItem(SAVEKEY)===null}catch(e){return false}})();
 function storeSave(){try{localStorage.setItem(SAVEKEY,JSON.stringify(save))}catch(e){}}
 /* 世界マップへ「クリア」を伝える: 6つの場所を、それぞれ1回以上あそんだら */
 function worldMark(k){try{var w=JSON.parse(localStorage.getItem('kanpe-world-v1')||'null');if(!w||typeof w!=='object')w={v:1,at:'haneda',seen:{haneda:1},cleared:{haneda:1}};w.seen=w.seen&&typeof w.seen==='object'?w.seen:{};w.cleared=w.cleared&&typeof w.cleared==='object'?w.cleared:{};w.seen[k]=1;w.cleared[k]=1;localStorage.setItem('kanpe-world-v1',JSON.stringify(w))}catch(e){}}
@@ -3312,6 +3313,7 @@ MODES={sage:{p:PLACES_SAGE,b:'🧙 賢者',h:'達人賢者の広間<small>世界
 if(save.ticket)worldAt('nairobi');
 
 setMode(save.ticket?'arr':'sage');
+if(TOUR_FRESH&&!save.ticket&&!/[?&]pho=/.test(location.search)){enterHub(PBY.sage);runStory('sage_1')}
 var phoQ=/[?&]pho=(\d)/.exec(location.search);if(phoQ){var PLAN={fw:["fine","fountain","flight"],mw:[{w:"fine",h:"hine"},{w:"flight",h:"hlight"},{w:"food",h:"hood"}],ss:["That is fine. Please bring it to the room."]};var sn=+phoQ[1],sq=/[&?]snd=(\w+)/.exec(location.search),sd=sq&&SND[sq[1]]?sq[1]:'f';if(sd!=='f')PLAN.fw=SND[sd].def.slice();showPho({fw:PLAN.fw,snd:sd,mw:PLAN.mw,ss:PLAN.ss,stages:sn===1?[1,2,3]:[sn]},true)}
 requestAnimationFrame(frame);
 })();

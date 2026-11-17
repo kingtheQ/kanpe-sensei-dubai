@@ -441,7 +441,10 @@ o = rep(o, "b.classList.toggle('on',b.dataset.m===MODE)});", "b.classList.toggle
 o = rep(o, "dep:['#e9e2f2','#d9d0e8','#8a7ac0']}[MODE]", "dep:['#e9e2f2','#d9d0e8','#8a7ac0'],sage:['#e4dff2','#d3cbe8','#8a7ac0']}[MODE]")
 o = rep(o, "g.fillStyle='#143fb0';g.fillRect(0,0,5,ch);g.fillRect(cw-5,0,5,ch)", "g.fillStyle='#2f7a4a';g.fillRect(0,0,5,ch);g.fillRect(cw-5,0,5,ch)")
 o_pre = o   # 終わりの場面の土台(エンジンの部品はナイロビと同じ)
-o = rep(o, "setMode('arr');\nvar phoQ", main + "\nsetMode(save.ticket?'arr':'sage');\nvar phoQ")
+# 記録(kanpe-tour-save-v1)がない初回だけ: マップでなく 賢者の広間に入り、賢者の最初の会話(sage_1)を開く(タスク022)
+o = rep(o, "function storeSave(){", "var TOUR_FRESH=(function(){try{return localStorage.getItem(SAVEKEY)===null}catch(e){return false}})();\nfunction storeSave(){")
+o = rep(o, "setMode('arr');\nvar phoQ", main + "\nsetMode(save.ticket?'arr':'sage');\n"
+        "if(TOUR_FRESH&&!save.ticket&&!/[?&]pho=/.test(location.search)){enterHub(PBY.sage);runStory('sage_1')}\nvar phoQ")
 os.makedirs(os.path.join(ROOT, 'tour'), exist_ok=True)
 open(os.path.join(ROOT, 'tour', 'index.html'), 'w', encoding='utf-8').write(o)
 print('nairobi built', len(o), 'bytes; dialogues', len(dn), 'words', sum(len(v['words']) for v in dn.values()))
