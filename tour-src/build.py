@@ -86,7 +86,23 @@ DARR = [
  place('dride', 'タクシー・Doha Metro', 'hall', 70, 82, '🚕', ['Karwaタクシーと Doha Metro', 'どちらで街へ行く？'], ['doh_taxi', 'doh_metro'],
        hub=True, hubMap=1, hubBg='dtaxi', hubHero='blue', hubEn='Would you like a taxi, or the metro?', hubMsg='タクシー乗り場と Doha Metro の案内。',
        menu=[['Karwa Taxi', 'doh_taxi'], ['Doha Metro', 'doh_metro']])]
-DOH_IDS = [i for p in DARR for i in p['v']]
+# ドーハ後半(タスク023・018案A)。出発は「2つの広場＋列車」の八の字、市内は「湾の弧」。seq=1 は場面を上から順に出す
+DDEP = [
+ place('dcounter', 'カウンター・出国審査', 'info', 20, 14, '🎫', ['出発カウンターと出国審査', '荷物を預けて、出国へ'], ['doh_dep_checkin', 'doh_dep_passport'], seq=1),
+ place('dsouth', '南の広場', 'hall', 72, 30, '🧸', ['南の広場', '大きなクマの前で'], ['doh_dep_bear']),
+ place('dtrain', '空港の列車', 'info', 46, 52, '🚝', ['空港の中の列車', '南から北の広場へ'], ['doh_dep_train']),
+ place('dnorth', '北の広場', 'ahlan', 24, 74, '🌳', ['北の広場', '木のある広場とラウンジの入口'], ['doh_dep_orchard', 'doh_dep_lounge']),
+ place('dgate', 'ゲート・機内', 'atop', 74, 84, '✈️', ['ヘルシンキ行きのゲート', '機内の会話が終わると、ドーハを出発'], ['doh_dep_gate', 'doh_dep_plane'],
+       hub=True, hubMap=1, hubBg='dgate', hubHero='blue', hubEn='The gate for Helsinki. Where would you like to go?', hubMsg='ヘルシンキ行きのゲート。',
+       menu=[['Gate desk', 'doh_dep_gate'], ['Board the plane', 'doh_dep_plane']])]
+DCITY = [
+ place('calley', 'スークの路地', 'souk', 14, 84, '🏮', ['スーク・ワキーフの路地', '夜・道をきく・お茶'], ['doh_city_t2', 'doh_city_t1', 'doh_city_t3'], seq=1),
+ place('chotel', 'ホテル', 'hotel', 26, 58, '🏨', ['ホテル(夜)', 'チェックインと夕食の相談'], ['doh_city_h1', 'doh_city_h2'], seq=1),
+ place('csouq', 'スークの店', 'souk', 48, 40, '🧺', ['スーク・ワキーフの店', '香辛料・布・みやげ。値段は架空'], ['doh_city_s1', 'doh_city_s2', 'doh_city_s3']),
+ place('crest', 'レストラン', 'cafe', 72, 26, '🍽️', ['スークの中のレストラン', '注文・となりの家族・会計'], ['doh_city_r1', 'doh_city_r2', 'doh_city_r3'], seq=1),
+ place('cbreak', 'ホテルの朝', 'hotel', 84, 50, '☕', ['ホテル(朝)', '朝ごはんとチェックアウト'], ['doh_city_h3', 'doh_city_h4'], seq=1),
+ place('ccorn', 'コルニーシュ', 'beach', 60, 72, '⛵', ['コルニーシュ(湾ぞいの遊歩道)', '写真・木の舟・学生。値段は架空'], ['doh_city_c1', 'doh_city_c2', 'doh_city_c3'])]
+DOH_IDS = [i for p in DARR + DCITY + DDEP for i in p['v']]
 
 SPJS = r"""
 SP.sage={pitch:.8,m:[[trav({}),P(4,{o:'#5a3a8a',p:'#3a2a5a',h:'#d9d4c6'})]]};
@@ -164,6 +180,32 @@ SP.d_sim={pitch:1.15,m:[[trav({hair:'long'}),P(2,{o:'#e2231a',p:'#2a2a33',h:'#24
 SP.d_sim2={pitch:.95,m:[[trav({}),P(4,{o:'#e2231a',p:'#2a2a33',h:'#241a14'})]]};
 SP.d_taxi={pitch:.9,m:[[trav({hair:'cap'}),P(4,{o:'#2aa6a6',p:'#2a2a33',h:'#241a14'})]]};
 SP.d_metro={pitch:1.1,m:[[trav({hair:'long'}),P(1,{o:'#c8182a',p:'#2a2a33',h:'#241a14'})]]};
+/* ドーハ後半(タスク023)。服装・肌の色・髪型をばらけさせる。白い上下＋白い帽子は、地元の人の服装(悪役にしない) */
+SP.d_ck={pitch:1.15,m:[[trav({hair:'long'}),P(3,{o:'#8a1538',p:'#2a2a33',h:'#241a14'})]]};
+SP.d_exit={pitch:.9,m:[[trav({hair:'cap'}),P(4,{o:'#3a4a3a',p:'#2b2b33',h:'#14141a',c:'#3a4a3a'})]]};
+SP.d_photo={pitch:1.2,m:[[trav({hair:'curly'}),P(5,{o:'#e8b23a',p:'#3a5a8a',h:'#14141a',pack:1})]]};
+SP.d_trainp={pitch:.95,m:[[trav({}),P(2,{o:'#4a6a9a',p:'#2a2a33',h:'#8a6a3a'})]]};
+SP.d_bench={pitch:1.05,m:[[trav({hair:'long'}),P(1,{o:'#9a5ab0',p:'#44464f',h:'#c9a060'})]]};
+SP.lounge_guest={pitch:1,m:[[trav({hair:'curly'}),P(1,{o:'#d06a2a',p:'#44464f',h:'#8a6a3a'})]]};
+SP.d_gate={pitch:1.1,m:[[trav({hair:'long'}),P(3,{o:'#8a1538',p:'#2a2a33',h:'#14141a'})]]};
+SP.d_seat={pitch:.9,m:[[trav({}),P(2,{o:'#5a7a5a',p:'#3a3a48',h:'#d9d4c6'})]]};
+SP.c_man={pitch:.85,m:[[trav({hair:'cap'}),P(4,{o:'#f4f2ea',p:'#f4f2ea',h:'#14141a',c:'#f4f2ea'})]]};
+SP.c_tea={pitch:.95,m:[[trav({}),P(5,{o:'#c98a2a',p:'#3a3a48',h:'#14141a'})]]};
+SP.c_young={pitch:1.05,m:[[trav({hair:'cap'}),P(3,{o:'#f4f2ea',p:'#f4f2ea',h:'#14141a',c:'#e8e4d8'})]]};
+SP.c_front={pitch:1.15,m:[[trav({hair:'long'}),P(2,{o:'#2a3a5a',p:'#2a2a33',h:'#3b2a1f'})]]};
+SP.c_guest={pitch:1,m:[[trav({hair:'curly'}),P(4,{o:'#2d8f5a',p:'#44464f',h:'#14141a'})]]};
+SP.c_spice={pitch:.9,m:[[trav({}),P(4,{o:'#a8572a',p:'#3a3a48',h:'#14141a'})]]};
+SP.c_cloth={pitch:1.2,m:[[trav({hair:'long'}),P(3,{o:'#2a2a33',p:'#2a2a33',h:'#14141a'})]]};
+SP.c_souv={pitch:1,m:[[trav({hair:'cap'}),P(5,{o:'#3a6a8a',p:'#2a2a33',h:'#14141a',c:'#c8402a'})]]};
+SP.c_waiter={pitch:1.05,m:[[trav({}),P(3,{o:'#f4f0e6',p:'#14141a',h:'#241a14'})]]};
+SP.c_family={pitch:1.1,m:[[trav({hair:'long'}),P(2,{o:'#c0504a',p:'#44464f',h:'#241a14'})]]};
+SP.c_waiter2={pitch:.9,m:[[trav({hair:'cap'}),P(4,{o:'#f4f0e6',p:'#14141a',h:'#241a14',c:'#14141a'})]]};
+SP.c_break={pitch:1.15,m:[[trav({hair:'long'}),P(1,{o:'#6a8ac0',p:'#d9d4c6',h:'#7a5a3a'})]]};
+SP.c_front2={pitch:.95,m:[[trav({}),P(3,{o:'#2a3a5a',p:'#2a2a33',h:'#241a14'})]]};
+SP.c_walker={pitch:1.1,m:[[trav({hair:'curly'}),P(2,{o:'#e86a8a',p:'#2a2a33',h:'#241a14',shorts:1})]]};
+SP.c_boat={pitch:.85,m:[[trav({hair:'cap'}),P(5,{o:'#f4f2ea',p:'#f4f2ea',h:'#14141a',c:'#f4f2ea'})]]};
+SP.c_student={pitch:1.1,m:[[trav({}),P(3,{o:'#3a8f7a',p:'#2a2a33',h:'#14141a',pack:1})]]};
+SP.ev_tourist={pitch:1.05,m:[[trav({hair:'long'}),P(1,{o:'#d9a441',p:'#3a5a8a',h:'#c9a060',pack:1})]]};
 """
 BGD = r"""
 /* ハマド国際空港: 砂色の壁・木の波形の天井・えんじ色(カタールの色)の案内 */
@@ -190,6 +232,65 @@ BGS.dmetro=function(){airWall('#e8e4da');hiaRoof();floorAir('#d8d2c2','#c4bca8')
  R('#c8182a',0,34,VW,3);T('RED LINE',200,44,7,'#c8182a');
  R('#f4f2ec',20,50,150,40);R('#c8182a',20,84,150,4);for(var i=0;i<3;i++){R('#2b3a5a',30+i*46,56,34,18)}R('#14141a',20,90,150,4);
  for(i=0;i<3;i++){var gx=196+i*38;R('#8a8a94',gx,62,8,36);R('#8a8a94',gx+22,62,8,36);R(Math.floor(t*2+i)%2?'#3ad36a':'#2a8a4a',gx+11,70,8,10)}};
+/* 市内の地図(湾の弧)と、出発の地図(2つの広場＋列車) */
+function dohCityBg(g,cw,ch){var cx=cw*.56,cy=ch*1.02,rx=cw*.46,ry=ch*.36;
+ for(var y=0;y<ch;y++){var dy=(y-cy)/ry;if(dy*dy>=1)continue;var hw=rx*Math.sqrt(1-dy*dy);g.fillStyle='#f0e2bc';g.fillRect(Math.round(cx-hw-3),y,Math.round(hw*2+6),1);g.fillStyle=(y%6<1)?'#a8dcef':'#86c8e4';g.fillRect(Math.round(cx-hw),y,Math.round(hw*2),1)}
+ g.fillStyle='#c9a26a';for(var i=0;i<5;i++){g.fillRect(Math.round(cw*.06+i*5),Math.round(ch*.7),3,3);g.fillRect(Math.round(cw*.2+i*5),Math.round(ch*.32),3,3)}
+ g.fillStyle='#8a5a2a';g.fillRect(Math.round(cx-6),Math.round(ch*.86),8,2);g.fillRect(Math.round(cx+10),Math.round(ch*.92),8,2)}
+function dohDepBg(g,cw,ch){function plaza(px,py,col){var X=cw*px/100,Y=ch*py/100,r=Math.min(cw,ch)*.16;for(var y=-r;y<r;y++){var hw=Math.sqrt(r*r-y*y);g.fillStyle=col;g.fillRect(Math.round(X-hw),Math.round(Y+y),Math.round(hw*2),1)}}
+ plaza(72,30,'#f4e8c4');plaza(24,74,'#dcecc8');
+ g.fillStyle='#3a8a4a';for(var i=0;i<6;i++)g.fillRect(Math.round(cw*(.16+(i%3)*.06)),Math.round(ch*(.68+Math.floor(i/3)*.08)),3,3);
+ var a=[cw*.72,ch*.30],b=[cw*.24,ch*.74];g.fillStyle='#8a1538';for(var k=0;k<=40;k++){var x=a[0]+(b[0]-a[0])*k/40,y=a[1]+(b[1]-a[1])*k/40;g.fillRect(Math.round(x)-1,Math.round(y)-1,3,3)}}
+/* ---- ドーハ後半(タスク023): 出発 ---- */
+BGS.dcheck=function(){airWall('#efe6d2');hiaRoof();floorAir('#e2d6bc','#cfc2a4');signBox(30,12,110,'DEPARTURES','#8a1538');
+ for(var i=0;i<3;i++){var x=14+i*102;R('#8a1538',x,38,90,10);T('CHECK-IN',x+45,43.5,7,'#fff');R('#d9d4c6',x,62,90,36);R('#9a947f',x,62,90,3);R('#14141a',x+34,50,20,12);R('#2a6a9a',x+36,52,16,8);R('#6a6a76',x+62,90,24,8)}
+ for(i=0;i<8;i++){R('#c9a03a',14+i*40,112,2,12);R('#8a1538',14+i*40,114,38,1)}};
+BGS.dsouth=function(){airWall('#efe6d2');R('#c9a878',0,0,VW,4);for(var x=0;x<VW;x+=20){R('#a8845a',x,4,2,30);R('#e4d4b4',x+2,34,16,2)}
+ R('#9fd0ea',40,10,240,30);for(x=40;x<280;x+=30)R('#c9a878',x,10,2,30);floorAir('#e2d6bc','#cfc2a4');signBox(200,44,104,'SOUTH PLAZA','#8a1538');
+ for(var i=0;i<7;i++){var px=((t*14+i*52)%380)-30;R(['#2f5bb0','#c0504a','#3a8f7a','#d9a441','#7a3b8a','#f4f2ea','#4a4a56'][i],px,80,8,16);R('#c99a6a',px+1,74,6,6)}};
+BGS.dtrain=function(){airWall('#e8e4da');hiaRoof();R('#c8d6e4',0,30,VW,50);R('#8a1538',0,30,VW,3);
+ var tx=(Math.sin(t*.6)*.5+.5)*140-20;R('#f4f2ec',tx,40,190,38);R('#8a1538',tx,72,190,4);for(var i=0;i<5;i++)R('#2b3a5a',tx+10+i*36,46,26,16);
+ R('#6a6a76',0,80,VW,4);floorAir('#d8d2c2','#c4bca8');signBox(30,10,120,'TRAIN',  '#8a1538');T('NORTH ▶',250,18,8,'#8a1538')};
+BGS.dorch=function(){airWall('#eef0e6');R('#c9a878',0,0,VW,4);R('#bfe4f2',0,4,VW,36);for(var x=0;x<VW;x+=24)R('#a8845a',x,4,2,36);floorAir('#e2d6bc','#cfc2a4');
+ for(var i=0;i<6;i++){var x2=14+i*54;R('#7a5a3a',x2+10,52,6,46);R('#3a8a4a',x2,34,28,20);R('#4aa05a',x2+4,28,20,10);R('#2a6a3a',x2+2,50,24,4)}
+ for(i=0;i<3;i++){R('#8a6a4a',40+i*100,104,60,6);R('#6a4a2a',44+i*100,110,4,8);R('#6a4a2a',92+i*100,110,4,8)}};
+BGS.dlng=function(){airWall('#e2d6c4');hiaRoof();floorAir('#d8ccb0','#c4b898');
+ R('#5a4a3a',30,24,110,74);R('#3a2a1e',36,30,98,68);T('LOUNGE ▶',85,62,8,'#c9a03a');R('#8a1538',180,24,110,74);R('#a8204a',186,30,98,68);T('?',235,60,18,'#f4d8a0');
+ R('#3a8a4a',150,60,20,38);R('#4aa05a',146,50,28,14)};
+BGS.dgate=function(){airWall('#e6e0d2');hiaRoof();R('#8fd0f0',20,12,230,62);R('#cdeaf7',20,50,230,24);R('#c9a878',20,74,230,6);
+ var px=((t*10)%330)-40;R('#f6f6f2',px,54,70,12);R('#8a1538',px+60,46,10,10);R('#7ac0f0',px+10,56,48,3);R('#c9a878',18,10,4,72);R('#c9a878',248,10,4,72);
+ R('#05070f',262,16,50,34);T('HELSINKI',287,26,7,'#ffd36a');T(Math.floor(t*1.2)%2?'BOARDING':'CHANGED',287,40,7,'#3ad36a');
+ floorAir('#d8d2c2','#c4bca8');R('#8a1538',266,68,46,10);R('#6a1030',266,78,46,6)};
+BGS.dcabin=function(){R('#e6e2dc',0,0,VW,98);R('#bcb6ae',0,0,VW,22);R('#d0cac2',0,18,VW,5);for(var i=0;i<4;i++)R('#9a948c',10+i*76,24,60,4);
+ R('#4a4a5a',0,98,VW,52);R('#3a3a4a',100,98,120,52);R('#5a5a6a',104,98,3,52);R('#5a5a6a',213,98,3,52);
+ R('#05070f',250,42,40,30);R('#7ac0f0',253,45,34,24);var cx=((t*20)%80)-10;R('#f4f2ec',253+cx%40,52,18,6);
+ for(i=0;i<3;i++){var x=14+i*34;R('#3a4a6a',x,60,28,38);R('#4a5a7a',x+3,56,22,10);R('#2a3a5a',x,92,28,6)}};
+/* ---- ドーハ後半(タスク023): 市内。外の場面は現地の時刻で昼夜が変わる(dohNight) ---- */
+function dohSky(n){grad(0,60,n?'#141a3a':'#7cc4ee',n?'#2a3466':'#dff2fa',10)}
+function souqWall(n){var w=n?'#8a6a48':'#d9b888',w2=n?'#6a5034':'#b8986a';R(w,0,20,VW,80);for(var x=0;x<VW;x+=40){R(w2,x+30,20,4,80);R(n?'#3a2a1e':'#7a5a3a',x+8,8,16,12)}
+ for(x=0;x<VW;x+=40){R(w2,x+6,60,20,38);R(n?'#ffd36a':'#5a4030',x+10,64,12,14)}}
+BGS.calley=function(){var n=dohNight();dohSky(n);souqWall(n);
+ for(var i=0;i<6;i++){var lx=20+i*54;R('#3a2a1e',lx+4,30,1,8);R(n?'#ffb84a':'#c98a2a',lx,38,10,10);R(n?'#ffe08a':'#e8b860',lx+2,40,6,6)}
+ R(n?'#5a4634':'#c9a878',0,100,VW,50);for(var x=0;x<VW;x+=24)R(n?'#4a3826':'#b8986a',x,100,1,50);
+ R('#7a5a3a',230,76,60,22);R('#c9a03a',230,74,60,3);R('#f4f2ea',244,66,8,8);R('#f4f2ea',262,66,8,8);if(Math.floor(t*2)%2)R('#e4e4e4',246,58,4,6)};
+BGS.chotel=function(){var n=dohNight();R('#e8dcc4',0,0,VW,98);R('#c9a878',0,0,VW,6);R(n?'#2a3466':'#9fd0ea',220,14,80,50);R('#c9a878',258,14,4,50);
+ R('#8a6a4a',30,62,150,36);R('#a8845a',30,60,150,4);T('RECEPTION',105,48,8,'#8a6a4a');R('#d9a441',60,20,90,18);R('#fff3d0',66,24,78,10);
+ floorAir('#d8c8a8','#c4b494');R('#8a1538',200,96,110,14)};
+BGS.csouq=function(){var n=dohNight();dohSky(n);souqWall(n);var cl=['#c98a2a','#a8572a','#d9a441','#7a3b1e','#e8c060','#8a1a2a'];
+ for(var i=0;i<12;i++){var x=10+i*26;R(cl[i%6],x,78,20,10);R(cl[(i+2)%6],x+3,72,14,8)}
+ for(i=0;i<9;i++){R(['#c8402a','#2d8f8a','#e8b23a','#7a3b8a','#3a6a8a'][i%5],180+i*14,30,10,30)}
+ R(n?'#5a4634':'#c9a878',0,100,VW,50)};
+BGS.crest=function(){var n=dohNight();dohSky(n);souqWall(n);R(n?'#5a4634':'#c9a878',0,98,VW,52);
+ for(var i=0;i<3;i++){var x=30+i*96;R('#f4f0e6',x,92,70,6);R('#8a6a4a',x+6,98,4,22);R('#8a6a4a',x+60,98,4,22);R('#c98a2a',x+20,86,12,6);R('#d9d4c6',x+40,86,10,6)}
+ for(i=0;i<5;i++){R(n?'#ffd36a':'#d9a441',40+i*60,14,2,6)}};
+BGS.cbreak=function(){R('#f4ecd8',0,0,VW,98);R('#c9a878',0,0,VW,6);R('#9fd0ea',30,14,120,50);R('#dff2fa',30,40,120,24);R('#c9a878',88,14,4,50);
+ R('#c9a878',180,60,120,8);for(var i=0;i<4;i++){R('#f4f2ea',188+i*28,48,16,12);R(['#d9a441','#c0504a','#7a3b1e','#3a8f4a'][i],190+i*28,50,12,6)}
+ floorAir('#e2d6bc','#cfc2a4');R('#8a6a4a',40,104,90,6);R('#f4f2ea',60,98,12,6);R('#5a3a2a',64,96,4,3)};
+BGS.ccorn=function(){var n=dohNight();dohSky(n);
+ for(var i=0;i<9;i++){var h=18+((i*37)%30),x=150+i*18;R(n?'#2a3a5a':'#9aaac0',x,58-h,14,h);if(n)for(var y=58-h+4;y<56;y+=6)R('#ffd98a',x+4,y,2,2)}
+ R(n?'#1a3a5a':'#4aa0c8',0,58,VW,30);for(i=0;i<8;i++){var wx=((t*8+i*44)%340)-10;R(n?'#3a5a7a':'#8ad0ea',wx,62+(i%3)*8,14,1)}
+ for(i=0;i<2;i++){var bx=30+i*70+Math.sin(t+i)*3;R('#8a5a2a',bx,70,40,8);R('#6a4020',bx+4,78,32,3);R('#5a3a1e',bx+18,48,2,22);R('#f4ead0',bx+8,50,10,16)}
+ R(n?'#6a6a7a':'#e2d6bc',0,88,VW,62);R(n?'#8a8a9a':'#f4ead0',0,88,VW,3);for(var x=0;x<VW;x+=30)R(n?'#5a5a6a':'#cfc2a4',x,88,1,62)};
 """
 BGN = r"""
 BGS.checkinQ=function(){airWall('#eef0f4');floorAir('#d8dce6','#c4c8d4');
@@ -229,7 +330,7 @@ MODES={sage:{p:PLACES_SAGE,b:'🧙 賢者',h:'達人賢者の広間<small>世界
 if(save.ticket)worldAt('nairobi');
 """
 MAIN_DOH = r"""
-/* ===== 世界一周編: ドーハ(到着)。空港・街・出発はこれから ===== */
+/* ===== 世界一周編: ドーハ(到着・街・出発。タスク023 で街と出発を追加) ===== */
 var TOURDLG=%(dlg)s;
 for(var _k in TOURDLG)DLG[_k]=TOURDLG[_k];
 %(sp)s
@@ -237,11 +338,13 @@ for(var _k in TOURDLG)DLG[_k]=TOURDLG[_k];
 %(world)s
 %(voice)s
 %(ev)s
-var PLACES_DARR=%(arr)s;
-PLACES_AIR=PLACES_DARR;
-PLACES_DARR.forEach(function(p){PBY[p.id]=p});
+var PLACES_DARR=%(arr)s,PLACES_DCITY=%(city)s,PLACES_DDEP=%(dep)s;
+PLACES_AIR=PLACES_DDEP;   /* 世界マップのクリアの印: 出発の場所を全部(各1つ以上)あそんだら */
+PLACES_DARR.concat(PLACES_DCITY,PLACES_DDEP).forEach(function(p){PBY[p.id]=p});
 var TOUR_IDS=%(ids)s;
-MODES={arr:{p:PLACES_DARR,b:'🛬 到着',h:'ドーハに到着<small>ハマド国際空港</small>',snd:'doh'}};
+MODES={arr:{p:PLACES_DARR,b:'🛬 到着',h:'ドーハに到着<small>ハマド国際空港</small>',snd:'doh'},
+ city:{p:PLACES_DCITY,b:'🏙 市内',h:'ドーハの街<small>スーク・ワキーフとコルニーシュ・1泊</small>',snd:'dohc'},
+ dep:{p:PLACES_DDEP,b:'🛫 出発',h:'ドーハから出発<small>カウンターからヘルシンキ行きの機内まで</small>',snd:'doh'}};
 worldAt('doha');
 """
 
@@ -451,7 +554,7 @@ print('nairobi built', len(o), 'bytes; dialogues', len(dn), 'words', sum(len(v['
 
 # ---------- ドーハ(tour/doha/index.html) ----------
 dd = sub('doh_')
-main = MAIN_DOH % dict(dlg=J(dd), sp=SPD, bg=BGD, world=WORLDJS, voice=VOICEJS, ev=EVJS, arr=J(DARR), ids=J(DOH_IDS))
+main = MAIN_DOH % dict(dlg=J(dd), sp=SPD, bg=BGD, world=WORLDJS, voice=VOICEJS, ev=EVJS, arr=J(DARR), city=J(DCITY), dep=J(DDEP), ids=J(DOH_IDS))
 o = ev_patches(common(src, 'Asia/Qatar'))
 for _a, _b in SHARED: o = rep(o, _a, _b)
 o = rep(o, " if(!G.camp)addHelp(T)}", " if(!G.camp&&!G.scene.d.nohelp)addHelp(T)}")
@@ -459,11 +562,28 @@ o = rep(o, '<title>カンペ先生 ドバイ編</title>', '<title>空港えい�
 o = rep(o, SNOTE_OLD, SNOTE_NEW)
 o = rep(o, ".cue .heard.live{color:#8a7b55}", ".cue .heard.live{color:#8a7b55}\n" + VOICECSS)
 o = rep(o, "'../world/?map=1'", "'../../world/?map=1'", 2)
-o = rep(o, "worldMark('dubai')", "void 0")   # ドーハはまだ到着だけ。クリアの印はつけない
+o = rep(o, "worldMark('dubai')", "worldMark('doha')")   # タスク023: 出発の場所を全部あそんだら印(PLACES_AIR=PLACES_DDEP)
+# 地図: 市内は湾の弧、出発は2つの広場＋列車。地図のあとの音楽はモードの曲(ドーハの曲)
+o = rep(o, "if(cty){g.fillStyle='#e8f0f4';g.fillRect(0,ch-8,cw,8);g.fillStyle='#9ad0e4';g.fillRect(0,ch-6,cw,6);return}",
+        "if(cty){dohCityBg(g,cw,ch);return}if(MODE==='dep')dohDepBg(g,cw,ch);")
+o = rep(o, "Snd.go(MODE==='city'?'city':'map')", "Snd.go(MODES[MODE].snd)")
+# seq=1 の場所は、場面を上から順に出す(物語の順番: 道をきく→お茶→ルルがいない など)
+o = rep(o, "function pickV(pl){\n var ids=pl.v,min=1e9;ids.forEach(function(i){min=Math.min(min,save.seen[i]||0)});\n",
+        "function pickV(pl){\n var ids=pl.v,min=1e9;ids.forEach(function(i){min=Math.min(min,save.seen[i]||0)});\n"
+        " if(pl.seq){for(var q=0;q<ids.length;q++)if((save.seen[ids[q]]||0)===min)return ids[q]}\n")
+# 場面のあと: 乗り場(タクシー・メトロ)→市内のタブ / 機内→クリアの印をつけて世界マップへ
+o = rep(o, "if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}showMap()}",
+        "if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}"
+        "if(S.vid==='doh_dep_plane'){worldMark('doha');Snd.go(null);location.href='../../world/?map=1';return}"
+        "showMap();if(S.pl.id==='dride')setMode('city')}")
 o = rep(o, KBASE, KBASE +
         "K.doh={bpm:function(){return 66},amb:function(){loopNoise(320,.6,.015,.08,.008,'lowpass')},"
         "st:function(s,t,e){var KD=[62,63,65,67,69,67,65,63];if(s%4===0)pluck(hz(KD[(s>>2)%8]),t,e*3.4,ngt?.07:.1);"
-        "if(s%16===8)pluck(hz(KD[0]-12),t,e*5,.08);if(s%32===0)tone(hz(38),t,e*30,'sine',.06,.6)}};")
+        "if(s%16===8)pluck(hz(KD[0]-12),t,e*5,.08);if(s%32===0)tone(hz(38),t,e*30,'sine',.06,.6)}};"
+        # 市内の曲(タスク023): ヒジャーズ調の、ゆっくりした つま弾き。背景音は静かに、高い音は使わない
+        "K.dohc={bpm:function(){return ngt?60:72},amb:function(){loopNoise(260,.5,.012,.07,.006,'lowpass')},"
+        "st:function(s,t,e){var KC=[62,63,66,67,69,67,66,63];if(s%4===0)pluck(hz(KC[(s>>2)%8]-12),t,e*3.6,ngt?.08:.1);"
+        "if(s%8===6)pluck(hz(KC[((s>>3)+2)%8]-12),t,e*2,.05);if(s%16===0)tone(hz(43),t,e*14,'sine',.06,.5)}};")
 o = rep(o, REC, record('ドーハの'))
 o = rep(o, "g.fillStyle='#143fb0';g.fillRect(0,0,5,ch);g.fillRect(cw-5,0,5,ch)", "g.fillStyle='#8a1538';g.fillRect(0,0,5,ch);g.fillRect(cw-5,0,5,ch)")
 o = rep(o, "setMode('arr');\nvar phoQ", main + "\nsetMode('arr');\nvar phoQ")
