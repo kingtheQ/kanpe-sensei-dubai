@@ -143,7 +143,7 @@ function e4(){
  var three=P.cmp,marks=[];
  if(P.st&&P.st.bits&&P.en.bits)marks=endMarks(P.st,P.en,three);
  if(P.st)box.appendChild(endTier('Departure',P.st,three,three,null));
- box.appendChild(endTier('Home',P.en,P.cmp||(!P.st&&P.en.src==='az'&&!!P.en.w),false,marks));
+ box.appendChild(endTier('Home',P.en,P.cmp||(!P.st&&P.en.src==='az'&&!!P.en.w),three,marks));   /* 数字は 両段に小さく(013 §2-2・タスク022)。比べられないとき(b・a・c)は出さない */
  if(marks.length){var tk=endToks(),jl=el('div','ejoy');jl.textContent=marks.map(function(i){return '✦ '+tk[i].replace(/[^A-Za-z']/g,'')}).join('   ');box.appendChild(jl)}
  panel.appendChild(box);endNav(null,function(){e5()})}
 /* E5: 音の変化(いちばんむずかしかった音 上位3つ。数字は出さず、棒の長さだけ) */
