@@ -330,7 +330,6 @@ MODES={sage:{p:PLACES_SAGE,b:'🧙 賢者',h:'達人賢者の広間<small>世界
  arr:{p:PLACES_NARR,b:'🛬 到着',h:'ナイロビに到着<small>ジョモ・ケニヤッタ国際空港</small>',snd:'nbo'},
  air:{p:PLACES_NAIR,b:'✈ 空港',h:'ナイロビの空港<small>出発までの時間</small>',snd:'nbo'},
  dep:{p:PLACES_NDEP,b:'🛫 出発',h:'ナイロビから出発<small>チェックインから機内まで</small>',snd:'nbo'}};
-if(save.ticket)worldAt('nairobi');
 """
 MAIN_DOH = r"""
 /* ===== 世界一周編: ドーハ(到着・街・出発。タスク023 で街と出発を追加) ===== */
@@ -528,12 +527,12 @@ o = rep(o, '<title>カンペ先生 ドバイ編</title>', '<title>空港えい�
 o = rep(o, SNOTE_OLD, SNOTE_NEW)
 o = rep(o, "worldMark('dubai')", "worldMark('nairobi')")
 o = rep(o, "function runStory(vid){startVid(G.scene.pl,vid,'hub')}",
-        "function runStory(vid){if(vid==='ticket_star'||vid==='ticket_ow'){save.ticket=vid==='ticket_star'?'star':'ow';storeSave();worldAt('nairobi')}startVid(G.scene.pl,vid,'hub')}")
+        "function runStory(vid){if(vid==='ticket_star'||vid==='ticket_ow'){save.ticket=vid==='ticket_star'?'star':'ow';storeSave()}startVid(G.scene.pl,vid,'hub')}")
 # 場面のあと: 窓口→到着 / 搭乗ゲート→出発(機内の前) / 機内→世界マップの飛ぶ画面→ドーハ
 o = rep(o, "if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}showMap()}",
         "if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}"
         "if(S.pl.id==='qplane'){worldAt('nairobi');Snd.go(null);location.href='../world/?fly=doha';return}"
-        "showMap();if(S.pl.id==='ticket'&&save.ticket)setMode('arr');"
+        "if(S.pl.id==='ticket'&&save.ticket){Snd.go(null);location.href='../world/?map=1';return}showMap();"
         "}")
 o = rep(o, KBASE, KBASE + "K.sage=K.hall;K.tdesk=K.info;"
         "K.nbo={bpm:function(){return 84},amb:function(){loopNoise(500,.7,.02,.1,.01,'lowpass')},"
@@ -601,7 +600,7 @@ ENDJS = _rd('ending.js').replace("/*DECL*/''", json.dumps(window_data.DECL))
 ENDCSS = _rd('ending.css')
 e = o_pre
 e = rep(e, '<title>空港えいご物語 世界一周編 ナイロビ</title>', '<title>空港えいご物語 世界一周編 アルバム</title>')
-e = rep(e, "'../world/?map=1'", "'../../world/?map=1'", 2)
+e = rep(e, "'../world/?map=1'", "'../../world/?map=1'", 3)
 e = rep(e, "worldMark('nairobi')", "void 0")
 e = rep(e, "K.sage=K.hall;", "K.sage=K.hall;K.home=K.hall;")
 e = rep(e, "else if(k==='poof')whoosh(t0,.5,.07,400,3000);", "else if(k==='poof')whoosh(t0,.5,.07,400,3000);else if(k==='page'){noise(t0,.09,.12,1800,'highpass');noise(t0+.08,.06,.08,2600,'highpass')}")

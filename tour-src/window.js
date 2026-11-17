@@ -25,7 +25,7 @@ function winRun(){
  if(k==='win_decl'&&voiceNeedConsent()){winConsent();return}   /* 宣言の直前に、声を送ってよいかを一度だけ聞く(013 3-3) */
  if(k==='win_rec')winRecBuild();if(k==='win_decl')winDeclPrep();
  var vid=winVid(k),pl=PBY.ticket;
- if(k==='win_pass'){save.ticket=W.pick==='ow'?'ow':'star';W.done=1;storeSave();worldAt('nairobi');startVid(pl,vid,'hub');return}
+ if(k==='win_pass'){save.ticket=W.pick==='ow'?'ow':'star';W.done=1;storeSave();startVid(pl,vid,'hub');return}
  startVid(pl,vid,'win')}
 function winAfter(S){var W=save.win;W.step++;storeSave();winRun()}
 

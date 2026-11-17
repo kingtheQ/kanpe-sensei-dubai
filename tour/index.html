@@ -2213,7 +2213,7 @@ function startReveal(){
  one()}
 function finishScene(){
  var S=G.scene;if(S.d&&S.d.win){save.seen[S.vid]=(save.seen[S.vid]||0)+1;storeSave();winAfter(S);return}if(S.d&&S.d.ev){evFinish(S);return}if(!S.evd){S.evd=1;evNote(S);if(evGate('after',S.pl.id,function(){G.scene=S;finishScene()}))return}save.seen[S.vid]=(save.seen[S.vid]||0)+1;(S.d.inter||[]).forEach(function(n){if(n.set&&n.set.gold)save.gold=1});storeSave();worldSync();
- if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}if(S.pl.id==='qplane'){worldAt('nairobi');Snd.go(null);location.href='../world/?fly=doha';return}showMap();if(S.pl.id==='ticket'&&save.ticket)setMode('arr');}
+ if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}if(S.pl.id==='qplane'){worldAt('nairobi');Snd.go(null);location.href='../world/?fly=doha';return}if(S.pl.id==='ticket'&&save.ticket){Snd.go(null);location.href='../world/?map=1';return}showMap();}
 
 /* ---------- お店の中(Veranda・S34・Costa・Ahlan): 入るたびに、食べている人と相手がかわる ---------- */
 var INSIDE={cafe:1,s34:1,costa:1,ahlan:1};
@@ -2687,7 +2687,7 @@ function dqFinish(box){
  function sel(i){bs.forEach(function(b,j){b.classList.toggle('sel',j===i)})}
  bs.forEach(function(b,i){['focus','pointerenter','pointerdown'].forEach(function(ev){b.addEventListener(ev,function(){sel(i)})})});
  sel(0)}
-function runStory(vid){if(vid==='ticket_star'||vid==='ticket_ow'){save.ticket=vid==='ticket_star'?'star':'ow';storeSave();worldAt('nairobi')}startVid(G.scene.pl,vid,'hub')}
+function runStory(vid){if(vid==='ticket_star'||vid==='ticket_ow'){save.ticket=vid==='ticket_star'?'star':'ow';storeSave()}startVid(G.scene.pl,vid,'hub')}
 function sleepNow(){
  clearPanel();G.phase='inter';setMsgInstant('キングとルルは、ふかふかのベッドで ぐっすり… おやすみなさい。','');say('Goodnight!',.9,1);
  G.scene.anim={n:'fade',t0:t,ms:3600,seg:-1,d:0};later(3600,function(){G.scene.anim=null;showMap()})}
@@ -3230,7 +3230,7 @@ function winRun(){
  if(k==='win_decl'&&voiceNeedConsent()){winConsent();return}   /* 宣言の直前に、声を送ってよいかを一度だけ聞く(013 3-3) */
  if(k==='win_rec')winRecBuild();if(k==='win_decl')winDeclPrep();
  var vid=winVid(k),pl=PBY.ticket;
- if(k==='win_pass'){save.ticket=W.pick==='ow'?'ow':'star';W.done=1;storeSave();worldAt('nairobi');startVid(pl,vid,'hub');return}
+ if(k==='win_pass'){save.ticket=W.pick==='ow'?'ow':'star';W.done=1;storeSave();startVid(pl,vid,'hub');return}
  startVid(pl,vid,'win')}
 function winAfter(S){var W=save.win;W.step++;storeSave();winRun()}
 
@@ -3310,7 +3310,6 @@ MODES={sage:{p:PLACES_SAGE,b:'🧙 賢者',h:'達人賢者の広間<small>世界
  arr:{p:PLACES_NARR,b:'🛬 到着',h:'ナイロビに到着<small>ジョモ・ケニヤッタ国際空港</small>',snd:'nbo'},
  air:{p:PLACES_NAIR,b:'✈ 空港',h:'ナイロビの空港<small>出発までの時間</small>',snd:'nbo'},
  dep:{p:PLACES_NDEP,b:'🛫 出発',h:'ナイロビから出発<small>チェックインから機内まで</small>',snd:'nbo'}};
-if(save.ticket)worldAt('nairobi');
 
 setMode(save.ticket?'arr':'sage');
 if(TOUR_FRESH&&!save.ticket&&!/[?&]pho=/.test(location.search)){enterHub(PBY.sage);runStory('sage_1')}
