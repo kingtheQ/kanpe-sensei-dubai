@@ -91,7 +91,7 @@ def add(D):
               rep=("We will arrive in Doha about thirty minutes late. Thank you.", "ドーハへの到着は30分ほどおくれます。ありがとうございます。", 'Captain'))])],
         fx='pa')
 
-    # g. メトロの改札：ルルだけ先に通ってしまう。どれを選んでも doh_metro へ（005 #24。係員は7つのうちこの1つだけ）
+    # g. メトロの改札：ルルだけ先に通ってしまう。どれを選んでも doh_metro へ（005 #24。改札の係員が出るのはこの割り込みだけ。doh_metro 本体の相手は、023で となりの乗客 に入れ替え）
     ev(D, 'doh_ev_g_card', 'Doha Metro', 'dmetro', 'd_metro', [
         OT("Excuse me, sir. Your card, please?", "失礼します。カードを見せていただけますか。", [
             O('nocard', "I don't have a card.", "カードを持っていません。",

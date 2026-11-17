@@ -256,13 +256,13 @@ d('doh_sim1','Ooredooの店員','dsim','d_sim','到着ロビーのOoredoo。店�
 ("Yes, card is fine. I will set it up for you.","はい、カードで大丈夫です。こちらで設定します。","*Thank* *you*. *Does* *it* *work* *now*?","ありがとう。もう使えますか。"),
 ("Yes, it is ready. Enjoy your stay in Doha.","はい、準備できました。ドーハでの滞在を楽しんで。","*That* *was* *fast*! *Thank* *you*.","はやい！ありがとう。")],
 [("visitor","訪問者"),("riyal","リヤル(カタールのお金)"),("pay by card","カードで払う"),("set up","設定する"),("ready","準備ができた")])
-d('doh_sim2','Ooredooの店員','dsim','d_sim2','SIMを入れたのに、地図が開かない。もう一度カウンターへ。',[
-("Hello again. Is everything all right?","またいらっしゃいましたね。何かありましたか。","*No*. *The* *internet* *does* *not* *work*.","いいえ。インターネットがつながりません。"),
-("Let me see. May I have your phone?","見てみましょう。スマホをお借りできますか。","*Sure*. *Here* *it* *is*.","はい。どうぞ。"),
+d('doh_sim2','カウンターの列のとなりの人','dsim','d_sim2','SIMを入れたのに、地図が開かない。Ooredooのカウンターの列で、となりの人が声をかけてくれた。',[
+("You look worried. Is something wrong with your phone?","心配そうですね。スマホに何かありましたか。","*Yes*. *The* *internet* *does* *not* *work*.","はい。インターネットがつながりません。"),
+("I had the same problem once. May I look at it?","私も前に同じことがありました。見てもいいですか。","*Sure*. *Here* *it* *is*.","はい。どうぞ。"),
 ("Ah. Mobile data is off. I will turn it on.","ああ。モバイルデータがオフです。オンにしますね。","*Oh*, *I* *see*. *Is* *it* *working* *now*?","そうだったんですね。もう動いていますか。"),
 ("Yes. Please open a map and try.","はい。地図を開いて試してください。","*It* *works*! *I* *can* *see* *the* *map*.","つながった！地図が見えます。"),
-("Good. If you have any trouble, please come back.","よかったです。こまったら、またいらしてください。","*I* *will*. *Thank* *you* *for* *your* *help*.","そうします。助かりました。")],
-[("internet","インターネット"),("mobile data","モバイルデータ通信"),("turn on","オンにする"),("try","試す"),("trouble","こまったこと")])
+("Good. Next time, check that setting first.","よかったです。次は、まずその設定を見てくださいね。","*I* *will*. *Thank* *you* *for* *your* *help*.","そうします。助かりました。")],
+[("internet","インターネット"),("mobile data","モバイルデータ通信"),("turn on","オンにする"),("try","試す"),("setting","設定")],kind='trav')
 d('doh_taxi','Karwaタクシーの係員','dtaxi','d_taxi','到着ロビーのはしにあるタクシー乗り場。係員が、しずかに手で列を案内している。',[
 ("Good evening. Taxi? This way, please.","こんばんは。タクシーですか。こちらへどうぞ。","*Yes*, *please*. *We* *are* *going* *to* *Souq* *Waqif*.","お願いします。スーク・ワキーフへ行きます。"),
 ("Souq Waqif. It takes about twenty minutes.","スーク・ワキーフですね。20分ほどです。","*Good*. *Does* *the* *taxi* *use* *a* *meter*?","よかった。タクシーはメーターを使いますか。"),
@@ -270,13 +270,13 @@ d('doh_taxi','Karwaタクシーの係員','dtaxi','d_taxi','到着ロビーの�
 ("Yes, card or cash. Please take the next taxi in line.","はい、カードでも現金でも。列の次のタクシーにお乗りください。","*The* *next* *one*? *Thank* *you*.","次のですね。ありがとう。"),
 ("Have a pleasant evening in Doha.","ドーハでよい夜をおすごしください。","*Thank* *you*. *Good* *night*!","ありがとう。おやすみなさい！")],
 [("this way","こちらへ"),("meter","メーター"),("cash","現金"),("in line","列にならんで"),("pleasant","心地よい")])
-d('doh_metro','Doha Metroの係員','dmetro','d_metro','空港の下にあるDoha Metroの駅。ぴかぴかの改札の前に、係員が立っている。',[
-("Hello. Welcome to Doha Metro. Where are you going?","こんにちは。Doha Metroへようこそ。どちらへ行かれますか。","*To* *the* *city* *center*. *Which* *line* *do* *I* *take*?","街の中心へ。どの路線に乗ればいいですか。"),
+d('doh_metro','改札の前のとなりの乗客','dmetro','d_metrop','空港の下にあるDoha Metroの駅。ぴかぴかの改札の前で、となりの乗客が声をかけてくれた。',[
+("Hello. Are you going into the city?","こんにちは。街へ行かれるのですか。","*Yes*. *To* *the* *city* *center*. *Which* *line* *do* *I* *take*?","はい。街の中心へ。どの路線に乗ればいいですか。"),
 ("Take the Red Line to Msheireb. It is the main station.","レッドラインでムシェイレブへ。中心の駅です。","*The* *Red* *Line* *to* *Msheireb*. *Got* *it*.","レッドラインでムシェイレブですね。わかりました。"),
 ("Do you have a travel card?","乗車カードはお持ちですか。","*No*, *not* *yet*. *Where* *can* *I* *buy* *one*?","いいえ、まだです。どこで買えますか。"),
-("At that machine. A day pass is good for all day.","あの機械です。1日乗車券なら1日中使えます。","*A* *day* *pass*, *then*. *How* *long* *does* *it* *take*?","では1日乗車券にします。どのくらいかかりますか。"),
+("At this machine. A day pass is good for all day.","この機械です。1日乗車券なら1日中使えます。","*A* *day* *pass*, *then*. *How* *long* *does* *it* *take*?","では1日乗車券にします。どのくらいかかりますか。"),
 ("About twenty-five minutes. Trains come every few minutes.","25分ほどです。電車は数分おきに来ます。","*Perfect*. *Thank* *you* *for* *your* *help*!","完ぺきです。助かりました！")],
-[("line","路線"),("main station","中心の駅"),("travel card","乗車カード"),("day pass","1日乗車券"),("every few minutes","数分おきに")])
+[("line","路線"),("main station","中心の駅"),("travel card","乗車カード"),("day pass","1日乗車券"),("every few minutes","数分おきに")],kind='trav')
 
 # ---- 窓口（タスク012）: 宣言・聞き取り5本・線を引く・値段・読み上げ確認・名前の確認 ----
 import window_data

@@ -180,8 +180,9 @@ SP.d_officer2={pitch:1.1,m:[[trav({hair:'long'}),P(3,{o:'#3a4a3a',p:'#2b2b33',h:
 SP.d_bag={pitch:1,m:[[trav({}),P(2,{o:'#8a1538',p:'#2a2a33',h:'#241a14'})]]};
 SP.d_traveler={pitch:.95,m:[[trav({}),P(4,{o:'#2d8f8a',p:'#44464f',h:'#14141a',pack:1})]]};
 SP.d_sim={pitch:1.15,m:[[trav({hair:'long'}),P(2,{o:'#e2231a',p:'#2a2a33',h:'#241a14'})]]};
-SP.d_sim2={pitch:.95,m:[[trav({}),P(4,{o:'#e2231a',p:'#2a2a33',h:'#241a14'})]]};
+SP.d_sim2={pitch:1.05,m:[[trav({hair:'long'}),P(5,{o:'#5a7a4a',p:'#44464f',h:'#241a14'})]]};
 SP.d_taxi={pitch:.9,m:[[trav({hair:'cap'}),P(4,{o:'#2aa6a6',p:'#2a2a33',h:'#241a14'})]]};
+SP.d_metrop={pitch:.95,m:[[trav({}),P(2,{o:'#3a5a8a',p:'#2a2a33',h:'#14141a',pack:1})]]};
 SP.d_metro={pitch:1.1,m:[[trav({hair:'long'}),P(1,{o:'#c8182a',p:'#2a2a33',h:'#241a14'})]]};
 /* ドーハ後半(タスク023)。服装・肌の色・髪型をばらけさせる。白い上下＋白い帽子は、地元の人の服装(悪役にしない) */
 SP.d_ck={pitch:1.15,m:[[trav({hair:'long'}),P(3,{o:'#8a1538',p:'#2a2a33',h:'#241a14'})]]};
