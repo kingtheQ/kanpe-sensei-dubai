@@ -285,3 +285,7 @@ window_data.add(D)
 # ---- 割りこみ・顔なじみ・持ち越し（タスク014。設計 005）----
 import event_data
 event_data.add(D)
+
+# ---- ドーハ後半: 市内16＋出発8（タスク023。設計 018 案A）。国ごとのデータは別ファイル ----
+import doha_data
+doha_data.add(D)
