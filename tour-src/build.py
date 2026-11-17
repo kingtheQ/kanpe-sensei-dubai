@@ -83,10 +83,10 @@ NDEP = [
  place('qplane', '機内(Qatar Airways)', 'atop', 26, 76, '✈️', ['機内', '客室乗務員との会話。終わるとドーハへ飛ぶ'], ['nbo_plane1', 'nbo_plane2'])]
 TOUR_IDS = [i for p in ARR + AIR + NDEP for i in p['v']]
 DARR = [
- place('dimmig', '入国審査', 'info', 22, 16, '🛂', ['入国審査(Passport Control)', '滞在日数・次の航空券・ホテル'], ['doh_immig1', 'doh_immig2']),
- place('dbag', '手荷物受け取り', 'hall', 70, 36, '🧳', ['バゲージクレーム', 'ベルト・カート・そっくりなスーツケース'], ['doh_bag1', 'doh_bag2']),
- place('dsim', 'Ooredoo SIM', 'info', 24, 58, '📱', ['Ooredoo', '旅行者用SIM・値段は架空'], ['doh_sim1', 'doh_sim2']),
- place('dride', 'タクシー・Doha Metro', 'hall', 70, 82, '🚕', ['Karwaタクシーと Doha Metro', 'どちらで街へ行く？'], ['doh_taxi', 'doh_metro'],
+ place('dimmig', '入国審査', 'info', 76, 18, '🛂', ['入国審査(Passport Control)', '滞在日数・次の航空券・ホテル'], ['doh_immig1', 'doh_immig2']),
+ place('dbag', '手荷物受け取り', 'hall', 28, 38, '🧳', ['バゲージクレーム', 'ベルト・カート・そっくりなスーツケース'], ['doh_bag1', 'doh_bag2']),
+ place('dsim', 'Ooredoo SIM', 'info', 74, 60, '📱', ['Ooredoo', '旅行者用SIM・値段は架空'], ['doh_sim1', 'doh_sim2']),
+ place('dride', 'タクシー・Doha Metro', 'hall', 28, 82, '🚕', ['Karwaタクシーと Doha Metro', 'どちらで街へ行く？'], ['doh_taxi', 'doh_metro'],
        hub=True, hubMap=1, hubBg='dtaxi', hubHero='blue', hubEn='Would you like a taxi, or the metro?', hubMsg='タクシー乗り場と Doha Metro の案内。',
        menu=[['Karwa Taxi', 'doh_taxi'], ['Doha Metro', 'doh_metro']])]
 # ドーハ後半(タスク023・018案A)。出発は「2つの広場＋列車」の八の字、市内は「湾の弧」。seq=1 は場面を上から順に出す
