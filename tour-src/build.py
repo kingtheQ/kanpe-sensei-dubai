@@ -44,10 +44,13 @@ for x in data.D:
         dl[x['id']]['ev'] = 1; dl[x['id']]['auto'] = 1
         for k in ('lvis', 'nohelp', 'fx'):
             if x.get(k) is not None: dl[x['id']][k] = x[k]
+    elif x.get('lvis') is not None or x.get('nohelp'):   # ふつうの5往復でも、ルルがいない始まり(タスク023 doh_city_t3)
+        for k in ('lvis', 'nohelp'):
+            if x.get(k) is not None: dl[x['id']][k] = x[k]
     if x.get('kind'): dl[x['id']]['kind'] = x['kind']
 # ---------- 持ち越し(005案B): 相手のセリフの差しかえ。種の場面(save.seen)を遊んでいたときだけ返る ----------
-import event_data, window_data
-for (sc, ti, seed, nn, njp, yy, yjp) in event_data.VARIANTS:
+import event_data, window_data, doha_data
+for (sc, ti, seed, nn, njp, yy, yjp) in event_data.VARIANTS + doha_data.VARIANTS:
     ln = dl[sc]['lines'][2 * ti]
     assert 'n' in ln, (sc, ti)
     v = {'s': seed, 'n': nn, 'jp': njp}
@@ -472,7 +475,7 @@ function evPick(T,o){
  S.pick=o.k;T.pk=o.k;T.cue=o.y;T.cueJp=o.jp;if(o.rep)T.rep=o.rep;
  showCue()}
 """
-EVJS = EVJS.replace('EVSLOTS_JSON', json.dumps(event_data.SLOTS, ensure_ascii=False)).replace('\\\\w', '\\w')
+EVJS = EVJS.replace('EVSLOTS_JSON', json.dumps(event_data.SLOTS + doha_data.SLOTS, ensure_ascii=False)).replace('\\\\w', '\\w')
 
 def ev_patches(o):
     o = rep(o, "if(s0&&s0.gold)save.gold=1;", "if(s0&&s0.gold)save.gold=1;if(s0&&s0.ev&&typeof s0.ev==='object')save.ev=s0.ev;")
