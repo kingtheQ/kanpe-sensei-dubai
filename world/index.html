@@ -584,8 +584,24 @@ function mapMusicOn(){
 var grs=0;window.addEventListener('resize',function(){clearTimeout(grs);grs=setTimeout(function(){if(!$('sGate').hidden)buildGate()},200)});
 document.addEventListener('visibilitychange',function(){if(document.hidden){gateOff();mapMusicOff()}else if(!$('sMap').hidden)mapMusicOn()});
 
+/* 世界一周編(tour 側の ../tour/ ..)へ飛ぶには、窓口で買った券が要る。券の有無は tour の記録(kanpe-tour-save-v1)を読む */
+var GATE_EN_DEF='Where would you like to fly next?',GATE_JP_DEF='どこに 飛びますか。';
+function hasTicket(){try{var t=JSON.parse(localStorage.getItem('kanpe-tour-save-v1')||'null');return !!(t&&(t.ticket==='star'||t.ticket==='ow'))}catch(e){return false}}
+function needTicket(id){return !!AP[id].url&&AP[id].url.indexOf('../tour/')===0&&!hasTicket()}
+function setGateSay(en,jp){GATE_EN=en;var p=$('gSay').querySelectorAll('p');p[0].textContent=en;p[1].textContent=jp}
+/* 券を持たずに ゲートへ来たとき: 飛ばさず、賢者の広間へ案内するだけ */
+function noTicket(){
+ var box=$('opts');box.textContent='';
+ setGateSay('You need a ticket first. Please see the sage.','チケットが まだ ありません。賢者の ところへ 行こう。');
+ var b=document.createElement('button');b.type='button';b.className='opt sel';
+ var c=document.createElement('span');c.className='cur';c.textContent='▶';b.appendChild(c);
+ var nm=document.createElement('span');nm.className='nm';nm.textContent='賢者の ところへ';b.appendChild(nm);
+ b.addEventListener('click',function(){blip();location.href='../tour/'});
+ box.appendChild(b);box.onkeydown=null;
+ $('gateNote').style.display='none';
+ show('sGate');buildGate();gateOn();b.focus({preventScroll:true})}
 function openGate(){
- S=load();
+ S=load();setGateSay(GATE_EN_DEF,GATE_JP_DEF);
  var box=$('opts');box.textContent='';var anyQ=false,btns=[],cur=0;
  function sel(i){cur=i;btns.forEach(function(b,j){b.classList.toggle('sel',j===i)})}
  function mk(cls,name){
@@ -614,6 +630,7 @@ function openGate(){
 /* ---------- 飛行中 ---------- */
 var flyTimer=0;
 function fly(to){
+ if(needTicket(to)){noTicket();return}
  S=load();
  var from=S.at,knownTo=S.cleared[to]||S.seen[to];
  $('flRoute').textContent=AP[from].n+' → '+(knownTo?AP[to].n:'？');
@@ -799,6 +816,7 @@ function blip(){if(!ac())return;tone(880,0,.08,'square',.035);tone(1318.5,.06,.1
 
 /* ---------- はじめから / つづきから ---------- */
 function hasSave(s){return s.at!=='haneda'||Object.keys(s.cleared).length>1||Object.keys(s.seen).length>1}
+function enterTour(){location.href='../tour/'}
 function enterMap(){try{sessionStorage.setItem('kw-started',String(Date.now()))}catch(e){}renderMap();show('sMap')}
 function openCmd(){
  S=load();var hs=hasSave(S);
@@ -809,10 +827,10 @@ function openCmd(){
  (hs?cc:$('cNew')).focus({preventScroll:true})}
 $('startBtn').addEventListener('click',function(){jingle();openCmd()});
 function hasTour(){try{return localStorage.getItem('kanpe-tour-save-v1')!==null}catch(e){return false}}
-$('cNew').addEventListener('click',function(){blip();S=load();if(hasSave(S)||hasTour()){$('cmdMain').hidden=true;$('cmdAsk').hidden=false;$('cNo').focus({preventScroll:true})}else enterMap()});
+$('cNew').addEventListener('click',function(){blip();S=load();if(hasSave(S)||hasTour()){$('cmdMain').hidden=true;$('cmdAsk').hidden=false;$('cNo').focus({preventScroll:true})}else enterTour()});
 $('cCont').addEventListener('click',function(){if($('cCont').getAttribute('aria-disabled')==='true')return;blip();enterMap()});
 $('cNo').addEventListener('click',function(){blip();$('cmdAsk').hidden=true;$('cmdMain').hidden=false;$('cNew').focus({preventScroll:true})});
-$('cYes').addEventListener('click',function(){blip();try{localStorage.removeItem(KEY)}catch(e){}try{localStorage.removeItem('kanpe-tour-save-v1')}catch(e){}enterMap()});  /* 世界一周編の記録も消す(タスク022)。旅のメモ kanpe-tour-memo-v1 と 声の記録 kanpe-voice-v1 は残す */
+$('cYes').addEventListener('click',function(){blip();try{localStorage.removeItem(KEY)}catch(e){}try{localStorage.removeItem('kanpe-tour-save-v1')}catch(e){}enterTour()});  /* 世界一周編の記録も消す(タスク022)。旅のメモ kanpe-tour-memo-v1 と 声の記録 kanpe-voice-v1 は残す */
 window.addEventListener('pageshow',function(e){cancelAnimationFrame(flyTimer);if(e.persisted){renderMap();show('sMap')}});
 renderMap();
 var skipTitle=/(^|[?&])map=1(&|$)/.test(location.search);
