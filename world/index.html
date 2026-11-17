@@ -195,6 +195,7 @@ button{font:inherit;color:inherit;cursor:pointer}
   <div class="cmdwin cmdmap" id="mapCmd">
    <button type="button" class="copt" id="mSet"><span class="cur">▶</span>しゅっぱつ準備する</button>
    <button type="button" class="copt" id="mGate"><span class="cur">▶</span>搭乗ゲートにいく</button>
+   <button type="button" class="copt sub" id="mTitle"><span class="cur">▶</span>タイトルに もどる</button>
    <button type="button" class="copt sub" id="mBack" hidden><span class="cur">▶</span>くうこうに もどる</button>
   </div>
   <div class="legend small dim">
@@ -666,6 +667,8 @@ function fly(to){
 $('mGate').addEventListener('click',function(){blip();openGate()});
 $('mBack').addEventListener('click',function(){S=load();if(AP[S.at].url)location.href=AP[S.at].url+'#w=1'});
 $('mSet').addEventListener('click',function(){blip();openSet()});
+/* 記録を消したいとき: タイトルの はじめから(確認つき)へ戻る。30分のタイトル省略もここで外す */
+$('mTitle').addEventListener('click',function(){blip();try{sessionStorage.removeItem('kw-started')}catch(e){}show('sTitle');openCmd()});
 /* グアム編の ⚙ から来たとき(#set&from=guam): もどる→グアム、グアム専用のものも見られる */
 var FROMG=/[#&]from=guam/.test(location.hash);
 $('setInfo').hidden=!FROMG;
