@@ -442,7 +442,7 @@ SHARED = [
  ("var T=G.scene.turns[G.ti],toks=parseCue(T.cue);clearInterval(G.typeTimer);msgText.textContent=T.npc;",
   "var T=G.scene.turns[G.ti];if(T.opts&&!T.pk){((G.scene.d.ev||typeof winOpts!=='function')?evOpts:winOpts)(T);return}var toks=parseCue(T.cue);clearInterval(G.typeTimer);msgText.textContent=T.npc;"),
  ("function advance(){\n",
-  "function advance(){\n if(!G.camp){var D0=G.scene.turns[G.ti];if(D0&&D0.rep&&!D0.repd){D0.repd=1;G.phase='rep';setMsg(D0.rep.n,D0.rep.who||whoNow());spSay=true;say(D0.rep.n,.95,G.scene.pitch,gd(function(){spSay=false;later(450,advance)}));return}}\n"),
+  "function advance(){\n if(!G.camp){var D0=G.scene.turns[G.ti];if(D0&&D0.rep&&!D0.repd){D0.repd=1;G.phase='rep';setMsg(D0.rep.n,D0.rep.who||whoNow());spSay=true;(paRep(G.scene,D0.rep)?paSay:say)(D0.rep.n,.95,G.scene.pitch,gd(function(){spSay=false;later(450,advance)}));return}}\n"),
  ("setMsgInstant('Clear!  ぜんぶ いえた！',whoNow());later(2000,startWords)",
   "var W0=G.scene.d&&(G.scene.d.win||G.scene.d.ev);setMsgInstant(W0?'Clear!':'Clear!  ぜんぶ いえた！',whoNow());later(W0?1300:2000,W0?finishScene:startWords)"),
  (" setMsgInstant(S.d.intro||S.pl.tip[0],'');$m('tapHint').textContent='';\n var b=el('button','btn go','GO！');",
@@ -490,6 +490,26 @@ function evPick(T,o){
  if(G.phase!=='opts')return;stopSay();var S=G.scene;
  S.pick=o.k;T.pk=o.k;T.cue=o.y;T.cueJp=o.jp;if(o.rep)T.rep=o.rep;
  showCue()}
+/* ===== 放送の読み上げ(タスク034): 機内アナウンス・空港の放送を、英語の声で流す =====
+   対象: 場面の fx が 'pa' の相手の台詞 と、あとの一言(rep)のうち話す人が Announcement / Captain のもの。ふつうの会話は今までどおり say()。
+   音の設定(kd_snd)がオフなら声は出さず、文だけ出して進む。声が使えない環境でも止まらない(say と同じ保険の時計)。
+   マイクのダッキング(__ambDuck)には触らない: 放送のあいだ環境音はそのまま、声のほうが大きい。 */
+var paEl=null;
+function paMark(on){
+ try{if(!paEl){paEl=el('span','pa','🔊');paEl.setAttribute('aria-hidden','true')}
+  var w=$m('msg');if(on){if(paEl.parentNode!==w)w.appendChild(paEl)}else if(paEl.parentNode)paEl.parentNode.removeChild(paEl)}catch(e){}}
+function paOn(){try{return localStorage.getItem('kd_snd')!=='off'}catch(e){return true}}
+var PAT={nbo_gate2:[0]};   /* ふつうの5往復の中の放送の行(場面の番号→何番目の台詞か)。部屋全体への呼びかけ(キングの決定 2026-11-18) */
+function paTurn(S,T){if(!S||!S.d||!T||T.by)return false;if(S.d.ev&&S.d.fx==='pa')return true;
+ var a=PAT[S.vid],i=S.turns?S.turns.indexOf(T):-1;return !!(a&&i>=0&&a.indexOf(i)>=0)}
+function paRep(S,r){return !!(S&&S.d&&S.d.ev&&r&&(r.who==='Announcement'||r.who==='Captain'))}
+function paSay(text,rate,pitch,done){
+ var my=++sayTok,fired=false;function fin(){paMark(0);if(fired||my!==sayTok)return;fired=true;if(done)done()}
+ var ok=paOn()&&('speechSynthesis' in window)&&typeof SpeechSynthesisUtterance!=='undefined';
+ if(!ok){setTimeout(fin,Math.min(text.length*26+900,4200));return}
+ try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(text);u.lang='en-US';u.rate=(rate||.95)*.92*PREF.rate;u.pitch=pitch||1;u.volume=PREF.voice/100;
+  u.onstart=function(){if(my===sayTok)paMark(1)};u.onend=fin;u.onerror=fin;speechSynthesis.speak(u)}catch(e){}
+ setTimeout(fin,text.length*85+2200)}
 """
 EVJS = EVJS.replace('EVSLOTS_JSON', json.dumps(event_data.SLOTS + doha_data.SLOTS, ensure_ascii=False)).replace('\\\\w', '\\w')
 
@@ -500,6 +520,13 @@ def ev_patches(o):
     o = rep(o, "function finishScene(){\n var S=G.scene;",
             "function finishScene(){\n var S=G.scene;if(S.d&&S.d.ev){evFinish(S);return}"
             "if(!S.evd){S.evd=1;evNote(S);if(evGate('after',S.pl.id,function(){G.scene=S;finishScene()}))return}")
+    # ---- 放送の読み上げ(タスク034) ----
+    o = rep(o, " say(T.npc,.95,S.pitch,gd(function(){spSay=false;if(G.phase==='npc')later(250,showCue)}))}",
+            " (paTurn(S,T)?paSay:say)(T.npc,.95,S.pitch,gd(function(){spSay=false;if(G.phase==='npc')later(250,showCue)}))}")
+    o = rep(o, "if(T){spSay=true;say(T.npc,.95,G.scene.pitch,gd(function(){spSay=false}))}",
+            "if(T){spSay=true;(paTurn(G.scene,T)?paSay:say)(T.npc,.95,G.scene.pitch,gd(function(){spSay=false}))}")
+    o = rep(o, "function stopSay(){sayTok++;try{speechSynthesis.cancel()}catch(e){}}", "function stopSay(){sayTok++;paMark(0);try{speechSynthesis.cancel()}catch(e){}}")
+    o = rep(o, ".win .tag{position:absolute;", ".win .pa{position:absolute;top:-12px;right:12px;border-radius:4px;padding:0 8px;font-size:12px;font-weight:800;border:2px solid var(--line);background:var(--win);animation:paBlink 1s steps(2) infinite}@keyframes paBlink{50%{opacity:.35}}\n.win .tag{position:absolute;")
     o = rep(o, "function enterPlace(id){var pl=PBY[id];", "function enterPlace(id){var pl=PBY[id];if(evGate('enter',id,function(){enterPlace(id)}))return;")
     o = rep(o, "function startVid(pl,vid,from){\n", "function startVid(pl,vid,from){\n if(from!=='ev'&&evGate('vid',vid,function(){startVid(pl,vid,from)}))return;\n")
     return o
