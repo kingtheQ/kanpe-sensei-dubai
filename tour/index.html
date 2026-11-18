@@ -2889,9 +2889,9 @@ function worldAt(k){try{var w=JSON.parse(localStorage.getItem('kanpe-world-v1')|
    設計の正本: docs/pm/deliverables/013-ending-scores-design-v1.md
    声の行き先: ブラウザの音声認識(いつも) / Azure(同意した人の、旅の始めと終わりの宣言の2回だけ)。
    キーはゲームに置かない。中継(relay/)が10分だけ使えるトークンを渡す。中継の URL が空なら Azure は使わない。
-   build.py が "" の中身を tour-src/relay-url.txt から差しこむ(中継のURLは、そこ1か所だけ)。 */
+   build.py が "https://kanpe-speech-relay.jungood1219.workers.dev" の中身を tour-src/relay-url.txt から差しこむ(中継のURLは、そこ1か所だけ)。 */
 var VOICEKEY='kanpe-voice-v1',VREF='decl-v1';
-var RELAY_URL="";
+var RELAY_URL="https://kanpe-speech-relay.jungood1219.workers.dev";
 var SDK_URL='https://cdn.jsdelivr.net/npm/microsoft-cognitiveservices-speech-sdk@1.45.0/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle-min.js';
 var SDK_SRI='sha384-RrysmqdtkBJHdL3yBqslKJR4EMsU7hA1rz+HpC9qMY001mmfKeRcKisr+NyuyI6H';
 
@@ -3330,7 +3330,7 @@ var ARTI={},ARTFAIL={},ARTSHOW=0,AW=1536,AH=960;
    base=足もとの高さ、lulu/king/suit=立つ位置(ルルが左・キングが右。グアムと同じ)、npc=相手(いつもの顔のドット)の位置と大きさ */
 var ART={
  nairobi:{bg:'nairobi-arrivals.png',mode:'wide',base:926,lulu:300,king:470,suit:575,npc:{x:1060,px:9,slide:1},fx:'night'},
- hotel:{bg:'hotel-front.png',mode:'room',base:895,lulu:250,king:450,suit:560,npc:{x:1290,px:14,top:272,clip:412},fx:'hotel'}};
+ hotel:{bg:'hotel-front.png',mode:'room',base:895,lulu:250,king:450,suit:560,npc:{x:1290,px:15,top:262,clip:412},fx:'hotel'}};
 function artIdFor(S){return S&&S.d&&S.d.bg==='taxi'?'nairobi':null}
 function artImg(n){var i=ARTI[n];if(!i){i=ARTI[n]=new Image();i.onerror=function(){i.bad=1};i.src=ARTBASE+n}return i}
 function artShow(on){if(ARTSHOW===on)return;ARTSHOW=on;cv.hidden=!!on;cvA.hidden=!on}
