@@ -1508,7 +1508,7 @@ var TRIP=(function(){
   ['day','td'].forEach(function(k){if(typeof r[k]==='number'&&r[k]>=0&&r[k]<=40)s[k]=Math.floor(r[k])});
   if(r.ph==='morning'||r.ph==='day'||r.ph==='night'||r.ph==='wait')s.ph=r.ph;
   if(r.bun)s.bun=1;
-  if(Array.isArray(r.legs))s.legs=r.legs.filter(function(l){return l&&typeof l.i==='number'}).slice(0,16).map(function(l){return {i:l.i,fr:String(l.fr||''),to:String(l.to||''),d:typeof l.d==='number'?l.d:null,f:l.f?1:0,l:l.l?1:0}});
+  if(Array.isArray(r.legs))s.legs=r.legs.filter(function(l){return l&&typeof l.i==='number'}).slice(0,16).map(function(l){return {i:l.i,fr:String(l.fr||''),to:String(l.to||''),d:typeof l.d==='number'?l.d:null,f:l.f?1:0,l:l.l?1:0,dt:/^\d{4}-\d\d-\d\d$/.test(l.dt||'')?l.dt:''}});
   if(Array.isArray(r.days))s.days=r.days.filter(function(d){return d&&typeof d.d==='number'}).slice(0,32).map(function(d){
    var p=d.ph&&typeof d.ph==='object'?d.ph:{};
    return {d:d.d,td:typeof d.td==='number'?d.td:d.d,ph:{s:String(p.s||'night').slice(0,20),k:String(p.k||'night').slice(0,10),f:p.f?1:0},
@@ -1536,6 +1536,9 @@ var TRIP=(function(){
  function reachable(td){var r=rowOf(td);if(!r||td>=29)return false;if(r[5].length)return true;return r[2]==='rest'&&td<maxTd()}
  function nextTd(td){var n,m=maxTd();for(n=td+1;n<=m;n++)if(reachable(n))return n;return 0}
  /* ---------- 券の束 ---------- */
+ function today(){var d=new Date(),z=function(n){return (n<10?'0':'')+n};return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate())}
+ var MON=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+ function dtText(iso){var m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(iso||'');return m?(+m[3])+' '+MON[+m[2]-1]+' '+m[1]:''}
  function mkLegs(tk){return LEGS[tk].map(function(l,i){return {i:i,fr:l[0],to:l[1],d:null,f:0,l:0}})}
  function legInfo(i){var s=S(),l=LEGS[s.tk||'ow'][i];return l?{fr:l[0],to:l[1],al:l[2],td:l[3],sep:!!l[4]}:null}
  function here(){var s=S(),i,c='HND';for(i=0;i<s.legs.length;i++)if(s.legs[i].l)c=s.legs[i].to;return c}
@@ -1558,9 +1561,9 @@ var TRIP=(function(){
  function fly(apId){
   var c=codeOf(apId),ch=c&&chain(c);if(!ch)return null;
   var s=S(),tear=[];
-  ch.forEach(function(j){var l=s.legs[j];if(!l.f){l.f=1;tear.push(j)}l.l=1});
+  ch.forEach(function(j){var l=s.legs[j];if(!l.f){l.f=1;l.dt=today();tear.push(j)}l.l=1});
   fillD();save();return {tear:tear,all:ch}}
- function tearNow(i){var s=S(),l=s.legs[i];if(!l||l.f)return false;l.f=1;fillD();save();return true}
+ function tearNow(i){var s=S(),l=s.legs[i];if(!l||l.f)return false;l.f=1;l.dt=today();fillD();save();return true}
  function setTicket(tk,price){
   var s=S();if(tk!=='ow'&&tk!=='star')return;
   if(s.tk!==tk){s.tk=tk;s.legs=mkLegs(tk)}
@@ -1690,7 +1693,7 @@ var TRIP=(function(){
   d.appendChild(E('div','al',l.sep?'SEPARATE TICKET':l.al.toUpperCase()));
   d.appendChild(E('div','nn',(i+1)+' / '+total()));
   var rt=E('div','rt');rt.appendChild(E('b','',l.fr));rt.appendChild(E('i','','→'));rt.appendChild(E('b','',l.to));d.appendChild(rt);
-  d.appendChild(E('div','cy',a.en+' → '+b.en));d.appendChild(E('div','cut'));
+  d.appendChild(E('div','cy',a.en+' → '+b.en));var lg0=s.legs[i];d.appendChild(E('div','cy',dtText((lg0&&lg0.dt)||today())));d.appendChild(E('div','cut'));
   var lg=s.legs[i],stub=E('div','stub');
   if(lg&&lg.f){stub.textContent=lg.d?('DAY '+lg.d):'';}else stub.textContent='';
   d.appendChild(stub);return d}
@@ -1764,7 +1767,7 @@ var TRIP=(function(){
   var list=E('div','trip-list'),any=false;
   for(i=0;i<s.legs.length;i++){var lg=s.legs[i];if(!lg.f)continue;any=true;
    var li=legInfo(i),r=E('div','trip-row'),cv=E('canvas');cv.width=320;cv.height=150;r.appendChild(cv);
-   var d=lg.d?dayRec(lg.d):null,t=E('div');t.appendChild(E('b','',li.fr+' → '+li.to+(lg.d?'  ·  DAY '+lg.d:'')));
+   var d=lg.d?dayRec(lg.d):null,t=E('div');t.appendChild(E('b','',li.fr+' → '+li.to+(lg.d?'  ·  DAY '+lg.d:'')));if(lg.dt)t.appendChild(E('span','',dtText(lg.dt)));
    var bg=d?big(d.led):null;t.appendChild(E('span','',bg?money(bg):''));r.appendChild(t);list.appendChild(r);
    drawPhoto(cv,d?d.ph:{s:'night',k:'night'})}
   if(any)o.appendChild(list);
