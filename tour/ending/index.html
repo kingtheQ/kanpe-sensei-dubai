@@ -3579,7 +3579,9 @@ function paMark(on){
  try{if(!paEl){paEl=el('span','pa','🔊');paEl.setAttribute('aria-hidden','true')}
   var w=$m('msg');if(on){if(paEl.parentNode!==w)w.appendChild(paEl)}else if(paEl.parentNode)paEl.parentNode.removeChild(paEl)}catch(e){}}
 function paOn(){try{return localStorage.getItem('kd_snd')!=='off'}catch(e){return true}}
-function paTurn(S,T){return !!(S&&S.d&&S.d.ev&&S.d.fx==='pa'&&T&&!T.by)}
+var PAT={nbo_gate2:[0]};   /* ふつうの5往復の中の放送の行(場面の番号→何番目の台詞か)。部屋全体への呼びかけ(キングの決定 2026-11-18) */
+function paTurn(S,T){if(!S||!S.d||!T||T.by)return false;if(S.d.ev&&S.d.fx==='pa')return true;
+ var a=PAT[S.vid],i=S.turns?S.turns.indexOf(T):-1;return !!(a&&i>=0&&a.indexOf(i)>=0)}
 function paRep(S,r){return !!(S&&S.d&&S.d.ev&&r&&(r.who==='Announcement'||r.who==='Captain'))}
 function paSay(text,rate,pitch,done){
  var my=++sayTok,fired=false;function fin(){paMark(0);if(fired||my!==sayTok)return;fired=true;if(done)done()}

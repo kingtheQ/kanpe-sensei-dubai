@@ -101,6 +101,22 @@ def main():
         # ふつうの会話(放送ではない割りこみ)は印なし・今までどおり読む
         r = run(base, br, '/tour/', 'nbo_ev_a_dropped', 'on', 0)
         chk(len(r['sp']) > 0 and not r.get('mark_seen'), 'ふつうの会話(nbo_ev_a_dropped): 今までどおり読む・放送の印なし')
+        # nbo_gate2: 最初の台詞(放送)だけ放送の声と印。2つ目からは係員の会話でふつうの声
+        ctx = br.new_context(viewport={'width': 390, 'height': 780}); ctx.add_init_script(INIT % json.dumps('on'))
+        ctx.route(re.compile(r'.*/index\.html(\?.*)?$'), hooked); pg = ctx.new_page(); pe = []
+        pg.on('pageerror', lambda e: pe.append(str(e)[:200]))
+        pg.goto(base + '/tour/index.html?ev=off'); pg.wait_for_timeout(800)
+        pg.evaluate("()=>{var T=window.__T;T.startVid(T.PBY[Object.keys(T.PBY)[0]],'nbo_gate2','x')}"); pg.wait_for_timeout(500)
+        for _ in range(60):
+            pg.evaluate("()=>{var b=[].slice.call(document.querySelectorAll('#panel button')).filter(function(x){return x.offsetParent&&!x.disabled});for(var i=0;i<b.length;i++)if(/^GO/.test(b[i].textContent)){b[i].click();return}}")
+            sp = pg.evaluate("()=>window.__sp")
+            if any(q['t'].startswith('Which group') for q in sp): break
+            pg.wait_for_timeout(200)
+        g0 = [q for q in sp if q['t'].startswith('Attention please. Flight boarding')]; g1 = [q for q in sp if q['t'].startswith('Which group')]
+        chk(bool(g0) and g0[0]['mid'] is True, 'nbo_gate2 最初の台詞: 放送の声と印')
+        chk(bool(g1) and g1[0]['mid'] is False and g1[0]['start'] is False, 'nbo_gate2 2つ目(係員の会話): ふつうの声・印なし')
+        chk(not pe, 'nbo_gate2: エラーなし %s' % pe)
+        ctx.close()
         br.close()
     print('NG件数:', len(bad)); sys.exit(1 if bad else 0)
 
