@@ -2342,6 +2342,40 @@ var SND={
 var SNDORDER=['f','th','l','r','v','b','sh','s','w','ng','end','ae','uh'];
 var SNDSAY={l:'luh',r:'ruh',th:'thuh',v:'vuh',b:'buh',sh:'shuh',s:'suh',w:'wuh'};
 function hasSnd(id,w){var ip=ipaOf(w),d=SND[id];if(ip)return d.ipa.test(ip.slice(1,-1));return d.re.test(w)}
+/* ---- 鍛える音(タスク035・設計004 3-6): 発音の記録(kanpe-pron-v1)から、音ごとの弱さを数える。
+   新しい保存は作らない(毎回 記録から計算する)ので、記録の形・保存キーは変わらない。
+   弱さ=(X+0.5)/(N+2)。N=その音をふくむ単語を言う場面に出た回数、X=そのうち失敗した回数。
+   「弱い音」は、2つ以上の違う単語で失敗し、かつ2つ以上の場面で失敗した音だけ。上位3つが「鍛える音」。
+   記録が無い・少ないときは空の配列を返す(呼ぶ側は今までどおりに動く)。画面には何も出さない。 ---- */
+function trainSounds(){
+ var out=[];
+ try{
+  var a=plogLoad(),T={},cache={};
+  SNDORDER.forEach(function(k){T[k]={k:k,n:0,x:0,fw:{},sc:{}}});
+  function has(k,w){var c=k+'|'+w;if(!(c in cache))cache[c]=hasSnd(k,w);return cache[c]}
+  a.forEach(function(r){
+   if(!r||typeof r!=='object')return;
+   /* 何も聞こえなかった回(マイク・タイミングの疑い)は数えない。合宿の記録は hd が空なので数える(合宿で言えた分は「出た回数」に入り、弱さが下がる) */
+   if(!r.camp&&!String(r.hd||'').trim())return;
+   var scene=r.camp?'':String(r.v||'?');
+   String(r.tg||'').split(' ').forEach(function(tk){var w=missKey(tk);if(w.length<2)return;
+    SNDORDER.forEach(function(k){if(has(k,w))T[k].n++})});
+   (Array.isArray(r.miss)?r.miss:[]).forEach(function(m){
+    var w=m&&m.t?String(m.t):'';if(w.length<2)return;
+    var h=m.h==null||m.h==='(聞こえず)'?'':String(m.h);
+    SNDORDER.forEach(function(k){
+     if(!has(k,w))return;
+     var d=SND[k],lack=h&&!(d.hre||d.re).test(h);
+     if(d.strict&&!lack)return;   /* 同じ音が聞こえているなら、この音の失敗には数えない(今の pickLessons と同じ決まり) */
+     var t=T[k];t.x++;t.fw[w]=(t.fw[w]||0)+1;if(scene)t.sc[scene]=1})})});
+  SNDORDER.forEach(function(k,i){
+   var t=T[k],ws=Object.keys(t.fw);
+   if(ws.length<2||Object.keys(t.sc).length<2)return;
+   out.push({k:k,i:i,weak:(t.x+0.5)/(t.n+2),n:t.n,x:t.x,
+    words:ws.sort(function(p,q){return (t.fw[q]-t.fw[p])||(p<q?-1:1)})})});
+  out.sort(function(p,q){return (q.weak-p.weak)||(p.i-q.i)});
+  out=out.slice(0,3)}catch(e){out=[]}
+ return out}
 function pickLessons(n){
  var sc={},ws={};SNDORDER.forEach(function(k){sc[k]=0;ws[k]=[]});
  try{boothStats().words.forEach(function(e){var w=String(e.w).toLowerCase();if(w.length<2)return;var top='',n=0;Object.keys(e.hs||{}).forEach(function(h){if(e.hs[h]>n){n=e.hs[h];top=h}});if(top==='(聞こえず)')top='';
