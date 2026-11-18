@@ -32,6 +32,9 @@ function polaroid(x,y,w,h,fn,cap,al){
  if(al!=null&&al<1)c.globalAlpha=Math.max(0,al);fn(x+4,y+4,w-8,h-15);c.globalAlpha=1;
  if(cap)T(cap,x+w/2,y+h-6,6.5,'#6a5a3a')}
 function corners(x,y,w,h){[[x,y,1,1],[x+w-5,y,-1,1],[x,y+h-5,1,-1],[x+w-5,y+h-5,-1,-1]].forEach(function(q){R('#3a2a1c',q[0],q[1],5,2);R('#3a2a1c',q[0]+(q[2]>0?0:3),q[1],2,5*q[3]>0?5:5)})}
+var DAYCV={};
+function dayShot(ph,x,y,w,h){var k=ph?ph.s+'|'+ph.k:'none';if(!DAYCV[k]){var o=document.createElement('canvas');o.width=320;o.height=150;TRIP.mini(o.getContext('2d'),ph||{s:'night',k:'night'});DAYCV[k]=o}
+ c.imageSmoothingEnabled=false;c.drawImage(DAYCV[k],x,y,w,h)}
 function albumCover(){
  R('#2a1c10',88,6,144,94);R('#6a4428',91,9,138,88);R('#d9a441',96,14,128,1);R('#d9a441',96,91,128,1);R('#d9a441',96,14,1,78);R('#d9a441',223,14,1,78);
  R('#c8452c',204,9,9,88);R('#a83a24',204,9,2,88);
@@ -44,6 +47,8 @@ BGS.album=function(ctx,S){
   polaroid(52,19,100,68,photoDep,'Departure');
   R('#fff3b0',172,22,92,58);R('#cdbf80',172,22,92,1);R('#e8d98a',176,19,14,5);R('#e8d98a',246,19,14,5);
   T('PROMISE',218,31,7,'#6a5a3a');for(var i=0;i<6;i++)R('#b9ad82',178,38+i*6,78-(i%3)*10,2)}
+ else if(v==='day'){var G0=E.dayPg||{};polaroid(52,19,100,68,function(x,y,w,h){dayShot(G0.ph,x,y,w,h)},'DAY '+G0.d);
+  R('#fff3b0',172,22,92,58);R('#cdbf80',172,22,92,1);T(G0.stub||'',218,34,8,'#4a3a22');R('#b9ad82',178,42,80,1);T(G0.line||'',218,56,6,'#4a3a22')}
  else if(v==='both'){polaroid(52,19,100,68,photoDep,'Departure');polaroid(168,19,100,68,photoHome,'Home')}
  else{ /* blank / develop: ひだりは旅の写真、みぎは まっ白なページ */
   polaroid(50,21,48,40,photoDep,null);polaroid(102,31,48,40,photoHome,null);R('#cfc3a0',60,70,34,1);R('#cfc3a0',110,78,30,1);
@@ -57,18 +62,34 @@ function endSay(who,sp,text,cb){
  say(text,.92,sp==='lulu'?1.35:1,gd(function(){spSay=false;if(cb)later(750,cb)}))}
 function endMicOK(){return !PREF.silent&&(!!SR||voiceAzureOn())}
 function endingStart(){
+ if(!TRIP.exists()||!TRIP.state().days.length){endingStart0();return}
+ endingStart0(true)}
+function endingStart0(trip){
  G.sid++;clearTimers();stopSay();G.camp=null;luHelp=false;resetOUT();speaker=null;spSay=false;
  G.view='scene';$m('mapView').hidden=true;$m('boothView').hidden=true;$m('sceneView').hidden=false;
  END={view:'one',devT:0,mic:true,plan:null,sndRows:null};
  G.scene={id:'end',vid:'end',pl:{id:'end',snd:'home',tip:['']},d:{who:'Lulu',story:0,words:[],lines:[],inter:[]},turns:[],words:[],pitch:1,from:null,anim:null,lastSp:null,tables:null,end:END,ctx:endCtx('lulu','Lulu')};
  applyCtx(G.scene.ctx);clearPanel();setMsgInstant('','');Snd.go('home');
- later(700,e1)}
+ later(700,trip?settleStart:e1)}
+/* 精算(29日目): その日の写真を添えて、旅のお金を読み上げる。点数や発音の結果は出さない */
+function settleStart(){
+ var R0=TRIP.settle(),best=R0.best,lines=[];
+ lines.push('Day twenty-nine. The receipts are on the table.');
+ lines.push('We spent '+TRIP.yenText(R0.total)+' on this trip.');
+ if(best){END.view='day';END.dayPg={d:best.d,ph:best.ph,stub:'DAY '+best.d,line:TRIP.big(best.led)?TRIP.money(TRIP.big(best.led)):''};lines.push('The biggest day was day '+best.d+'.')}
+ if(R0.save&&R0.save.yen>0)lines.push('The metro saved us '+TRIP.yenText(R0.save.yen)+' that day.');
+ var i=0;(function nx(){if(i>=lines.length){later(500,function(){TRIP.oneMonth(e1)});return}endSay('Lulu','lulu',lines[i++],nx)})()}
+/* 30日目のアルバム: 1日1ページ(写真+控え+レシートの1行)を、2日目から順にめくる */
+function dayPages(done){
+ var pg=TRIP.albumPages(),i=0;
+ (function nx(){if(i>=pg.length){done();return}var P=pg[i++];END.view='day';END.dayPg=P;Snd.fx('page');endSay('Lulu','lulu','Day '+P.d+'.',nx)})()}
 /* E1: 1ページ目(出発の日の写真と約束の紙)→ ページをめくって、最後の白いページ */
 function e1(){
  END.view='one';
  endSay('Lulu','lulu','Page one. The day we promised.',function(){
-  Snd.fx('page');END.view='blank';
-  endSay('Lulu','lulu','And the last page is still empty.',e2)})}
+  var after=function(){Snd.fx('page');END.view='blank';
+  endSay('Lulu','lulu','And the last page is still empty.',e2)};
+  if(TRIP.exists()&&TRIP.state().days.length){Snd.fx('page');dayPages(after)}else after()})}
 /* 同意が まだなら ここで一度だけ聞く(中継があるときだけ)。そのあと、宣言文をもう一度読む */
 function e2(){
  if(voiceNeedConsent()){applyCtx(endCtx('lulu','Lulu'));setMsgInstant('King, one question first.','Lulu');consentCard(function(){clearPanel();e2b()});return}
