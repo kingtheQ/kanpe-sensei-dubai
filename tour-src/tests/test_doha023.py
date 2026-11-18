@@ -11,6 +11,7 @@ SEEDS = ['nbo_lounge2', 'nbo_sec2', 'nbo_java2', 'nbo_art2', 'nbo_ev_f1_ribbon']
 
 INIT = r"""
 (function(){
+ setInterval(function(){var o=document.querySelector('.trip-ov');if(o&&!o.busy)o.click()},400);   /* タスク030: 夜の1枚・朝の1枚は 自動で進める */
  window.__errs=[];window.addEventListener('error',function(e){window.__errs.push(String(e.message))});
  try{speechSynthesis.speak=function(u){setTimeout(function(){if(u.onend)u.onend({})},5)};speechSynthesis.cancel=function(){}}catch(e){}
  function FS(){}
