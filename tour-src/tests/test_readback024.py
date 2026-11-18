@@ -37,11 +37,40 @@ def run(pw, name, d, consent, token_ok, az):
     v = T.vstore(page); res['trips'] = len(v['trips']) if v and v != 'bad' else None
     res['errors'] += page.evaluate("window.__errs"); br.close(); srv.shutdown(); return res
 
+def run_card(pw, name, d, consent):
+    """窓口の最初(win_decl の直前)で、同意の1枚が出るか・新しい文面か。consent は 前から入っている同意の記録"""
+    res = {'route': name, 'errors': []}
+    srv = T.serve(d); base = 'http://127.0.0.1:%d' % srv.server_address[1]
+    br = pw.chromium.launch(executable_path='/usr/bin/google-chrome', args=['--no-sandbox', '--autoplay-policy=no-user-gesture-required'])
+    ctx = br.new_context(viewport={'width': 390, 'height': 780})
+    ctx.add_init_script(T.INIT % json.dumps({'sr': True, 'az': True, 'decl': RB}))
+    ctx.add_init_script("try{if(!localStorage.getItem('kanpe-voice-v1'))localStorage.setItem('kanpe-voice-v1',JSON.stringify({v:1,consent:%s,trips:[],next:null}))}catch(e){}" % json.dumps(consent))
+    ctx.route(T.RELAY + '/token', lambda r: r.fulfill(status=200, content_type='application/json', headers={'access-control-allow-origin': '*'}, body=json.dumps({'token': 'x', 'region': 'japaneast', 'expiresInSec': 600})))
+    ctx.route('**/tour/index.html', lambda r: T.hooked(r, 'tour'))
+    page = ctx.new_page(); page.on('pageerror', lambda e: res['errors'].append(str(e)[:160]))
+    page.goto(base + '/tour/index.html'); page.wait_for_timeout(700)
+    page.evaluate("()=>{document.querySelectorAll('.trip-ov').forEach(function(o){o.remove()})}")
+    page.evaluate("window.__PHASE='start';window.__T.save.win={step:0,m:{},cont:5,pick:null};window.__T.winStart()")
+    t0 = time.time(); txt = ''
+    while time.time() - t0 < 40:
+        txt = page.evaluate("()=>document.getElementById('panel').innerText")
+        if '声を送ってもいい' in txt: break
+        T.click_text(page, ['GO！', 'GO!']); time.sleep(.25)
+    res['card_shown'] = '声を送ってもいい' in txt
+    res['card_text'] = txt[:400] if res['card_shown'] else ''
+    if res['card_shown']:
+        T.click_text(page, ['送ってOK']); page.wait_for_timeout(300)
+        v = T.vstore(page); res['consent_after'] = v.get('consent') if v and v != 'bad' else None
+    br.close(); srv.shutdown(); return res
+
 if __name__ == '__main__':
     d_on = T.build('on', T.RELAY)
     ok = {'az': True, 'at': 1, 'ver': 2}
     with sync_playwright() as pw:
         R = [run(pw, 'A_yes_az', d_on, ok, True, True), run(pw, 'B_no', d_on, {'az': False, 'at': 1, 'ver': 2}, True, False),
              run(pw, 'C_yes_offline', d_on, ok, False, False)]
-        if len(sys.argv) > 1 and sys.argv[1] == 'old': R.append(run(pw, 'D_old_consent_v1', d_on, {'az': True, 'at': 1, 'ver': 1}, True, True))
+        R.append(run(pw, 'D_old_consent_v1', d_on, {'az': True, 'at': 1, 'ver': 1}, True, True))
+        R.append(run_card(pw, 'E_old_yes_asked_again', d_on, {'az': True, 'at': 1, 'ver': 1}))
+        R.append(run_card(pw, 'F_old_no_not_asked', d_on, {'az': False, 'at': 1, 'ver': 1}))
+        R.append(run_card(pw, 'G_new_yes_not_asked', d_on, {'az': True, 'at': 1, 'ver': 2}))
     print(json.dumps(R, ensure_ascii=False, indent=1))
