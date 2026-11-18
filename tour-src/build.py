@@ -382,6 +382,7 @@ WINJS = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'window.js
 WINCSS = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'window.css'), encoding='utf-8').read()
 HERE = os.path.dirname(os.path.abspath(__file__))
 def _rd(n): return open(os.path.join(HERE, n), encoding='utf-8').read()
+TRIPJS = None  # trip.js は _rd のあとで読む
 def relay_url():
     # 中継のURLはここ1か所(tour-src/relay-url.txt)。空なら Azure は使わない。環境変数 KANPE_RELAY_URL はヘッドレス確認用
     u = os.environ.get('KANPE_RELAY_URL')
@@ -405,6 +406,21 @@ def rep(s, a, b, cnt=1):
 SNOTE_OLD = '<p class="snote">音声は 保存も 送信も しません。発音の きろくは この端末の中だけに のこります。</p>'
 SNOTE_NEW = ('<p class="snote">声は、ゲームでは 保存しません。マイクの声は ブラウザの音声認識が 文字にします(Chrome は Google、Safari は Apple の サーバーに 声が おくられます)。'
              '「こえを おくる」を ONに した ときだけ、旅の はじめと おわりの 宣言の 声が、発音を しらべる ために Microsoft Azure に おくられます。発音の きろくは この端末の中だけに のこります。</p>')
+
+def trip_patches(o, page):
+    """タスク030: 旅の骨組み(DAY・券の束・記録)を、場面のあと・場所の鍵・タブの鍵につなぐ"""
+    tj = _rd('trip.js')
+    o = rep(o, "function storeSave(){", tj + "\nTRIP.setPage('" + page + "');TRIP.hooks.say=function(t){try{setMsgInstant(t,'LULU')}catch(e){}};\nfunction storeSave(){")
+    # 場面が終わったあと: 券・お金・夜の1枚(続きは コールバックで)
+    o = rep(o, "storeSave();worldSync();\n if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}",
+            "storeSave();worldSync();\n TRIP.afterScene(S,function(){if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}")
+    # 場所の鍵・タブの鍵
+    o = rep(o, "function lockedPlace(id){if(MODE!=='arr'&&MODE!=='dep')return false;",
+            "function lockedPlace(id){if(TRIP.lockedPlace(id))return true;if(MODE!=='arr'&&MODE!=='dep')return false;")
+    o = rep(o, "b.dataset.m=k;b.addEventListener('click',function(){",
+            "b.dataset.m=k;b.addEventListener('click',function(){if(G.view==='map'&&MODE!==k&&TRIP.lockedMode(k)){try{Snd.jingle('buzz')}catch(e){}return}")
+    return o
+
 def sub(pref): return dict((k, v) for k, v in dl.items() if k.startswith(pref))
 KBASE = "K.fountain=K.hall;K.safari=K.ahlan;K.marina=K.s34;K.beach=K.costa;"
 REC = "b.appendChild(s4);\n $m('setView').hidden=false;"
@@ -562,6 +578,8 @@ o = rep(o, KBASE, KBASE + "K.sage=K.hall;K.tdesk=K.info;"
 o = rep(o, "if(G.view==='map'&&MODE!==k)setMode(k)",
         "if(G.view==='map'&&MODE!==k){if(k!=='sage'&&!save.ticket){setMode('sage');G.at='ticket';placeWalkers('ticket',true);return}setMode(k)}")
 o = rep(o, REC, record('ナイロビ', True))
+o = trip_patches(o, 'tour')
+o = rep(o, "location.href='../world/?map=1';return}showMap();", "location.href='../world/?map=1';return}showMap();})")
 # 券を買ったあとは 賢者のタブを出さない(賢者と窓口は 出発前の場面)
 o = rep(o, "b.classList.toggle('on',b.dataset.m===MODE)});", "b.classList.toggle('on',b.dataset.m===MODE);if(b.dataset.m==='sage')b.hidden=!!save.ticket});")
 o = rep(o, "dep:['#e9e2f2','#d9d0e8','#8a7ac0']}[MODE]", "dep:['#e9e2f2','#d9d0e8','#8a7ac0'],sage:['#e4dff2','#d3cbe8','#8a7ac0']}[MODE]")
@@ -570,7 +588,7 @@ o_pre = o   # 終わりの場面の土台(エンジンの部品はナイロビ�
 # 記録(kanpe-tour-save-v1)がない初回だけ: マップでなく 賢者の広間に入り、賢者の最初の会話(sage_1)を開く(タスク022)
 o = rep(o, "function storeSave(){", "var TOUR_FRESH=(function(){try{return localStorage.getItem(SAVEKEY)===null}catch(e){return false}})();\nfunction storeSave(){")
 o = rep(o, "setMode('arr');\nvar phoQ", main + "\nsetMode(save.ticket?'arr':'sage');\n"
-        "if(TOUR_FRESH&&!save.ticket&&!/[?&]pho=/.test(location.search)){enterHub(PBY.sage);runStory('sage_1')}\nvar phoQ")
+        "if(/[?&]pho=/.test(location.search)){}else TRIP.enter(function(){if(TOUR_FRESH&&!save.ticket){enterHub(PBY.sage);runStory('sage_1')}},'tour');\nvar phoQ")
 os.makedirs(os.path.join(ROOT, 'tour'), exist_ok=True)
 open(os.path.join(ROOT, 'tour', 'index.html'), 'w', encoding='utf-8').write(o)
 print('nairobi built', len(o), 'bytes; dialogues', len(dn), 'words', sum(len(v['words']) for v in dn.values()))
@@ -609,8 +627,10 @@ o = rep(o, KBASE, KBASE +
         "st:function(s,t,e){var KC=[62,63,66,67,69,67,66,63];if(s%4===0)pluck(hz(KC[(s>>2)%8]-12),t,e*3.6,ngt?.08:.1);"
         "if(s%8===6)pluck(hz(KC[((s>>3)+2)%8]-12),t,e*2,.05);if(s%16===0)tone(hz(43),t,e*14,'sine',.06,.5)}};")
 o = rep(o, REC, record('ドーハの'))
+o = trip_patches(o, 'doha')
+o = rep(o, "showMap();if(S.pl.id==='dride')setMode('city')}", "showMap();if(S.pl.id==='dride')setMode('city')})}")
 o = rep(o, "g.fillStyle='#143fb0';g.fillRect(0,0,5,ch);g.fillRect(cw-5,0,5,ch)", "g.fillStyle='#8a1538';g.fillRect(0,0,5,ch);g.fillRect(cw-5,0,5,ch)")
-o = rep(o, "setMode('arr');\nvar phoQ", main + "\nsetMode('arr');\nvar phoQ")
+o = rep(o, "setMode('arr');\nvar phoQ", main + "\nsetMode('arr');if(!/[?&]pho=/.test(location.search))TRIP.enter(function(){},'doha');\nvar phoQ")
 os.makedirs(os.path.join(ROOT, 'tour', 'doha'), exist_ok=True)
 open(os.path.join(ROOT, 'tour', 'doha', 'index.html'), 'w', encoding='utf-8').write(o)
 print('doha built', len(o), 'bytes; dialogues', len(dd), 'words', sum(len(v['words']) for v in dd.values()))
@@ -632,3 +652,10 @@ e = rep(e, "setMode('arr');\nvar phoQ", "\n" + VOICEJS + "\n" + DIAGJS + "\n" + 
 os.makedirs(os.path.join(ROOT, 'tour', 'ending'), exist_ok=True)
 open(os.path.join(ROOT, 'tour', 'ending', 'index.html'), 'w', encoding='utf-8').write(e)
 print('ending built', len(e), 'bytes')
+
+# ---------- 世界マップ(world/index.html は手書き。trip.js だけ マーカーの間に入れる) ----------
+_w = open(os.path.join(ROOT, 'world', 'index.html'), encoding='utf-8').read()
+_i, _j = _w.index('/*TRIPJS-BEGIN*/'), _w.index('/*TRIPJS-END*/')
+_w = _w[:_i] + '/*TRIPJS-BEGIN*/' + _rd('trip.js') + _w[_j:]
+open(os.path.join(ROOT, 'world', 'index.html'), 'w', encoding='utf-8').write(_w)
+print('world trip.js injected')
