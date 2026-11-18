@@ -2345,8 +2345,18 @@ function pickLessons(n){
  var sc={},ws={};SNDORDER.forEach(function(k){sc[k]=0;ws[k]=[]});
  try{boothStats().words.forEach(function(e){var w=String(e.w).toLowerCase();if(w.length<2)return;var top='',n=0;Object.keys(e.hs||{}).forEach(function(h){if(e.hs[h]>n){n=e.hs[h];top=h}});if(top==='(聞こえず)')top='';
   SNDORDER.forEach(function(k){if(hasSnd(k,w)){var lack=top&&!(SND[k].hre||SND[k].re).test(top);if(SND[k].strict&&!lack)return;sc[k]+=e.m*(lack?2:1);ws[k].push(w)}})})}catch(e){}
- var rc=recentGet(),order=backOf(SNDORDER.filter(function(k){return sc[k]>0}).sort(function(a,b){return sc[b]-sc[a]}),rc.s,function(k){return k}).slice(0,1);
- return order.map(function(best){var c=ws[best].slice();SND[best].def.forEach(function(d){if(c.indexOf(d)<0)c.push(d)});var w=backOf(c,rc.w,function(x){return x}).slice(0,2);return {snd:best,words:w}})}
+ /* タスク035: 鍛える音(trainSounds)があれば、その中から選ぶ(続けて同じ音にならないよう、直近に出した音は後ろに回す)。無いときは今までどおり */
+ var rc=recentGet(),tr=trainSounds(),trw={};tr.forEach(function(t){trw[t.k]=t.words});
+ var order=backOf(tr.length?tr.map(function(t){return t.k}):SNDORDER.filter(function(k){return sc[k]>0}).sort(function(a,b){return sc[b]-sc[a]}),rc.s,function(k){return k}).slice(0,1);
+ return order.map(function(best){var c=(trw[best]||[]).concat(ws[best]).filter(function(x,i,r){return r.indexOf(x)===i});SND[best].def.forEach(function(d){if(c.indexOf(d)<0)c.push(d)});var w=backOf(c,rc.w,function(x){return x}).slice(0,2);return {snd:best,words:w}})}
+/* 単語バトルの出す順(タスク035): その場面の語のうち、鍛える音をふくむ語を最大2つ、先に出す。残りの順は今までどおり(シャッフル)。語は増減しない。鍛える音が無いときは何も変えない */
+function trainFirst(list){
+ var tr=trainSounds();if(!tr.length)return list;
+ var pri=list.map(function(q,i){var ip=String(q[1]||'').replace(/\//g,''),best=-1;
+  tr.forEach(function(t,j){var d=SND[t.k],hit=ip?d.ipa.test(ip):hasSnd(t.k,String(q[0]).toLowerCase());if(hit&&best<0)best=j});
+  return {q:q,i:i,r:best}});
+ var top=pri.filter(function(x){return x.r>=0}).sort(function(a,b){return (a.r-b.r)||(a.i-b.i)}).slice(0,2);
+ return top.map(function(x){return x.q}).concat(pri.filter(function(x){return top.indexOf(x)<0}).map(function(x){return x.q}))}
 var SVGF=null;
 function phoLipsSet(id){
  var v=$m('phoLips');if(SVGF===null)SVGF=v.innerHTML;
@@ -2617,7 +2627,7 @@ function phoExit(proceed){
 /* ---------- 単語バトル(英語+発音記号 → 日本語を3択) ---------- */
 function startWords(){
  G.phase='words';clearPanel();stopSay();var S=G.scene;setMsgInstant('Word Battle','');$m('tapHint').textContent='';
- var queue=shuffle(S.words.slice()),done=0,total=S.words.length,combo=0;
+ var queue=trainFirst(shuffle(S.words.slice())),done=0,total=S.words.length,combo=0;
  var allJp=[];Object.keys(DLG).forEach(function(k){DLG[k].words.forEach(function(w){allJp.push(w[2])})});
  function next(){
   clearPanel();if(!queue.length){wordsClear();return}

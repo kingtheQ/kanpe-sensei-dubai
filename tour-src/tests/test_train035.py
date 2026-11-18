@@ -4,17 +4,17 @@
 import os, sys, json
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'flow025'))
 from play import *
-HOOK = "window.__t={ts:trainSounds,pick:pickLessons,plog:plogLoad};"
+HOOK = "window.__t={ts:trainSounds,pick:pickLessons,plog:plogLoad,first:(typeof trainFirst==='function'?trainFirst:null)};"
 def rec(tg, miss, v, hd='x', **kw):
     r = {'ts': 1, 'v': v, 'tg': tg, 'hd': hd, 'cf': 0, 'n': len(tg.split()), 'ok': len(tg.split()) - len(miss),
          'miss': [{'t': t, 'h': h, 'k': 'diff'} for t, h in miss]}
     r.update(kw); return r
-def run(pw, base, path, seed, js):
+def run(pw, base, path, seed, js, hook=HOOK):
     br = pw.chromium.launch(args=['--no-sandbox'])
     ctx = br.new_context(viewport={'width': 390, 'height': 780}); ctx.add_init_script(INIT)
     def patch(route):
         resp = route.fetch(); body = resp.text()
-        if 'function trainSounds(){' in body: body = body.replace('function trainSounds(){', HOOK + 'function trainSounds(){', 1)
+        if 'function trainSounds(){' in body: body = body.replace('function trainSounds(){', hook + 'function trainSounds(){', 1)
         route.fulfill(response=resp, body=body)
     ctx.route('**/*.html', patch); ctx.route('**/', patch)
     p = ctx.new_page(); errs = []; p.on('pageerror', lambda e: errs.append(str(e)[:200]))
@@ -78,4 +78,35 @@ if __name__ == '__main__':
             # 8 壊れた記録が混ざっても落ちない
             r, e = run(pw, base, path, [None, 5, 'x', {'tg': 3, 'miss': 'x'}, {}, {'tg': 'think', 'hd': 'y', 'miss': [None, {'t': 5}]}] + base_s, TS)
             check('壊れた記録でも落ちない', not e and [t['k'] for t in r] == [t['k'] for t in r0], (r, e))
+        # ---- 反映(commit 2): 合宿の音の選び方 と 単語バトルの出す順 ----
+        PK = "()=>JSON.parse(JSON.stringify(window.__t.pick(2)))"
+        QF = "()=>{var L=[['think','/θɪŋk/','a'],['book','/bʊk/','b'],['five','/faɪv/','c'],['red','/rɛd/','d'],['cup','/kʌp/','e']];return window.__t.first(L.slice()).map(function(x){return x[0]})}"
+        two = [rec('think thirty five fine right red water window', [('think', 'sink'), ('five', 'hive'), ('right', 'light'), ('water', 'ater')], 'sA', hd='x'),
+               rec('think thirty five fine right red water window', [('thirty', 'dirty'), ('fine', 'hine'), ('red', 'led'), ('window', 'indow')], 'sB', hd='x')]
+        one = [rec('think thank this', [('think', 'sink')], 'a', hd='sink thank this')]
+        OLD = os.environ.get('OLDROOT')
+        osrv = serve(OLD) if OLD else None
+        obase = 'http://127.0.0.1:%d' % osrv.server_address[1] if osrv else None
+        for path in ['/dubai/', '/tour/', '/tour/doha/']:
+            print('== 反映', path)
+            r, e = run(pw, base, path, [], PK); check('合宿:記録なし→従来どおり(空)', r == [] and not e, (r, e))
+            tsr, _ = run(pw, base, path, two, TS)
+            trained = [t['k'] for t in tsr]
+            r, e = run(pw, base, path, two, PK)
+            check('合宿:鍛える音から選ぶ', len(r) == 1 and r[0]['snd'] in trained and not e, (r, trained))
+            if r:
+                fw = set(tsr[trained.index(r[0]['snd'])]['words'])
+                check('合宿:その音で失敗した語が先に入る', r[0]['words'][0] in fw or all(w in fw for w in r[0]['words']), (r[0], fw))
+            if obase:
+                for name, sd in [('記録なし', []), ('1語1場面だけ', one)]:
+                    a, _ = run(pw, base, path, sd, PK)
+                    from playwright.sync_api import sync_playwright as _s
+                    b, _ = run(pw, obase, path, sd, PK, hook="window.__t={pick:pickLessons};")
+                    check('合宿:' + name + '→変更前と同じ', a == b, (a, b))
+            q0, e = run(pw, base, path, [], QF); check('単語:記録なし→順を変えない', q0 == ['think', 'book', 'five', 'red', 'cup'] and not e, q0)
+            q1, e = run(pw, base, path, one, QF); check('単語:1語1場面→順を変えない', q1 == q0, q1)
+            q2, e = run(pw, base, path, two, QF)
+            check('単語:語は増減しない', sorted(q2) == sorted(q0), q2)
+            check('単語:鍛える音の語が先頭2つ(最大2)', set(q2[:2]) <= set(['think', 'five', 'red']) and q2[:2] != q0[:2], (q2, trained))
+            check('単語:残りは元の順', [x for x in q2[2:]] == [x for x in q0 if x not in q2[:2]], q2)
     print('FAILS', fails); sys.exit(1 if fails else 0)
