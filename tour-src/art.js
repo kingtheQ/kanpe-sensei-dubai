@@ -9,10 +9,10 @@ var ARTBASE='/*ARTBASE*/';
 var cvA=$('sceneA'),ca=cvA.getContext('2d');ca.imageSmoothingEnabled=false;
 var ARTI={},ARTFAIL={},ARTSHOW=0,AW=1536,AH=960;
 /* 場面の置き場。mode: wide=ワイド(人物は小さめ、キング124px) / room=室内(背景も人物も2倍、キング248px)
-   base=足もとの高さ、lulu/king/suit=立つ位置(ルルが左・キングが右。グアムと同じ)、npc=相手(いつもの顔のドット)の位置と大きさ */
+   base=足もとの高さ、lulu/king/suit=立つ位置(ルルが左・キングが右。グアムと同じ)、npc=相手(いつもの顔のドット)の位置と大きさ。大人の相手は、キング(子ども)の高さの約1.1倍(14行×px。キング決定 2026-11-18)。pxは小数でよい */
 var ART={
- nairobi:{bg:'nairobi-arrivals.png',mode:'wide',base:926,lulu:300,king:470,suit:575,npc:{x:1060,px:9,slide:1},fx:'night'},
- hotel:{bg:'hotel-front.png',mode:'room',base:895,lulu:250,king:450,suit:560,npc:{x:1290,px:15,top:262,clip:412},fx:'hotel'}};
+ nairobi:{bg:'nairobi-arrivals.png',mode:'wide',base:926,lulu:300,king:470,suit:575,npc:{x:1060,px:9.75,slide:1},fx:'night'},
+ hotel:{bg:'hotel-front.png',mode:'room',base:895,lulu:250,king:450,suit:560,npc:{x:1290,px:19.5,top:217,clip:412},fx:'hotel'}};
 /*ARTSEL*/
 function artImg(n){var i=ARTI[n];if(!i){i=ARTI[n]=new Image();i.onerror=function(){i.bad=1};i.src=ARTBASE+n}return i}
 function artShow(on){if(ARTSHOW===on)return;ARTSHOW=on;cv.hidden=!!on;cvA.hidden=!on}
@@ -24,7 +24,8 @@ function artShadow(cx,by,rx){var ry=rx*.12,ps=4;ca.fillStyle='rgba(0,0,0,.62)';
 function artSuit(cx,by,room){var w=room?58:30,bh=room?96:52,yh=room?18:10,hw=room?6:3,hh=room?24:16,x=Math.round(cx-w/2);
  artR('#8c9098',cx-hw/2,by-bh-yh-hh,hw,hh+2);artR('#facd28',x,by-bh-yh,w,yh);artR('#265496',x,by-bh,w,bh)}
 function artSpA(map,pal,x,y,px,clipY){for(var r=0;r<map.length;r++){var yy=y+r*px;if(clipY&&yy>=clipY)break;var row=map[r];
-  for(var k=0;k<row.length;k++){var ch=row.charAt(k);if(ch!=='.'){ca.fillStyle=pal[ch]||'#f0f';var hh=clipY?Math.min(px,clipY-yy):px;ca.fillRect(Math.round(x+k*px),Math.round(yy),px,hh)}}}}
+  var y0=Math.round(yy),y1=Math.round(clipY?Math.min(yy+px,clipY):yy+px);
+  for(var k=0;k<row.length;k++){var ch=row.charAt(k);if(ch!=='.'){ca.fillStyle=pal[ch]||'#f0f';var x0=Math.round(x+k*px);ca.fillRect(x0,y0,Math.round(x+(k+1)*px)-x0,y1-y0)}}}}
 function artBubble(cx,cy){artR('#05070f',cx-16,cy-3,36,24);artR('#f4f1e8',cx-14,cy-1,32,20);ca.fillStyle='#05070f';ca.font='800 18px sans-serif';ca.textAlign='center';ca.textBaseline='middle';ca.fillText('…',cx+2,cy+8)}
 /* ---- 小さな動き(場面ごと) ---- */
 var ARTR=(function(){var s=12345;return function(){s=(s*1103515245+12345)&0x7fffffff;return s/0x7fffffff}})();
