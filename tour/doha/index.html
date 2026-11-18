@@ -3627,17 +3627,26 @@ var ARTI={},ARTFAIL={},ARTSHOW=0,AW=1536,AH=960;
 /* 場面の置き場。mode: wide=ワイド(人物は小さめ、キング124px) / room=室内(背景も人物も2倍、キング248px)
    base=足もとの高さ、lulu/king/suit=立つ位置(ルルが左・キングが右。グアムと同じ)、npc=相手(いつもの顔のドット)の位置と大きさ */
 var ART={
- nairobi:{bg:'nairobi-arrivals.png',mode:'wide',base:926,lulu:300,king:470,suit:575,npc:{x:1060,px:9,slide:1},fx:'night'},
+ nairobi:{bg:'nairobi-arrivals.png',mode:'wide',base:926,lulu:300,king:470,suit:575,npc:{x:1060,px:9,slide:1},fx:'night',npcS:{taxi_staff:'w-front-man-dashiki',driver:'w-front-man-suit-1'}},
  hotel:{bg:'hotel-front.png',mode:'room',base:895,lulu:250,king:450,suit:560,npc:{x:1290,px:15,top:262,clip:412},fx:'hotel'},
  /* 入国審査(タスク031): 人なしの背景。キングとルルは右の端から歩いて入り、いちばん右の列(Visitors)のおわりに立つ(dir:-1 = 左へ歩く)。ルルが左・キングが右 */
- immig:{bg:'nairobi-immigration.png',mode:'wide',base:690,dir:-1,lulu:1290,king:1360,suit:1250,npc:{x:1319,px:11,top:345,clip:488}}};
+ immig:{bg:'nairobi-immigration.png',mode:'wide',base:690,dir:-1,lulu:1290,king:1360,suit:1250,
+  /* 窓口の係官(頭と肩だけ。大きさは素材のまま)。lead=話し相手の係官の窓口。sw=話し相手が officer2(女性)のとき入れ替わる絵 */
+  booths:[{n:'o-front-officer-green-1',x:215,top:345,clip:488},{n:'o-front-officer-blue',x:585,top:345,clip:488,sw:'o-front-officer-green-1'},
+   {n:'o-front-officer-green-2',x:951,top:345,clip:488},{n:'o-front-officer-green-passport',x:1319,top:345,clip:488,lead:1,sw:'o-front-officer-blue'}],
+  /* 並ぶ人(後ろ姿)と歩く人(正面)。x=足もとの中心、by=足もとの高さ。高さはキングと同じ124px(素材を124pxに縮めた w- の絵)。奥の人から順に描く */
+  crowd:[['back-family',217,686],['back-man-suit-1',215,789],['back-maasai',216,894],
+   ['back-backpacker',585,684],['back-woman-hijab',585,788],['back-man-suit-2',584,892],
+   ['back-man-thobe',952,684],['back-couple-red',952,786],['back-woman-blonde-suit',952,892],
+   ['back-man-dashiki',1320,792],['back-couple-colorful',1321,896],
+   ['front-safari',399,947,'walk'],['front-pilot-fa',1119,946,'walk']]}};
 function artIdFor(S){return S&&S.vid==='doh_city_h1'?'hotel':null}
 function artImg(n){var i=ARTI[n];if(!i){i=ARTI[n]=new Image();i.onerror=function(){i.bad=1};i.src=ARTBASE+n}return i}
 function artShow(on){if(ARTSHOW===on)return;ARTSHOW=on;cv.hidden=!!on;cvA.hidden=!on}
 function artR(col,x,y,w,h){ca.fillStyle=col;ca.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h))}
 function artSpr(img,cx,by,flip){var w=img.naturalWidth,h=img.naturalHeight,x=Math.round(cx-w/2),y=Math.round(by-h);
  if(flip){ca.save();ca.translate(x+w,y);ca.scale(-1,1);ca.drawImage(img,0,0);ca.restore()}else ca.drawImage(img,x,y)}
-function artShadow(cx,by,rx){var ry=rx*.12,ps=4;ca.fillStyle='rgba(0,0,0,.62)';
+function artShadow(cx,by,rx,al){var ry=rx*.12,ps=4;ca.fillStyle='rgba(0,0,0,'+(al||.62)+')';
  for(var yy=-Math.round(ry);yy<=ry;yy+=ps){var half=rx*Math.sqrt(Math.max(0,1-(yy/ry)*(yy/ry)));ca.fillRect(Math.round(cx-half),Math.round(by-ps/2+yy),Math.round(half*2),ps)}}
 function artSuit(cx,by,room){var w=room?58:30,bh=room?96:52,yh=room?18:10,hw=room?6:3,hh=room?24:16,x=Math.round(cx-w/2);
  artR('#8c9098',cx-hw/2,by-bh-yh-hh,hw,hh+2);artR('#facd28',x,by-bh-yh,w,yh);artR('#265496',x,by-bh,w,bh)}
@@ -3671,6 +3680,7 @@ function ARTframe(S,A0,dt){
  for(var i=0;i<names.length;i++){im[names[i]]=artImg(m+'-'+names[i]+'.png');if(!artOKimg(im[names[i]]))ok=false}
  if(bg.bad){ARTFAIL[id]=1;artShow(0);return false}
  for(var j=0;j<names.length;j++)if(im[names[j]].bad){ARTFAIL[id]=1;artShow(0);return false}
+ var ex=artExtra(cf),exi={};for(var e=0;e<ex.length;e++){var xi=artImg('npc/'+ex[e]+'.png');if(xi.bad){ARTFAIL[id]=1;artShow(0);return false}if(!artOKimg(xi))ok=false;exi[ex[e]]=xi}
  artShow(1);
  if(!ok){artR('#10131f',0,0,AW,AH);return true}
  if(S.artT0==null)S.artT0=t;
@@ -3678,7 +3688,16 @@ function ARTframe(S,A0,dt){
  ca.globalAlpha=1;ca.drawImage(bg,0,0);
  if(cf.fx==='night')artFxNight();else if(cf.fx==='hotel')artFxHotel();
  /* 相手(いつもの顔のドット): 空港では右から入ってくる。カウンターの中は動かず、頭と肩だけ見せる(カウンターの高さで切る) */
- if(speaker&&!speaker.ghost&&speaker.m&&speaker.m[0]){var nm=speaker.m[0][0],np=speaker.m[0][1],px=cf.npc.px,nw=nm[0].length*px,nh=nm.length*px;
+ /* 窓口の係官(入国審査): 頭と肩だけ見せる(窓口の台の高さで切る)。話し相手の窓口は、話すとき小さくうなずいて「…」を出す。そのほかの窓口もゆっくり小さく動く */
+ if(cf.booths){var lead=S.d&&S.d.sp==='officer2';
+  cf.booths.forEach(function(b,bi){var im2=exi[(lead&&b.sw)?b.sw:b.n],bw=im2.naturalWidth,bob2=b.lead&&speaker&&spSay?(Math.floor(t*6)%2?-3:0):(Math.floor(t*.9+bi*.37)%2?-2:0),by0=b.top+bob2,x0=Math.round(b.x-bw/2);
+   ca.drawImage(im2,0,0,bw,b.clip-by0,x0,by0,bw,b.clip-by0);
+   if(b.lead&&speaker&&spSay)artBubble(b.x+Math.round(bw*.4),b.top-18)})}
+ /* 相手が素材の絵(w-:縮めた絵)のとき: 足もとをそろえて立ち、右から入ってくる。いつもの小さな動きは今までと同じ */
+ var sk=artSpKey(),spr=(cf.npcS&&sk&&cf.npcS[sk])?exi[cf.npcS[sk]]:null;
+ if(spr){var spw=spr.naturalWidth,spy=B+(Math.floor(t*1.6+.25)%2?-BOB/2:0)+(spSay&&Math.floor(t*6)%2?-3:0),spx=cf.npc.x+Math.round(Math.sin(t*1.3)*2)+(cf.npc.slide?spX*2:0);
+  artShadow(spx,B,spw*.6);artSpr(spr,spx,spy,false);if(spSay)artBubble(spx+Math.round(spw*.3),spy-spr.naturalHeight-18)}
+ else if(speaker&&!speaker.ghost&&speaker.m&&speaker.m[0]&&cf.npc){var nm=speaker.m[0][0],np=speaker.m[0][1],px=cf.npc.px,nw=nm[0].length*px,nh=nm.length*px;
   var sway=Math.round(Math.sin(t*1.3)*2),nx=cf.npc.x-nw/2+sway+(cf.npc.slide?spX*2:0);
   if(cf.npc.clip){var cyc=t%7.5,wr=cyc>4&&cyc<6,ny=cf.npc.top,hb=wr?10:0,bob=spSay&&Math.floor(t*6)%2?-3:0;
    var head=nm.slice(0,6).map(function(r){return wr?r.replace(/e/g,'s'):r}),body=nm.slice(6);
@@ -3687,24 +3706,33 @@ function ARTframe(S,A0,dt){
    if(spSay)artBubble(nx+nw*.8,ny-18)}
   else{var nb=Math.floor(t*1.6+.25)%2?-BOB/2:0,ny2=B-nh+nb+(spSay&&Math.floor(t*6)%2?-3:0);artShadow(nx+nw/2,B,nw*.6);artSpA(nm,np,nx,ny2,px,0);
    if(spSay)artBubble(nx+nw*.8,ny2-18)}}
- /* 歩いて入ってくる(ゆっくり一定の速さ)。ルルが左・キングが右でそろって止まる */
+ /* 歩いて入ってくる(ゆっくり一定の速さ)。ルルが左・キングが右でそろって止まる。人物は足もとの高さの順に重ねて描く(奥から手前) */
  var dir=cf.dir||1,sp=room?260:150,dist=cf.dist||(dir>0?cf.king+150:AW+150-cf.king),walked=Math.min(dist,sp*te),walking=walked<dist-.5,sh=dist-walked;
- var kx=cf.king-dir*sh,lx=cf.lulu-dir*sh;
- artSuit(cf.suit-dir*sh,B,room);
- var shw=room?70:36;
- if(OUT.lvis){var ly=0,limg;
+ var kx=cf.king-dir*sh,lx=cf.lulu-dir*sh,shw=room?70:36,L=[];
+ /* 並ぶ人・歩く人: 小さく上下にゆれる(ふたりより小さく、ゆっくり。人ごとに周期をずらす)。歩く人は少し速く */
+ (cf.crowd||[]).forEach(function(c,ci){L.push({by:c[2],f:function(){var img=exi['w-'+c[0]],bw=img.naturalWidth,
+   o=c[3]==='walk'?(Math.floor(t*3.2+ci*.4)%2?-3:0):(Math.floor(t*1.1+ci*.53)%2?-2:0);
+   artShadow(c[1],c[2],bw*.42,.3);artSpr(img,c[1],c[2]+o,false)}})});
+ L.push({by:B,f:function(){artSuit(cf.suit-dir*sh,B,room)}});
+ if(OUT.lvis)L.push({by:B,f:function(){var ly=0,limg;
   if(walking){var lf=Math.floor(te/.2)%4;limg=im[['lulu-walk-a','lulu-walk-b','lulu-walk-c','lulu-walk-b'][lf]];ly=lf%2?-BOB:0}
   else{limg=im['lulu-idle'];ly=Math.floor(t*1.6+.5)%2?-BOB:0}
   if(luHelp&&!walking)ly-=Math.floor(t*7)%2?10:0;
   artShadow(lx,B,shw*.8);artSpr(limg,lx,B+ly,walking&&dir<0);   /* ルルの歩きのコマは右向き。左へ歩くときだけ反転 */
   if(luTalk&&spSay&&!walking)artBubble(lx+20,B-limg.naturalHeight-26);
-  if(luHelp&&!walking){ca.fillStyle='#e8452c';ca.font='800 26px sans-serif';ca.textAlign='center';ca.textBaseline='middle';ca.fillText('♪',lx+limg.naturalWidth*.5,B-limg.naturalHeight-12)}}
- if(OUT.hvis){var ky=0,kimg;
+  if(luHelp&&!walking){ca.fillStyle='#e8452c';ca.font='800 26px sans-serif';ca.textAlign='center';ca.textBaseline='middle';ca.fillText('♪',lx+limg.naturalWidth*.5,B-limg.naturalHeight-12)}}});
+ if(OUT.hvis)L.push({by:B,f:function(){var ky=0,kimg;
   if(walking){var kf=Math.floor(te/.32)%2;kimg=im[kf?'king-walk-b':'king-walk-a'];ky=kf?-BOB:0}
   else{kimg=im['king-idle'];ky=Math.floor(t*1.6)%2?-BOB:0}
-  artShadow(kx,B,shw);artSpr(kimg,kx,B+ky,walking&&dir>0)}   /* 右へ歩くときは、元の左向きのコマを左右反転(左へ歩くときは元のまま) */
+  artShadow(kx,B,shw);artSpr(kimg,kx,B+ky,walking&&dir>0)}});   /* 右へ歩くときは、元の左向きのコマを左右反転(左へ歩くときは元のまま) */
+ L.sort(function(a,b){return a.by-b.by});for(var li=0;li<L.length;li++)L[li].f();
  return true}
 function artOKimg(i){return i.complete&&i.naturalWidth>0}
+/* この場面が使う人物の絵の名前(npc/ の中)。ひとつでも読めなければ、場面全体が今までの描画に戻る */
+function artExtra(cf){var a=[],i;(cf.crowd||[]).forEach(function(c){a.push('w-'+c[0])});
+ (cf.booths||[]).forEach(function(b){a.push(b.n);if(b.sw)a.push(b.sw)});
+ if(cf.npcS)for(var k in cf.npcS)a.push(cf.npcS[k]);return a}
+function artSpKey(){if(!speaker)return null;for(var k in SP)if(SP[k]===speaker)return k;return null}
 /* ============================================================
    場面の環境音(タスク028): 場面→音の対応表 + 再生の口 + ミュート。音源ファイルは素材パック第2弾で納品する
    - src が空のカテゴリは何も鳴らさない(いまは全部空)。入れるときは tour/assets/amb/ に置いて src にファイル名を書く
