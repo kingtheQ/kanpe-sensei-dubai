@@ -57,13 +57,13 @@ Worker の画面に出る `https://kanpe-speech-relay.○○.workers.dev` が中
 ## 費用（無料枠で収まる根拠）　確認日：2026-11-16
 **Cloudflare Workers（無料プラン）**
 - 1日10万リクエストまで、1回あたりCPU時間10ミリ秒まで。超えると止まる（請求はされない）。出典：https://developers.cloudflare.com/workers/platform/pricing/ と https://developers.cloudflare.com/workers/platform/limits/
-- この中継は、プレイヤー1回の「始め」と「終わり」で各1回、トークンをもらうだけ。1日10万回には遠い。
+- この中継は、プレイヤー1回の「始めの宣言」「窓口の読み返し」「終わりの宣言」で、トークンをもらうだけ(トークンは10分使えるので、続けて読めば1回で足りる)。1日10万回には遠い。
 
 **Azure Speech（East US）**
 - 無料プラン（F0）：音声→文字の標準リアルタイムが月5時間まで無料。出典：https://azure.microsoft.com/en-us/pricing/details/speech/
 - 発音評価の料金は、基本は音声→文字と同じ扱い（出典：Microsoft Learn「Use pronunciation assessment」https://learn.microsoft.com/en-us/azure/ai-services/speech-service/how-to-pronunciation-assessment）。抑揚（prosody）などの上乗せ機能は別料金なので、このゲームでは**使わない**（確認ページも使っていない）。
-- 計算：宣言文70語は約35〜42秒（011）。始めと終わりの2回で約80秒。5時間＝18,000秒 ÷ 80秒 ＝ **月に約225人ぶん**。
-- 従量課金（S0）に切り替えた場合の目安は音声1時間あたり約$1（出典：Microsoft Q&A https://learn.microsoft.com/en-us/answers/questions/5608069/ ：公式の料金表の数字そのものではない）。この目安だと1人あたり約0.02ドル。**この金額は公式表で未確認。**
+- 計算：宣言文70語は約35〜42秒（011）。窓口の読み返しは58語で、同じ速さなら約29〜35秒(語数からの見積もり。実測は未確認)。始め・読み返し・終わりの3回で約100〜120秒、多めに見て120秒。5時間＝18,000秒 ÷ 120秒 ＝ **月に約150人ぶん**(タスク024で、2回・約80秒・約225人から変更)。
+- 従量課金（S0）に切り替えた場合の目安は音声1時間あたり約$1（出典：Microsoft Q&A https://learn.microsoft.com/en-us/answers/questions/5608069/ ：公式の料金表の数字そのものではない）。この目安だと1人あたり約0.03ドル(120秒 ÷ 3,600秒 × 約$1)。**この金額は公式表で未確認。**
 
 **未確認（キングの画面で確認してください）**
 - 作成済みの Azure リソースが F0（無料）か S0（従量）か。ポータルのリソースの「Pricing tier」で見られる。F0 なら上限で止まるだけで請求は出ない。S0 なら、Azure の「Cost Management」で予算アラートを付けておく。

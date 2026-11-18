@@ -1,6 +1,6 @@
 /* ===== 声(タスク016): 同意・記録(kanpe-voice-v1)・Azure 発音評価・設定 =====
    設計の正本: docs/pm/deliverables/013-ending-scores-design-v1.md
-   声の行き先: ブラウザの音声認識(いつも) / Azure(同意した人の、旅の始めと終わりの宣言の2回だけ)。
+   声の行き先: ブラウザの音声認識(いつも) / Azure(同意した人の、旅の始めの宣言・窓口の読み返し・旅の終わりの宣言の3回だけ)。
    キーはゲームに置かない。中継(relay/)が10分だけ使えるトークンを渡す。中継の URL が空なら Azure は使わない。
    build.py が /*RELAY_URL*/'' の中身を tour-src/relay-url.txt から差しこむ(中継のURLは、そこ1か所だけ)。 */
 var VOICEKEY='kanpe-voice-v1',VREF='decl-v1';
@@ -18,7 +18,10 @@ function vLoad(){
  return v}
 function vSave(v){try{localStorage.setItem(VOICEKEY,JSON.stringify(v))}catch(e){}}
 function voiceRelayOn(){return /^https:\/\//.test(RELAY_URL)}
-function voiceConsent(){var c=vLoad().consent;return c?c.az:null}
+/* 同意文の版。同意文を変えたら上げる。「送ってOK」と答えた人には、新しい文面で もう一度聞く(それまで Azure には送らない)。
+   「送らない」と答えた人には聞き直さない(送らないままを守る。変えたいときは設定から)。 1=旅の始めと終わりの2回 / 2=窓口の読み返しを足した3回(タスク024) */
+var CONSENT_VER=2;
+function voiceConsent(){var c=vLoad().consent;if(!c)return null;if(c.az===true&&c.ver!==CONSENT_VER)return null;return c.az}
 function voiceNeedConsent(){return voiceRelayOn()&&voiceConsent()===null}      /* 中継がなければ、送る先がないので聞かない */
 function voiceAzureOn(){return voiceRelayOn()&&voiceConsent()===true}
 /* Azure で読む長いカンペ: 旅の始めの宣言・終わりの宣言・窓口の読み返し(タスク024)。始め/終わりの2つだけが kanpe-voice-v1 の比べに入る */
@@ -26,7 +29,7 @@ function voiceAzDiag(k){return k==='decl'||k==='decl_end'||k==='readback'}
 function voiceCmpDiag(k){return k==='decl'||k==='decl_end'}
 /* 読み返しの判定: 聞き取れた単語でも、Azure の単語の正確さが AZ_BAD(60)未満なら「言えなかった」に数える(仮。false にすると、聞き取れたかどうかだけ) */
 var RB_AZ_JUDGE=true;
-function voiceSetConsent(b){var v=vLoad();v.consent={az:!!b,at:Date.now(),ver:1};vSave(v)}
+function voiceSetConsent(b){var v=vLoad();v.consent={az:!!b,at:Date.now(),ver:CONSENT_VER};vSave(v)}
 function voiceClear(){var v=vLoad();v.trips=[];v.next=null;vSave(v)}              /* 同意の選びは残す(切り替えは別) */
 function voiceSetNext(o){var v=vLoad();v.next=o;vSave(v)}
 function voiceTripCur(){var v=vLoad();return v.trips.length?v.trips[v.trips.length-1]:null}
@@ -166,12 +169,12 @@ function voiceBuildM(tg,segs,txt,res){
 function consentCard(done){
  clearPanel();G.phase='consent';
  var card=el('div','vcons');card.appendChild(el('div','vh','声を送ってもいい？'));
- card.appendChild(el('p','','旅のはじめと、おわりに、同じ文を言います。そのときの声だけを、発音を調べるために Microsoft のサービス（Azure）に送ります。'));
+ card.appendChild(el('p','','旅のはじめの窓口と、旅のおわりに、決まった文を言います。その声だけを、発音を調べるために Microsoft のサービス（Azure）に送ります。'));
  var ul=el('ul');
- ['送るのは、この2回だけ。ほかの場面の声は、このサービスには送りません。（ほかの場面では、ブラウザの音声認識が声を文字にします。Chrome なら Google、Safari なら Apple のサービスです。）',
-  'ゲームは声を保存しません。Microsoft は、この方法では声を保存しないと説明しています。',
-  '結果は、この端末の中だけに残ります。',
-  '送らなくても、ゲームは最後まで同じように遊べます。いつでも、設定で変えられます。'].forEach(function(t){ul.appendChild(el('li','',t))});
+ ['送らなくても、最後まで同じように遊べます。いつでも、設定で変えられます。',
+  '送るのは、この3回だけ（はじめの宣言／窓口での読み返し／おわりの宣言）。ほかの場面の声は送りません。ほかの場面では、ブラウザの音声認識（Chrome は Google、Safari は Apple）が文字にします。',
+  'ゲームは声を保存しません。Microsoft も、この方法では保存しないと説明しています。',
+  '結果は、この端末の中だけに残ります。'].forEach(function(t){ul.appendChild(el('li','',t))});
  card.appendChild(ul);panel.appendChild(card);
  var row=el('div','row cuerow'),ok=el('button','btn sub','送ってOK'),no=el('button','btn sub','送らない'),used=false;
  [ok,no].forEach(function(b){b.type='button'});
@@ -184,7 +187,7 @@ function voiceSetSection(b){
  var s=sSec('こえの おくりさき');
  if(voiceRelayOn()){
   var r=el('div','stg'),tx=el('div','tx');tx.appendChild(el('div','tt','こえを Microsoft に おくる'));
-  tx.appendChild(el('div','dd','はじめと おわりの せんげん(2かい)だけ。ほかの ばめんでは おくりません'));
+  tx.appendChild(el('div','dd','はじめの せんげんと まどぐちの よみかえし、おわりの せんげん(3かい)だけ。ほかの ばめんでは おくりません'));
   var tg=el('button','tgl');tg.type='button';tg.setAttribute('aria-label','こえを おくる');tg.setAttribute('aria-pressed',voiceConsent()===true?'true':'false');
   tg.addEventListener('click',function(){var nv=voiceConsent()!==true;voiceSetConsent(nv);tg.setAttribute('aria-pressed',nv?'true':'false')});
   r.appendChild(tx);r.appendChild(tg);s.appendChild(r)}

@@ -404,7 +404,7 @@ def rep(s, a, b, cnt=1):
     return s.replace(a, b)
 SNOTE_OLD = '<p class="snote">音声は 保存も 送信も しません。発音の きろくは この端末の中だけに のこります。</p>'
 SNOTE_NEW = ('<p class="snote">声は、ゲームでは 保存しません。マイクの声は ブラウザの音声認識が 文字にします(Chrome は Google、Safari は Apple の サーバーに 声が おくられます)。'
-             '「こえを おくる」を ONに した ときだけ、旅の はじめと おわりの 宣言の 声が、発音を しらべる ために Microsoft Azure に おくられます。発音の きろくは この端末の中だけに のこります。</p>')
+             '「こえを おくる」を ONに した ときだけ、旅の はじめの 宣言、窓口の 読み返し、おわりの 宣言の 3かいの 声が、発音を しらべる ために Microsoft Azure に おくられます。発音の きろくは この端末の中だけに のこります。</p>')
 def sub(pref): return dict((k, v) for k, v in dl.items() if k.startswith(pref))
 KBASE = "K.fountain=K.hall;K.safari=K.ahlan;K.marina=K.s34;K.beach=K.costa;"
 REC = "b.appendChild(s4);\n $m('setView').hidden=false;"
