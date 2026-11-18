@@ -327,6 +327,13 @@ var TRIP=(function(){
    [25,'HNL','move',0,'Honolulu. Today the date changes.',[]],[26,'GUM','air',2,'Guam. We have been here before.',[]],
    [27,'GUM','city',0,'Guam. The beach and the hotel.',[]],[28,'GUM','air',0,'Guam. We are going home.',[]],
    [29,'NRT','home',0,'Home. The receipts are on the table.',[]],[30,'NRT','home',2,'One month later.',[]]]};
+ /* スパルタ時間の置き場所(タスク032 / 020-8 案1)。休養の翌日の★(ホノルルの着いた翌々日)に、ルルのスパルタ時間(強化合宿)を1回置く。
+    ここは枠だけ: 発生の置き方(表のどの日か)・入口(朝の1枚のあと 強化合宿が開く)・終わり(合宿を終えたら その日が終わり、夜の1枚へ)。
+    中身は いまある強化合宿(startCamp)をそのまま使う。合宿の作り直しは別タスク(017)。表の日は ROWS の「前の日が rest・この日が山★(2)」の行 */
+ var SPARTA={ow:24,star:22};
+ function isSparta(td){var t=S().tk;return !!t&&SPARTA[t]===td}
+ /* 発生の置き方が表と合っているか(前の日が休養日・この日が★)。テストが使う */
+ function spartaRule(){var o={};['ow','star'].forEach(function(k){var d=SPARTA[k],r=ROWS[k][d-1],q=ROWS[k][d-2];o[k]=!!r&&!!q&&r[0]===d&&r[3]===2&&q[2]==='rest'});return o}
  /* 休養日の「知らせ」(タスク032 / 020-7)。休養日に来るのはこれだけ。答えなくてよい。英文1行(日本語なし)。出来事の内容・数字は物語の中の架空(実在の運行情報ではない)。
     キー = 券の種類 + 表の日。休養日(ROWS の種類が rest)の日だけ */
  var NOTICES={ow5:'Airport staff are on strike today. Some flights may be late.',ow8:'Hot and windy this afternoon. Some outdoor tours may change.',
@@ -400,9 +407,10 @@ var TRIP=(function(){
    var p=d.ph&&typeof d.ph==='object'?d.ph:{};
    return {d:d.d,td:typeof d.td==='number'?d.td:d.d,ph:{s:String(p.s||'night').slice(0,20),k:String(p.k||'night').slice(0,10),f:p.f?1:0},
     led:Array.isArray(d.led)?d.led.filter(function(x){return Array.isArray(x)&&x.length===3&&typeof x[1]==='number'}).slice(0,24):[],
-    pick:Array.isArray(d.pick)?d.pick.filter(function(x){return typeof x==='string'}).slice(0,12):[]}});
+    pick:Array.isArray(d.pick)?d.pick.filter(function(x){return typeof x==='string'}).slice(0,12):[],sp:d.sp?1:0}});
   if(r.cur&&typeof r.cur==='object'){s.cur={led:Array.isArray(r.cur.led)?r.cur.led.filter(function(x){return Array.isArray(x)&&x.length===3}).slice(0,24):[],
    pick:Array.isArray(r.cur.pick)?r.cur.pick.filter(function(x){return typeof x==='string'}).slice(0,12):[]};
+   if(r.cur.sp)s.cur.sp=1;
    if(typeof r.cur.bg==='string')s.cur.bg=r.cur.bg.slice(0,20);if(typeof r.cur.ev==='string')s.cur.ev=r.cur.ev.slice(0,20);if(r.cur.n>0)s.cur.n=Math.min(99,r.cur.n|0)}
   return s}
  function load(){try{st=clean(JSON.parse(localStorage.getItem(KEY)||'null'))}catch(e){st=blank()}return st}
@@ -417,10 +425,10 @@ var TRIP=(function(){
  function groupTd(g){var r=rows(),i;for(i=0;i<r.length;i++)if(r[i][5].indexOf(g)>=0)return r[i][0];return 0}
  function maxTd(){var r=rows(),m=0,i;for(i=0;i<r.length;i++)if(r[i][5].length)m=r[i][0];return m}
  function groupDone(g){var G=GROUPS[g],i;if(!G)return false;for(i=0;i<G.length;i++){var ok=false,j;for(j=0;j<G[i].length;j++)if(seen(G[i][j]))ok=true;if(!ok)return false}return true}
- function dayDone(td){var gs=groupsOf(td),i;if(!gs.length)return false;for(i=0;i<gs.length;i++)if(!groupDone(gs[i]))return false;return true}
+ function dayDone(td){if(isSparta(td)){var s0=S();return td===s0.td&&!!(s0.cur&&s0.cur.sp)}var gs=groupsOf(td),i;if(!gs.length)return false;for(i=0;i<gs.length;i++)if(!groupDone(gs[i]))return false;return true}
  function isRest(td){var r=rowOf(td);return !!r&&r[2]==='rest'}
  /* その日は 作ってある日か: 場面があるか、場面のある日のあいだにはさまる休養日 */
- function reachable(td){var r=rowOf(td);if(!r||td>=29)return false;if(r[5].length)return true;return r[2]==='rest'&&td<maxTd()}
+ function reachable(td){var r=rowOf(td);if(!r||td>=29)return false;if(r[5].length||isSparta(td))return true;return r[2]==='rest'&&td<maxTd()}
  function nextTd(td){var n,m=maxTd();for(n=td+1;n<=m;n++)if(reachable(n))return n;return 0}
  /* ---------- 券の束 ---------- */
  function today(){var d=new Date(),z=function(n){return (n<10?'0':'')+n};return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate())}
@@ -514,7 +522,7 @@ var TRIP=(function(){
   var s=sync();if(s.ph!=='morning')return null;
   var td=s.td;if(!rowOf(td)||!reachable(td)){var n=nextTd(td-1);if(!n)return null;td=n}
   if(!openable(td)&&!(td===1&&s.day===0))return null;
-  var r=rowOf(td);return {td:td,day:s.day+1,en:'Day '+(s.day+1)+'. '+r[4],rest:r[2]==='rest',note:r[2]==='rest'&&has(NOTICES,s.tk+td)?NOTICES[s.tk+td]:'',fly:legsOnDay(td)}}
+  var r=rowOf(td);return {td:td,day:s.day+1,en:'Day '+(s.day+1)+'. '+r[4],rest:r[2]==='rest',note:r[2]==='rest'&&has(NOTICES,s.tk+td)?NOTICES[s.tk+td]:'',sparta:isSparta(td),fly:legsOnDay(td)}}
  function legsOnDay(td){var s=S(),o=[],i;for(i=0;i<s.legs.length;i++)if(legInfo(i).td===td&&!s.legs[i].l)o.push(i);return o}
  function openMorning(){var m=morningInfo();if(!m)return null;var s=S();s.day=m.day;s.td=m.td;s.ph='day';s.cur={led:[],pick:[]};fillD();save();syncUI();return m}
  function nightInfo(){
@@ -525,7 +533,7 @@ var TRIP=(function(){
  function closeNight(){
   var s=S();if(s.ph!=='night')return;
   var ph=s.nph||pickPhoto(s.td);
-  s.days.push({d:s.day,td:s.td,ph:ph,led:(s.cur&&s.cur.led)||[],pick:(s.cur&&s.cur.pick)||[]});
+  s.days.push({d:s.day,td:s.td,ph:ph,led:(s.cur&&s.cur.led)||[],pick:(s.cur&&s.cur.pick)||[],sp:(s.cur&&s.cur.sp)?1:0});
   s.cur={led:[],pick:[]};delete s.nph;
   fillD();
   var n=nextTd(s.td);
@@ -533,6 +541,10 @@ var TRIP=(function(){
   save();syncUI()}
  /* 休養日(朝の1枚を開いてから夜の1枚を閉じるまで)か。この間は 単語バトル・合宿の入口を出さず、場所は全部閉じる。飽きたサインも数えない(020-7) */
  function restToday(){var s=S();return !!s.tk&&exists()&&(s.ph==='day'||s.ph==='night')&&isRest(s.td)}
+ /* スパルタ時間(強化合宿)を終えた: その日を終わりにして、夜の1枚へ。スパルタの日でないとき・もう終えたときは何もしない */
+ function spartaDone(cb){
+  var s=S();if(!s.tk||s.ph!=='day'||!isSparta(s.td)||(s.cur&&s.cur.sp)){if(cb)cb();return false}
+  s.cur.sp=1;save();night(cb);return true}
  function lockedGroup(g){
   var s=S();if(!s.tk)return false;
   if(restToday())return true;
@@ -623,7 +635,7 @@ var TRIP=(function(){
  /* ---- 朝の1枚 ---- */
  function morning(cb){
   var m=openMorning();if(!m){if(cb)cb();return false}
-  var o=overlay('mor',function(){o.close();if(m.rest)night(cb);else if(cb)cb()});
+  var o=overlay('mor',function(){o.close();if(m.rest){night(cb);return}if(cb)cb();if(m.sparta)try{if(hooks.sparta)hooks.sparta()}catch(e){}});
   o.appendChild(E('div','trip-sun'));
   o.appendChild(E('div','trip-day','DAY '+m.day));
   var row=rowOf(m.td);o.appendChild(E('div','trip-sub',row[4]));
@@ -726,7 +738,7 @@ var TRIP=(function(){
   setTicket:setTicket,rowOf:rowOf,groupTd:groupTd,groupDone:groupDone,dayDone:dayDone,reachable:reachable,nextTd:nextTd,maxTd:maxTd,
   morning:morning,night:night,bundle:bundle,afterScene:afterScene,enter:enter,morningInfo:morningInfo,nightInfo:nightInfo,
   lockedPlace:lockedPlace,lockedMode:lockedMode,modeHidden:modeHidden,stamps:stamps,inTrip:inTrip,drawPhoto:drawPhoto,mini:mini,passEl:passEl,
-  restToday:restToday,hourNow:hourNow,hourAt:hourAt,HOUR:HOUR,
+  restToday:restToday,isSparta:isSparta,spartaDone:spartaDone,spartaRule:spartaRule,SPARTA:SPARTA,hourNow:hourNow,hourAt:hourAt,HOUR:HOUR,
   tearNow:tearNow,settle:settle,settleExtra:settleExtra,addFee:addFee,albumPages:albumPages,yen:yen,money:money,yenText:yenText,big:big,dayRec:dayRec,overlay:overlay,E:E,css:css,
   migrate:migrate,pickPhoto:pickPhoto,note:note,oneMonth:oneMonth}
 })();

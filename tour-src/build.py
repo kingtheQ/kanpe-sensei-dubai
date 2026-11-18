@@ -410,7 +410,7 @@ SNOTE_NEW = ('<p class="snote">声は、ゲームでは 保存しません。マ
 def trip_patches(o, page):
     """タスク030: 旅の骨組み(DAY・券の束・記録)を、場面のあと・場所の鍵・タブの鍵につなぐ"""
     tj = _rd('trip.js')
-    o = rep(o, "function storeSave(){", tj + "\nTRIP.setPage('" + page + "');TRIP.hooks.say=function(t){try{setMsgInstant(t,'LULU')}catch(e){}};TRIP.hooks.at=function(){try{return G.at}catch(e){return null}};TRIP.hooks.ui=function(){try{var b=document.getElementById('boothBtn');if(b)b.hidden=TRIP.restToday()}catch(e){}};\nfunction storeSave(){")
+    o = rep(o, "function storeSave(){", tj + "\nTRIP.setPage('" + page + "');TRIP.hooks.say=function(t){try{setMsgInstant(t,'LULU')}catch(e){}};TRIP.hooks.at=function(){try{return G.at}catch(e){return null}};TRIP.hooks.sparta=function(){try{if(G.view==='map')startCamp()}catch(e){}};TRIP.hooks.ui=function(){try{var b=document.getElementById('boothBtn');if(b)b.hidden=TRIP.restToday()}catch(e){}};\nfunction storeSave(){")
     # 場面の昼夜は 旅の中の現地時刻(タスク032 / 020-3)。nightNow(音)と dohNight(ドーハの外の絵)の「いまの時」を TRIP.hourNow に通す。旅の外は本当の時計のまま
     o, n = re.subn(r"var h=\+new Intl\.DateTimeFormat\('en-GB',\{timeZone:'([A-Za-z/_]+)',hour:'2-digit',hourCycle:'h23'\}\)\.format\(new Date\(\)\);",
                    lambda m: "var h=TRIP.hourNow('" + m.group(1) + "');", o)
@@ -427,6 +427,9 @@ def trip_patches(o, page):
     o = rep(o, "function refreshBoothBtn(){var n=boothCount();$m('boothBtn').textContent=",
             "function refreshBoothBtn(){var n=boothCount();$m('boothBtn').hidden=TRIP.restToday();$m('boothBtn').textContent=")
     o = rep(o, "function startCamp(){\n var fromMap=", "function startCamp(){\n if(TRIP.restToday())return;\n var fromMap=")
+    # スパルタ時間(タスク032 / 020-8): 強化合宿(マップから入るもの)を終えたら、スパルタの日はその日が終わる。ふつうの日は何も起きない
+    o = rep(o, "location.href='../guam/#w=1';return}showMap();return}\n G.camp={scene:G.scene,ti:G.ti,sp:speaker,lt:luTalk};G.sid++;clearTimers();G.view='scene';$m('sceneView').hidden=false;Snd.go(G.snd||null);campDone()}",
+            "location.href='../guam/#w=1';return}showMap();if(!P.sample)TRIP.spartaDone(function(){});return}\n G.camp={scene:G.scene,ti:G.ti,sp:speaker,lt:luTalk};G.sid++;clearTimers();G.view='scene';$m('sceneView').hidden=false;Snd.go(G.snd||null);campDone()}")
     return o
 
 def sub(pref): return dict((k, v) for k, v in dl.items() if k.startswith(pref))
