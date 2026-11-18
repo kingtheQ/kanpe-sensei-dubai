@@ -38,6 +38,10 @@
 - 中継 URL は `tour-src/relay-url.txt` の1か所（空なら Azure 無効・同意の1枚も出ない）。確認は `python3 tour-src/tests/test_routes.py`
 - 未確認：マイクと Azure 実通信（実機）。決めた区切り（色 80/60、良くなった5点）と4数字の式は仮
 
+## 11/18 タスク024でやったこと（ブランチ task-024。main 未反映＝同意文の確認待ち）
+- 終わりの場面の4つの数字を Azure の値そのものに（`voiceWhole`。nv=2 の印。古い記録とは数字を並べない）。窓口の読み返し(win_rb)にも Azure（plog に src）。同意文を「3回」に直し `CONSENT_VER=2`。詳細は docs/pm/deliverables/024-voice-numbers-impl-report-v1.md
+- 確認は `tour-src/tests/` の test_numbers / test_readback / test_consent / test_routes（「中継なし」の経路は KANPE_RELAY_URL を空で渡して作る）
+
 ## 未決・考え中
 - ナイロビ・ドーハまで遊んで「飽きてきた」。どの国も入国審査・手荷物受け取りなど同じ場面が続くため。対策案は 005。どうするかは未決定。
 - 強化合宿の作り直しの方向は未決定（006）。006 の e（開けない「発音教室」画面と古い合宿の整理）はキングの判断待ちで、まだやっていない。

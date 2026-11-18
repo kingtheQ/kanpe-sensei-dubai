@@ -14,7 +14,7 @@ def build(variant, relay):
     d = os.path.join(OUT, variant)
     shutil.rmtree(d, ignore_errors=True)
     env = dict(os.environ, PYTHONDONTWRITEBYTECODE='1')
-    if relay is not None: env['KANPE_RELAY_URL'] = relay
+    env['KANPE_RELAY_URL'] = relay if relay is not None else ''   # None=中継なし。relay-url.txt に公開用のURLが入った後も、「中継なし」の経路を作れるように空を渡す
     keep = {}
     for f in ('tour/index.html', 'tour/doha/index.html', 'tour/ending/index.html'):
         keep[f] = open(os.path.join(ROOT, f), 'rb').read()
