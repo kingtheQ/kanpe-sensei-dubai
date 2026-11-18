@@ -171,14 +171,14 @@ def e45_shots(pw, d, name='yes'):
 
 if __name__ == '__main__':
     os.makedirs(SHOTS, exist_ok=True)
-    d_off = build('off', None)
+    d_off = build('off', '')   # 空の文字列=中継なし(relay-url.txt に本物のURLが入っていても、ここでは使わない)
     d_on = build('on', RELAY)
     sizes = {'tour/index.html(off)': os.path.getsize(os.path.join(d_off, 'tour/index.html')), 'tour/ending/index.html(off)': os.path.getsize(os.path.join(d_off, 'tour/ending/index.html'))}
     with sync_playwright() as pw:
-        R = []
-        R.append(run_route(pw, 'r0_norelay', d_off, False, None, True, False, False))
-        R.append(run_route(pw, 'r1_yes_az', d_on, True, '送ってOK', True, True, True))
-        R.append(run_route(pw, 'r2_no', d_on, True, '送らない', True, False, True))
-        R.append(run_route(pw, 'r3_yes_offline', d_on, True, '送ってOK', True, False, False))
-        R.append(run_route(pw, 'r4_nomic', d_off, False, None, False, False, False))
+        R = []; only = sys.argv[1:]   # 例: python3 test_routes.py r0_norelay r4_nomic
+        ALL = [('r0_norelay', d_off, False, None, True, False, False), ('r1_yes_az', d_on, True, '送ってOK', True, True, True),
+               ('r2_no', d_on, True, '送らない', True, False, True), ('r3_yes_offline', d_on, True, '送ってOK', True, False, False),
+               ('r4_nomic', d_off, False, None, False, False, False)]
+        for a in ALL:
+            if not only or a[0] in only: R.append(run_route(pw, *a))
     print(json.dumps({'sizes': sizes, 'routes': R}, ensure_ascii=False, indent=1))

@@ -126,7 +126,8 @@ function endPlan(){
  var tr=voiceTripCur()||{},st=tr.start||null,en=tr.end||null;
  if(!END.mic||!en||!en.heard||!en.heard.trim())return {show:false};                       /* d・何も聞こえなかった: E4・E5 は出さない */
  var three=!!(st&&st.src==='az'&&en.src==='az'&&st.w&&en.w&&st.w.length===en.w.length);   /* 同じ測り方どうしだけ、数字と3段の色で比べる */
- return {show:true,st:st,en:en,cmp:three,one:!st}}
+ var same=three&&(st.calc||1)===(en.calc||1);                                              /* 数字の意味の版(calc)が同じどうしだけ、数字を並べる。古い記録(1)と新しい記録(2)は、単語の色だけで比べる */
+ return {show:true,st:st,en:en,cmp:three,num:same,one:!st}}
 function endCls(M,i,three){
  if(three&&M.w&&M.w[i]){var a=M.w[i][1];return a==null?2:(a>=80?0:(a>=60?1:2))}      /* 近い／おしい／遠い(80・60 は仮の区切り) */
  return M.bits&&M.bits.charAt(i)==='1'?0:2}
@@ -163,8 +164,8 @@ function e4(){
  clearPanel();var box=el('div','eres');
  var three=P.cmp,marks=[];
  if(P.st&&P.st.bits&&P.en.bits)marks=endMarks(P.st,P.en,three);
- if(P.st)box.appendChild(endTier('Departure',P.st,three,three,null));
- box.appendChild(endTier('Home',P.en,P.cmp||(!P.st&&P.en.src==='az'&&!!P.en.w),three,marks));   /* 数字は 両段に小さく(013 §2-2・タスク022)。比べられないとき(b・a・c)は出さない */
+ if(P.st)box.appendChild(endTier('Departure',P.st,three,P.num,null));
+ box.appendChild(endTier('Home',P.en,P.cmp||(!P.st&&P.en.src==='az'&&!!P.en.w),P.num,marks));   /* 数字は 両段に小さく(013 §2-2・タスク022)。比べられないとき(b・a・c)は出さない */
  if(marks.length){var tk=endToks(),jl=el('div','ejoy');jl.textContent=marks.map(function(i){return '✦ '+tk[i].replace(/[^A-Za-z']/g,'')}).join('   ');box.appendChild(jl)}
  panel.appendChild(box);endNav(null,function(){e5()})}
 /* E5: 音の変化(いちばんむずかしかった音 上位3つ。数字は出さず、棒の長さだけ) */

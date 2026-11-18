@@ -3,7 +3,7 @@
    声の行き先: ブラウザの音声認識(いつも) / Azure(同意した人の、旅の始めと終わりの宣言の2回だけ)。
    キーはゲームに置かない。中継(relay/)が10分だけ使えるトークンを渡す。中継の URL が空なら Azure は使わない。
    build.py が /*RELAY_URL*/'' の中身を tour-src/relay-url.txt から差しこむ(中継のURLは、そこ1か所だけ)。 */
-var VOICEKEY='kanpe-voice-v1',VREF='decl-v1';
+var VOICEKEY='kanpe-voice-v1',VREF='decl-v1',VCALC=2;   /* VCALC: 4つの数字の意味の版。1=016の仮の式(正確さ×0.6＋流れ×0.2＋言い切り度[単語の一致率]×0.2)／2=Azure の値そのまま(タスク024)。印のない古い記録は1として扱う */
 var RELAY_URL=/*RELAY_URL*/'';
 var SDK_URL='https://cdn.jsdelivr.net/npm/microsoft-cognitiveservices-speech-sdk@1.45.0/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle-min.js';
 var SDK_SRI='sha384-RrysmqdtkBJHdL3yBqslKJR4EMsU7hA1rz+HpC9qMY001mmfKeRcKisr+NyuyI6H';
@@ -110,27 +110,37 @@ function valign(rn,an){
 /* tg=紙の単語, segs=Azure の区切りごとの結果, txt=聞こえた文, res=analyze の結果。
    単語の半分以上が対応づかなければ、Azure の結果は使わない(src='sr'。数字なし) */
 function voiceBuildM(tg,segs,txt,res){
- var rn=tg.map(vnorm),aw=[],durs=0,fs=0,fw=0;
+ var rn=tg.map(vnorm),aw=[];
  segs.forEach(function(sg){
-  var pa=sg.pa,wd=0;
   (sg.words||[]).forEach(function(w){
-   var a=w.PronunciationAssessment||{};wd+=+w.Duration||0;
+   var a=w.PronunciationAssessment||{};
    if(a.ErrorType==='Insertion'||a.ErrorType==='Omission')return;
    aw.push({n:vnorm(w.Word),a:typeof a.AccuracyScore==='number'?a.AccuracyScore:null,e:a.ErrorType||'None',
-    p:(w.Phonemes||[]).map(function(p){var q=p.PronunciationAssessment||{};return [String(p.Phoneme||''),Math.round(typeof q.AccuracyScore==='number'?q.AccuracyScore:0)]})})});
-  if(pa&&typeof pa.FluencyScore==='number'){var wt=wd||1;fs+=pa.FluencyScore*wt;fw+=wt}});
- var map=valign(rn,aw.map(function(x){return x.n})),w=[],accs=[],matched=0;
+    p:(w.Phonemes||[]).map(function(p){var q=p.PronunciationAssessment||{};return [String(p.Phoneme||''),Math.round(typeof q.AccuracyScore==='number'?q.AccuracyScore:0)]})})})});
+ var map=valign(rn,aw.map(function(x){return x.n})),w=[],matched=0;
  rn.forEach(function(r,i){
   var j=map[i],x=j>=0?aw[j]:null,ok=x&&x.a!=null&&(x.n===r||lev(x.n,r)<=Math.max(1,Math.floor(r.length*.5)));
-  if(ok){matched++;accs.push(x.a);w.push([tg[i],Math.round(x.a),x.e,x.p])}else w.push([tg[i],null,'Omission',[]])});
- var cov=tg.length?matched/tg.length:0,usable=cov>=.5&&fw>0;
+  if(ok){matched++;w.push([tg[i],Math.round(x.a),x.e,x.p])}else w.push([tg[i],null,'Omission',[]])});
+ var cov=tg.length?matched/tg.length:0,ag=voiceAgg(segs),usable=cov>=.5&&!!ag;
  var M={ts:Date.now(),src:usable?'az':'sr',tot:null,acc:null,flu:null,cmp:null,w:null,
   bits:res.words.map(function(x){return x.ok?'1':'0'}).join(''),heard:String(txt||'').slice(0,600)};
- if(usable){
-  var acc=accs.reduce(function(a,b){return a+b},0)/Math.max(1,accs.length),flu=fs/fw,cmp=cov*100;
-  /* 4つの数字: このゲームの計算式(同じ式で始めと終わりを測る)。Azure の画面の総合点とは一致しないことがある */
-  M.acc=Math.round(acc);M.flu=Math.round(flu);M.cmp=Math.round(cmp);M.tot=Math.round(acc*.6+flu*.2+cmp*.2);M.w=w}
+ if(usable){M.calc=VCALC;M.tot=ag.tot;M.acc=ag.acc;M.flu=ag.flu;M.cmp=ag.cmp;M.sg=ag.sg;M.w=w}
  return M}
+/* 4つの数字(タスク024・016-1): Azure が返した値そのもの。総合=PronScore、正確さ=AccuracyScore、流れ=FluencyScore、言い切り度=CompletenessScore。
+   Azure の連続認識は 区切り(セグメント)ごとにしか値を返さない(全体の値は返らない)。区切りが1つなら そのまま。
+   複数なら、各区切りの Azure の値を、その区切りで聞き取れた語の数で重みづけして平均する(Azure が返した値のほかに、新しい式は入れない)。
+   区切りごとの元の値は M.sg=[[Pron,Acc,Flu,Comp,語数],...] に残す(あとから集計のしかたを変えても、測りなおさずに済む)。 */
+function voiceAgg(segs){
+ var raw=[],tw=0,S=[0,0,0,0];
+ segs.forEach(function(sg){
+  var pa=sg&&sg.pa;
+  if(!pa||typeof pa.PronScore!=='number'||typeof pa.AccuracyScore!=='number'||typeof pa.FluencyScore!=='number'||typeof pa.CompletenessScore!=='number')return;
+  var n=(sg.words||[]).filter(function(w){var e=w.PronunciationAssessment&&w.PronunciationAssessment.ErrorType;return e!=='Insertion'&&e!=='Omission'}).length||1;
+  var v=[pa.PronScore,pa.AccuracyScore,pa.FluencyScore,pa.CompletenessScore];
+  raw.push([Math.round(v[0]*10)/10,Math.round(v[1]*10)/10,Math.round(v[2]*10)/10,Math.round(v[3]*10)/10,n]);
+  for(var k=0;k<4;k++)S[k]+=v[k]*n;tw+=n});
+ if(!raw.length)return null;
+ return {tot:Math.round(S[0]/tw),acc:Math.round(S[1]/tw),flu:Math.round(S[2]/tw),cmp:Math.round(S[3]/tw),sg:raw}}
 
 /* ---- 同意の1枚(ゲーム内の紙)。ボタンは同じ大きさ。ここだけ日本語(013 3-4) ---- */
 function consentCard(done){
