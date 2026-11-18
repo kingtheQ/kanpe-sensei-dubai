@@ -12,7 +12,9 @@ var ARTI={},ARTFAIL={},ARTSHOW=0,AW=1536,AH=960;
    base=足もとの高さ、lulu/king/suit=立つ位置(ルルが左・キングが右。グアムと同じ)、npc=相手(いつもの顔のドット)の位置と大きさ */
 var ART={
  nairobi:{bg:'nairobi-arrivals.png',mode:'wide',base:926,lulu:300,king:470,suit:575,npc:{x:1060,px:9,slide:1},fx:'night'},
- hotel:{bg:'hotel-front.png',mode:'room',base:895,lulu:250,king:450,suit:560,npc:{x:1290,px:15,top:262,clip:412},fx:'hotel'}};
+ hotel:{bg:'hotel-front.png',mode:'room',base:895,lulu:250,king:450,suit:560,npc:{x:1290,px:15,top:262,clip:412},fx:'hotel'},
+ /* 入国審査(タスク031): 人なしの背景。キングとルルは右の端から歩いて入り、いちばん右の列(Visitors)のおわりに立つ(dir:-1 = 左へ歩く)。ルルが左・キングが右 */
+ immig:{bg:'nairobi-immigration.png',mode:'wide',base:690,dir:-1,lulu:1290,king:1360,suit:1250,npc:{x:1319,px:11,top:345,clip:488}}};
 /*ARTSEL*/
 function artImg(n){var i=ARTI[n];if(!i){i=ARTI[n]=new Image();i.onerror=function(){i.bad=1};i.src=ARTBASE+n}return i}
 function artShow(on){if(ARTSHOW===on)return;ARTSHOW=on;cv.hidden=!!on;cvA.hidden=!on}
@@ -70,21 +72,21 @@ function ARTframe(S,A0,dt){
   else{var nb=Math.floor(t*1.6+.25)%2?-BOB/2:0,ny2=B-nh+nb+(spSay&&Math.floor(t*6)%2?-3:0);artShadow(nx+nw/2,B,nw*.6);artSpA(nm,np,nx,ny2,px,0);
    if(spSay)artBubble(nx+nw*.8,ny2-18)}}
  /* 歩いて入ってくる(ゆっくり一定の速さ)。ルルが左・キングが右でそろって止まる */
- var sp=room?260:150,dist=cf.king+150,walked=Math.min(dist,sp*te),walking=walked<dist-.5,sh=dist-walked;
- var kx=cf.king-sh,lx=cf.lulu-sh;
- artSuit(cf.suit-sh,B,room);
+ var dir=cf.dir||1,sp=room?260:150,dist=cf.dist||(dir>0?cf.king+150:AW+150-cf.king),walked=Math.min(dist,sp*te),walking=walked<dist-.5,sh=dist-walked;
+ var kx=cf.king-dir*sh,lx=cf.lulu-dir*sh;
+ artSuit(cf.suit-dir*sh,B,room);
  var shw=room?70:36;
  if(OUT.lvis){var ly=0,limg;
   if(walking){var lf=Math.floor(te/.2)%4;limg=im[['lulu-walk-a','lulu-walk-b','lulu-walk-c','lulu-walk-b'][lf]];ly=lf%2?-BOB:0}
   else{limg=im['lulu-idle'];ly=Math.floor(t*1.6+.5)%2?-BOB:0}
   if(luHelp&&!walking)ly-=Math.floor(t*7)%2?10:0;
-  artShadow(lx,B,shw*.8);artSpr(limg,lx,B+ly,false);
+  artShadow(lx,B,shw*.8);artSpr(limg,lx,B+ly,walking&&dir<0);   /* ルルの歩きのコマは右向き。左へ歩くときだけ反転 */
   if(luTalk&&spSay&&!walking)artBubble(lx+20,B-limg.naturalHeight-26);
   if(luHelp&&!walking){ca.fillStyle='#e8452c';ca.font='800 26px sans-serif';ca.textAlign='center';ca.textBaseline='middle';ca.fillText('♪',lx+limg.naturalWidth*.5,B-limg.naturalHeight-12)}}
  if(OUT.hvis){var ky=0,kimg;
   if(walking){var kf=Math.floor(te/.32)%2;kimg=im[kf?'king-walk-b':'king-walk-a'];ky=kf?-BOB:0}
   else{kimg=im['king-idle'];ky=Math.floor(t*1.6)%2?-BOB:0}
-  artShadow(kx,B,shw);artSpr(kimg,kx,B+ky,walking)}   /* 右へ歩くときは、元の左向きのコマを左右反転 */
+  artShadow(kx,B,shw);artSpr(kimg,kx,B+ky,walking&&dir>0)}   /* 右へ歩くときは、元の左向きのコマを左右反転(左へ歩くときは元のまま) */
  return true}
 function artOKimg(i){return i.complete&&i.naturalWidth>0}
 /* ============================================================

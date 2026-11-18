@@ -532,7 +532,7 @@ def art_js(base, sel): return _rd('art.js').replace("/*ARTBASE*/", base).replace
 # ---------- ナイロビ(tour/index.html) ----------
 dn = dict(sub('sage_')); dn.update(sub('ticket_')); dn.update(sub('win_')); dn.update(sub('nbo_'))
 main = MAIN % dict(dlg=J(dn), sp=SPJS + SPW, bg=BGJS + BGN, world=WORLDJS, voice=VOICEJS, diag=DIAGJS, ev=EVJS, win=WINJS, sage=J(SAGE), arr=J(ARR), air=J(AIR), dep=J(NDEP), ids=J(TOUR_IDS))
-main += art_js('assets/art/', "function artIdFor(S){return S&&S.d&&S.d.bg==='taxi'?'nairobi':null}")   # ナイロビ到着(タクシー乗り場)
+main += art_js('assets/art/', "function artIdFor(S){var g=S&&S.d&&S.d.bg;return g==='taxi'?'nairobi':(g==='immig'?'immig':null)}")   # ナイロビ到着(タクシー乗り場)・入国審査
 o = ev_patches(common(src, 'Africa/Nairobi'))
 # ---- 窓口フロー(タスク012)のためのエンジン側の追加。ナイロビ(tour)だけに入れる。ドバイ・ドーハは変えない ----
 o = rep(o, "if(s0&&(s0.ticket==='star'||s0.ticket==='ow'))save.ticket=s0.ticket;",
