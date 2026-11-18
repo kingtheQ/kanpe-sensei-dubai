@@ -227,10 +227,14 @@ var TRIP=(function(){
   save()}
  function pickPhoto(td){
   var s=S(),r=rowOf(td),c=s.cur||{};
-  if(r&&r[2]==='rest')return {s:'nap',k:'nap',f:0};
+  if(r&&r[2]==='rest')return rawPhoto();
   if(c.ev)return {s:c.ev,k:'ev',f:0};
   if(c.bg)return {s:c.bg,k:(r&&r[3])?'peak':'day',f:0};
-  return {s:'night',k:'night',f:0}}
+  return rawPhoto()}
+ /* 何もなかった日・休養日の写真(020-9): 素の瞬間を、いままでの何もない日の数だけ順に(変顔→寝顔→おやつ→昼寝)。毎回おなじ並びで、読み込み直しても変わらない */
+ function rawPhoto(){
+  var s=S(),n=0,i;for(i=0;i<s.days.length;i++){var p=s.days[i].ph;if(p&&(p.s==='raw'||p.k==='nap'))n++}
+  var k=RAWORDER[n%RAWORDER.length];return k==='nap'?{s:'nap',k:'nap',f:0}:{s:'raw',k:k,f:0}}
  /* ---------- 日の進み ---------- */
  function migrate(){   /* 旅の記録(kanpe-trip-v1)がなく、券だけある古い記録: あそんだぶんの日を作る */
   var t=readTour(),s=blank();if(t.ticket!=='ow'&&t.ticket!=='star')return s;
@@ -351,7 +355,44 @@ var TRIP=(function(){
  var TPH={h:'#2b2b2b',s:'#f2c9a0',e:'#1c2230',b:'#2f5bea',a:'#f2b705',d:'#333a4d'},TPB={t:'#5fd6c3',e:'#10131f',p:'#ff9aa8',a:'#ffc72c',f:'#2f8f82'};
  function spr(g,map,pal,x,y,px){for(var r=0;r<map.length;r++){var row=map[r];for(var k=0;k<row.length;k++){var ch=row.charAt(k);if(ch!=='.'){g.fillStyle=pal[ch]||'#f0f';g.fillRect(Math.round(x+k*px),Math.round(y+r*px),px,px)}}}}
  function rect(g,col,x,y,w,h){g.fillStyle=col;g.fillRect(x,y,w,h)}
- function mini(g,ph){   /* 場面の絵が使えないとき(世界マップ)の、小さな ドットの写真。グラデーションなし */
+ /* ---------- 何もない日の写真(タスク032 / 020-9): 素の瞬間の絵(2人の変顔・寝顔・おやつ) ----------
+    場面がなかった日(休養日など)の記録・アルバムに付く。いまのゲームの絵の流儀(キングとルルのドット・グラデーションなし・赤と緑を並べない)で、
+    320x150 の小さな絵として描く。あとで差し替えできる: RAW[名前] は g(2Dコンテキスト, 320x150)に描く関数。
+    TRIP.setRaw(名前, 関数) で関数を差し替える。TRIP.setRawImage(名前, 画像のURL) なら 320x150 の画像に差し替える(読み込めるまではドット絵)。 */
+ var RAWORDER=['face','sleep','snack','nap'];
+ var KFACE=['...hhhhhh...','..hhhhhhhh..','..hssssssh..','..hsseessh..','..hsmmmmsh..','...sspps...','..bbbbbbbb..','.sbbbaabbbs.'];
+ var LFACE=['.tt....tt.','tttttttttt','tttteetttt','ppttttttpp','ttttmmtttt','aaaaaaaaaa','.tttttttt.','.ff....ff.'];
+ var KSLEEP=['...hhhhhh...','..hhhhhhhh..','..hssssssh..','..heesseeh..','..hssssssh..','...ssssss...'];
+ var LSLEEP=['.tt....tt.','tttttttttt','teetttteet','tpttttttpt','tttttttttt'];
+ var HEROMINI=['...hhhhhh...','..hhhhhhhh..','..hssssssh..','..hsessesh..','..hssssssh..','...ssssss...','..bbbbbbbb..','.sbbbaabbbs.','.sbbbaabbbs.','..bbbbbbbb..'];
+ var BUDDYMINI=['.tt....tt.','tttttttttt','ttettttett','tpttttttpt','tttttttttt','aaaaaaaaaa','.tttttttt.','.ff....ff.'];
+ var RP={h:'#2b2b2b',s:'#f2c9a0',e:'#1c2230',b:'#2f5bea',a:'#f2b705',d:'#333a4d',m:'#5a2a2a',p:'#ff9aa8',t:'#5fd6c3',f:'#2f8f82'};
+ var ZZ=['zzzzz','...z.','..z..','.z...','zzzzz'];
+ function plus(g,col,x,y){rect(g,col,x+2,y,2,6);rect(g,col,x,y+2,6,2)}
+ function cookie(g,x,y,bite){rect(g,'#c98a3a',x+1,y,4,6);rect(g,'#c98a3a',x,y+1,6,4);rect(g,'#5a3a1a',x+2,y+2,1,1);rect(g,'#5a3a1a',x+4,y+3,1,1);if(bite)rect(g,'#f3e6c8',x+4,y,2,2)}
+ var RAW={
+  face:function(g){
+   rect(g,'#f3e6c8',0,0,320,150);rect(g,'#d9b88a',0,118,320,32);rect(g,'#c9a878',0,118,320,2);
+   spr(g,KFACE,RP,64,60,6);spr(g,LFACE,RP,194,60,6);
+   plus(g,'#f2b705',40,30);plus(g,'#143fb0',150,24);plus(g,'#f2b705',286,34);plus(g,'#143fb0',172,100)},
+  sleep:function(g){
+   rect(g,'#1f2750',0,0,320,150);rect(g,'#0e1630',226,10,64,50);rect(g,'#d8dde8',226,10,64,2);rect(g,'#d8dde8',226,58,64,2);rect(g,'#d8dde8',256,10,2,50);
+   rect(g,'#ffd36a',236,22,12,12);for(var i=0;i<8;i++)rect(g,'#ffe9a8',(i*41+12)%200,(i*23+10)%52,2,2);
+   rect(g,'#6a4428',14,96,292,54);rect(g,'#fffdf4',54,70,92,34);rect(g,'#fffdf4',182,70,92,34);
+   spr(g,KSLEEP,RP,70,62,5);spr(g,LSLEEP,RP,198,70,5);
+   rect(g,'#5f79c0',22,102,276,48);for(var y=108;y<150;y+=10)rect(g,'#4a62a8',22,y,276,2);
+   spr(g,ZZ,{z:'#ffd36a'},150,30,3);spr(g,ZZ,{z:'#ffd36a'},180,14,2)},
+  snack:function(g){
+   rect(g,'#f3e6c8',0,0,320,150);rect(g,'#d9b88a',0,100,320,2);
+   spr(g,HEROMINI,RP,50,46,5);spr(g,BUDDYMINI,RP,216,56,5);
+   rect(g,'#8a6238',0,112,320,4);rect(g,'#b98a58',0,116,320,34);
+   rect(g,'#fffdf4',112,108,96,6);cookie(g,124,102,0);cookie(g,142,100,0);cookie(g,160,102,1);cookie(g,178,100,1);
+   rect(g,'#c98a3a',60,128,2,2);rect(g,'#c98a3a',230,132,2,2);rect(g,'#5a3a1a',104,124,2,2)}};
+ function setRaw(k,fn){if(typeof fn==='function')RAW[k]=fn}
+ function setRawImage(k,url){var im=new Image();im.onload=function(){RAW[k]=function(g){g.imageSmoothingEnabled=false;g.drawImage(im,0,0,320,150)}};im.src=url}
+ function mini(g,ph){
+  if(ph&&ph.s==='raw'&&has(RAW,ph.k)){try{RAW[ph.k](g);return}catch(e){}}   /* 何もない日の写真(素の瞬間) */
+  /* 場面の絵が使えないとき(世界マップ)の、小さな ドットの写真。グラデーションなし */
   var th=THEME[ph&&ph.s]||'air',k=ph&&ph.k;
   var P={desk:['#e8e4da','#d9d4c6','#143fb0'],air:['#e8e4da','#d8dce6','#143fb0'],dair:['#efe6d2','#e2d6bc','#8a1538'],lng:['#3a2a4a','#5a4a6a','#c9a03a'],
    street:['#7cc4ee','#5a5a66','#143fb0'],cabin:['#e4dfe2','#6a4a5a','#5c0632'],souq:['#d9b888','#c9a878','#7a5a3a'],hotel:['#e8dcc4','#d8c8a8','#8a6a4a'],
@@ -478,7 +519,7 @@ var TRIP=(function(){
   setTicket:setTicket,rowOf:rowOf,groupTd:groupTd,groupDone:groupDone,dayDone:dayDone,reachable:reachable,nextTd:nextTd,maxTd:maxTd,
   morning:morning,night:night,bundle:bundle,afterScene:afterScene,enter:enter,morningInfo:morningInfo,nightInfo:nightInfo,
   lockedPlace:lockedPlace,lockedMode:lockedMode,modeHidden:modeHidden,stamps:stamps,inTrip:inTrip,drawPhoto:drawPhoto,mini:mini,passEl:passEl,
-  restToday:restToday,isSparta:isSparta,spartaDone:spartaDone,spartaRule:spartaRule,SPARTA:SPARTA,hourNow:hourNow,hourAt:hourAt,HOUR:HOUR,
+  restToday:restToday,isSparta:isSparta,spartaDone:spartaDone,spartaRule:spartaRule,SPARTA:SPARTA,setRaw:setRaw,setRawImage:setRawImage,RAW:RAW,RAWORDER:RAWORDER,hourNow:hourNow,hourAt:hourAt,HOUR:HOUR,
   tearNow:tearNow,settle:settle,settleExtra:settleExtra,addFee:addFee,albumPages:albumPages,yen:yen,money:money,yenText:yenText,big:big,dayRec:dayRec,overlay:overlay,E:E,css:css,
   migrate:migrate,pickPhoto:pickPhoto,note:note,oneMonth:oneMonth}
 })();

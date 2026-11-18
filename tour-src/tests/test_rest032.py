@@ -35,7 +35,7 @@ if __name__ == '__main__':
         o = q.evaluate(OV); print('次の朝', o); chk('夜のあと 6日目の朝(DAY 6、知らせなし)', bool(o) and 'DAY 6' in o and 'NOTICE' not in o, o)
         chk('夜を閉じたあと 合宿ボタンが戻る', q.evaluate("()=>document.getElementById('boothBtn').hidden") is False)
         t = q.evaluate("()=>JSON.parse(localStorage.getItem('kanpe-trip-v1'))")
-        chk('記録: 5日目が日の記録に入り、その日の写真は昼寝', any(d['d'] == 5 and d['ph']['k'] == 'nap' for d in t['days']), json.dumps(t['days'])[:200]); q.close()
+        chk('記録: 5日目が日の記録に入り、その日の写真は 素の瞬間(昼寝か変顔か寝顔かおやつ)', any(d['d'] == 5 and d['ph']['k'] in ('nap','face','sleep','snack') for d in t['days']), json.dumps(t['days'])[:200]); q.close()
         # B. 休養日の途中(朝の1枚のあと閉じて開き直し=ph が day): 場面に入らず夜の1枚へ。マップのボタンは隠れ、場所は全部閉じ、合宿は始まらない
         q = page(ctx, base, seed('ow', 5, 5, 'day'))
         o = q.evaluate(OV); chk('開き直し: 夜の1枚(DAY 5)', bool(o) and 'DAY 5' in o and 'Good night' in o, o)
