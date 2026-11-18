@@ -410,7 +410,7 @@ SNOTE_NEW = ('<p class="snote">声は、ゲームでは 保存しません。マ
 def trip_patches(o, page):
     """タスク030: 旅の骨組み(DAY・券の束・記録)を、場面のあと・場所の鍵・タブの鍵につなぐ"""
     tj = _rd('trip.js')
-    o = rep(o, "function storeSave(){", tj + "\nTRIP.setPage('" + page + "');TRIP.hooks.say=function(t){try{setMsgInstant(t,'LULU')}catch(e){}};TRIP.hooks.at=function(){try{return G.at}catch(e){return null}};\nfunction storeSave(){")
+    o = rep(o, "function storeSave(){", tj + "\nTRIP.setPage('" + page + "');TRIP.hooks.say=function(t){try{setMsgInstant(t,'LULU')}catch(e){}};TRIP.hooks.at=function(){try{return G.at}catch(e){return null}};TRIP.hooks.ui=function(){try{var b=document.getElementById('boothBtn');if(b)b.hidden=TRIP.restToday()}catch(e){}};\nfunction storeSave(){")
     # 場面の昼夜は 旅の中の現地時刻(タスク032 / 020-3)。nightNow(音)と dohNight(ドーハの外の絵)の「いまの時」を TRIP.hourNow に通す。旅の外は本当の時計のまま
     o, n = re.subn(r"var h=\+new Intl\.DateTimeFormat\('en-GB',\{timeZone:'([A-Za-z/_]+)',hour:'2-digit',hourCycle:'h23'\}\)\.format\(new Date\(\)\);",
                    lambda m: "var h=TRIP.hourNow('" + m.group(1) + "');", o)
@@ -423,6 +423,10 @@ def trip_patches(o, page):
             "function lockedPlace(id){if(TRIP.lockedPlace(id))return true;if(MODE!=='arr'&&MODE!=='dep')return false;")
     o = rep(o, "b.dataset.m=k;b.addEventListener('click',function(){",
             "b.dataset.m=k;b.addEventListener('click',function(){if(G.view==='map'&&MODE!==k&&TRIP.lockedMode(k)){try{Snd.jingle('buzz')}catch(e){}return}")
+    # 休養日は 強化合宿の入口(マップのボタン・合宿の開始)を出さない(タスク032 / 020-7)。単語バトルは場面の中にあり、休養日は場所が全部閉じるので入口がない
+    o = rep(o, "function refreshBoothBtn(){var n=boothCount();$m('boothBtn').textContent=",
+            "function refreshBoothBtn(){var n=boothCount();$m('boothBtn').hidden=TRIP.restToday();$m('boothBtn').textContent=")
+    o = rep(o, "function startCamp(){\n var fromMap=", "function startCamp(){\n if(TRIP.restToday())return;\n var fromMap=")
     return o
 
 def sub(pref): return dict((k, v) for k, v in dl.items() if k.startswith(pref))
@@ -462,13 +466,13 @@ var EVQ=(location.search.match(/[?&]ev=(\\w+)/)||[])[1]||'';
 function evS(){var e=save.ev;if(!e||typeof e!=='object')e=save.ev={};if(!e.fired||typeof e.fired!=='object')e.fired={};if(typeof e.streak!=='number')e.streak=0;if(typeof e.last!=='string')e.last='';return e}
 function evFx(k){try{Snd.fx('ding')}catch(e){}}
 function evNote(S){
- if(!S||!S.d||S.d.win)return;var e=evS(),k=S.d.kind||'std';
+ if(!S||!S.d||S.d.win||TRIP.restToday())return;var e=evS(),k=S.d.kind||'std';
  if(k==='ev'||k==='short'){e.streak=0;e.last=k}
  else if(k===e.last)e.streak++;else{e.last=k;e.streak=1}
  storeSave()}
-function evBored(){return EVQ==='all'||evS().streak>=EVC.sameN}
+function evBored(){if(TRIP.restToday())return false;return EVQ==='all'||evS().streak>=EVC.sameN}
 function evGate(at,key,cont){
- if(EVQ==='off')return false;var e=evS();
+ if(EVQ==='off'||TRIP.restToday())return false;var e=evS();
  for(var i=0;i<EVSLOTS.length;i++){var x=EVSLOTS[i];
   if(x.at!==at||x.key!==key||e.fired[x.id]||!DLG[x.vid])continue;
   if(x.need&&!(save.seen[x.need]>0))continue;

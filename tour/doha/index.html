@@ -1439,6 +1439,11 @@ var TRIP=(function(){
    [25,'HNL','move',0,'Honolulu. Today the date changes.',[]],[26,'GUM','air',2,'Guam. We have been here before.',[]],
    [27,'GUM','city',0,'Guam. The beach and the hotel.',[]],[28,'GUM','air',0,'Guam. We are going home.',[]],
    [29,'NRT','home',0,'Home. The receipts are on the table.',[]],[30,'NRT','home',2,'One month later.',[]]]};
+ /* 休養日の「知らせ」(タスク032 / 020-7)。休養日に来るのはこれだけ。答えなくてよい。英文1行(日本語なし)。出来事の内容・数字は物語の中の架空(実在の運行情報ではない)。
+    キー = 券の種類 + 表の日。休養日(ROWS の種類が rest)の日だけ */
+ var NOTICES={ow5:'Airport staff are on strike today. Some flights may be late.',ow8:'Hot and windy this afternoon. Some outdoor tours may change.',
+  ow16:'Morning fog at the airport. Some flights may be late.',ow20:"Tomorrow's train leaves one hour earlier.",ow23:'Light rain this morning. It will clear by noon.',
+  star5:'Airport staff are on strike today. Some flights may be late.',star14:'Rain in the city this afternoon.',star18:"Tomorrow's train leaves one hour earlier.",star21:'Light rain this morning. It will clear by noon.'};
  /* 場面のまとまり: 各行 = 1つの場所の場面の名前。全部の場所で、どれか1本あそんでいたら、そのまとまりは終わり(いまのクリアと同じ決まり) */
  var GROUPS={
   hnd:[['ticket_ow','ticket_star']],
@@ -1614,12 +1619,12 @@ var TRIP=(function(){
   var s=sync();if(s.ph!=='morning')return null;
   var td=s.td;if(!rowOf(td)||!reachable(td)){var n=nextTd(td-1);if(!n)return null;td=n}
   if(!openable(td)&&!(td===1&&s.day===0))return null;
-  var r=rowOf(td);return {td:td,day:s.day+1,en:'Day '+(s.day+1)+'. '+r[4],rest:r[2]==='rest',fly:legsOnDay(td)}}
+  var r=rowOf(td);return {td:td,day:s.day+1,en:'Day '+(s.day+1)+'. '+r[4],rest:r[2]==='rest',note:r[2]==='rest'&&has(NOTICES,s.tk+td)?NOTICES[s.tk+td]:'',fly:legsOnDay(td)}}
  function legsOnDay(td){var s=S(),o=[],i;for(i=0;i<s.legs.length;i++)if(legInfo(i).td===td&&!s.legs[i].l)o.push(i);return o}
- function openMorning(){var m=morningInfo();if(!m)return null;var s=S();s.day=m.day;s.td=m.td;s.ph='day';s.cur={led:[],pick:[]};fillD();save();return m}
+ function openMorning(){var m=morningInfo();if(!m)return null;var s=S();s.day=m.day;s.td=m.td;s.ph='day';s.cur={led:[],pick:[]};fillD();save();syncUI();return m}
  function nightInfo(){
   var s=S();if(s.ph!=='night'&&!(s.ph==='day'&&(dayDone(s.td)||isRest(s.td))))return null;
-  if(s.ph==='day'){s.ph='night';s.nph=pickPhoto(s.td);save()}
+  if(s.ph==='day'){s.ph='night';s.nph=pickPhoto(s.td);save();syncUI()}
   var ph=s.nph||pickPhoto(s.td),b=big(s.cur&&s.cur.led);
   return {day:s.day,td:s.td,photo:ph,line:b?money(b):'',rest:isRest(s.td)}}
  function closeNight(){
@@ -1630,9 +1635,12 @@ var TRIP=(function(){
   fillD();
   var n=nextTd(s.td);
   if(n){s.td=n;s.ph='morning'}else{s.td=s.td+1;s.ph='wait'}
-  save()}
+  save();syncUI()}
+ /* 休養日(朝の1枚を開いてから夜の1枚を閉じるまで)か。この間は 単語バトル・合宿の入口を出さず、場所は全部閉じる。飽きたサインも数えない(020-7) */
+ function restToday(){var s=S();return !!s.tk&&exists()&&(s.ph==='day'||s.ph==='night')&&isRest(s.td)}
  function lockedGroup(g){
   var s=S();if(!s.tk)return false;
+  if(restToday())return true;
   var td=groupTd(g);if(!td)return true;
   return td>s.td||(td===s.td&&s.ph==='morning')}
  function lockedPlace(id){var g=PLACEGRP[id];return g?lockedGroup(g):false}
@@ -1660,6 +1668,7 @@ var TRIP=(function(){
  +'.trip-list{width:min(92vw,380px);display:flex;flex-direction:column;gap:8px;margin:4px 0}'
  +'.trip-row{display:flex;gap:8px;align-items:center;background:#1c2447;border:2px solid #5b6690;border-radius:6px;padding:6px 8px;text-align:left}'
  +'.trip-row canvas{width:96px;aspect-ratio:320/150;image-rendering:pixelated;border:2px solid #fffdf4;background:#222;flex:none}.trip-row b{font-size:13px;color:#ffc72c}.trip-row span{display:block;font-size:12px;color:#cfd6ee}'
+ +'.trip-note{width:min(86vw,330px);box-sizing:border-box;padding:8px 12px;border:3px solid #2a1a10;border-radius:6px;background:#fff6d8;color:#10131f;text-align:left;font-size:14px;line-height:1.45;box-shadow:0 4px 0 #2a1a10}.trip-note b{display:block;font-size:11px;letter-spacing:.12em;color:#8a1538;margin-bottom:2px}'
  +'.trip-btn{font:inherit;font-weight:800;font-size:15px;color:#10131f;background:#ffc72c;border:3px solid #2a1a10;border-radius:10px;padding:10px 22px;cursor:pointer;box-shadow:0 4px 0 #2a1a10}'
  +'.trip-torn{position:relative;width:min(86vw,330px);height:150px}.trip-torn .tp{position:absolute;left:0;right:0;top:0;margin:0}'
  +'.trip-torn .tp.tp-top{clip-path:inset(0 0 52px 0)}.trip-torn .tp.tp-bot{clip-path:inset(98px 0 0 0)}'
@@ -1677,6 +1686,7 @@ var TRIP=(function(){
   try{o.focus({preventScroll:true})}catch(e){}
   return o}
  function say(text){try{if(hooks.say)hooks.say(text)}catch(e){}}
+ function syncUI(){try{if(hooks.ui)hooks.ui()}catch(e){}}   /* 休養日の入口(合宿ボタン)の出し入れを、ページに知らせる */
  function fx(n){try{if(hooks.fx)hooks.fx(n)}catch(e){}}
  /* ---- 搭乗券 ---- */
  function passEl(i,cls){
@@ -1723,6 +1733,7 @@ var TRIP=(function(){
   o.appendChild(E('div','trip-day','DAY '+m.day));
   var row=rowOf(m.td);o.appendChild(E('div','trip-sub',row[4]));
   if(m.fly.length){var pe=passEl(m.fly[0]);o.appendChild(pe)}
+  if(m.note){var nb=E('div','trip-note');nb.appendChild(E('b','','NOTICE'));nb.appendChild(E('span','',m.note));o.appendChild(nb)}
   o.appendChild(E('div','trip-hint','▶'));
   say(m.en);fx('page');return true}
  /* ---- 夜の1枚(今日の写真がゆっくり浮かぶ) ---- */
@@ -1780,8 +1791,9 @@ var TRIP=(function(){
  function enter(cb,page){
   PAGE=page||PAGE;
   try{sync()}catch(e){}
-  var s=S();
+  var s=S();syncUI();
   if(s.ph==='night'){night(cb);return}
+  if(s.ph==='day'&&isRest(s.td)){night(cb);return}   /* 休養日は 場面がない。朝の1枚のあと閉じて開き直したら そのまま夜へ */
   if(morningInfo()){morning(cb);return}
   if(cb)cb()}
  /* 記録帳: 数える言葉 */
@@ -1808,14 +1820,14 @@ var TRIP=(function(){
   setTicket:setTicket,rowOf:rowOf,groupTd:groupTd,groupDone:groupDone,dayDone:dayDone,reachable:reachable,nextTd:nextTd,maxTd:maxTd,
   morning:morning,night:night,bundle:bundle,afterScene:afterScene,enter:enter,morningInfo:morningInfo,nightInfo:nightInfo,
   lockedPlace:lockedPlace,lockedMode:lockedMode,modeHidden:modeHidden,stamps:stamps,inTrip:inTrip,drawPhoto:drawPhoto,mini:mini,passEl:passEl,
-  hourNow:hourNow,hourAt:hourAt,HOUR:HOUR,
+  restToday:restToday,hourNow:hourNow,hourAt:hourAt,HOUR:HOUR,
   settle:settle,albumPages:albumPages,yen:yen,money:money,yenText:yenText,big:big,dayRec:dayRec,overlay:overlay,E:E,css:css,
   migrate:migrate,pickPhoto:pickPhoto,note:note,oneMonth:oneMonth}
 })();
 
 try{window.TRIP=TRIP}catch(e){}
 
-TRIP.setPage('doha');TRIP.hooks.say=function(t){try{setMsgInstant(t,'LULU')}catch(e){}};TRIP.hooks.at=function(){try{return G.at}catch(e){return null}};
+TRIP.setPage('doha');TRIP.hooks.say=function(t){try{setMsgInstant(t,'LULU')}catch(e){}};TRIP.hooks.at=function(){try{return G.at}catch(e){return null}};TRIP.hooks.ui=function(){try{var b=document.getElementById('boothBtn');if(b)b.hidden=TRIP.restToday()}catch(e){}};
 function storeSave(){try{localStorage.setItem(SAVEKEY,JSON.stringify(save))}catch(e){}}
 /* 世界マップへ「クリア」を伝える: 6つの場所を、それぞれ1回以上あそんだら */
 function worldMark(k){try{var w=JSON.parse(localStorage.getItem('kanpe-world-v1')||'null');if(!w||typeof w!=='object')w={v:1,at:'haneda',seen:{haneda:1},cleared:{haneda:1}};w.seen=w.seen&&typeof w.seen==='object'?w.seen:{};w.cleared=w.cleared&&typeof w.cleared==='object'?w.cleared:{};w.seen[k]=1;w.cleared[k]=1;localStorage.setItem('kanpe-world-v1',JSON.stringify(w))}catch(e){}}
@@ -2190,7 +2202,7 @@ function boothPractice(tokens,key){
   if(listening){try{if(rec)rec.stop()}catch(e){}return}
   listen()});
  act.addEventListener('contextmenu',function(e){e.preventDefault()})}
-function refreshBoothBtn(){var n=boothCount();$m('boothBtn').textContent='✈ 強化合宿 ・ 言えなかった単語 '+n+'語'}
+function refreshBoothBtn(){var n=boothCount();$m('boothBtn').hidden=TRIP.restToday();$m('boothBtn').textContent='✈ 強化合宿 ・ 言えなかった単語 '+n+'語'}
 $m('boothBtn').addEventListener('click',function(){if(G.view==='map')startCamp()});
 $m('worldBtn').addEventListener('click',function(){if(G.view==='map')location.href='../../world/?map=1'});
 $m('boothBack').addEventListener('click',function(){showMap()});
@@ -2466,6 +2478,7 @@ function phoLipsSet(id){
  }
  v.innerHTML=out}
 function startCamp(){
+ if(TRIP.restToday())return;
  var fromMap=G.view==='map',lss=pickLessons(2),ls=lss[0],fw=[],mw,ss=weakSents(),st=[];
  lss.forEach(function(l){fw=fw.concat(l.words)});mw=missWords(fw);
  recentAdd(lss.map(function(l){return l.snd}),fw.concat(mw.map(function(m){return m.w})));
@@ -3639,13 +3652,13 @@ var EVQ=(location.search.match(/[?&]ev=(\w+)/)||[])[1]||'';
 function evS(){var e=save.ev;if(!e||typeof e!=='object')e=save.ev={};if(!e.fired||typeof e.fired!=='object')e.fired={};if(typeof e.streak!=='number')e.streak=0;if(typeof e.last!=='string')e.last='';return e}
 function evFx(k){try{Snd.fx('ding')}catch(e){}}
 function evNote(S){
- if(!S||!S.d||S.d.win)return;var e=evS(),k=S.d.kind||'std';
+ if(!S||!S.d||S.d.win||TRIP.restToday())return;var e=evS(),k=S.d.kind||'std';
  if(k==='ev'||k==='short'){e.streak=0;e.last=k}
  else if(k===e.last)e.streak++;else{e.last=k;e.streak=1}
  storeSave()}
-function evBored(){return EVQ==='all'||evS().streak>=EVC.sameN}
+function evBored(){if(TRIP.restToday())return false;return EVQ==='all'||evS().streak>=EVC.sameN}
 function evGate(at,key,cont){
- if(EVQ==='off')return false;var e=evS();
+ if(EVQ==='off'||TRIP.restToday())return false;var e=evS();
  for(var i=0;i<EVSLOTS.length;i++){var x=EVSLOTS[i];
   if(x.at!==at||x.key!==key||e.fired[x.id]||!DLG[x.vid])continue;
   if(x.need&&!(save.seen[x.need]>0))continue;
