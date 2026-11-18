@@ -3675,10 +3675,10 @@ var ART={
  hotel:{bg:'hotel-front.png',mode:'room',base:895,lulu:250,king:450,suit:560,npc:{x:1290,px:15,top:262,clip:412},fx:'hotel',npcS:{c_front:'o-front-woman-blonde-suit'}},
  /* 入国審査(タスク031): 人なしの背景。キングとルルは右の端から歩いて入り、いちばん右の列(Visitors)のおわりに立つ(dir:-1 = 左へ歩く)。ルルが左・キングが右 */
  immig:{bg:'nairobi-immigration.png',mode:'wide',base:690,dir:-1,lulu:1290,king:1360,suit:1250,
-  /* 窓口の係官(頭と肩だけ。大きさは素材のまま)。lead=話し相手の係官の窓口。sw=話し相手が officer2(女性)のとき入れ替わる絵 */
-  booths:[{n:'o-front-officer-green-1',x:215,top:345,clip:488},{n:'o-front-officer-blue',x:585,top:345,clip:488,sw:'o-front-officer-green-1'},
-   {n:'o-front-officer-green-2',x:951,top:345,clip:488},{n:'o-front-officer-green-passport',x:1319,top:345,clip:488,lead:1,sw:'o-front-officer-blue'}],
-  /* 並ぶ人(後ろ姿)と歩く人(正面)。x=足もとの中心、by=足もとの高さ。高さはキングと同じ124px(素材を124pxに縮めた w- の絵)。奥の人から順に描く */
+  /* 窓口の係官(頭と肩だけ。大人の高さ136pxに縮めた絵)。lead=話し相手の係官の窓口。sw=話し相手が officer2(女性)のとき入れ替わる絵 */
+  booths:[{n:'o-front-officer-green-1',x:215,top:395,clip:488},{n:'o-front-officer-blue',x:585,top:395,clip:488,sw:'o-front-officer-green-1'},
+   {n:'o-front-officer-green-2',x:951,top:395,clip:488},{n:'o-front-officer-green-passport',x:1319,top:395,clip:488,lead:1,sw:'o-front-officer-blue'}],
+  /* 並ぶ人(後ろ姿)と歩く人(正面)。x=足もとの中心、by=足もとの高さ。高さは大人=キングの約1.1倍(136px。素材を縮めた w- の絵)。奥の人から順に描く */
   crowd:[['back-family',217,686],['back-man-suit-1',215,789],['back-maasai',216,894],
    ['back-backpacker',585,684],['back-woman-hijab',585,788],['back-man-suit-2',584,892],
    ['back-man-thobe',952,684],['back-couple-red',952,786],['back-woman-blonde-suit',952,892],
