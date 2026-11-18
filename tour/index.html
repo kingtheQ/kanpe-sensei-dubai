@@ -466,7 +466,7 @@ var Snd=(function(){
   ngt=nightNow();send.gain.value=.16;
   kg=AC.createGain();kg.gain.setValueAtTime(.0001,AC.currentTime);kg.gain.linearRampToValueAtTime(.3,AC.currentTime+.5);kg.connect(master);kg.connect(send);
   cur=kind;step=0;next=AC.currentTime+.08;K[kind].amb();tm=setInterval(sched,100);sched()}
- function nightNow(){try{var h=+new Intl.DateTimeFormat('en-GB',{timeZone:'Africa/Nairobi',hour:'2-digit',hourCycle:'h23'}).format(new Date());return h>=19||h<5}catch(e){return false}}
+ function nightNow(){try{var h=TRIP.hourNow('Africa/Nairobi');return h>=19||h<5}catch(e){return false}}
  function go(kind){want=kind||null;if(window.__ambGo)window.__ambGo(want);if(!AC)return;if(want)begin(want);else halt()}
  function duck(flag){                       /* マイクで聞いているあいだは音を止める(BGMがマイクに入らないように) */
   if(window.__ambDuck)window.__ambDuck(flag);if(!AC)return;clearTimeout(duckT);
@@ -1475,6 +1475,26 @@ var TRIP=(function(){
   dimmig:'dair',dbag:'dair',dsim:'dair',dtaxi:'street',dmetro:'dair',dcheck:'dair',dsouth:'dair',dtrain:'dair',dorch:'dair',dlng:'lng',dgate:'dair',dcabin:'cabin',
   calley:'souq',chotel:'hotel',csouq:'souq',crest:'souq',cbreak:'hotel',ccorn:'sea',night:'night',nap:'night'};
 
+ /* ---------- 場面の現地時刻(タスク032 / 020-3) ----------
+    旅の中の場面は、いまの本当の時計でなく「旅の中の現地時刻」で昼夜を決める。
+    時刻は場所(各ページの place id)ごと。台本のあいさつ(Good morning / afternoon / evening)と、便の時間(docs/world-tour-design.md)に合わせた。
+    便の時刻は作る直前に公式で確認する(docs の決まり)。ここは物語の時刻で、実在の便の時刻ではない。旅の外(ドバイ編・グアム編など)は本当の時計のまま。 */
+ var HOUR={
+  immig:9,bag:9,sim:10,taxi:10,                       /* ナイロビ到着(台本: Good morning) */
+  java:12,art:13,lounge:14,duty:15,                    /* ナイロビの空港(昼すぎ) */
+  qcheckin:16,nsec:17,gate:18,qplane:19,               /* ナイロビ出発(台本: 午後〜Good evening)。夕方の便 */
+  dimmig:22,dbag:22,dsim:22,dride:22,                  /* ドーハ到着(台本: Good evening。ナイロビから約5時間) */
+  calley:20,chotel:21,csouq:19,crest:20,               /* ドーハ市内の夜(台本: Good evening) */
+  cbreak:7,ccorn:10,                                   /* ドーハの翌朝(朝食 6:30〜・コルニーシュは朝食のあと) */
+  dcounter:13,dsouth:14,dtrain:14,dnorth:15,dgate:15}; /* ドーハ出発(台本: Good afternoon) */
+ /* 券ごとの上書き: スターのナイロビ着は 01:25(夜)。台本のあいさつは朝のまま(夜版の台本は未作成) */
+ var HOUR_TK={star:{immig:1,bag:2,sim:2,taxi:3}};
+ function hourAt(tk,id){if(!id)return null;var o=HOUR_TK[tk];if(o&&has(o,id))return o[id];return has(HOUR,id)?HOUR[id]:null}
+ function realHour(tz){try{return +new Intl.DateTimeFormat('en-GB',{timeZone:tz,hour:'2-digit',hourCycle:'h23'}).format(new Date())}catch(e){return -1}}
+ /* 場面の絵・音が使う「いまの現地の時(0〜23)」。旅の中で、その日を遊んでいて、場所の時刻が決まっているときだけ旅の時刻。それ以外は tz の本当の時計 */
+ function hourNow(tz){
+  try{var s=S();if(s.tk&&exists()&&s.ph==='day'){var h=hourAt(s.tk,hooks.at&&hooks.at());if(h!=null)return h}}catch(e){}
+  return realHour(tz)}
  /* ---------- 記録の読み書き ---------- */
  var st=null,PAGE='',hooks={};
  function readTour(){try{var t=JSON.parse(localStorage.getItem(TKEY)||'null');return t&&typeof t==='object'?t:{}}catch(e){return {}}}
@@ -1795,13 +1815,14 @@ var TRIP=(function(){
   setTicket:setTicket,rowOf:rowOf,groupTd:groupTd,groupDone:groupDone,dayDone:dayDone,reachable:reachable,nextTd:nextTd,maxTd:maxTd,
   morning:morning,night:night,bundle:bundle,afterScene:afterScene,enter:enter,morningInfo:morningInfo,nightInfo:nightInfo,
   lockedPlace:lockedPlace,lockedMode:lockedMode,modeHidden:modeHidden,stamps:stamps,inTrip:inTrip,drawPhoto:drawPhoto,mini:mini,passEl:passEl,
+  hourNow:hourNow,hourAt:hourAt,HOUR:HOUR,
   settle:settle,albumPages:albumPages,yen:yen,money:money,yenText:yenText,big:big,dayRec:dayRec,overlay:overlay,E:E,css:css,
   migrate:migrate,pickPhoto:pickPhoto,note:note,oneMonth:oneMonth}
 })();
 
 try{window.TRIP=TRIP}catch(e){}
 
-TRIP.setPage('tour');TRIP.hooks.say=function(t){try{setMsgInstant(t,'LULU')}catch(e){}};
+TRIP.setPage('tour');TRIP.hooks.say=function(t){try{setMsgInstant(t,'LULU')}catch(e){}};TRIP.hooks.at=function(){try{return G.at}catch(e){return null}};
 var TOUR_FRESH=(function(){try{return localStorage.getItem(SAVEKEY)===null}catch(e){return false}})();
 function storeSave(){try{localStorage.setItem(SAVEKEY,JSON.stringify(save))}catch(e){}}
 /* 世界マップへ「クリア」を伝える: 6つの場所を、それぞれ1回以上あそんだら */
