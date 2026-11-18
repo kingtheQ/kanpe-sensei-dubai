@@ -1611,7 +1611,7 @@ function renderEval(card,spans,toks,res,heardEl){
  res.heardRaw.forEach(function(h,j){var e=document.createElement(res.hflags[j]==='bad'?'b':'span');e.textContent=h+' ';heardEl.appendChild(e)})}
 function setupAction(act,stat,toks,spans,T){
  G.mute=null;var card=spans.length?spans[0].parentNode:null;
- if(T.diag&&!PREF.silent&&card){var AZ=(T.diag==='decl'||T.diag==='decl_end')&&voiceAzureOn();if(AZ||SR){(AZ?setupDiagAz:setupDiag)(act,stat,toks,spans,T,card);return}}
+ if(T.diag&&!PREF.silent&&card){var AZ=voiceAzDiag(T.diag)&&voiceAzureOn();if(AZ||SR){(AZ?setupDiagAz:setupDiag)(act,stat,toks,spans,T,card);return}}
  if(!SR||!card||PREF.silent){setupActionTimer(act,stat,toks,spans,T);if(card)card.appendChild(el('div','heard nomic',PREF.silent?'こえを ださない モード(時間だけで判定)':'このブラウザは音声認識なし(時間だけで判定)'));return}
  var heardEl=el('div','heard','');card.appendChild(heardEl);
  var tgToks=toks.map(function(k){return k.txt}),sid=G.sid,rec=null,listening=false,got=false,lastInt='',errCode='',mode='say',IDLE='🎤 もういちど';
@@ -2908,6 +2908,11 @@ function voiceRelayOn(){return /^https:\/\//.test(RELAY_URL)}
 function voiceConsent(){var c=vLoad().consent;return c?c.az:null}
 function voiceNeedConsent(){return voiceRelayOn()&&voiceConsent()===null}      /* 中継がなければ、送る先がないので聞かない */
 function voiceAzureOn(){return voiceRelayOn()&&voiceConsent()===true}
+/* Azure で読む長いカンペ: 旅の始めの宣言・終わりの宣言・窓口の読み返し(タスク024)。始め/終わりの2つだけが kanpe-voice-v1 の比べに入る */
+function voiceAzDiag(k){return k==='decl'||k==='decl_end'||k==='readback'}
+function voiceCmpDiag(k){return k==='decl'||k==='decl_end'}
+/* 読み返しの判定: 聞き取れた単語でも、Azure の単語の正確さが AZ_BAD(60)未満なら「言えなかった」に数える(仮。false にすると、聞き取れたかどうかだけ) */
+var RB_AZ_JUDGE=true;
 function voiceSetConsent(b){var v=vLoad();v.consent={az:!!b,at:Date.now(),ver:1};vSave(v)}
 function voiceClear(){var v=vLoad();v.trips=[];v.next=null;vSave(v)}              /* 同意の選びは残す(切り替えは別) */
 function voiceSetNext(o){var v=vLoad();v.next=o;vSave(v)}
@@ -3101,10 +3106,17 @@ function setupDiagAz(act,stat,toks,spans,T,card){
   function go(){
    Snd.duck(0);
    var txt=segTxt().trim(),res=analyze(tg,txt),M=voiceBuildM(tg,segs,txt,res);
-   plogAdd({ts:M.ts,v:G.scene?G.scene.vid:'',tg:tg.join(' '),hd:txt.slice(0,600),cf:0,ok:res.okN,n:res.n,
-    miss:res.words.filter(function(w){return !w.ok}).slice(0,40).map(function(w){return {t:missKey(w.t),h:w.h,k:w.k}}),
-    diag:T.diag,why:why,seg:segs.length,bits:M.bits,alts:[],src:M.src});
-   voiceSetM(T.diag,M);
+   /* 判定。始め・終わりの宣言は今までどおり(聞き取れたか)。窓口の読み返しだけ、Azure の単語ごとの正確さも使う */
+   var judge=T.diag==='readback'&&RB_AZ_JUDGE&&M.src==='az'&&M.w&&M.w.length===res.words.length,bits=M.bits,okN=res.okN,miss=[];
+   if(judge){bits='';res.words.forEach(function(w,i){
+    var low=w.ok&&M.w[i][1]!=null&&M.w[i][1]<AZ_BAD,ok=w.ok&&!low;bits+=ok?'1':'0';if(low)okN--;
+    if(!ok&&miss.length<40)miss.push({t:missKey(w.t),h:w.h,k:low?'az':w.k})})}
+   else miss=res.words.filter(function(w){return !w.ok}).slice(0,40).map(function(w){return {t:missKey(w.t),h:w.h,k:w.k}});
+   var rec={ts:M.ts,v:G.scene?G.scene.vid:'',tg:tg.join(' '),hd:txt.slice(0,600),cf:0,ok:okN,n:res.n,miss:miss,
+    diag:T.diag,why:why,seg:segs.length,bits:bits,alts:[],src:M.src};
+   if(M.src==='az'){rec.nv=M.nv;rec.sc=[M.tot,M.acc,M.flu,M.cmp]}   /* Azure の4つの値(総合・正確さ・流れ・言い切り度) */
+   plogAdd(rec);
+   if(voiceCmpDiag(T.diag))voiceSetM(T.diag,M);
    card.classList.add('shown');heardEl.className='heard fin';heardEl.textContent=txt||'…';
    later(Math.min(6500,2600+txt.length*16),diagDone)}
   if(h0)h0.stop(go);else go()}
@@ -3154,8 +3166,8 @@ function setupDiag(act,stat,toks,spans,T,card){
   /* 集計用の記録(004): 既存の発音記録 plog に、同じ形で残す。bits=紙の単語ごとの 合った(1)/ちがった(0)。alts=候補1〜3 */
   plogAdd({ts:Date.now(),v:G.scene?G.scene.vid:'',tg:tg.join(' '),hd:txt.slice(0,600),cf:cfN?cfSum/cfN:0,ok:res.okN,n:res.n,
    miss:res.words.filter(function(w){return !w.ok}).slice(0,40).map(function(w){return {t:missKey(w.t),h:w.h,k:w.k}}),
-   diag:T.diag,why:why,seg:segs.length,bits:res.words.map(function(w){return w.ok?'1':'0'}).join(''),alts:alts.slice(0,12)});
-  if(T.diag==='decl'||T.diag==='decl_end')voiceSaveSR(T.diag,tg,res,txt);  /* 始め・終わりの宣言は、比べるための別の記録(kanpe-voice-v1)にも残す */
+   diag:T.diag,why:why,seg:segs.length,bits:res.words.map(function(w){return w.ok?'1':'0'}).join(''),alts:alts.slice(0,12),src:'sr'});   /* src: sr=ブラウザの音声認識 / az=Azure(voice.js) */
+  if(voiceCmpDiag(T.diag))voiceSaveSR(T.diag,tg,res,txt);  /* 始め・終わりの宣言は、比べるための別の記録(kanpe-voice-v1)にも残す */
   card.classList.add('shown');heardEl.className='heard fin';heardEl.textContent=txt||'…';
   later(Math.min(6500,2600+txt.length*16),diagDone)}
  function start(){
