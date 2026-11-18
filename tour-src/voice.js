@@ -1,6 +1,6 @@
 /* ===== 声(タスク016): 同意・記録(kanpe-voice-v1)・Azure 発音評価・設定 =====
    設計の正本: docs/pm/deliverables/013-ending-scores-design-v1.md
-   声の行き先: ブラウザの音声認識(いつも) / Azure(同意した人の、旅の始めと終わりの宣言の2回だけ)。
+   声の行き先: ブラウザの音声認識(いつも) / Azure(同意した人の、旅の始めの宣言・窓口の読み返し・旅の終わりの宣言だけ)。
    キーはゲームに置かない。中継(relay/)が10分だけ使えるトークンを渡す。中継の URL が空なら Azure は使わない。
    build.py が /*RELAY_URL*/'' の中身を tour-src/relay-url.txt から差しこむ(中継のURLは、そこ1か所だけ)。 */
 var VOICEKEY='kanpe-voice-v1',VREF='decl-v1',VCALC=2;   /* VCALC: 4つの数字の意味の版。1=016の仮の式(正確さ×0.6＋流れ×0.2＋言い切り度[単語の一致率]×0.2)／2=Azure の値そのまま(タスク024)。印のない古い記録は1として扱う */
@@ -201,8 +201,8 @@ function setupDiagAz(act,stat,toks,spans,T,card){
    var txt=segTxt().trim(),res=analyze(tg,txt),M=voiceBuildM(tg,segs,txt,res);
    plogAdd({ts:M.ts,v:G.scene?G.scene.vid:'',tg:tg.join(' '),hd:txt.slice(0,600),cf:0,ok:res.okN,n:res.n,
     miss:res.words.filter(function(w){return !w.ok}).slice(0,40).map(function(w){return {t:missKey(w.t),h:w.h,k:w.k}}),
-    diag:T.diag,why:why,seg:segs.length,bits:M.bits,alts:[],src:M.src});
-   voiceSetM(T.diag,M);
+    diag:T.diag,why:why,seg:segs.length,bits:M.bits,alts:[],src:M.src,az:M.src==='az'?[M.tot,M.acc,M.flu,M.cmp]:undefined});   /* src: 'az'=Azure／'sr'=ブラウザの音声認識。az=[総合,正確さ,流れ,言い切り度](Azure の値) */
+   if(T.diag==='decl'||T.diag==='decl_end')voiceSetM(T.diag,M);   /* 始め・終わりの宣言だけ、比べるための記録(kanpe-voice-v1)に入れる。窓口の読み返し(readback)は plog だけ */
    card.classList.add('shown');heardEl.className='heard fin';heardEl.textContent=txt||'…';
    later(Math.min(6500,2600+txt.length*16),diagDone)}
   if(h0)h0.stop(go);else go()}

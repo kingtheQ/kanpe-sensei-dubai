@@ -577,7 +577,7 @@ o = rep(o, "var card=el('div','cue');card.appendChild(el('span','lab','カンペ
         "var card=el('div','cue'+(T.diag?' diag':''));card.appendChild(el('span','lab','カンペ'));")
 o = rep(o, " if(!G.camp)addHelp(T)}", " if(!G.camp&&!T.diag&&!G.scene.d.nohelp)addHelp(T)}")
 o = rep(o, " G.mute=null;var card=spans.length?spans[0].parentNode:null;",
-        " G.mute=null;var card=spans.length?spans[0].parentNode:null;\n if(T.diag&&!PREF.silent&&card){var AZ=(T.diag==='decl'||T.diag==='decl_end')&&voiceAzureOn();if(AZ||SR){(AZ?setupDiagAz:setupDiag)(act,stat,toks,spans,T,card);return}}")
+        " G.mute=null;var card=spans.length?spans[0].parentNode:null;\n if(T.diag&&!PREF.silent&&card){var AZ=(T.diag==='decl'||T.diag==='decl_end'||T.diag==='readback')&&voiceAzureOn();if(AZ||SR){(AZ?setupDiagAz:setupDiag)(act,stat,toks,spans,T,card);return}}")
 # 長いカンペは、ブザーも合格音もなく、いつも先へ進む
 o = rep(o, "function onFail(){\n Snd.jingle('buzz');", "function onFail(){\n var Td=G.scene&&G.scene.turns[G.ti];if(Td&&Td.diag){diagDone();return}\n Snd.jingle('buzz');")
 o = rep(o, "function onPass(){\n Snd.jingle('pass');", "function onPass(){\n var Td=G.scene&&G.scene.turns[G.ti];if(Td&&Td.diag){diagDone();return}\n Snd.jingle('pass');")
