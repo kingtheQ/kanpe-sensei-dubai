@@ -1,9 +1,9 @@
 /* ===== 声(タスク016): 同意・記録(kanpe-voice-v1)・Azure 発音評価・設定 =====
    設計の正本: docs/pm/deliverables/013-ending-scores-design-v1.md
-   声の行き先: ブラウザの音声認識(いつも) / Azure(同意した人の、旅の始めと終わりの宣言の2回だけ)。
+   声の行き先: ブラウザの音声認識(いつも) / Azure(同意した人の、旅の始めの宣言・窓口の読み返し・旅の終わりの宣言だけ)。
    キーはゲームに置かない。中継(relay/)が10分だけ使えるトークンを渡す。中継の URL が空なら Azure は使わない。
    build.py が /*RELAY_URL*/'' の中身を tour-src/relay-url.txt から差しこむ(中継のURLは、そこ1か所だけ)。 */
-var VOICEKEY='kanpe-voice-v1',VREF='decl-v1';
+var VOICEKEY='kanpe-voice-v1',VREF='decl-v1',VCALC=2,CONSENT_VER=2;   /* VCALC: 4つの数字の意味の版。1=016の仮の式(正確さ×0.6＋流れ×0.2＋言い切り度[単語の一致率]×0.2)／2=Azure の値そのまま(タスク024)。印のない古い記録は1として扱う */
 var RELAY_URL=/*RELAY_URL*/'';
 var SDK_URL='https://cdn.jsdelivr.net/npm/microsoft-cognitiveservices-speech-sdk@1.45.0/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle-min.js';
 var SDK_SRI='sha384-RrysmqdtkBJHdL3yBqslKJR4EMsU7hA1rz+HpC9qMY001mmfKeRcKisr+NyuyI6H';
@@ -18,10 +18,11 @@ function vLoad(){
  return v}
 function vSave(v){try{localStorage.setItem(VOICEKEY,JSON.stringify(v))}catch(e){}}
 function voiceRelayOn(){return /^https:\/\//.test(RELAY_URL)}
-function voiceConsent(){var c=vLoad().consent;return c?c.az:null}
+/* 同意の版(ver): 1=冒頭と終わりの宣言の2回／2=宣言2回＋窓口の読み返し(タスク024)。送ってよいと答えた人が古い版(ver<2)のままなら、新しい文面で取り直すまで送らない(null=まだ聞いていない)。送らないと答えた人は、そのまま「送らない」 */
+function voiceConsent(){var c=vLoad().consent;if(!c)return null;if(c.az===true&&(c.ver||1)<CONSENT_VER)return null;return c.az}
 function voiceNeedConsent(){return voiceRelayOn()&&voiceConsent()===null}      /* 中継がなければ、送る先がないので聞かない */
 function voiceAzureOn(){return voiceRelayOn()&&voiceConsent()===true}
-function voiceSetConsent(b){var v=vLoad();v.consent={az:!!b,at:Date.now(),ver:1};vSave(v)}
+function voiceSetConsent(b){var v=vLoad();v.consent={az:!!b,at:Date.now(),ver:CONSENT_VER};vSave(v)}
 function voiceClear(){var v=vLoad();v.trips=[];v.next=null;vSave(v)}              /* 同意の選びは残す(切り替えは別) */
 function voiceSetNext(o){var v=vLoad();v.next=o;vSave(v)}
 function voiceTripCur(){var v=vLoad();return v.trips.length?v.trips[v.trips.length-1]:null}
@@ -110,35 +111,45 @@ function valign(rn,an){
 /* tg=紙の単語, segs=Azure の区切りごとの結果, txt=聞こえた文, res=analyze の結果。
    単語の半分以上が対応づかなければ、Azure の結果は使わない(src='sr'。数字なし) */
 function voiceBuildM(tg,segs,txt,res){
- var rn=tg.map(vnorm),aw=[],durs=0,fs=0,fw=0;
+ var rn=tg.map(vnorm),aw=[];
  segs.forEach(function(sg){
-  var pa=sg.pa,wd=0;
   (sg.words||[]).forEach(function(w){
-   var a=w.PronunciationAssessment||{};wd+=+w.Duration||0;
+   var a=w.PronunciationAssessment||{};
    if(a.ErrorType==='Insertion'||a.ErrorType==='Omission')return;
    aw.push({n:vnorm(w.Word),a:typeof a.AccuracyScore==='number'?a.AccuracyScore:null,e:a.ErrorType||'None',
-    p:(w.Phonemes||[]).map(function(p){var q=p.PronunciationAssessment||{};return [String(p.Phoneme||''),Math.round(typeof q.AccuracyScore==='number'?q.AccuracyScore:0)]})})});
-  if(pa&&typeof pa.FluencyScore==='number'){var wt=wd||1;fs+=pa.FluencyScore*wt;fw+=wt}});
- var map=valign(rn,aw.map(function(x){return x.n})),w=[],accs=[],matched=0;
+    p:(w.Phonemes||[]).map(function(p){var q=p.PronunciationAssessment||{};return [String(p.Phoneme||''),Math.round(typeof q.AccuracyScore==='number'?q.AccuracyScore:0)]})})})});
+ var map=valign(rn,aw.map(function(x){return x.n})),w=[],matched=0;
  rn.forEach(function(r,i){
   var j=map[i],x=j>=0?aw[j]:null,ok=x&&x.a!=null&&(x.n===r||lev(x.n,r)<=Math.max(1,Math.floor(r.length*.5)));
-  if(ok){matched++;accs.push(x.a);w.push([tg[i],Math.round(x.a),x.e,x.p])}else w.push([tg[i],null,'Omission',[]])});
- var cov=tg.length?matched/tg.length:0,usable=cov>=.5&&fw>0;
+  if(ok){matched++;w.push([tg[i],Math.round(x.a),x.e,x.p])}else w.push([tg[i],null,'Omission',[]])});
+ var cov=tg.length?matched/tg.length:0,ag=voiceAgg(segs),usable=cov>=.5&&!!ag;
  var M={ts:Date.now(),src:usable?'az':'sr',tot:null,acc:null,flu:null,cmp:null,w:null,
   bits:res.words.map(function(x){return x.ok?'1':'0'}).join(''),heard:String(txt||'').slice(0,600)};
- if(usable){
-  var acc=accs.reduce(function(a,b){return a+b},0)/Math.max(1,accs.length),flu=fs/fw,cmp=cov*100;
-  /* 4つの数字: このゲームの計算式(同じ式で始めと終わりを測る)。Azure の画面の総合点とは一致しないことがある */
-  M.acc=Math.round(acc);M.flu=Math.round(flu);M.cmp=Math.round(cmp);M.tot=Math.round(acc*.6+flu*.2+cmp*.2);M.w=w}
+ if(usable){M.calc=VCALC;M.tot=ag.tot;M.acc=ag.acc;M.flu=ag.flu;M.cmp=ag.cmp;M.sg=ag.sg;M.w=w}
  return M}
+/* 4つの数字(タスク024・016-1): Azure が返した値そのもの。総合=PronScore、正確さ=AccuracyScore、流れ=FluencyScore、言い切り度=CompletenessScore。
+   Azure の連続認識は 区切り(セグメント)ごとにしか値を返さない(全体の値は返らない)。区切りが1つなら そのまま。
+   複数なら、各区切りの Azure の値を、その区切りで聞き取れた語の数で重みづけして平均する(Azure が返した値のほかに、新しい式は入れない)。
+   区切りごとの元の値は M.sg=[[Pron,Acc,Flu,Comp,語数],...] に残す(あとから集計のしかたを変えても、測りなおさずに済む)。 */
+function voiceAgg(segs){
+ var raw=[],tw=0,S=[0,0,0,0];
+ segs.forEach(function(sg){
+  var pa=sg&&sg.pa;
+  if(!pa||typeof pa.PronScore!=='number'||typeof pa.AccuracyScore!=='number'||typeof pa.FluencyScore!=='number'||typeof pa.CompletenessScore!=='number')return;
+  var n=(sg.words||[]).filter(function(w){var e=w.PronunciationAssessment&&w.PronunciationAssessment.ErrorType;return e!=='Insertion'&&e!=='Omission'}).length||1;
+  var v=[pa.PronScore,pa.AccuracyScore,pa.FluencyScore,pa.CompletenessScore];
+  raw.push([Math.round(v[0]*10)/10,Math.round(v[1]*10)/10,Math.round(v[2]*10)/10,Math.round(v[3]*10)/10,n]);
+  for(var k=0;k<4;k++)S[k]+=v[k]*n;tw+=n});
+ if(!raw.length)return null;
+ return {tot:Math.round(S[0]/tw),acc:Math.round(S[1]/tw),flu:Math.round(S[2]/tw),cmp:Math.round(S[3]/tw),sg:raw}}
 
 /* ---- 同意の1枚(ゲーム内の紙)。ボタンは同じ大きさ。ここだけ日本語(013 3-4) ---- */
 function consentCard(done){
  clearPanel();G.phase='consent';
  var card=el('div','vcons');card.appendChild(el('div','vh','声を送ってもいい？'));
- card.appendChild(el('p','','旅のはじめと、おわりに、同じ文を言います。そのときの声だけを、発音を調べるために Microsoft のサービス（Azure）に送ります。'));
+ card.appendChild(el('p','','旅のはじめと、おわりに、同じ文を言います。窓口では、券の控えを読み上げます。この3つの場面の声だけを、発音を調べるために Microsoft のサービス（Azure）に送ります。'));
  var ul=el('ul');
- ['送るのは、この2回だけ。ほかの場面の声は、このサービスには送りません。（ほかの場面では、ブラウザの音声認識が声を文字にします。Chrome なら Google、Safari なら Apple のサービスです。）',
+ ['送るのは、この3つの場面だけ（旅のはじめ・窓口の読み上げ・旅のおわり）。言い直したときの声も送ります。ほかの場面の声は、このサービスには送りません。（ほかの場面では、ブラウザの音声認識が声を文字にします。Chrome なら Google、Safari なら Apple のサービスです。）',
   'ゲームは声を保存しません。Microsoft は、この方法では声を保存しないと説明しています。',
   '結果は、この端末の中だけに残ります。',
   '送らなくても、ゲームは最後まで同じように遊べます。いつでも、設定で変えられます。'].forEach(function(t){ul.appendChild(el('li','',t))});
@@ -154,7 +165,7 @@ function voiceSetSection(b){
  var s=sSec('こえの おくりさき');
  if(voiceRelayOn()){
   var r=el('div','stg'),tx=el('div','tx');tx.appendChild(el('div','tt','こえを Microsoft に おくる'));
-  tx.appendChild(el('div','dd','はじめと おわりの せんげん(2かい)だけ。ほかの ばめんでは おくりません'));
+  tx.appendChild(el('div','dd','はじめの せんげん・まどぐちの よみあげ・おわりの せんげんだけ。ほかの ばめんでは おくりません'));
   var tg=el('button','tgl');tg.type='button';tg.setAttribute('aria-label','こえを おくる');tg.setAttribute('aria-pressed',voiceConsent()===true?'true':'false');
   tg.addEventListener('click',function(){var nv=voiceConsent()!==true;voiceSetConsent(nv);tg.setAttribute('aria-pressed',nv?'true':'false')});
   r.appendChild(tx);r.appendChild(tg);s.appendChild(r)}
@@ -191,8 +202,8 @@ function setupDiagAz(act,stat,toks,spans,T,card){
    var txt=segTxt().trim(),res=analyze(tg,txt),M=voiceBuildM(tg,segs,txt,res);
    plogAdd({ts:M.ts,v:G.scene?G.scene.vid:'',tg:tg.join(' '),hd:txt.slice(0,600),cf:0,ok:res.okN,n:res.n,
     miss:res.words.filter(function(w){return !w.ok}).slice(0,40).map(function(w){return {t:missKey(w.t),h:w.h,k:w.k}}),
-    diag:T.diag,why:why,seg:segs.length,bits:M.bits,alts:[],src:M.src});
-   voiceSetM(T.diag,M);
+    diag:T.diag,why:why,seg:segs.length,bits:M.bits,alts:[],src:M.src,az:M.src==='az'?[M.tot,M.acc,M.flu,M.cmp]:undefined});   /* src: 'az'=Azure／'sr'=ブラウザの音声認識。az=[総合,正確さ,流れ,言い切り度](Azure の値) */
+   if(T.diag==='decl'||T.diag==='decl_end')voiceSetM(T.diag,M);   /* 始め・終わりの宣言だけ、比べるための記録(kanpe-voice-v1)に入れる。窓口の読み返し(readback)は plog だけ */
    card.classList.add('shown');heardEl.className='heard fin';heardEl.textContent=txt||'…';
    later(Math.min(6500,2600+txt.length*16),diagDone)}
   if(h0)h0.stop(go);else go()}
