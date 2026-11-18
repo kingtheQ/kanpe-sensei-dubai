@@ -54,9 +54,9 @@ def run_card(pw, name, d, consent):
     t0 = time.time(); txt = ''
     while time.time() - t0 < 40:
         txt = page.evaluate("()=>document.getElementById('panel').innerText")
-        if '声を送ってもいい' in txt: break
+        if '発音をチェックしてみよう' in txt: break
         T.click_text(page, ['GO！', 'GO!']); time.sleep(.25)
-    res['card_shown'] = '声を送ってもいい' in txt
+    res['card_shown'] = '発音をチェックしてみよう' in txt
     res['card_text'] = txt[:400] if res['card_shown'] else ''
     if res['card_shown']:
         T.click_text(page, ['送ってOK']); page.wait_for_timeout(300)

@@ -3638,14 +3638,9 @@ function voiceAgg(segs){
 /* ---- 同意の1枚(ゲーム内の紙)。ボタンは同じ大きさ。ここだけ日本語(013 3-4) ---- */
 function consentCard(done){
  clearPanel();G.phase='consent';
- var card=el('div','vcons');card.appendChild(el('div','vh','声を送ってもいい？'));
- card.appendChild(el('p','','旅のはじめと、おわりに、同じ文を言います。窓口では、券の控えを読み上げます。この3つの場面の声だけを、発音を調べるために Microsoft のサービス（Azure）に送ります。'));
- var ul=el('ul');
- ['送るのは、この3つの場面だけ（旅のはじめ・窓口の読み上げ・旅のおわり）。言い直したときの声も送ります。ほかの場面の声は、このサービスには送りません。（ほかの場面では、ブラウザの音声認識が声を文字にします。Chrome なら Google、Safari なら Apple のサービスです。）',
-  'ゲームは声を保存しません。Microsoft は、この方法では声を保存しないと説明しています。',
-  '結果は、この端末の中だけに残ります。',
-  '送らなくても、ゲームは最後まで同じように遊べます。いつでも、設定で変えられます。'].forEach(function(t){ul.appendChild(el('li','',t))});
- card.appendChild(ul);panel.appendChild(card);
+ var card=el('div','vcons');card.appendChild(el('div','vh','発音をチェックしてみよう！'));
+ card.appendChild(el('p','','はじめに発音を聞かせてね。旅のおわりに、どれだけ言えるようになったかを並べて見られるよ。判定は Microsoft のサービスがします。声を送るのは、旅のはじめとおわり、窓口で券を読むときの3回だけ。声は保存されません。'));
+ panel.appendChild(card);
  var row=el('div','row cuerow'),ok=el('button','btn sub','送ってOK'),no=el('button','btn sub','送らない'),used=false;
  [ok,no].forEach(function(b){b.type='button'});
  function pick(v){if(used)return;used=true;voiceSetConsent(v);done()}

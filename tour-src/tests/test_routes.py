@@ -129,8 +129,8 @@ def run_route(pw, name, d, relay_on, consent_btn, sr, az, token_ok, phase_says=N
         v = vstore(p)
         if v and v != 'bad' and v.get('trips') and v['trips'][0].get('start'): return True
         txt = p.evaluate("()=>document.getElementById('panel').innerText")
-        if '声を送ってもいい' in txt: seen_consent = True
-        for t in ([consent_btn] if '声を送ってもいい' in txt and consent_btn else []) + ['GO！', 'GO!']:
+        if '発音をチェックしてみよう' in txt: seen_consent = True
+        for t in ([consent_btn] if '発音をチェックしてみよう' in txt and consent_btn else []) + ['GO！', 'GO!']:
             r = click_text(p, [t])
             if r: clicked.append(r); break
         return False
@@ -148,7 +148,7 @@ def run_route(pw, name, d, relay_on, consent_btn, sr, az, token_ok, phase_says=N
         txt = p.evaluate("()=>document.getElementById('panel').innerText")
         st = p.evaluate("()=>window.__T&&window.__T.G&&window.__T.G.scene&&window.__T.G.scene.end?window.__T.G.scene.end.view:''")
         key = st + '|' + ('E4' if 'Departure' in txt and 'Home' in txt and 'Voice' in txt or ('Home' in txt and 'Departure' not in txt and '✦' in txt) else '')
-        if '声を送ってもいい' in txt:
+        if '発音をチェックしてみよう' in txt:
             click_text(p, [consent_btn]); return False
         if st+'|'+txt[:20] != getattr(tick2, 'last', None):
             tick2.last = st+'|'+txt[:20]; tick2.n = getattr(tick2, 'n', 0) + 1
