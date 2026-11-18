@@ -152,6 +152,7 @@ def run_route(pw, name, d, relay_on, consent_btn, sr, az, token_ok, phase_says=N
         if st+'|'+txt[:20] != getattr(tick2, 'last', None):
             tick2.last = st+'|'+txt[:20]; tick2.n = getattr(tick2, 'n', 0) + 1
             p.wait_for_timeout(500); p.screenshot(path=os.path.join(SHOTS, '%s_e%d.png' % (name, tick2.n)))
+        if 'Voice' in txt and 'Words' in txt and not res.get('e4_text'): res['e4_text'] = txt[:400]   # E4 の数字(タスク024)
         if 'Close the album' in txt: return True
         for t in ['We went!', '›']:
             if click_text(p, [t]): break
@@ -160,7 +161,7 @@ def run_route(pw, name, d, relay_on, consent_btn, sr, az, token_ok, phase_says=N
     res['reached_E6'] = ok2
     res['errors'] += page.evaluate("window.__errs")
     res['final_panel'] = page.evaluate("()=>document.getElementById('panel').innerText")[:300]
-    v = vstore(page); res['final_store'] = {'consent': v.get('consent') if v and v != 'bad' else None, 'trips': [{'id': t['id'], 'start_src': (t.get('start') or {}).get('src'), 'end_src': (t.get('end') or {}).get('src'), 'start_tot': (t.get('start') or {}).get('tot'), 'end_tot': (t.get('end') or {}).get('tot')} for t in (v or {}).get('trips', [])] if v and v != 'bad' else None, 'next': v.get('next') if v and v != 'bad' else None, 'bytes': len(json.dumps(v)) if v else 0}
+    v = vstore(page); res['final_store'] = {'consent': v.get('consent') if v and v != 'bad' else None, 'trips': [{'id': t['id'], 'start_src': (t.get('start') or {}).get('src'), 'end_src': (t.get('end') or {}).get('src'), 'start_tot': (t.get('start') or {}).get('tot'), 'end_tot': (t.get('end') or {}).get('tot'), 'start_nv': (t.get('start') or {}).get('nv'), 'end_nv': (t.get('end') or {}).get('nv'), 'end_nseg': (t.get('end') or {}).get('nseg')} for t in (v or {}).get('trips', [])] if v and v != 'bad' else None, 'next': v.get('next') if v and v != 'bad' else None, 'bytes': len(json.dumps(v)) if v else 0}
     page.screenshot(path=os.path.join(SHOTS, name + '_6end.png')); res['shots'].append(name + '_6end.png')
     br.close(); srv.shutdown(); return res
 

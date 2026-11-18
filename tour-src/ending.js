@@ -105,7 +105,9 @@ function endPlan(){
  var tr=voiceTripCur()||{},st=tr.start||null,en=tr.end||null;
  if(!END.mic||!en||!en.heard||!en.heard.trim())return {show:false};                       /* d・何も聞こえなかった: E4・E5 は出さない */
  var three=!!(st&&st.src==='az'&&en.src==='az'&&st.w&&en.w&&st.w.length===en.w.length);   /* 同じ測り方どうしだけ、数字と3段の色で比べる */
- return {show:true,st:st,en:en,cmp:three,one:!st}}
+ /* 数字は、同じ意味の数字どうしだけ出す(nv=2: Azure の値そのもの。印のない古い記録は独自の式なので、並べない。単語の色は Azure の単語ごとの値で、どちらも同じ) */
+ var nums=three&&st.nv===NUMV&&en.nv===NUMV,oneNums=!st&&en.src==='az'&&!!en.w&&en.nv===NUMV;
+ return {show:true,st:st,en:en,cmp:three,nums:nums,oneNums:oneNums,one:!st}}
 function endCls(M,i,three){
  if(three&&M.w&&M.w[i]){var a=M.w[i][1];return a==null?2:(a>=80?0:(a>=60?1:2))}      /* 近い／おしい／遠い(80・60 は仮の区切り) */
  return M.bits&&M.bits.charAt(i)==='1'?0:2}
@@ -120,7 +122,7 @@ function endMarks(st,en,three){
  return out}
 function endTier(label,M,three,nums,marks){
  var box=el('div','ert'),h=el('div','erh');h.appendChild(el('b','',label));
- if(nums)h.appendChild(el('span','enum','Voice '+M.tot+' · Words '+M.acc+' · Flow '+M.flu+' · Finish '+M.cmp));
+ if(nums)h.appendChild(el('span','enum','Voice '+vShow(M.tot)+' · Words '+vShow(M.acc)+' · Flow '+vShow(M.flu)+' · Finish '+vShow(M.cmp)));
  box.appendChild(h);var ws=el('div','ewords');
  endToks().forEach(function(k,i){
   var s=el('span','ew c'+endCls(M,i,three),k);
@@ -142,8 +144,8 @@ function e4(){
  clearPanel();var box=el('div','eres');
  var three=P.cmp,marks=[];
  if(P.st&&P.st.bits&&P.en.bits)marks=endMarks(P.st,P.en,three);
- if(P.st)box.appendChild(endTier('Departure',P.st,three,three,null));
- box.appendChild(endTier('Home',P.en,P.cmp||(!P.st&&P.en.src==='az'&&!!P.en.w),three,marks));   /* 数字は 両段に小さく(013 §2-2・タスク022)。比べられないとき(b・a・c)は出さない */
+ if(P.st)box.appendChild(endTier('Departure',P.st,three,P.nums,null));
+ box.appendChild(endTier('Home',P.en,P.cmp||(!P.st&&P.en.src==='az'&&!!P.en.w),P.nums||P.oneNums,marks));   /* 数字は 両段に小さく(013 §2-2・タスク022)。比べられないとき(b・a・c)は出さない */
  if(marks.length){var tk=endToks(),jl=el('div','ejoy');jl.textContent=marks.map(function(i){return '✦ '+tk[i].replace(/[^A-Za-z']/g,'')}).join('   ');box.appendChild(jl)}
  panel.appendChild(box);endNav(null,function(){e5()})}
 /* E5: 音の変化(いちばんむずかしかった音 上位3つ。数字は出さず、棒の長さだけ) */

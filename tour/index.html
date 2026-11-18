@@ -2994,29 +2994,54 @@ function valign(rn,an){
  var map=[];for(i=0;i<n;i++)map.push(-1);i=n;j=m;
  while(i>0||j>0){var b=B[i][j];if(i>0&&j>0&&b===0){map[i-1]=j-1;i--;j--}else if(i>0&&(j===0||b===1)){i--}else{j--}}
  return map}
+/* ---- 4つの数字(タスク024): 独自の計算式はやめ、Azure が返した値そのものを使う ----
+   総合=PronScore / 正確さ=AccuracyScore / 流れ=FluencyScore / 言い切り度=CompletenessScore。
+   長い宣言は連続認識で、Azure は「区切りごと」に4つの値を返す(全体で1つの値は返らない)。
+   ・区切りが1つのとき: その区切りの4つの値を、そのまま使う(PronScore も Azure の値)。
+   ・区切りが2つ以上のとき: Azure の区切りごとの値を、Microsoft の連続認識の例(Speech SDK サンプル)の考え方で合わせる
+       正確さ=区切りの AccuracyScore を単語数で平均 / 流れ=区切りの FluencyScore を長さ(Duration)で平均
+       言い切り度=紙の単語のうち、聞き取れて正確さ60以上の割合(Microsoft のサンプルが「誤発音」とする区切りと同じ。連続認識では区切りごとの値が全体の紙と比べた値か分からないため)
+       総合=Microsoft Learn の式を、この3つにあてる(下の vPron)
+   記録には、区切りごとの Azure の値(az)も そのまま残す。合わせ方を変えても、古い記録を計算しなおせる。 */
+var AZ_BAD=60;                                   /* 単語の正確さがこれ未満=「遠い」(013 の3段の下の区切りと同じ。仮) */
+var NUMV=2;                                      /* 数字の意味の版。2=Azure の値そのもの。印がない(nv なし)古い記録は、独自の式で計算した数字 */
+function vr1(x){return Math.round(x*10)/10}
+function vShow(x){return typeof x==='number'?String(Math.round(x)):'-'}      /* 画面には整数で出す */
+/* PronScore(読み上げ・抑揚なし): Microsoft Learn「Use pronunciation assessment」の式。3つを小さい順に s0,s1,s2 として 0.6*s0+0.2*s1+0.2*s2 */
+function vPron(a,f,c){var s=[a,f,c].sort(function(x,y){return x-y});return s[0]*.6+s[1]*.2+s[2]*.2}
+/* raw=区切りごと [PronScore|null, Accuracy, Fluency, Completeness, 単語数, 長さ]。w=紙の単語の順の結果, refN=紙の単語数 */
+function voiceWhole(raw,w,refN){
+ if(!raw||!raw.length)return null;
+ if(raw.length===1){var r=raw[0];return {tot:typeof r[0]==='number'?r[0]:vPron(r[1],r[2],r[3]),acc:r[1],flu:r[2],cmp:r[3]}}
+ var an=0,as=0,fd=0,fs=0;
+ raw.forEach(function(r){as+=r[1]*r[4];an+=r[4];fs+=r[2]*r[5];fd+=r[5]});
+ if(!an||!fd)return null;
+ var good=0;(w||[]).forEach(function(x){if(x&&x[1]!=null&&x[1]>=AZ_BAD&&x[2]!=='Omission')good++});
+ var acc=as/an,flu=fs/fd,cmp=refN?Math.min(100,good*100/refN):0;
+ return {tot:vPron(acc,flu,cmp),acc:acc,flu:flu,cmp:cmp}}
 /* tg=紙の単語, segs=Azure の区切りごとの結果, txt=聞こえた文, res=analyze の結果。
    単語の半分以上が対応づかなければ、Azure の結果は使わない(src='sr'。数字なし) */
 function voiceBuildM(tg,segs,txt,res){
- var rn=tg.map(vnorm),aw=[],durs=0,fs=0,fw=0;
+ var rn=tg.map(vnorm),aw=[],raw=[];
  segs.forEach(function(sg){
-  var pa=sg.pa,wd=0;
+  var pa=sg.pa,wd=0,wn=0;
   (sg.words||[]).forEach(function(w){
    var a=w.PronunciationAssessment||{};wd+=+w.Duration||0;
-   if(a.ErrorType==='Insertion'||a.ErrorType==='Omission')return;
+   if(a.ErrorType==='Insertion'||a.ErrorType==='Omission')return;wn++;
    aw.push({n:vnorm(w.Word),a:typeof a.AccuracyScore==='number'?a.AccuracyScore:null,e:a.ErrorType||'None',
     p:(w.Phonemes||[]).map(function(p){var q=p.PronunciationAssessment||{};return [String(p.Phoneme||''),Math.round(typeof q.AccuracyScore==='number'?q.AccuracyScore:0)]})})});
-  if(pa&&typeof pa.FluencyScore==='number'){var wt=wd||1;fs+=pa.FluencyScore*wt;fw+=wt}});
- var map=valign(rn,aw.map(function(x){return x.n})),w=[],accs=[],matched=0;
+  if(pa&&typeof pa.AccuracyScore==='number'&&typeof pa.FluencyScore==='number'&&typeof pa.CompletenessScore==='number'&&wn>0)
+   raw.push([typeof pa.PronScore==='number'?pa.PronScore:null,pa.AccuracyScore,pa.FluencyScore,pa.CompletenessScore,wn,wd||1])});
+ var map=valign(rn,aw.map(function(x){return x.n})),w=[],matched=0;
  rn.forEach(function(r,i){
   var j=map[i],x=j>=0?aw[j]:null,ok=x&&x.a!=null&&(x.n===r||lev(x.n,r)<=Math.max(1,Math.floor(r.length*.5)));
-  if(ok){matched++;accs.push(x.a);w.push([tg[i],Math.round(x.a),x.e,x.p])}else w.push([tg[i],null,'Omission',[]])});
- var cov=tg.length?matched/tg.length:0,usable=cov>=.5&&fw>0;
- var M={ts:Date.now(),src:usable?'az':'sr',tot:null,acc:null,flu:null,cmp:null,w:null,
+  if(ok){matched++;w.push([tg[i],Math.round(x.a),x.e,x.p])}else w.push([tg[i],null,'Omission',[]])});
+ var cov=tg.length?matched/tg.length:0,W=cov>=.5?voiceWhole(raw,w,tg.length):null,usable=!!W;
+ var M={ts:Date.now(),src:usable?'az':'sr',nv:usable?NUMV:undefined,tot:null,acc:null,flu:null,cmp:null,w:null,
   bits:res.words.map(function(x){return x.ok?'1':'0'}).join(''),heard:String(txt||'').slice(0,600)};
  if(usable){
-  var acc=accs.reduce(function(a,b){return a+b},0)/Math.max(1,accs.length),flu=fs/fw,cmp=cov*100;
-  /* 4つの数字: このゲームの計算式(同じ式で始めと終わりを測る)。Azure の画面の総合点とは一致しないことがある */
-  M.acc=Math.round(acc);M.flu=Math.round(flu);M.cmp=Math.round(cmp);M.tot=Math.round(acc*.6+flu*.2+cmp*.2);M.w=w}
+  M.tot=vr1(W.tot);M.acc=vr1(W.acc);M.flu=vr1(W.flu);M.cmp=vr1(W.cmp);M.w=w;
+  M.nseg=raw.length;M.az=raw.map(function(r){return [r[0]==null?null:vr1(r[0]),vr1(r[1]),vr1(r[2]),vr1(r[3]),r[4],Math.round(r[5])]})}
  return M}
 
 /* ---- 同意の1枚(ゲーム内の紙)。ボタンは同じ大きさ。ここだけ日本語(013 3-4) ---- */
