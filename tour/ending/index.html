@@ -1498,6 +1498,9 @@ var TRIP=(function(){
  var RATE={JPY:1,KES:1.2,USD:150,QAR:41};
  var LBL={ticket:'Ticket',sim:'SIM card',taxi:'Taxi',metro:'Metro',coffee:'Coffee',duty:'Duty free',tea:'Tea',gift:'Gift',dinner:'Dinner',boat:'Boat ride',fee:'Fee',sep:'Separate ticket'};
  var TICKETPRICE={star:958900,ow5:1074300,ow4:936500};
+ /* 29日目の精算の「手数料」「別切符」(タスク032 / 020-10)。値段は物語の中の架空(実在の手数料の数字ではない。020-10)。
+    別切符: 券の区間のうち sep の区間(oneworld のリマ⇄クスコ)をちぎったとき、1回ずつ記録帳に載る。手数料: 場面が TRIP.addFee で載せる(いまそれを使う場面はまだない) */
+ var SEPTICKET=['sep',95,'USD'];
  /* 場面の絵の名前 → 写真の見た目(場面の絵が使えないページ=世界マップで、控えの写真に使う) */
  var THEME={tdesk:'desk',sage:'desk',javaK:'air',artK:'air',lounge:'lng',duty:'air',gate:'air',sim:'air',taxi:'street',checkinQ:'air',cabinQ:'cabin',
   dimmig:'dair',dbag:'dair',dsim:'dair',dtaxi:'street',dmetro:'dair',dcheck:'dair',dsouth:'dair',dtrain:'dair',dorch:'dair',dlng:'lng',dgate:'dair',dcabin:'cabin',
@@ -1587,9 +1590,13 @@ var TRIP=(function(){
  function fly(apId){
   var c=codeOf(apId),ch=c&&chain(c);if(!ch)return null;
   var s=S(),tear=[];
-  ch.forEach(function(j){var l=s.legs[j];if(!l.f){l.f=1;l.dt=today();tear.push(j)}l.l=1});
+  ch.forEach(function(j){var l=s.legs[j];if(!l.f){l.f=1;l.dt=today();tear.push(j);var li=legInfo(j);if(li&&li.sep)ledgerAdd(SEPTICKET)}l.l=1});
   fillD();save();return {tear:tear,all:ch}}
- function tearNow(i){var s=S(),l=s.legs[i];if(!l||l.f)return false;l.f=1;l.dt=today();fillD();save();return true}
+ /* お金の1行を、いまの日(朝〜その日を遊んでいる間)の記録帳に載せる。夜・朝のあいだなら、直前の日の記録に足す。日がまだなければ載せない */
+ function ledgerAdd(e){var s=S();if(s.ph==='day'){s.cur.led.push(e.slice(0,3));return true}
+  if(s.days.length){var d=s.days[s.days.length-1];if(d.led.length<24){d.led.push(e.slice(0,3));return true}}return false}
+ function addFee(amount,cur){if(!(amount>0))return false;var ok=ledgerAdd(['fee',amount,cur||'JPY']);save();return ok}
+ function tearNow(i){var s=S(),l=s.legs[i];if(!l||l.f)return false;l.f=1;l.dt=today();var li=legInfo(i);if(li&&li.sep)ledgerAdd(SEPTICKET);fillD();save();return true}
  function setTicket(tk,price){
   var s=S();if(tk!=='ow'&&tk!=='star')return;
   if(s.tk!==tk){s.tk=tk;s.legs=mkLegs(tk)}
@@ -1839,6 +1846,17 @@ var TRIP=(function(){
    d.pick.forEach(function(p){picks[p]=(picks[p]||0)+1})});
   if(picks.metro&&MONEY.doh_taxi&&MONEY.doh_metro){sv={what:'metro',yen:yen(MONEY.doh_taxi)-yen(MONEY.doh_metro)}}
   return {total:tot,best:best,bestSum:bestSum,picks:picks,fee:fee,sep:sep,save:sv,days:s.days.length}}
+ /* 精算(29日目)の読み上げ5項目のうち 4(手数料・別切符)と 5(選んだ重さ)。1〜3 は ending.js(合計・いちばん高い日・いちばん得した選択)。
+    手数料・別切符が1円もないときは「なかった」と読む(記録がないのは、使ってないから)。選んだ重さ(タクシーとメトロ)は、選んだ記録があるときだけ読む */
+ function settleExtra(R0){
+  R0=R0||settle();var out=[],fs=R0.fee,sp=R0.sep;
+  if(fs>0&&sp>0)out.push('Fees and separate tickets cost us '+yenText(fs+sp)+'.');
+  else if(fs>0)out.push('The fees cost us '+yenText(fs)+'.');
+  else if(sp>0)out.push('The separate tickets cost us '+yenText(sp)+'.');
+  else out.push('No fees this time. No separate tickets, either.');
+  var tx=R0.picks.taxi||0,mt=R0.picks.metro||0;
+  if(tx+mt>0)out.push('Taxi '+tx+(tx===1?' time':' times')+', metro '+mt+(mt===1?' time':' times')+'.');
+  return out}
  function albumPages(){   /* 2日目から。1ページ目は 出発の日(013 E1)。写真と控えと、お金の1行 */
   var s=sync();return s.days.filter(function(d){return d.d>=2}).map(function(d){
    var b=big(d.led),leg=null,i;for(i=0;i<s.legs.length;i++)if(s.legs[i].d===d.d&&s.legs[i].f){leg=legInfo(i)}
@@ -1851,7 +1869,7 @@ var TRIP=(function(){
   morning:morning,night:night,bundle:bundle,afterScene:afterScene,enter:enter,morningInfo:morningInfo,nightInfo:nightInfo,
   lockedPlace:lockedPlace,lockedMode:lockedMode,modeHidden:modeHidden,stamps:stamps,inTrip:inTrip,drawPhoto:drawPhoto,mini:mini,passEl:passEl,
   restToday:restToday,hourNow:hourNow,hourAt:hourAt,HOUR:HOUR,
-  settle:settle,albumPages:albumPages,yen:yen,money:money,yenText:yenText,big:big,dayRec:dayRec,overlay:overlay,E:E,css:css,
+  tearNow:tearNow,settle:settle,settleExtra:settleExtra,addFee:addFee,albumPages:albumPages,yen:yen,money:money,yenText:yenText,big:big,dayRec:dayRec,overlay:overlay,E:E,css:css,
   migrate:migrate,pickPhoto:pickPhoto,note:note,oneMonth:oneMonth}
 })();
 
@@ -3749,6 +3767,7 @@ function settleStart(){
  lines.push('We spent '+TRIP.yenText(R0.total)+' on this trip.');
  if(best){END.view='day';END.dayPg={d:best.d,ph:best.ph,stub:'DAY '+best.d,line:TRIP.big(best.led)?TRIP.money(TRIP.big(best.led)):''};lines.push('The biggest day was day '+best.d+'.')}
  if(R0.save&&R0.save.yen>0)lines.push('The metro saved us '+TRIP.yenText(R0.save.yen)+' that day.');
+ TRIP.settleExtra(R0).forEach(function(x){lines.push(x)});   /* 4: 手数料・別切符 5: 選んだ重さ(タスク032 / 020-10) */
  var i=0;(function nx(){if(i>=lines.length){later(500,function(){TRIP.oneMonth(e1)});return}endSay('Lulu','lulu',lines[i++],nx)})()}
 /* 30日目のアルバム: 1日1ページ(写真+控え+レシートの1行)を、2日目から順にめくる */
 function dayPages(done){

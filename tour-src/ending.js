@@ -78,6 +78,7 @@ function settleStart(){
  lines.push('We spent '+TRIP.yenText(R0.total)+' on this trip.');
  if(best){END.view='day';END.dayPg={d:best.d,ph:best.ph,stub:'DAY '+best.d,line:TRIP.big(best.led)?TRIP.money(TRIP.big(best.led)):''};lines.push('The biggest day was day '+best.d+'.')}
  if(R0.save&&R0.save.yen>0)lines.push('The metro saved us '+TRIP.yenText(R0.save.yen)+' that day.');
+ TRIP.settleExtra(R0).forEach(function(x){lines.push(x)});   /* 4: 手数料・別切符 5: 選んだ重さ(タスク032 / 020-10) */
  var i=0;(function nx(){if(i>=lines.length){later(500,function(){TRIP.oneMonth(e1)});return}endSay('Lulu','lulu',lines[i++],nx)})()}
 /* 30日目のアルバム: 1日1ページ(写真+控え+レシートの1行)を、2日目から順にめくる */
 function dayPages(done){
