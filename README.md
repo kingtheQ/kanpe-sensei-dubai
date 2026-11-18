@@ -22,6 +22,7 @@
 ## 世界一周編の作り方
 
 `tour-src/data.py` に会話、`tour-src/build.py` に場所・人物・背景・音を書き、`python3 tour-src/build.py` で `dubai/index.html` から `tour/index.html` と `tour/doha/index.html` を作る(`pip install cmudict` が必要)。
+旅の骨組み(DAY・券の束・日ごとの記録 `kanpe-trip-v1`・精算とアルバム)は `tour-src/trip.js` 1か所。ビルドが tour/・tour/doha/・tour/ending/ と、`world/index.html` の `/*TRIPJS-BEGIN*/…/*TRIPJS-END*/` の間に入れる。どの日にどの場面を載せるかは `trip.js` の `ROWS`(30日の表)と `GROUPS`(場面のまとまり)。確認は `tour-src/tests/test_trip030*.py`。
 
 ## 発音記号について
 

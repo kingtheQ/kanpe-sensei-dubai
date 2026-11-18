@@ -20,7 +20,7 @@ INIT = r"""
  FS.prototype.abort=FS.prototype.stop=function(){};
  window.SpeechRecognition=FS;window.webkitSpeechRecognition=FS;
  try{if(!localStorage.getItem('__seeded')){localStorage.setItem('__seeded','1');
-  var s={seen:{},help:5,weak:[],missed:[],ticket:'ow'};%s.forEach(function(k){s.seen[k]=1});localStorage.setItem('kanpe-tour-save-v1',JSON.stringify(s));localStorage.removeItem('kanpe-world-v1')}}catch(e){}
+  var s={seen:{},help:5,weak:[],missed:[],ticket:'ow'};%s.forEach(function(k){s.seen[k]=1});localStorage.setItem('kanpe-tour-save-v1',JSON.stringify(s));localStorage.removeItem('kanpe-world-v1');localStorage.setItem('kanpe-trip-v1',JSON.stringify({v:1,trip:1,tk:'ow',day:6,td:9,ph:'day',bun:1,legs:[],days:[],cur:{led:[],pick:[]}}))}}catch(e){}
 })();
 """ % json.dumps(SEEDS)
 HOOK = "requestAnimationFrame(frame);\n})();"

@@ -121,6 +121,7 @@ def run_route(pw, name, d, relay_on, consent_btn, sr, az, token_ok, phase_says=N
     page.on('pageerror', lambda e: res['errors'].append('pageerror:' + str(e)[:160]))
     # ---- 始めの宣言(窓口の最初の場面) ----
     page.goto(base + '/tour/index.html'); page.wait_for_timeout(700)
+    page.evaluate("()=>{document.querySelectorAll('.trip-ov').forEach(function(o){o.remove()})}")   # タスク030: 朝の1枚(DAY 1)は このテストの対象外
     page.evaluate("window.__PHASE='start';window.__T.winStart()")
     seen_consent = False; clicked = []
     def tick(p):
