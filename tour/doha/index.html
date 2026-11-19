@@ -2374,6 +2374,9 @@ $m('setBack').addEventListener('click',closeSettings);
  var bm=document.querySelector('#boothView .mapbar');if(bm){var bw=mkWorldBtn();bm.insertBefore(bw,$m('boothBack'));bm.insertBefore(mkSetBtn(),$m('boothBack'))}
  var st=document.querySelector('#sceneView .stage');if(st){var sw=mkWorldBtn();sw.classList.add('wb');st.appendChild(sw);st.appendChild(mkSetBtn())}
  mkSetBtn('phoSet');var ps=$m('phoSet');if(ps&&ps.parentNode)ps.parentNode.insertBefore(mkWorldBtn(),ps.nextSibling)})();
+/* タスク042: 場面の再生中(会話中・強化合宿の場面)は 🌏 を出さない。賢者の広間などのメニュー画面と、場面の外(マップ・発音教室・フォニックス)は従来どおり */
+var wbHid=null;
+function wbSync(){var b=document.querySelector('#sceneView .stage .setbtn.wb');if(!b)return;var hide=!(G.scene&&G.scene.hub&&!G.camp);if(hide!==wbHid){wbHid=hide;b.style.display=hide?'none':''}}
 prefApply();
 
 /* ---------- 強化合宿(ルル先生): ①フォニックス → ②たんご → ③ぶん(発音記号つき) ---------- */
@@ -3351,6 +3354,7 @@ function setMode(m){
 var last=0;
 function frame(ts){
  var dt=Math.min(.05,(ts-last)/1000||0);last=ts;t+=dt;
+ wbSync();
  if(G.view==='scene'){var S0=G.scene,an0=S0&&S0.anim,A0=an0&&ANIM[an0.n],p0=an0?t-an0.t0:0;if(speaker&&spX>0)spX=Math.max(0,spX-dt*520);
   if(A0&&A0.tick)A0.tick(p0,S0);
   if(typeof ARTframe==='function'&&ARTframe(S0,A0,dt)){requestAnimationFrame(frame);return}

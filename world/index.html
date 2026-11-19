@@ -919,7 +919,8 @@ function visibleSet(s){
   else if(NEI[id].some(function(n){return s.cleared[n]||(AP[n].gw&&s.at===n)}))v[id]=1});
  Object.keys(AP).forEach(function(id){if(AP[id].soon)delete v[id]});var ns=nextSoon();if(ns)v[ns]=1;
  return v}
-function isOpen(s,id){return id!==s.at&&!s.cleared[id]&&(!!s.seen[id]||NEI[id].some(function(n){return s.cleared[n]||(AP[n].gw&&s.at===n)}))}
+/* タスク042: 券を買うまで(旅が始まるまで)は、ほかの場所を「開いている」扱いにしない。クリア記録・スタンプ・区間数の表示はそのまま */
+function isOpen(s,id){if(!bought())return false;return id!==s.at&&!s.cleared[id]&&(!!s.seen[id]||NEI[id].some(function(n){return s.cleared[n]||(AP[n].gw&&s.at===n)}))}
 
 function node(s,id,onTap){
  var p=xy(id),cur=s.at===id,cl=!!s.cleared[id];
@@ -1126,6 +1127,7 @@ document.addEventListener('visibilitychange',function(){if(document.hidden){gate
 /* 世界一周編(tour 側の ../tour/ ..)へ飛ぶには、窓口で買った券が要る。券の有無は tour の記録(kanpe-tour-save-v1)を読む */
 var GATE_EN_DEF='Where would you like to fly next?',GATE_JP_DEF='どこに 飛びますか。';
 function hasTicket(){try{var t=JSON.parse(localStorage.getItem('kanpe-tour-save-v1')||'null');return !!(t&&(t.ticket==='star'||t.ticket==='ow'))}catch(e){return false}}
+function bought(){return hasTicket()||tripOn()}
 function needTicket(id){return !!AP[id].url&&AP[id].url.indexOf('../tour/')===0&&!hasTicket()}
 function setGateSay(en,jp){GATE_EN=en;var p=$('gSay').querySelectorAll('p');p[0].textContent=en;p[1].textContent=jp}
 /* 券を持たずに ゲートへ来たとき: 飛ばさず、賢者の広間へ案内するだけ */
@@ -1140,7 +1142,7 @@ function noTicket(){
  $('gateNote').style.display='none';
  show('sGate');buildGate();gateOn();b.focus({preventScroll:true})}
 function openGate(){
- S=load();setGateSay(GATE_EN_DEF,GATE_JP_DEF);
+ S=load();if(!bought()){noTicket();return}setGateSay(GATE_EN_DEF,GATE_JP_DEF);
  var box=$('opts');box.textContent='';var anyQ=false,btns=[],cur=0;
  function sel(i){cur=i;btns.forEach(function(b,j){b.classList.toggle('sel',j===i)})}
  function mk(cls,name){
@@ -1172,7 +1174,7 @@ function openGate(){
 /* ---------- 飛行中 ---------- */
 var flyTimer=0;
 function fly(to){
- if(needTicket(to)){noTicket();return}
+ if(!bought()||needTicket(to)){noTicket();return}
  if(tripOn()&&AP[to].url&&AP[to].url.indexOf('../tour/')===0){var r=TRIP.fly(to);if(!r){renderMap();show('sMap');return}if(r.tear.length){TRIP.tearAll(r.tear,function(){fly2(to)});return}}
  fly2(to)}
 function fly2(to){
