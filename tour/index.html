@@ -3936,6 +3936,14 @@ var ART={
     globe=背景の球の位置(球の外わく 312..473×356..517)に、球だけ8コマ(96px。2倍=192px)を重ね、period秒で1回転。人は足と影を固定し、上半身だけ小さく揺れる(タスク037) */
  sage:{bg:'sage-hall-bg-clean.png',mode:'wide',hall:{sage:{n:'hall-sage',x:768,by:684},lulu:{n:'hall-lulu-back',x:733,by:905},king:{n:'hall-king-back',x:803,by:905},
   globe:{img:'sage-hall-globe-strip.png',x:296,y:340,n:8,fw:96,z:2,period:1.8}}},
+ /* チケット売り場=旅行代理店の一室(タスク041): 人なし・航路なしの背景をフルブリード(028)。係員はカウンターの向こうの中央に大人の大きさ(室内の基準273px)で、カウンターの高さで切って下は隠す。
+    ルル(左)とキング(右)は絨毯の上に後ろ姿で寄って立つ(室内の基準の大きさ。素材のまま)。中心の間隔136px・体の横幅は131＋136pxで、すき間は約3px。
+    route=壁の地図に航路を引く場面(窓口の「線を引く」会話 bg:'rtmap')だけの設定。bgFix=アニメが描けなかったときの、航路入りの静止画。
+    cities=地図の上の都市の位置(1536×960の座標。地図の枠の内側は x340..1200, y92..478)。segs=区間(出発,到着,横ずれ)。横ずれ -860 は、地図の左はしから出て右はしに入る西まわり */
+ ticket:{bg:'ticket-office-bg-clean-noroute.png',mode:'room',tk:{bgFix:'ticket-office-bg-clean.png',
+  clerk:{n:'tk-clerk',x:768,top:420,clip:596},lulu:{n:'tk-lulu-back',x:699,by:920},king:{n:'tk-king-back',x:835,by:920},
+  route:{x0:340,x1:1200,D:1.1,sp:15,cities:{tok:[1080,193],nbo:[784,237],rov:[806,142],cus:[552,300],hon:[476,177]},
+   segs:[['tok','nbo',0],['nbo','rov',0],['rov','cus',0],['cus','hon',0],['hon','tok',-860]]}}},
  /* 入国審査(タスク031): 人なしの背景。キングとルルは右の端から歩いて入り、いちばん右の列(Visitors)のおわりに立つ(dir:-1 = 左へ歩く)。ルルが左・キングが右 */
  immig:{bg:'nairobi-immigration.png',mode:'wide',base:690,dir:-1,lulu:1290,king:1360,suit:1250,
   /* 窓口の係官(頭と肩だけ。大人の高さ136pxに縮めた絵)。lead=話し相手の係官の窓口。sw=話し相手が officer2(女性)のとき入れ替わる絵 */
@@ -3947,7 +3955,7 @@ var ART={
    ['back-man-thobe',952,684],['back-couple-red',952,786],['back-woman-blonde-suit',952,892],
    ['back-man-dashiki',1320,792],['back-couple-colorful',1321,896],
    ['front-safari',399,947,'walk'],['front-pilot-fa',1119,946,'walk']]}};
-function artIdFor(S){var g=S&&S.d&&S.d.bg,h=S&&S.hub&&S.ctx&&S.ctx.bg;return (g==='sage'||h==='sage')?'sage':(g==='taxi'?'nairobi':(g==='immig'?'immig':null))}
+function artIdFor(S){var g=S&&S.d&&S.d.bg,h=S&&S.hub&&S.ctx&&S.ctx.bg;return (g==='sage'||h==='sage')?'sage':((g==='tdesk'||g==='rtmap')?'ticket':(g==='taxi'?'nairobi':(g==='immig'?'immig':null)))}
 function artImg(n){var i=ARTI[n];if(!i){i=ARTI[n]=new Image();i.onerror=function(){i.bad=1};i.src=ARTBASE+n}return i}
 function artShow(on){if(ARTSHOW===on)return;ARTSHOW=on;cv.hidden=!!on;cvA.hidden=!on}
 function artR(col,x,y,w,h){ca.fillStyle=col;ca.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h))}
@@ -3994,6 +4002,7 @@ function ARTframe(S,A0,dt){
  var te=t-S.artT0,B=cf.base,BOB=4;
  ca.globalAlpha=1;ca.drawImage(bg,0,0);
  if(cf.hall){artHall(cf.hall,exi);return true}
+ if(cf.tk){artTicket(cf.tk,exi,S);return true}
  if(cf.fx==='night')artFxNight();else if(cf.fx==='hotel')artFxHotel();
  /* 相手(いつもの顔のドット): 空港では右から入ってくる。カウンターの中は動かず、頭と肩だけ見せる(カウンターの高さで切る) */
  /* 窓口の係官(入国審査): 頭と肩だけ見せる(窓口の台の高さで切る)。話し相手の窓口は、話すとき小さくうなずいて「…」を出す。そのほかの窓口もゆっくり小さく動く */
@@ -4050,9 +4059,62 @@ function artHall(H,exi){var g=H.globe,gi=artImg(g.img);
  if(OUT.lvis){artShadow(H.lulu.x,H.lulu.by,29);artSway(lu,H.lulu.x,H.lulu.by,ld);
   if(luTalk&&spSay)artBubble(H.lulu.x+20,H.lulu.by-lu.naturalHeight-26)}
  if(OUT.hvis){artShadow(H.king.x,H.king.by,36);artSway(kg,H.king.x,H.king.by,kd)}}
+/* チケット売り場を描く(タスク041)。歩かない。足と影は動かさず、上半身だけ小さく揺れる(037)。係員は話しているとき「…」を出す。
+   航路の地図(route)は、窓口の「線を引く」会話(bg:'rtmap')のあいだだけ。描けなければ、航路入りの静止画に切りかえる。会話の進み方には一切かかわらない(時間だけで動く) */
+function artTicket(H,exi,S){
+ var rt=!!(S.d&&S.d.bg==='rtmap');
+ if(rt&&!S.rtFail){try{ca.save();artRoute(H.route,S);ca.restore()}catch(e){S.rtFail=1;try{ca.restore()}catch(e2){}ca.globalAlpha=1}}
+ if(rt&&S.rtFail){var fb=artImg(H.bgFix);if(artOKimg(fb))ca.drawImage(fb,0,0)}
+ var cl=exi[H.clerk.n],lu=exi[H.lulu.n],kg=exi[H.king.n],sd=Math.floor(t*.8)%2?3:0,ld=Math.floor(t*1.1+.5)%2?3:0,kd=Math.floor(t*1.1)%2?3:0;
+ /* 係員: 足もとはカウンターの向こうに隠れる。頭と肩〜カウンターの高さまでを描き、腰より上だけ上へ伸び縮み */
+ var cw=cl.naturalWidth,chh=cl.naturalHeight,cx=Math.round(H.clerk.x-cw/2),cut=Math.round(chh*.58),vis=H.clerk.clip-H.clerk.top;   /* vis=見える高さ(カウンターの高さまで) */
+ ca.drawImage(cl,0,0,cw,Math.min(cut,vis),cx,H.clerk.top-sd,cw,Math.min(cut,vis)+sd);
+ if(vis>cut)ca.drawImage(cl,0,cut,cw,vis-cut,cx,H.clerk.top+cut,cw,vis-cut);
+ if(spSay&&speaker)artBubble(H.clerk.x+Math.round(cw*.3),H.clerk.top-18);
+ if(OUT.lvis){artShadow(H.lulu.x,H.lulu.by,56);artSway(lu,H.lulu.x,H.lulu.by,ld);
+  if(luTalk&&spSay)artBubble(H.lulu.x+20,H.lulu.by-lu.naturalHeight-26);
+  if(luHelp){ca.fillStyle='#e8452c';ca.font='800 26px sans-serif';ca.textAlign='center';ca.textBaseline='middle';ca.fillText('♪',H.lulu.x+Math.round(lu.naturalWidth*.5),H.lulu.by-lu.naturalHeight-12)}}
+ if(OUT.hvis){artShadow(H.king.x,H.king.by,70);artSway(kg,H.king.x,H.king.by,kd)}}
+/* ---- 壁の地図に航路を引く(タスク041): 場面の進み(S.rf=ここまで引いた本数 / S.rn=この会話で引く本数 / S.rt=その始まりの時刻)に合わせて、1区間ずつ ----
+   小さい飛行機が今の区間を飛び、点線を引く。着いた都市の印が光る。もどる線(rn>=6)は、青い点線が少し進んで止まり、✕が点滅(赤は使わない) */
+var RTP=null;
+function rtPath(R,i){var sg=R.segs[i],A=R.cities[sg[0]],B=R.cities[sg[1]],ax=A[0],ay=A[1],bx=B[0]+sg[2],by=B[1],dx=bx-ax,dy=by-ay,L=Math.sqrt(dx*dx+dy*dy)||1,nx=-dy/L,ny=dx/L;
+ if(ny>0){nx=-nx;ny=-ny}var h=L*.16,qx=(ax+bx)/2+nx*h,qy=(ay+by)/2+ny*h,pts=[],cum=[0],k,N=80,px=ax,py=ay;
+ for(k=0;k<=N;k++){var u=k/N,w=1-u,x=w*w*ax+2*w*u*qx+u*u*bx,y=w*w*ay+2*w*u*qy+u*u*by;pts.push([x,y]);if(k){cum.push(cum[k-1]+Math.sqrt((x-px)*(x-px)+(y-py)*(y-py)))}px=x;py=y}
+ return {pts:pts,cum:cum,len:cum[N]}}
+function rtAt(P,s){var c=P.cum,n=c.length-1,k=0;while(k<n-1&&c[k+1]<s)k++;var u=c[k+1]>c[k]?(s-c[k])/(c[k+1]-c[k]):0;u=Math.max(0,Math.min(1,u));
+ var a=P.pts[k],b=P.pts[k+1];return [a[0]+(b[0]-a[0])*u,a[1]+(b[1]-a[1])*u]}
+function rtWrap(R,x){var W=R.x1-R.x0;while(x<R.x0)x+=W;while(x>=R.x1)x-=W;return x}
+var PLANE=[[10,0,3,1],[8,1,6,1],[3,2,16,2],[0,2,3,1],[2,4,16,1],[7,5,6,1],[9,6,3,1],[1,1,2,1],[0,0,2,1]],PLCOL=['#f4f1e8','#f4f1e8','#f4f1e8','#c8522f','#8fb4c0','#f4f1e8','#f4f1e8','#c8522f','#c8522f'];
+function rtPlane(x,y,face){var p=3,W=19;for(var i=0;i<PLANE.length;i++){var r=PLANE[i],rx=face>0?r[0]:W-r[0]-r[2];ca.fillStyle=PLCOL[i];ca.fillRect(Math.round(x-W*p/2+rx*p),Math.round(y-4*p+r[1]*p),r[2]*p,r[3]*p)}}
+var RING=['..XXXXX..','.XX...XX.','XX.....XX','X...o...X','X..ooo..X','X...o...X','XX.....XX','.XX...XX.','..XXXXX..'];
+function rtCity(x,y,lit,since){var p=3,s=9*p,r,c;
+ if(lit&&since>=0&&since<1.4){var g=Math.floor(since*6)%2,k=since<.7?1:0,o=(2+Math.floor(since*8))*p+(g?p:0);ca.globalAlpha=Math.max(.2,1-since/1.4);
+  for(r=0;r<9;r++)for(c=0;c<9;c++){if(RING[r].charAt(c)!=='X')continue;var dx=(c-4)*(p+o/4),dy=(r-4)*(p+o/4);ca.fillStyle='#ffb02e';ca.fillRect(Math.round(x+dx-p/2),Math.round(y+dy-p/2),p,p)}ca.globalAlpha=1}
+ for(r=0;r<9;r++)for(c=0;c<9;c++){var ch=RING[r].charAt(c);if(ch==='.')continue;ca.fillStyle=lit?(ch==='X'?'#c9730e':'#ffd36a'):'#c98a22';ca.fillRect(Math.round(x-s/2+c*p),Math.round(y-s/2+r*p),p,p)}}
+function artRoute(R,S){
+ if(window.__artRouteBreak)throw new Error('route break');
+ if(!RTP){RTP=R.segs.map(function(s,i){return rtPath(R,i)})}
+ var rf=S.rf||0,rw=S.rn||0,rn=Math.min(rw,R.segs.length),e=(S.rt!=null)?t-S.rt:0,D=R.D,SP=R.sp,i,k,head=null,face=-1,ci={};
+ ca.globalAlpha=1;
+ for(i=0;i<R.segs.length;i++){var f=0;if(i<rf)f=1;else if(i<rn)f=Math.max(0,Math.min(1,(e-(i-rf)*D)/D));if(f<=0)break;
+  var P=RTP[i],sg=R.segs[i],S0=f*P.len;
+  for(var s=SP*.5;s<=S0;s+=SP){var q=rtAt(P,s);ca.fillStyle='#d98a1c';ca.fillRect(Math.round(rtWrap(R,q[0]))-4,Math.round(q[1])-1,8,3);ca.fillRect(Math.round(rtWrap(R,q[0]))-1,Math.round(q[1])-4,3,8)}
+  var hp=rtAt(P,S0),h2=rtAt(P,Math.max(0,S0-6));head=[rtWrap(R,hp[0]),hp[1]];if(Math.abs(hp[0]-h2[0])>.5)face=hp[0]>h2[0]?1:-1;
+  if(f>=1){ci[sg[1]]=(i<rf)?99:(e-(i-rf+1)*D)}}
+ /* 都市の印: 出発地は最初から光り、着いた都市は光る(着いてすぐは光の輪がまたたく) */
+ var A=R.cities;rtCity(A.tok[0],A.tok[1],true,99);
+ for(var kc in ci){rtCity(A[kc][0],A[kc][1],true,ci[kc])}
+ if(rw>=6){var f6=Math.max(0,Math.min(1,e/1.2)),H=A.hon,C=A.cus,lim=.28*f6,ex=null;
+  for(k=0;k<=24*lim;k++){var u=k/24,xx=H[0]+(C[0]-H[0])*u,yy=H[1]+(C[1]-H[1])*u;if(k%2===0){ca.fillStyle='#5aa0ff';ca.fillRect(Math.round(xx)-2,Math.round(yy)-2,4,4)}ex=[xx,yy]}
+  if(f6>=1&&ex&&Math.floor(t*3)%2){ca.fillStyle='#fff';ca.fillRect(Math.round(ex[0])-12,Math.round(ex[1])-12,24,24);ca.fillStyle='#2f6ad8';ca.fillRect(Math.round(ex[0])-10,Math.round(ex[1])-10,20,20);
+   ca.fillStyle='#fff';ca.font='800 18px sans-serif';ca.textAlign='center';ca.textBaseline='middle';ca.fillText('✕',Math.round(ex[0]),Math.round(ex[1])+1)}}
+ /* 小さい飛行機: いま飛んでいる区間の先頭。どこも引いていないときは羽田で待つ */
+ if(!head)head=[A.tok[0],A.tok[1]];
+ rtPlane(head[0],head[1]-14+(Math.floor(t*3)%2?-1:0),face)}
 function artOKimg(i){return i.complete&&i.naturalWidth>0}
 /* この場面が使う人物の絵の名前(npc/ の中)。ひとつでも読めなければ、場面全体が今までの描画に戻る */
-function artExtra(cf){var a=[],i;if(cf.hall)['sage','lulu','king'].forEach(function(k){a.push(cf.hall[k].n)});(cf.crowd||[]).forEach(function(c){a.push('w-'+c[0])});
+function artExtra(cf){var a=[],i;if(cf.hall)['sage','lulu','king'].forEach(function(k){a.push(cf.hall[k].n)});if(cf.tk)['clerk','lulu','king'].forEach(function(k){a.push(cf.tk[k].n)});(cf.crowd||[]).forEach(function(c){a.push('w-'+c[0])});
  (cf.booths||[]).forEach(function(b){a.push(b.n);if(b.sw)a.push(b.sw)});
  if(cf.npcS)for(var k in cf.npcS)a.push(cf.npcS[k]);return a}
 function artSpKey(){if(!speaker)return null;for(var k in SP)if(SP[k]===speaker)return k;return null}
