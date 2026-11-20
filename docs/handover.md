@@ -73,6 +73,11 @@
 - 確認：`python3 tour-src/tests/test_bag045.py`（周期の実測24.0秒ほか）。報告と**会話文の下書き（PM確認待ち・未組み込み）**は `docs/pm/deliverables/045-baggage-report-v1.md`。
 - 未確認：実機での見え方・滑らかさ。指示書 `pm-kit/tasks/045-…md` と `kanpe-assets-baggage-045.zip` はリポジトリに無く、依頼文と素材の zip の中身で実装した。
 
+## 今回（11/20）タスク046でやったこと（荷物受取の会話文の本組み込み）
+- PM決定の案A：`nbo_bag1` を、045の下書き（同じ便の旅行者と5往復・青+黄タグのスーツケースを見つけて取る）に**置き換え**。id は `nbo_bag1` のまま（trip.js・場所の並び・セーブのキーは無変更）。雨もりを遊んだあとは**1行目**が「雨でベルトが止まっていた」を受ける（`event_data.py` の VARIANTS）。
+- 旅行者 `SP.traveler`：声 pitch=1.0、見た目は d_metrop 系。専用スーツケース（青+黄タグ）はスプライト2行目を差し替え（`tour-src/art/prep_hero_bag.py`）。台詞3のあいだ緑の板のとなりに来て、台詞5・`nbo_bag2` ではベルトから消える（`art.js` の `artHeroTh`）。
+- 確認：`python3 tour-src/tests/test_bag046.py`。報告は `docs/pm/deliverables/046-baggage-dialogue-report-v1.md`。未確認：実機の見え方・音。
+
 ## 未決・考え中
 - ナイロビ・ドーハまで遊んで「飽きてきた」。どの国も入国審査・手荷物受け取りなど同じ場面が続くため。対策案は 005。どうするかは未決定。
 - 強化合宿の作り直しの方向は未決定（006）。006 の e（開けない「発音教室」画面と古い合宿の整理）はキングの判断待ちで、まだやっていない。

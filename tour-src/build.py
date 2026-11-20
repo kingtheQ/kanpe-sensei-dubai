@@ -127,6 +127,8 @@ SP.desk_ow={pitch:.95,m:[[trav({hair:'cap'}),P(3,{o:'#5c0632',p:'#2a2a33',h:'#24
 SP.officer={pitch:.9,m:[[trav({hair:'cap'}),P(5,{o:'#2b3a5a',p:'#2b2b33',h:'#241a14'})]]};
 SP.officer2={pitch:1.15,m:[[trav({hair:'long'}),P(4,{o:'#2b3a5a',p:'#2b2b33',h:'#241a14'})]]};
 SP.bag_staff={pitch:1,m:[[trav({}),P(5,{o:'#f2b705',p:'#2a2a33',h:'#241a14'})]]};
+/* 荷物受け取りの旅行者(タスク046)。見た目は d_metrop(リュックの旅行者)と同じ系統。声は pitch 1.0(成人・中性的。係員 bag_staff2=1.1・雨もりの旅行者 ev_wet=.95・ルル=1.35と被らない) */
+SP.traveler={pitch:1,m:[[trav({}),P(2,{o:'#3a5a8a',p:'#2a2a33',h:'#14141a',pack:1})]]};
 SP.bag_staff2={pitch:1.1,m:[[trav({hair:'long'}),P(4,{o:'#f2b705',p:'#2a2a33',h:'#241a14'})]]};
 SP.sim_staff={pitch:1.1,m:[[trav({hair:'long'}),P(4,{o:'#43b02a',p:'#2a2a33',h:'#241a14'})]]};
 SP.sim_staff2={pitch:.95,m:[[trav({}),P(5,{o:'#43b02a',p:'#2a2a33',h:'#241a14'})]]};

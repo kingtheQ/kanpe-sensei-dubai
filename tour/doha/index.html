@@ -3847,7 +3847,7 @@ var ART={
     描く順: 奥の半分(sin<0)の荷物 → 中央の島 → 手前の半分の荷物 → ふたり。荷物は奥ほど小さく暗い(絵の段階 lv=13 を sin で引く)。手前では左→右、奥では右→左。
     ルル(左)とキング(右)は広間と同じ後ろ姿で、足もとは y=884(素材の静止画と同じ)。stopFor=この場面ではベルトを止める(雨もりの出来事「ベルトが止まった」) */
  bagclaim:{bg:'nairobi-baggage-base.png',mode:'wide',hall:{lulu:{n:'hall-lulu-back',x:716,by:884},king:{n:'hall-king-back',x:800,by:884},bubble:{x:1210,y:540}},
-  belt:{isl:'nairobi-baggage-island.png',ix:552,iy:602,bags:'nairobi-baggage-bags.png',cw:112,ch:104,ax:56,ay:92,lv:13,n:6,cx:400,cy:330,rx:178,ry:28,period:24,stopFor:['nbo_ev_b_leak']}}};
+  belt:{isl:'nairobi-baggage-island.png',ix:552,iy:602,bags:'nairobi-baggage-bags.png',cw:112,ch:104,ax:56,ay:92,lv:13,n:6,cx:400,cy:330,rx:178,ry:28,period:24,stopFor:['nbo_ev_b_leak'],hero:{i:1,vid:'nbo_bag1',also:['nbo_ev_b_leak'],line:2,th:1.1,tpre:10,creep:.25,ease:1.2,hide:4}}}};
 function artIdFor(S){return S&&S.vid==='doh_city_h1'?'hotel':null}
 function artImg(n){var i=ARTI[n];if(!i){i=ARTI[n]=new Image();i.onerror=function(){i.bad=1};i.src=ARTBASE+n}return i}
 function artShow(on){if(ARTSHOW===on)return;ARTSHOW=on;cv.hidden=!!on;cvA.hidden=!on}
@@ -3945,10 +3945,23 @@ function ARTframe(S,A0,dt){
 /* 荷物受け取りを描く(タスク045)。荷物6個が楕円の経路を1周 period 秒でまわる(時間だけで動く。会話の進み方にはかかわらない)。
    θ=i/n の等間隔 − 2π×経過/period(θは減る向き=手前の縁で左→右、奥の縁で右→左)。接地点 x=cx+rx cosθ, y=cy+ry sinθ(半分の大きさの座標。四捨五入して2画素単位)。
    描く順は 奥の半分→島→手前の半分→ふたり。同じ半分の中では sin の小さい(奥の)順。 */
+/* 専用スーツケースの角度(タスク046)。台詞(3番目 line=2)の「緑の板のとなりの青いの」に合わせて、その台詞が始まったとき緑の板のとなり(右どなり)に来る。
+   それまでは、ほかの荷物と同じ向き・同じ速さでベルトをまわる(始まりから tpre 秒後に板のとなりに着く並び)。台詞が始まったら ease 秒でなめらかに板のとなりへ寄せ、
+   台詞のあいだは ほかの荷物の creep 倍の速さでゆっくり進む(読めるあいだ、板のとなりにとどまる)。会話の進み方(G.ti)にだけ合わせ、時計にはよらない */
+function artWrapPi(a){var W=6.283185307179586;a=a%W;if(a>Math.PI)a-=W;if(a<-Math.PI)a+=W;return a}
+function artHeroTh(S,te,L,H,om){
+ if(L<H.line)return H.th+om*(H.tpre-te);
+ if(S.hz0==null){S.hz0=te;S.hzD=artWrapPi(om*(H.tpre-te))}
+ var u=Math.max(0,Math.min(1,(te-S.hz0)/H.ease)),e=u*u*(3-2*u);
+ return H.th-om*H.creep*(te-S.hz0)+S.hzD*(1-e)}
 function artBelt(cf,exi,te,S){var B=cf.belt,bi=artImg(B.bags),isl=artImg(B.isl),ths=[],i,stop=false;
  for(var q=0;q<B.stopFor.length;q++)if(S&&S.vid===B.stopFor[q])stop=true;
  var ph=stop?0:te/B.period;
- for(i=0;i<B.n;i++){var th=i*6.283185307179586/B.n-6.283185307179586*ph,sn=Math.sin(th);
+ for(i=0;i<B.n;i++){var th=i*6.283185307179586/B.n-6.283185307179586*ph,sn;
+  if(B.hero&&i===B.hero.i){var H=B.hero,hv=S&&S.vid,hL=(typeof G!=='undefined'&&G.ti)|0;   /* 専用スーツケース(046): 受け取り前の場面だけ見える。会話で取った(hide番目の台詞)あとと、荷物を受け取ったあとの場面(nbo_bag2)では、ベルトから消える */
+   if(hv!==H.vid&&H.also.indexOf(hv)<0)continue;
+   if(hv===H.vid){if(hL>=H.hide)continue;th=artHeroTh(S,te,hL,H,6.283185307179586/B.period)}}
+  sn=Math.sin(th);
   ths.push({i:i,sn:sn,x:2*Math.round(B.cx+B.rx*Math.cos(th)),y:2*Math.round(B.cy+B.ry*sn)})}
  var drawG=function(back){var g=ths.filter(function(o){return (o.sn<0)===back}).sort(function(a,b){return a.sn-b.sn});
   for(var k=0;k<g.length;k++){var o=g[k],lv=Math.max(0,Math.min(B.lv-1,Math.round((o.sn+1)/2*(B.lv-1))));

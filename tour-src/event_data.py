@@ -142,8 +142,8 @@ VARIANTS = [
     # 005 #14 に理由がつく／#3 雨もりが出来事の理由になる／#21 再会
     ('nbo_gate1', 2, 'nbo_ev_e_gate',
      "Yes, this is the new gate. Gate fourteen. Please wait over there.", "はい、新しいゲートです。14番ゲートです。あちらでお待ちください。", None, None),
-    ('nbo_bag1', 4, 'nbo_ev_b_leak',
-     "It is here! The belt stopped because of the rain, so it was late. Enjoy Nairobi!", "ありました！雨でベルトが止まっていたので、おくれたんです。ナイロビを楽しんで。", None, None),
+    ('nbo_bag1', 0, 'nbo_ev_b_leak',
+     "Excuse me. The belt stopped for a while because of the rain. Is this the belt for the flight from Tokyo?", "すみません。雨でベルトがしばらく止まっていました。ここは東京からの便のベルトですか。", None, None),
     ('doh_bag2', 0, 'nbo_ev_f1_ribbon',
      "Oh! You again! From the plane! I think this blue suitcase is mine.", "あっ！また会いましたね。飛行機の！この青いスーツケース、私のだと思います。", None, None),
 ]

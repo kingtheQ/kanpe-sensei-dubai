@@ -58,13 +58,13 @@ d('nbo_immig2','入国審査の係官','immig','officer2','別の窓口。係官
 ("Do you have a ticket to leave Kenya?","ケニアを出る航空券はありますか。","*Yes*. *I* *fly* *out* *in* *three* *days*.","はい。3日後に出発します。"),
 ("Good. Enjoy your stay. Karibu Kenya!","結構です。滞在を楽しんで。ようこそケニアへ！","*Thank* *you*. *I* *will*!","ありがとうございます。楽しみます。")],
 [("purpose","目的"),("tourist","観光客"),("stay","滞在する"),("hotel","ホテル"),("leave","出発する")])
-d('nbo_bag1','手荷物受け取りのスタッフ','baggage','bag_staff','手荷物受け取り。ベルトコンベアから、スーツケースが出てこない。',[
-("Hello. Can I help you?","こんにちは。お手伝いしましょうか。","*Yes*. *My* *suitcase* *is* *not* *here*.","はい。スーツケースが見つかりません。"),
-("I am sorry. What color is your suitcase?","申し訳ありません。スーツケースは何色ですか。","*It's* *blue*, *with* *a* *yellow* *tag*.","青で、黄色いタグがついています。"),
-("May I see your baggage tag, please?","荷物のタグを見せていただけますか。","*Here* *it* *is*.","これです。"),
-("Thank you. Please wait here. I will check the system.","ありがとうございます。ここでお待ちください。システムを確認します。","*How* *long* *will* *it* *take*?","どのくらいかかりますか。"),
-("It is here! It came on the next belt. Enjoy Nairobi!","ありました！次のベルトで来ていました。ナイロビを楽しんで。","*Oh*, *thank* *goodness*! *Thank* *you*!","よかった！ありがとうございます。")],
-[("suitcase","スーツケース"),("tag","タグ"),("belt","ベルトコンベア"),("check","確認する"),("sorry","申し訳ない")])
+d('nbo_bag1','同じ便の旅行者','baggage','traveler','手荷物受け取り。ベルトがまわっている。自分のスーツケースをさがそう。',[
+("Excuse me. Is this the belt for the flight from Tokyo?","すみません。ここは東京からの便のベルトですか。","*Yes*. *The* *sign* *says* *number* *three*.","はい。看板に3番と書いてあります。"),
+("Great, thank you. What does your suitcase look like?","よかった、ありがとう。あなたのスーツケースはどんな形ですか。","*It's* *blue*, *with* *a* *yellow* *tag*.","青で、黄色いタグがついています。"),
+("Look! Is that one yours? The blue one, next to the green board.","見て！あれですか。緑の板のとなりの青いの。","*Yes*, *that's* *mine*! *Excuse* *me*, *I* *will* *get* *it*.","はい、私のです！すみません、取ってきます。"),
+("Careful, it is heavy. Do you need some help?","気をつけて、重いですよ。手伝いましょうか。","*No*, *thank* *you*. *I* *got* *it*!","いいえ、大丈夫です。取れました！"),
+("Wonderful. Welcome to Kenya, and enjoy your trip!","よかった。ケニアへようこそ、旅を楽しんで。","*Thank* *you*! *You* *too*!","ありがとう！あなたも！")],
+[("belt","ベルトコンベア"),("suitcase","スーツケース"),("tag","タグ"),("heavy","重い"),("help","手伝う")])
 d('nbo_bag2','手荷物受け取りのスタッフ','baggage','bag_staff2','スーツケースを受け取ったところで、係の人に声をかけられた。',[
 ("Welcome to Kenya. Do you have any plastic bags in your suitcase?","ケニアへようこそ。スーツケースにレジ袋は入っていますか。","*Plastic* *bags*? *Why*?","レジ袋ですか。なぜですか。"),
 ("In Kenya, single-use plastic bags are not allowed. We use paper or cloth bags.","ケニアでは、使い捨てのレジ袋は禁止されています。紙か布の袋を使います。","*I* *see*. *I* *have* *a* *cloth* *bag*.","なるほど。布の袋ならあります。"),
