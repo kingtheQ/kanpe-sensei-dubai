@@ -19,6 +19,14 @@ w, h = round(cw * 273 / ch), 273
 r = Image.open(os.path.join(SRC, 'npc-ticket-clerk-a-front.png')).convert('RGBA').resize((w, h), Image.BOX)
 a = np.array(r); a[..., 3] = np.where(a[..., 3] >= 110, 255, 0)
 Image.fromarray(a, 'RGBA').save(os.path.join(OUT, 'npc', 'tk-clerk.png')); print('npc/tk-clerk.png', (w, h))
+# スター側の係員(タスク044): 女性の係員。同じ基準(高さ273px)に縮める。素材は npc-ticket-clerk-star-front.png(あれば)
+_sf = os.path.join(SRC, 'npc-ticket-clerk-star-front.png')
+if os.path.exists(_sf):
+    sw, sh = Image.open(_sf).size
+    w2, h2 = round(sw * 273 / sh), 273
+    r2 = Image.open(_sf).convert('RGBA').resize((w2, h2), Image.BOX)
+    a2 = np.array(r2); a2[..., 3] = np.where(a2[..., 3] >= 110, 255, 0)
+    Image.fromarray(a2, 'RGBA').save(os.path.join(OUT, 'npc', 'tk-clerk-star.png')); print('npc/tk-clerk-star.png', (w2, h2))
 for n in ('king', 'lulu'):
     shutil.copy(os.path.join(SRC, n + '-back.png'), os.path.join(OUT, 'npc', 'tk-%s-back.png' % n))
     print('npc/tk-%s-back.png' % n, Image.open(os.path.join(OUT, 'npc', 'tk-%s-back.png' % n)).size)

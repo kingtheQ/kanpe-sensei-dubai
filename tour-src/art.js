@@ -22,7 +22,7 @@ var ART={
     route=壁の地図に航路を引く場面(窓口の「線を引く」会話 bg:'rtmap')だけの設定。bgFix=アニメが描けなかったときの、航路入りの静止画。
     cities=地図の上の都市の位置(1536×960の座標。地図の枠の内側は x340..1200, y92..478)。segs=区間(出発,到着,横ずれ)。横ずれ -860 は、地図の左はしから出て右はしに入る西まわり */
  ticket:{bg:'ticket-office-bg-clean-noroute.png',mode:'room',tk:{bgFix:'ticket-office-bg-clean.png',
-  clerk:{n:'tk-clerk',x:768,top:420,clip:596},lulu:{n:'tk-lulu-back',x:699,by:920},king:{n:'tk-king-back',x:835,by:920},
+  clerk:{n:'tk-clerk',x:768,top:420,clip:596},clerkS:{n:'tk-clerk-star'},lulu:{n:'tk-lulu-back',x:699,by:920},king:{n:'tk-king-back',x:835,by:920},
   route:{x0:340,x1:1200,D:1.1,sp:15,cities:{tok:[1080,193],nbo:[784,237],rov:[806,142],cus:[552,300],hon:[476,177]},
    segs:[['tok','nbo',0],['nbo','rov',0],['rov','cus',0],['cus','hon',0],['hon','tok',-860]]}}},
  /* 入国審査(タスク031): 人なしの背景。キングとルルは右の端から歩いて入り、いちばん右の列(Visitors)のおわりに立つ(dir:-1 = 左へ歩く)。ルルが左・キングが右 */
@@ -152,7 +152,8 @@ function artTicket(H,exi,S){
  var rt=!!(S.d&&S.d.bg==='rtmap');
  if(rt&&!S.rtFail){try{ca.save();artRoute(H.route,S);ca.restore()}catch(e){S.rtFail=1;try{ca.restore()}catch(e2){}ca.globalAlpha=1}}
  if(rt&&S.rtFail){var fb=artImg(H.bgFix);if(artOKimg(fb))ca.drawImage(fb,0,0)}
- var cl=exi[H.clerk.n],lu=exi[H.lulu.n],kg=exi[H.king.n],sd=Math.floor(t*.8)%2?3:0,ld=Math.floor(t*1.1+.5)%2?3:0,kd=Math.floor(t*1.1)%2?3:0;
+ var star=!!(S.d&&(artSpKey()==='desk_star'||/_star$/.test(String(S.vid||''))));   /* スター側の場面は女性の係員(タスク044) */
+ var cl=exi[star&&H.clerkS?H.clerkS.n:H.clerk.n],lu=exi[H.lulu.n],kg=exi[H.king.n],sd=Math.floor(t*.8)%2?3:0,ld=Math.floor(t*1.1+.5)%2?3:0,kd=Math.floor(t*1.1)%2?3:0;
  /* 係員: 足もとはカウンターの向こうに隠れる。頭と肩〜カウンターの高さまでを描き、腰より上だけ上へ伸び縮み */
  var cw=cl.naturalWidth,chh=cl.naturalHeight,cx=Math.round(H.clerk.x-cw/2),cut=Math.round(chh*.58),vis=H.clerk.clip-H.clerk.top;   /* vis=見える高さ(カウンターの高さまで) */
  ca.drawImage(cl,0,0,cw,Math.min(cut,vis),cx,H.clerk.top-sd,cw,Math.min(cut,vis)+sd);
@@ -201,7 +202,7 @@ function artRoute(R,S){
  rtPlane(head[0],head[1]-14+(Math.floor(t*3)%2?-1:0),face)}
 function artOKimg(i){return i.complete&&i.naturalWidth>0}
 /* この場面が使う人物の絵の名前(npc/ の中)。ひとつでも読めなければ、場面全体が今までの描画に戻る */
-function artExtra(cf){var a=[],i;if(cf.hall)['sage','lulu','king'].forEach(function(k){if(cf.hall[k])a.push(cf.hall[k].n)});if(cf.tk)['clerk','lulu','king'].forEach(function(k){a.push(cf.tk[k].n)});(cf.crowd||[]).forEach(function(c){a.push('w-'+c[0])});
+function artExtra(cf){var a=[],i;if(cf.hall)['sage','lulu','king'].forEach(function(k){if(cf.hall[k])a.push(cf.hall[k].n)});if(cf.tk)['clerk','clerkS','lulu','king'].forEach(function(k){if(cf.tk[k])a.push(cf.tk[k].n)});(cf.crowd||[]).forEach(function(c){a.push('w-'+c[0])});
  (cf.booths||[]).forEach(function(b){a.push(b.n);if(b.sw)a.push(b.sw)});
  if(cf.npcS)for(var k in cf.npcS)a.push(cf.npcS[k]);return a}
 function artSpKey(){if(!speaker)return null;for(var k in SP)if(SP[k]===speaker)return k;return null}
