@@ -289,3 +289,7 @@ event_data.add(D)
 # ---- ドーハ後半: 市内16＋出発8（タスク023。設計 018 案A）。国ごとのデータは別ファイル ----
 import doha_data
 doha_data.add(D)
+
+# ---- 1日目の羽田出発(タスク043): チェックイン・保安検査・出国・出発ゲート・搭乗・機内。会話は仮 ----
+import haneda_data
+haneda_data.add(D)

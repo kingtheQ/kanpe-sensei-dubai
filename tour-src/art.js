@@ -35,7 +35,12 @@ var ART={
    ['back-backpacker',585,684],['back-woman-hijab',585,788],['back-man-suit-2',584,892],
    ['back-man-thobe',952,684],['back-couple-red',952,786],['back-woman-blonde-suit',952,892],
    ['back-man-dashiki',1320,792],['back-couple-colorful',1321,896],
-   ['front-safari',399,947,'walk'],['front-pilot-fa',1119,946,'walk']]}};
+   ['front-safari',399,947,'walk'],['front-pilot-fa',1119,946,'walk']]},
+ /* 羽田の出発ゲート(タスク043): 人なしの背景をフルブリード。券で絵が出し分けられる(oneworld=DOHA・Qatar Airways / Star=ISTANBUL・Turkish Airlines)。
+    ルル(左・102px)とキング(右・114px)は広間と同じ後ろ姿で、足もとは y=884。相手の係員は絵には出さず(声だけ)、話すときカウンターの上に「…」を出す(bubble)。
+    秘密イベント(ルルの拾い物)は、この場面を遊び終えたとき 保存の keep に入るだけで、絵にも画面にも何も出さない(予告しない) */
+ hgate_ow:{bg:'haneda-departure-gate-v2-ow.png',mode:'wide',hall:{lulu:{n:'hall-lulu-back',x:690,by:884},king:{n:'hall-king-back',x:760,by:884},bubble:{x:250,y:552}}},
+ hgate_st:{bg:'haneda-departure-gate-v2-star.png',mode:'wide',hall:{lulu:{n:'hall-lulu-back',x:690,by:884},king:{n:'hall-king-back',x:760,by:884},bubble:{x:250,y:552}}}};
 /*ARTSEL*/
 function artImg(n){var i=ARTI[n];if(!i){i=ARTI[n]=new Image();i.onerror=function(){i.bad=1};i.src=ARTBASE+n}return i}
 function artShow(on){if(ARTSHOW===on)return;ARTSHOW=on;cv.hidden=!!on;cvA.hidden=!on}
@@ -132,11 +137,12 @@ function ARTframe(S,A0,dt){
 function artSway(img,cx,by,d){var w=img.naturalWidth,h=img.naturalHeight,x=Math.round(cx-w/2),y=by-h,cut=Math.round(h*.58);
  ca.drawImage(img,0,0,w,cut,x,y-d,w,cut+d);   /* 上半身: 上へd画素のばす(足側は動かない) */
  ca.drawImage(img,0,cut,w,h-cut,x,y+cut,w,h-cut)}   /* 腰から下: 固定 */
-function artHall(H,exi){var g=H.globe,gi=artImg(g.img);
- if(artOKimg(gi)){var f=Math.floor(t/(g.period/g.n))%g.n;ca.drawImage(gi,f*g.fw,0,g.fw,g.fw,g.x,g.y,g.fw*g.z,g.fw*g.z)}   /* 球だけ回す(NEAREST。ぼかさない) */
- var sg=exi[H.sage.n],lu=exi[H.lulu.n],kg=exi[H.king.n],sd=Math.floor(t*.8)%2?3:0,ld=Math.floor(t*1.1+.5)%2?3:0,kd=Math.floor(t*1.1)%2?3:0;
- artShadow(H.sage.x,H.sage.by,sg.naturalWidth*.6,.45);artSway(sg,H.sage.x,H.sage.by,sd);
- if(spSay&&speaker)artBubble(H.sage.x+Math.round(sg.naturalWidth*.3),H.sage.by-sg.naturalHeight-18);
+function artHall(H,exi){var g=H.globe,gi=g&&artImg(g.img);
+ if(g&&artOKimg(gi)){var f=Math.floor(t/(g.period/g.n))%g.n;ca.drawImage(gi,f*g.fw,0,g.fw,g.fw,g.x,g.y,g.fw*g.z,g.fw*g.z)}   /* 球だけ回す(NEAREST。ぼかさない) */
+ var sg=H.sage&&exi[H.sage.n],lu=exi[H.lulu.n],kg=exi[H.king.n],sd=Math.floor(t*.8)%2?3:0,ld=Math.floor(t*1.1+.5)%2?3:0,kd=Math.floor(t*1.1)%2?3:0;
+ if(sg){artShadow(H.sage.x,H.sage.by,sg.naturalWidth*.6,.45);artSway(sg,H.sage.x,H.sage.by,sd);
+  if(spSay&&speaker)artBubble(H.sage.x+Math.round(sg.naturalWidth*.3),H.sage.by-sg.naturalHeight-18)}
+ else if(H.bubble&&spSay&&speaker)artBubble(H.bubble.x,H.bubble.y);   /* 相手を絵に出さない場面(羽田のゲート): 声のぬしの場所に「…」 */
  if(OUT.lvis){artShadow(H.lulu.x,H.lulu.by,29);artSway(lu,H.lulu.x,H.lulu.by,ld);
   if(luTalk&&spSay)artBubble(H.lulu.x+20,H.lulu.by-lu.naturalHeight-26)}
  if(OUT.hvis){artShadow(H.king.x,H.king.by,36);artSway(kg,H.king.x,H.king.by,kd)}}
@@ -195,7 +201,7 @@ function artRoute(R,S){
  rtPlane(head[0],head[1]-14+(Math.floor(t*3)%2?-1:0),face)}
 function artOKimg(i){return i.complete&&i.naturalWidth>0}
 /* この場面が使う人物の絵の名前(npc/ の中)。ひとつでも読めなければ、場面全体が今までの描画に戻る */
-function artExtra(cf){var a=[],i;if(cf.hall)['sage','lulu','king'].forEach(function(k){a.push(cf.hall[k].n)});if(cf.tk)['clerk','lulu','king'].forEach(function(k){a.push(cf.tk[k].n)});(cf.crowd||[]).forEach(function(c){a.push('w-'+c[0])});
+function artExtra(cf){var a=[],i;if(cf.hall)['sage','lulu','king'].forEach(function(k){if(cf.hall[k])a.push(cf.hall[k].n)});if(cf.tk)['clerk','lulu','king'].forEach(function(k){a.push(cf.tk[k].n)});(cf.crowd||[]).forEach(function(c){a.push('w-'+c[0])});
  (cf.booths||[]).forEach(function(b){a.push(b.n);if(b.sw)a.push(b.sw)});
  if(cf.npcS)for(var k in cf.npcS)a.push(cf.npcS[k]);return a}
 function artSpKey(){if(!speaker)return null;for(var k in SP)if(SP[k]===speaker)return k;return null}

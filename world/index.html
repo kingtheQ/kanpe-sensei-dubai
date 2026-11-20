@@ -291,7 +291,7 @@ var TRIP=(function(){
     [表の日, 朝にいる空港, 種類(air/move/city/rest/home), 山(0なし 1☆ 2★), 英語のひとこと, [載せる場面のまとまり]]
     場面のまとまり(GROUPS)が空の日は、まだ作っていない日。休養日(rest)は、場面なしで夜へ進む日。 */
  var ROWS={
-  ow:[[1,'HND','air',1,'Tokyo. Today our trip begins.',['hnd']],
+  ow:[[1,'HND','air',1,'Tokyo. Today our trip begins.',['hnd','hnd_dep']],
    [2,'NBO','move',1,'Nairobi. We landed in Kenya.',['nbo_arr']],
    [3,'NBO','city',1,"Nairobi. Let's meet the giraffes.",[]],
    [4,'NBO','city',2,"Nairobi. Let's go on a safari.",[]],
@@ -310,7 +310,7 @@ var TRIP=(function(){
    [24,'HNL','city',2,'Honolulu. Lulu has a plan for us.',[]],[25,'HNL','city',1,"Honolulu. Let's go around the island.",[]],
    [26,'HNL','city',0,'Honolulu. Time to pack.',[]],[27,'HNL','air',2,'Honolulu. We are going home.',[]],
    [28,'HND','air',0,'Tokyo. Welcome back.',[]],[29,'HND','home',0,'Home. The receipts are on the table.',[]],[30,'HND','home',2,'One month later.',[]]],
-  star:[[1,'HND','air',1,'Tokyo. Today our trip begins.',['hnd']],
+  star:[[1,'HND','air',1,'Tokyo. Today our trip begins.',['hnd','hnd_dep']],
    [2,'IST','move',1,'Istanbul. A long wait between flights.',[]],
    [3,'NBO','air',1,'Nairobi. We landed in the middle of the night.',['nbo_arr']],
    [4,'NBO','city',2,"Nairobi. Let's go on a safari.",[]],[5,'NBO','rest',0,'Nairobi. A slow morning.',[]],
@@ -342,6 +342,7 @@ var TRIP=(function(){
  /* 場面のまとまり: 各行 = 1つの場所の場面の名前。全部の場所で、どれか1本あそんでいたら、そのまとまりは終わり(いまのクリアと同じ決まり) */
  var GROUPS={
   hnd:[['ticket_ow','ticket_star']],
+  hnd_dep:[['hnd_checkin_ow','hnd_checkin_star'],['hnd_sec'],['hnd_exit'],['hnd_gate_ow','hnd_gate_star'],['hnd_board_ow','hnd_board_star'],['hnd_plane_ow','hnd_plane_star']],   /* 1日目の羽田(タスク043): 券ごとに場面がちがう。どちらか1本あそべば、その場所は終わり */
   nbo_arr:[['nbo_immig1','nbo_immig2'],['nbo_bag1','nbo_bag2'],['nbo_sim1','nbo_sim2'],['nbo_taxi1','nbo_taxi2']],
   nbo_air:[['nbo_java1','nbo_java2'],['nbo_art1','nbo_art2'],['nbo_lounge1','nbo_lounge2'],['nbo_duty1','nbo_duty2']],
   nbo_dep:[['nbo_checkin1','nbo_checkin2'],['nbo_sec1','nbo_sec2'],['nbo_gate1','nbo_gate2'],['nbo_plane1','nbo_plane2']],
@@ -350,11 +351,11 @@ var TRIP=(function(){
   doh_hotel_am:[['doh_city_h3','doh_city_h4']],
   doh_dep:[['doh_dep_checkin','doh_dep_passport'],['doh_dep_bear'],['doh_dep_train'],['doh_dep_orchard','doh_dep_lounge'],['doh_dep_gate','doh_dep_plane']]};
  /* 場所の名前(各ページの place id) → まとまり。鍵(ロック)と、タブの開きに使う */
- var PLACEGRP={immig:'nbo_arr',bag:'nbo_arr',sim:'nbo_arr',taxi:'nbo_arr',java:'nbo_air',art:'nbo_air',lounge:'nbo_air',duty:'nbo_air',
+ var PLACEGRP={hcheckin:'hnd_dep',hsec:'hnd_dep',hexit:'hnd_dep',hgate:'hnd_dep',hboard:'hnd_dep',hplane:'hnd_dep',immig:'nbo_arr',bag:'nbo_arr',sim:'nbo_arr',taxi:'nbo_arr',java:'nbo_air',art:'nbo_air',lounge:'nbo_air',duty:'nbo_air',
   qcheckin:'nbo_dep',nsec:'nbo_dep',gate:'nbo_dep',qplane:'nbo_dep',dimmig:'doh_arr',dbag:'doh_arr',dsim:'doh_arr',dride:'doh_arr',
   calley:'doh_city',chotel:'doh_city',csouq:'doh_city',crest:'doh_city',ccorn:'doh_city',cbreak:'doh_hotel_am',
   dcounter:'doh_dep',dsouth:'doh_dep',dtrain:'doh_dep',dnorth:'doh_dep',dgate:'doh_dep'};
- var MODEGRP={arr:{tour:'nbo_arr',doha:'doh_arr'},air:{tour:'nbo_air'},dep:{tour:'nbo_dep',doha:'doh_dep'},city:{doha:'doh_city'},sage:{tour:'hnd'}};
+ var MODEGRP={hdep:{tour:'hnd_dep'},arr:{tour:'nbo_arr',doha:'doh_arr'},air:{tour:'nbo_air'},dep:{tour:'nbo_dep',doha:'doh_dep'},city:{doha:'doh_city'},sage:{tour:'hnd'}};
  /* お金の1行(場面の台詞に出る値段。円に直すレートは架空で固定)。タクシーとメトロは台詞に値段がないので、架空の値段 */
  var MONEY={nbo_sim1:['sim',1000,'KES'],nbo_taxi1:['taxi',3000,'KES'],nbo_java1:['coffee',800,'KES'],nbo_duty1:['duty',24,'USD'],
   doh_sim1:['sim',30,'QAR'],doh_taxi:['taxi',55,'QAR'],doh_metro:['metro',6,'QAR'],doh_city_t1:['tea',2,'QAR'],doh_city_s1:['gift',10,'QAR'],
@@ -367,7 +368,7 @@ var TRIP=(function(){
     別切符: 券の区間のうち sep の区間(oneworld のリマ⇄クスコ)をちぎったとき、1回ずつ記録帳に載る。手数料: 場面が TRIP.addFee で載せる(いまそれを使う場面はまだない) */
  var SEPTICKET=['sep',95,'USD'];
  /* 場面の絵の名前 → 写真の見た目(場面の絵が使えないページ=世界マップで、控えの写真に使う) */
- var THEME={tdesk:'desk',sage:'desk',javaK:'air',artK:'air',lounge:'lng',duty:'air',gate:'air',sim:'air',taxi:'street',checkinQ:'air',cabinQ:'cabin',
+ var THEME={checkinT:'air',immigH:'air',hgateOW:'air',hgateST:'air',cabinT:'cabin',tdesk:'desk',sage:'desk',javaK:'air',artK:'air',lounge:'lng',duty:'air',gate:'air',sim:'air',taxi:'street',checkinQ:'air',cabinQ:'cabin',
   dimmig:'dair',dbag:'dair',dsim:'dair',dtaxi:'street',dmetro:'dair',dcheck:'dair',dsouth:'dair',dtrain:'dair',dorch:'dair',dlng:'lng',dgate:'dair',dcabin:'cabin',
   calley:'souq',chotel:'hotel',csouq:'souq',crest:'souq',cbreak:'hotel',ccorn:'sea',night:'night',nap:'night'};
 
@@ -376,6 +377,7 @@ var TRIP=(function(){
     時刻は場所(各ページの place id)ごと。台本のあいさつ(Good morning / afternoon / evening)と、便の時間(docs/world-tour-design.md)に合わせた。
     便の時刻は作る直前に公式で確認する(docs の決まり)。ここは物語の時刻で、実在の便の時刻ではない。旅の外(ドバイ編・グアム編など)は本当の時計のまま。 */
  var HOUR={
+  hcheckin:21,hsec:22,hexit:22,hgate:23,hboard:23,hplane:0, /* 羽田の出発(深夜便。物語の時刻で、実在の便の時刻ではない) */
   immig:9,bag:9,sim:10,taxi:10,                       /* ナイロビ到着(台本: Good morning) */
   java:12,art:13,lounge:14,duty:15,                    /* ナイロビの空港(昼すぎ) */
   qcheckin:16,nsec:17,gate:18,qplane:19,               /* ナイロビ出発(台本: 午後〜Good evening)。夕方の便 */
@@ -444,11 +446,14 @@ var TRIP=(function(){
  function chain(code){
   var s=S(),i=firstOpen(),out=[],j;if(i<0||!s.tk)return null;
   if(s.legs[i].fr!==here())return null;
+  if(i===0&&departPending())return null;   /* 1日目の羽田(タスク043): 出発の場面(チェックイン〜機内)を遊び終えるまでは、世界マップからは飛べない */
   for(j=i;j<s.legs.length;j++){
    out.push(j);if(s.legs[j].to===code)return IMPL[code]?out:null;
    var nx=s.legs[j+1];if(!nx||nx.fr!==s.legs[j].to)return null;
    var a=legInfo(j),b=legInfo(j+1);if(!a||!b||b.td-a.td>1||a.sep||b.sep)return null}
   return null}
+ /* 1日目の羽田の出発がまだか(券を買った・まだ羽田・出発の場面が終わっていない)。世界マップの「くうこうに もどる」(羽田)と、飛べるかの判定が使う */
+ function departPending(){var s=S();return !!s.tk&&here()==='HND'&&!groupDone('hnd_dep')}
  function canFly(apId){var c=codeOf(apId);if(!c)return false;return !!chain(c)}
  function nextLegTo(){var i=firstOpen();return i<0?null:S().legs[i].to}
  function fillD(){var s=S(),i;for(i=0;i<s.legs.length;i++){var l=s.legs[i];if(l.f&&l.d==null){var td=legInfo(i).td,k;for(k=0;k<s.days.length;k++)if(s.days[k].td===td){l.d=s.days[k].d;break}if(l.d==null&&s.day>0)l.d=s.day}}}
@@ -723,7 +728,7 @@ var TRIP=(function(){
   if(any)o.appendChild(list);
   o.appendChild(E('div','trip-hint','▶'));return true}
  /* ---------- 場面が終わったあと(ページから呼ぶ) ---------- */
- var GATEVID={nbo_gate1:1,nbo_gate2:1};
+ var GATEVID={nbo_gate1:1,nbo_gate2:1,hnd_board_ow:1,hnd_board_star:1};
  function afterScene(S0,cont){
   var steps=[];
   try{
@@ -775,7 +780,7 @@ var TRIP=(function(){
  function yenText(n){return n.toLocaleString('en-US')+' yen'}
  return {KEY:KEY,AIRP:AIRP,IMPL:IMPL,LEGS:LEGS,ROWS:ROWS,GROUPS:GROUPS,PLACEGRP:PLACEGRP,MONEY:MONEY,
   hooks:hooks,setPage:function(p){PAGE=p},load:load,sync:sync,begin:begin,reset:reset,exists:exists,save:save,state:S,
-  codeOf:codeOf,canFly:canFly,fly:fly,chain:chain,here:here,landed:landed,total:total,legInfo:legInfo,nextLegTo:nextLegTo,tearAll:tearAll,tear:tear,
+  codeOf:codeOf,canFly:canFly,departPending:departPending,fly:fly,chain:chain,here:here,landed:landed,total:total,legInfo:legInfo,nextLegTo:nextLegTo,tearAll:tearAll,tear:tear,
   setTicket:setTicket,rowOf:rowOf,groupTd:groupTd,groupDone:groupDone,dayDone:dayDone,reachable:reachable,nextTd:nextTd,maxTd:maxTd,
   morning:morning,night:night,bundle:bundle,afterScene:afterScene,enter:enter,morningInfo:morningInfo,nightInfo:nightInfo,
   lockedPlace:lockedPlace,lockedMode:lockedMode,modeHidden:modeHidden,stamps:stamps,inTrip:inTrip,drawPhoto:drawPhoto,mini:mini,passEl:passEl,
@@ -944,6 +949,8 @@ function drawEdges(svg,pairs,s){
 
 var S=load();
 
+/* 「くうこうに もどる」の行き先。空港に場面がある所はその空港。羽田は、券を買ったあと出発の場面(チェックイン〜機内。タスク043)をまだ遊んでいないあいだだけ、世界一周編へ戻る */
+function backUrl(){var id=S.at;if(AP[id].url)return AP[id].url;if(id==='haneda'&&tripOn()&&TRIP.departPending())return '../tour/';return null}
 function renderMap(){
  S=load();
  var vis=visibleSet(S),box=$('mapBox');box.textContent='';
@@ -965,7 +972,7 @@ function renderMap(){
  var pips=$('pips');pips.textContent='';
  var pn=tripOn()?TRIP.total():stN;for(var i=0;i<pn;i++){var d=document.createElement('i');if(tripOn()?i<TRIP.landed():true)d.className='on';pips.appendChild(d)}
  $('mBundle').hidden=!tripOn();
- $('mBack').hidden=!AP[S.at].url;
+ $('mBack').hidden=!backUrl();
 }
 
 /* ---------- 画面の切りかえ ---------- */
@@ -1212,7 +1219,7 @@ function fly2(to){
 
 $('mGate').addEventListener('click',function(){blip();openGate()});
 $('mBundle').addEventListener('click',function(){blip();TRIP.bundle({},function(){})});
-$('mBack').addEventListener('click',function(){S=load();if(AP[S.at].url)location.href=AP[S.at].url+'#w=1'});
+$('mBack').addEventListener('click',function(){S=load();var u=backUrl();if(u)location.href=u+'#w=1'});
 $('mSet').addEventListener('click',function(){blip();openSet()});
 /* 記録を消したいとき: タイトルの はじめから(確認つき)へ戻る。30分のタイトル省略もここで外す */
 $('mTitle').addEventListener('click',function(){blip();try{sessionStorage.removeItem('kw-started')}catch(e){}show('sTitle');openCmd()});
