@@ -40,7 +40,13 @@ var ART={
     ルル(左・102px)とキング(右・114px)は広間と同じ後ろ姿で、足もとは y=884。相手の係員は絵には出さず(声だけ)、話すときカウンターの上に「…」を出す(bubble)。
     秘密イベント(ルルの拾い物)は、この場面を遊び終えたとき 保存の keep に入るだけで、絵にも画面にも何も出さない(予告しない) */
  hgate_ow:{bg:'haneda-departure-gate-v2-ow.png',mode:'wide',hall:{lulu:{n:'hall-lulu-back',x:690,by:884},king:{n:'hall-king-back',x:760,by:884},bubble:{x:250,y:552}}},
- hgate_st:{bg:'haneda-departure-gate-v2-star.png',mode:'wide',hall:{lulu:{n:'hall-lulu-back',x:690,by:884},king:{n:'hall-king-back',x:760,by:884},bubble:{x:250,y:552}}}};
+ hgate_st:{bg:'haneda-departure-gate-v2-star.png',mode:'wide',hall:{lulu:{n:'hall-lulu-back',x:690,by:884},king:{n:'hall-king-back',x:760,by:884},bubble:{x:250,y:552}}},
+ /* ナイロビの手荷物受け取り(タスク045): 人なしの背景(主ベルトは荷物も中央の島も描かない版)に、荷物6個が楕円の経路を1周 period 秒でまわる。
+    ベルトの形(中心 cx,cy・経路の半径 rx,ry)は素材の絵(768×480)の半分の大きさの座標で書く。荷物は 2倍の NEAREST の粒のまま、2画素単位で動く。
+    描く順: 奥の半分(sin<0)の荷物 → 中央の島 → 手前の半分の荷物 → ふたり。荷物は奥ほど小さく暗い(絵の段階 lv=13 を sin で引く)。手前では左→右、奥では右→左。
+    ルル(左)とキング(右)は広間と同じ後ろ姿で、足もとは y=884(素材の静止画と同じ)。stopFor=この場面ではベルトを止める(雨もりの出来事「ベルトが止まった」) */
+ bagclaim:{bg:'nairobi-baggage-base.png',mode:'wide',hall:{lulu:{n:'hall-lulu-back',x:716,by:884},king:{n:'hall-king-back',x:800,by:884},bubble:{x:1210,y:540}},
+  belt:{isl:'nairobi-baggage-island.png',ix:552,iy:602,bags:'nairobi-baggage-bags.png',cw:112,ch:104,ax:56,ay:92,lv:13,n:6,cx:400,cy:330,rx:178,ry:28,period:24,stopFor:['nbo_ev_b_leak']}}};
 /*ARTSEL*/
 function artImg(n){var i=ARTI[n];if(!i){i=ARTI[n]=new Image();i.onerror=function(){i.bad=1};i.src=ARTBASE+n}return i}
 function artShow(on){if(ARTSHOW===on)return;ARTSHOW=on;cv.hidden=!!on;cvA.hidden=!on}
@@ -82,11 +88,13 @@ function ARTframe(S,A0,dt){
  if(bg.bad){ARTFAIL[id]=1;artShow(0);return false}
  for(var j=0;j<names.length;j++)if(im[names[j]].bad){ARTFAIL[id]=1;artShow(0);return false}
  var ex=artExtra(cf),exi={};for(var e=0;e<ex.length;e++){var xi=artImg('npc/'+ex[e]+'.png');if(xi.bad){ARTFAIL[id]=1;artShow(0);return false}if(!artOKimg(xi))ok=false;exi[ex[e]]=xi}
+ if(cf.belt){var bt=[artImg(cf.belt.isl),artImg(cf.belt.bags)];for(var bi=0;bi<2;bi++){if(bt[bi].bad){ARTFAIL[id]=1;artShow(0);return false}if(!artOKimg(bt[bi]))ok=false}}
  artShow(1);
  if(!ok){artR('#10131f',0,0,AW,AH);return true}
  if(S.artT0==null)S.artT0=t;
  var te=t-S.artT0,B=cf.base,BOB=4;
  ca.globalAlpha=1;ca.drawImage(bg,0,0);
+ if(cf.belt){artBelt(cf,exi,te,S);return true}
  if(cf.hall){artHall(cf.hall,exi);return true}
  if(cf.tk){artTicket(cf.tk,exi,S);return true}
  if(cf.fx==='night')artFxNight();else if(cf.fx==='hotel')artFxHotel();
@@ -133,6 +141,19 @@ function ARTframe(S,A0,dt){
   artShadow(kx,B,shw);artSpr(kimg,kx,B+ky,walking&&dir>0)}});   /* 右へ歩くときは、元の左向きのコマを左右反転(左へ歩くときは元のまま) */
  L.sort(function(a,b){return a.by-b.by});for(var li=0;li<L.length;li++)L[li].f();
  return true}
+/* 荷物受け取りを描く(タスク045)。荷物6個が楕円の経路を1周 period 秒でまわる(時間だけで動く。会話の進み方にはかかわらない)。
+   θ=i/n の等間隔 − 2π×経過/period(θは減る向き=手前の縁で左→右、奥の縁で右→左)。接地点 x=cx+rx cosθ, y=cy+ry sinθ(半分の大きさの座標。四捨五入して2画素単位)。
+   描く順は 奥の半分→島→手前の半分→ふたり。同じ半分の中では sin の小さい(奥の)順。 */
+function artBelt(cf,exi,te,S){var B=cf.belt,bi=artImg(B.bags),isl=artImg(B.isl),ths=[],i,stop=false;
+ for(var q=0;q<B.stopFor.length;q++)if(S&&S.vid===B.stopFor[q])stop=true;
+ var ph=stop?0:te/B.period;
+ for(i=0;i<B.n;i++){var th=i*6.283185307179586/B.n-6.283185307179586*ph,sn=Math.sin(th);
+  ths.push({i:i,sn:sn,x:2*Math.round(B.cx+B.rx*Math.cos(th)),y:2*Math.round(B.cy+B.ry*sn)})}
+ var drawG=function(back){var g=ths.filter(function(o){return (o.sn<0)===back}).sort(function(a,b){return a.sn-b.sn});
+  for(var k=0;k<g.length;k++){var o=g[k],lv=Math.max(0,Math.min(B.lv-1,Math.round((o.sn+1)/2*(B.lv-1))));
+   ca.drawImage(bi,lv*B.cw,o.i*B.ch,B.cw,B.ch,o.x-B.ax,o.y-B.ay,B.cw,B.ch)}};
+ drawG(true);ca.drawImage(isl,B.ix,B.iy);drawG(false);
+ artHall(cf.hall,exi)}
 /* 賢者の広間を描く(タスク040)。歩かない。足と影は動かさず、上半身だけ小さく揺れる(タスク037)。話しているとき「…」を出す */
 function artSway(img,cx,by,d){var w=img.naturalWidth,h=img.naturalHeight,x=Math.round(cx-w/2),y=by-h,cut=Math.round(h*.58);
  ca.drawImage(img,0,0,w,cut,x,y-d,w,cut+d);   /* 上半身: 上へd画素のばす(足側は動かない) */

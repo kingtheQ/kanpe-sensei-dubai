@@ -68,6 +68,11 @@
 - 020-9 写真：`TRIP.RAW`（face/sleep/snack）。`TRIP.setRaw` / `setRawImage` で差し替え。
 - テスト：`tour-src/tests/test_{time,rest,settle,sparta,raw}032.py`（ヘッドレス。マイク・実機は未確認）。
 
+## 今回（11/20）タスク045でやったこと（ナイロビの荷物受取）
+- 手荷物受け取り（`nbo_bag1/2`、bg=baggage）が新しい背景＋荷物アニメで出る。荷物6個が楕円（中心(800,660)・356×56）を1周24秒、奥の荷物は島のうしろ（`tour-src/art.js` の `artBelt`、ART `bagclaim`）。素材の作り方は `tour-src/art/prep_baggage.py`（荷物の外の画素が素材と一致しなければ止まる）。雨もり出来事ではベルトが止まる。ドーハの手荷物は今のまま。
+- 確認：`python3 tour-src/tests/test_bag045.py`（周期の実測24.0秒ほか）。報告と**会話文の下書き（PM確認待ち・未組み込み）**は `docs/pm/deliverables/045-baggage-report-v1.md`。
+- 未確認：実機での見え方・滑らかさ。指示書 `pm-kit/tasks/045-…md` と `kanpe-assets-baggage-045.zip` はリポジトリに無く、依頼文と素材の zip の中身で実装した。
+
 ## 未決・考え中
 - ナイロビ・ドーハまで遊んで「飽きてきた」。どの国も入国審査・手荷物受け取りなど同じ場面が続くため。対策案は 005。どうするかは未決定。
 - 強化合宿の作り直しの方向は未決定（006）。006 の e（開けない「発音教室」画面と古い合宿の整理）はキングの判断待ちで、まだやっていない。
