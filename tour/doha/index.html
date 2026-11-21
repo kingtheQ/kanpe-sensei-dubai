@@ -3814,7 +3814,20 @@ var ARTI={},ARTFAIL={},ARTSHOW=0,AW=1536,AH=960;
 /* 場面の置き場。mode: wide=ワイド(人物は小さめ、キング124px) / room=室内(背景も人物も2倍、キング248px)
    base=足もとの高さ、lulu/king/suit=立つ位置(ルルが左・キングが右。グアムと同じ)、npc=相手(いつもの顔のドット)の位置と大きさ */
 var ART={
- nairobi:{bg:'nairobi-arrivals.png',mode:'wide',base:926,lulu:300,king:470,suit:575,npc:{x:1060,px:9,slide:1},fx:'night',npcS:{taxi_staff:'w-front-man-dashiki',driver:'w-front-man-suit-1'}},
+ /* ナイロビのタクシー乗り場(タスク051): 朝の屋外。人なしの背景(1536×960。黄色の公式タクシーが並ぶ到着カーブ)。歩道(y≥775)に立つ。fx は無し(昼の絵なので、夜の星・ガラスのきらめきは出さない)。
+    people=縁石の手前の歩道の右はし(係員・ふたりの動線と重ねない)。*/
+ nairobi:{bg:'nairobi-taxi-v1.png',mode:'wide',base:926,lulu:300,king:470,suit:575,npc:{x:1060,px:9,slide:1},fx:'',npcS:{taxi_staff:'w-front-man-dashiki',driver:'w-front-man-suit-1'},
+  people:[{n:'t-backpacker-front',x:1250,by:890,sw:79},{n:'t-man-thobe-front',x:1450,by:925,sw:79}]},
+ /* ナイロビのSIMの店(タスク051): 人なしの背景(JKIA到着ロビー。中央が Safaricom の緑カウンター、左 Telkom・右 airtel)。ふたりはカウンターの手前の床に立つ(足もと y=900)。
+    店員は中央のカウンターの向こう(カウンターの高さ y=500 で切る。入国審査・タクシーと同じ npc/npcS の方式)。
+    strips=背景の上・人物より奥に重ねる動き(汎用。{img,x,y,n,fw,fh,step}: 左上(x,y)に n コマの横並びの1コマ(fw×fh)を step 秒ごとに切り替える)。回転台=足もと中心(1264,896)、OPEN看板=(704,524)から128×48。
+    people=Telkom と airtel の前(背景の床の楕円の位置)。回転台(x 1204..1324)・店員・ふたりと重ねない */
+ simshop:{bg:'nairobi-sim-v1.png',mode:'wide',base:900,lulu:700,king:860,suit:965,npc:{x:768,top:372,clip:500},fx:'',npcS:{sim_staff:'w-front-man-suit-1',sim_staff2:'w-front-man-dashiki'},
+  strips:[{img:'nairobi-sim-spinner-strip.png',x:1204,y:596,n:4,fw:120,fh:300,step:.5},{img:'nairobi-sim-blink-strip.png',x:704,y:524,n:2,fw:128,fh:48,step:1}],
+  people:[{n:'t-safari-front',x:218,by:702,sw:85},{n:'t-woman-hijab-front',x:1430,by:712,sw:79}]},
+ /* ナイロビのホテルの部屋(タスク051): 到着の夜、部屋で休む場面(nbo_room)。人なしの背景をフルブリード。ふたりは後ろ姿(足もと y=884、ルル x=700・キング x=836)。人は置かない。
+    tv=壁のTV画面の矩形(1536×960座標)。今回は何も映さない。将来の映画場面のために名前つきで記録しておく */
+ nroom:{bg:'nairobi-hotel-room-v1.png',mode:'wide',hall:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884}},tv:{x:1120,y:216,w:344,h:176}},
  hotel:{bg:'hotel-front.png',mode:'room',base:895,lulu:250,king:450,suit:560,npc:{x:1290,px:15,top:262,clip:412},fx:'hotel',npcS:{c_front:'o-front-woman-blonde-suit'}},
  /* 賢者の広間(タスク040): 人なしの背景をフルブリード。賢者は壇上の中央(大人の高さ136px)、ルル(左)とキング(右)は絨毯の上に後ろ姿で寄って立つ(広い場面の大きさ)。
     globe=背景の球の位置(球の外わく 312..473×356..517)に、球だけ8コマ(96px。2倍=192px)を重ね、period秒で1回転。人は足と影を固定し、上半身だけ小さく揺れる(タスク037) */
@@ -3898,11 +3911,12 @@ function ARTframe(S,A0,dt){
  var ex=artExtra(cf),exi={};for(var e=0;e<ex.length;e++){var xi=artImg('npc/'+ex[e]+'.png');if(xi.bad){ARTFAIL[id]=1;artShow(0);return false}if(!artOKimg(xi))ok=false;exi[ex[e]]=xi}
  if(cf.belt){var bt=[artImg(cf.belt.isl),artImg(cf.belt.bags)];for(var bi=0;bi<2;bi++){if(bt[bi].bad){ARTFAIL[id]=1;artShow(0);return false}if(!artOKimg(bt[bi]))ok=false}
   if(cf.trav){var ti=artImg('npc/'+cf.trav.n+'.png');if(!ti.bad&&!artOKimg(ti))ok=false}}   /* 旅行者の絵だけは、読めなくても場面は出す(フォールバックで描く) */
+ (cf.strips||[]).forEach(function(q){var si=artImg(q.img);if(!si.bad&&!artOKimg(si))ok=false});   /* 動きの絵が読めないときは、動きだけ出さない(背景と人は出す) */
  artShow(1);
  if(!ok){artR('#10131f',0,0,AW,AH);return true}
  if(S.artT0==null)S.artT0=t;
  var te=t-S.artT0,B=cf.base,BOB=4;
- ca.globalAlpha=1;ca.drawImage(bg,0,0);
+ ca.globalAlpha=1;ca.drawImage(bg,0,0);artStrips(cf.strips);
  if(cf.belt){artBelt(cf,exi,te,S);return true}
  if(cf.hall){artPeople(cf.people,exi);artHall(cf.hall,exi);return true}
  if(cf.tk){artTicket(cf.tk,exi,S);return true}
@@ -4061,6 +4075,8 @@ function artRoute(R,S){
  /* 小さい飛行機: いま飛んでいる区間の先頭。どこも引いていないときは羽田で待つ */
  if(!head)head=[A.tok[0],A.tok[1]];
  rtPlane(head[0],head[1]-14+(Math.floor(t*3)%2?-1:0),face)}
+/* 背景に重ねる小さな動き(タスク051)。strips=[{img,x,y,n,fw,fh,step}]。NEARESTの粒のまま(拡大縮小しない)。会話の進み方にはかかわらず、時間だけで切り替わる */
+function artStrips(list){for(var i=0;i<(list||[]).length;i++){var q=list[i],im=artImg(q.img);if(im.bad||!artOKimg(im))continue;var f=Math.floor(t/q.step)%q.n;ca.drawImage(im,f*q.fw,0,q.fw,q.fh,q.x,q.y,q.fw,q.fh)}}
 function artOKimg(i){return i.complete&&i.naturalWidth>0}
 /* この場面が使う人物の絵の名前(npc/ の中)。ひとつでも読めなければ、場面全体が今までの描画に戻る */
 function artExtra(cf){var a=[],i;if(cf.hall)['sage','lulu','king'].forEach(function(k){if(cf.hall[k])a.push(cf.hall[k].n)});if(cf.tk)['clerk','clerkS','lulu','king'].forEach(function(k){if(cf.tk[k])a.push(cf.tk[k].n)});(cf.crowd||[]).forEach(function(c){a.push('w-'+c[0])});
