@@ -3852,7 +3852,13 @@ var ART={
   trav:{vid:'nbo_bag1',n:'t-backpacker-front',x:1065,by:708,sw:79}},
  /* ナイロビのホテルのロビー・歌手のイベント(タスク049): 人なしの背景(夜のロビー。右はしの肘かけ椅子のあるラウンジの隅)をフルブリード。
     歌手(正面・大人の高さ136px)はラウンジの隅の手前に立ち、歌っているあいだ 音符(♪)がのぼる(notes)。ルル(左)とキング(右)は広間と同じ後ろ姿で、歌手のほうを向いて少し離れて立つ。 */
- nlobby:{bg:'nairobi-hotel-lobby-v1.png',mode:'wide',hall:{sage:{n:'hall-singer',x:1130,by:800},lulu:{n:'hall-lulu-back',x:985,by:915},king:{n:'hall-king-back',x:1060,by:915},notes:1}}};
+ nlobby:{bg:'nairobi-hotel-lobby-v1.png',mode:'wide',hall:{sage:{n:'hall-singer',x:1130,by:800},lulu:{n:'hall-lulu-back',x:985,by:915},king:{n:'hall-king-back',x:1060,by:915},notes:1}},
+ /* 機内の対面アップ(タスク048): 1日目の最初の長距離便。CAアナウンス・イベントの2場面。背景は人なし(cabin-close-bg)と、食事のあと(cabin-close-meal。ふたりは絵に描かれている)。
+    cabinseat=CAが席に来る場面とマイク画面: キング・ルルは座った上半身。既存の室内の絵(room-king-idle / room-lulu-idle)を、食事の絵(cabin-close-meal)の人物に合わせた 約2.17倍(NEAREST)・同じ位置(x,y=左上)で重ね、
+      テーブルの上端(clip=585)で切る(テーブルは背景の絵)。CAは正面の絵(npc/ca-front・139×266)を同じ倍率で、右の通路側に立たせる(足もと by)。話しているとき「…」を出す。
+    cabinmeal=食事の場面: 背景の絵そのまま。ルルが話しているとき、ルルの頭の上に「…」を出す(bubble) */
+ cabinseat:{bg:'cabin-close-bg.png',mode:'room',seat:{king:{x:832,y:158,s:2.17},lulu:{x:444,y:202,s:2.18},clip:585,ca:{n:'ca-front',x:1345,by:700,s:2.17}}},
+ cabinmeal:{bg:'cabin-close-meal.png',mode:'room',meal:{bubble:{x:672,y:176}}}};
 function artIdFor(S){return S&&S.vid==='doh_city_h1'?'hotel':null}
 function artImg(n){var i=ARTI[n];if(!i){i=ARTI[n]=new Image();i.onerror=function(){i.bad=1};i.src=ARTBASE+n}return i}
 function artShow(on){if(ARTSHOW===on)return;ARTSHOW=on;cv.hidden=!!on;cvA.hidden=!on}
@@ -3902,6 +3908,8 @@ function ARTframe(S,A0,dt){
  var te=t-S.artT0,B=cf.base,BOB=4;
  ca.globalAlpha=1;ca.drawImage(bg,0,0);
  if(cf.belt){artBelt(cf,exi,te,S);return true}
+ if(cf.seat){artSeat(cf.seat,im,exi,S);return true}
+ if(cf.meal){artMeal(cf.meal);return true}
  if(cf.hall){artPeople(cf.people,exi);artHall(cf.hall,exi);return true}
  if(cf.tk){artTicket(cf.tk,exi,S);return true}
  if(cf.fx==='night')artFxNight();else if(cf.fx==='hotel')artFxHotel();
@@ -3989,6 +3997,18 @@ function artTrav(T){var im=artImg('npc/'+T.n+'.png');
 /* 人なし背景の場面に置く旅行者。list=[{n:'t-safari-front',x:足もとの中心,by:足もとの高さ,sw:影の幅,sit:座り(影なし。座面に足が着く)}]。端の位置に置くのは場面を入れる側 */
 function artPeople(list,exi){for(var i=0;i<(list||[]).length;i++){var P=list[i],im=exi[P.n];if(!im||im.bad||!artOKimg(im))continue;
  if(!P.sit)artShadowP(P.x,P.by,P.sw||Math.round(im.naturalWidth*1.2));artSway(im,P.x,P.by,artSwayD(i*.37+.2,1))}}
+/* 機内の対面アップ(タスク048)。ふたりは座った上半身(テーブルの上端で切る)。小さく上下にゆれる。CAは右の通路側に立ち、話しているとき小さく跳ねて「…」を出す */
+function artSeat(H,im,exi,S){
+ var ki=im['king-idle'],li=im['lulu-idle'],kd=Math.floor(t*1.1)%2?3:0,ld=Math.floor(t*1.1+.5)%2?3:0;
+ ca.save();ca.beginPath();ca.rect(0,0,AW,H.clip);ca.clip();
+ ca.drawImage(li,Math.round(H.lulu.x),Math.round(H.lulu.y-ld),Math.round(li.naturalWidth*H.lulu.s),Math.round(li.naturalHeight*H.lulu.s));
+ ca.drawImage(ki,Math.round(H.king.x),Math.round(H.king.y-kd),Math.round(ki.naturalWidth*H.king.s),Math.round(ki.naturalHeight*H.king.s));
+ ca.restore();
+ var ci=exi[H.ca.n];if(!ci)return;var cw=Math.round(ci.naturalWidth*H.ca.s),chh=Math.round(ci.naturalHeight*H.ca.s),hop=spSay&&Math.floor(t*6)%2?-4:0,cx=Math.round(H.ca.x-cw/2),cy=H.ca.by-chh+hop+(Math.floor(t*1.3)%2?-2:0);
+ ca.drawImage(ci,cx,cy,cw,chh);
+ if(spSay)artBubble(cx+Math.round(cw*.2),cy-20)}
+/* 機内食の場面(タスク048): 背景の絵そのまま。ルルが話しているとき、ルルの頭の上に「…」 */
+function artMeal(M){if(luTalk&&spSay)artBubble(M.bubble.x,M.bubble.y)}
 /* 賢者の広間を描く(タスク040)。歩かない。足と影は動かさず、上半身だけ小さく揺れる(タスク037)。話しているとき「…」を出す */
 function artSway(img,cx,by,d){var w=img.naturalWidth,h=img.naturalHeight,x=Math.round(cx-w/2),y=by-h,cut=Math.round(h*.58);
  ca.drawImage(img,0,0,w,cut,x,y-d,w,cut+d);   /* 上半身: 上へd画素のばす(足側は動かない) */
@@ -4061,7 +4081,7 @@ function artRoute(R,S){
  rtPlane(head[0],head[1]-14+(Math.floor(t*3)%2?-1:0),face)}
 function artOKimg(i){return i.complete&&i.naturalWidth>0}
 /* この場面が使う人物の絵の名前(npc/ の中)。ひとつでも読めなければ、場面全体が今までの描画に戻る */
-function artExtra(cf){var a=[],i;if(cf.hall)['sage','lulu','king'].forEach(function(k){if(cf.hall[k])a.push(cf.hall[k].n)});if(cf.tk)['clerk','clerkS','lulu','king'].forEach(function(k){if(cf.tk[k])a.push(cf.tk[k].n)});(cf.crowd||[]).forEach(function(c){a.push('w-'+c[0])});
+function artExtra(cf){var a=[],i;if(cf.seat&&cf.seat.ca)a.push(cf.seat.ca.n);if(cf.hall)['sage','lulu','king'].forEach(function(k){if(cf.hall[k])a.push(cf.hall[k].n)});if(cf.tk)['clerk','clerkS','lulu','king'].forEach(function(k){if(cf.tk[k])a.push(cf.tk[k].n)});(cf.crowd||[]).forEach(function(c){a.push('w-'+c[0])});
  (cf.booths||[]).forEach(function(b){a.push(b.n);if(b.sw)a.push(b.sw)});(cf.people||[]).forEach(function(q){a.push(q.n)});
  if(cf.npcS)for(var k in cf.npcS)a.push(cf.npcS[k]);return a}
 function artSpKey(){if(!speaker)return null;for(var k in SP)if(SP[k]===speaker)return k;return null}

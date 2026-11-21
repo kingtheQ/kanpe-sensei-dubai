@@ -1,0 +1,4 @@
+/* CAアナウンス・イベント(タスク048): マイク画面のカンペ。1文=1行、意味のまとまりごとに下線で区切る */
+.cue.pacard{display:block;overflow:hidden;padding:24px 12px 10px}
+.pacard .pal{display:flex;flex-wrap:wrap;gap:2px 16px;margin:0 0 8px}
+.pacard .pac{font-weight:900;font-size:28px;line-height:1.2;color:var(--ink);white-space:nowrap;border-bottom:3px solid #d9cba0;padding-bottom:1px}
