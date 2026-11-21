@@ -2001,7 +2001,7 @@ function showMap(){
  G.view='map';Snd.go(MODE==='city'?'city':'map');G.sid++;clearTimers();stopSay();G.scene=null;G.camp=null;luHelp=false;luTalk=false;G.phase='idle';speaker=null;
  $m('sceneView').hidden=true;$m('boothView').hidden=true;$m('mapView').hidden=false;refreshBoothBtn();refreshCityBtn();
  if(!heroEl||!heroEl.isConnected)buildMap();refreshMap();drawMapBg();placeWalkers(G.at,true)}
-function lockedPlace(id){if(TRIP.lockedPlace(id))return true;if(MODE!=='arr'&&MODE!=='dep'&&MODE!=='hdep')return false;for(var k=0;k<PLACES.length;k++){if(PLACES[k].id===id)return false;if(!PLACES[k].v.some(function(v){return save.seen[v]>0}))return true}return false}
+function lockedPlace(id){if(TRIP.lockedPlace(id))return true;if(MODE!=='arr'&&MODE!=='dep'&&MODE!=='hdep')return false;for(var k=0;k<PLACES.length;k++){if(PLACES[k].id===id)return false;if(PLACES[k].v.length&&!PLACES[k].v.some(function(v){return save.seen[v]>0}))return true}return false}
 function onNode(id){
  if(G.view!=='map')return;
  if(lockedPlace(id)){try{Snd.jingle('buzz')}catch(e){}return}
@@ -2015,7 +2015,7 @@ function pickV(pl){
  if(!pool.length)pool=ids.filter(function(i){return i!==lastId});
  if(!pool.length)pool=ids.slice();
  return pool[Math.floor(Math.random()*pool.length)]}
-function enterPlace(id){var pl=PBY[id];if(pl.listen){songListen(pl);return}if(evGate('enter',id,function(){enterPlace(id)}))return;if(pl.win&&!save.ticket){winStart();return}if(pl.hub){enterHub(pl);return}startVid(pl,pickV(pl),null)}
+function enterPlace(id){var pl=PBY[id];if(pl.listen){songListen(pl);return}if(pl.rest){roomRest(pl);return}if(evGate('enter',id,function(){enterPlace(id)}))return;if(pl.win&&!save.ticket){winStart();return}if(pl.hub){enterHub(pl);return}startVid(pl,pickV(pl),null)}
 function startVid(pl,vid,from){
  if(from!=='ev'&&evGate('vid',vid,function(){startVid(pl,vid,from)}))return;
  var d=DLG[vid];lastId=vid;G.sid++;clearTimers();stopSay();Snd.go(G.snd=pl.snd||pl.id);resetOUT();
@@ -3256,9 +3256,11 @@ var box=el('div','dqbox'),plh=G.scene&&G.scene.pl;
 if(plh&&plh.menu){
   setMsgInstant(plh.hubMsg||'どうする？','');
   if(plh.hubEn){msgText.textContent=plh.hubEn;say(plh.hubEn,.9,1)}
+  var first=0;
+  if(plh.id==='sage'){first=-1;plh.menu.forEach(function(m,i){if(first<0&&!save.seen[m[1]])first=i});if(first<0)first=0}
   plh.menu.forEach(function(m){item(m[0],save.seen[m[1]],function(){runStory(m[1])})});
   item('マップに もどる',0,function(){showMap()});
-  dqFinish(box);return}
+  dqFinish(box,first);return}
  if(w==='tv'){
   setMsgInstant('どのチャンネルを見る？（壁の大きなテレビ）','');
   item('BBC News',save.seen.tv_bbc,function(){runStory('tv_bbc')});
@@ -3272,11 +3274,11 @@ if(plh&&plh.menu){
   item('フロントにいく',save.seen.vault_story,function(){runStory('vault_story')});
   item('ねる',0,sleepNow)}
  dqFinish(box)}
-function dqFinish(box){
+function dqFinish(box,init){
  panel.appendChild(box);var bs=[].slice.call(box.children);
  function sel(i){bs.forEach(function(b,j){b.classList.toggle('sel',j===i)})}
  bs.forEach(function(b,i){['focus','pointerenter','pointerdown'].forEach(function(ev){b.addEventListener(ev,function(){sel(i)})})});
- sel(0)}
+ sel(init||0)}
 function runStory(vid){if(vid==='ticket_star'||vid==='ticket_ow'){save.ticket=vid==='ticket_star'?'star':'ow';storeSave()}startVid(G.scene.pl,vid,'hub')}
 function sleepNow(){
  clearPanel();G.phase='inter';setMsgInstant('キングとルルは、ふかふかのベッドで ぐっすり… おやすみなさい。','');say('Goodnight!',.9,1);
@@ -3937,7 +3939,7 @@ BGS.rtmap=function(ctx,S){
   if(f6>=1&&ex&&Math.floor(t*3)%2){R('#fff',ex[0]-4,ex[1]-4,9,9);R('#2f6ad8',ex[0]-3,ex[1]-3,7,7);T('✕',ex[0],ex[1],7,'#fff')}}
  Object.keys(WP).forEach(function(k){var p=WP[k],x=wmx(p[0]),y=wmy(p[1]);R('#0b1d33',x-3,y-3,6,6);R('#ffd36a',x-2,y-2,4,4);T(p[2],x+p[3],y+p[4],5,'#fff')})};
 
-var PLACES_SAGE=[{"id": "sage", "name": "達人賢者", "snd": "sage", "x": 30, "y": 28, "ico": "🧙", "tip": ["達人賢者", "旅のはじまりを聞く"], "v": ["sage_1", "sage_2", "sage_3"], "hub": true, "hubBg": "sage", "hubHero": "blue", "hubEn": "Welcome, travelers. What would you like to ask?", "hubMsg": "達人賢者の広間。", "menu": [["Why go around the world?", "sage_1"], ["Which ticket should we choose?", "sage_2"], ["Tips for travel English", "sage_3"]]}, {"id": "ticket", "name": "チケットをえらぶ", "snd": "tdesk", "x": 70, "y": 72, "ico": "🎫", "tip": ["航空券の窓口", "世界一周の窓口で相談して、券をえらぶ"], "v": ["ticket_star", "ticket_ow"], "hubMap": 1, "win": 1}],PLACES_HDEP=[{"id": "hcheckin", "name": "チェックイン", "snd": "info", "x": 22, "y": 14, "ico": "🎫", "tip": ["羽田空港 チェックイン", "荷物を預けて、搭乗券をもらう"], "v": ["hnd_checkin_ow", "hnd_checkin_star"], "seq": 1, "tkv": {"ow": ["hnd_checkin_ow"], "star": ["hnd_checkin_star"]}}, {"id": "hsec", "name": "保安検査", "snd": "info", "x": 72, "y": 28, "ico": "🔍", "tip": ["保安検査", "荷物・上着・液体"], "v": ["hnd_sec"], "seq": 1}, {"id": "hexit", "name": "出国審査", "snd": "info", "x": 26, "y": 46, "ico": "🛂", "tip": ["出国審査", "パスポートと搭乗券"], "v": ["hnd_exit"], "seq": 1}, {"id": "hgate", "name": "出発ゲート", "snd": "hall", "x": 72, "y": 62, "ico": "🚪", "tip": ["出発ゲート", "夜の静かなゲートで待つ"], "v": ["hnd_gate_ow", "hnd_gate_star"], "seq": 1, "tkv": {"ow": ["hnd_gate_ow"], "star": ["hnd_gate_star"]}}, {"id": "hboard", "name": "搭乗", "snd": "hall", "x": 28, "y": 78, "ico": "🛫", "tip": ["搭乗", "搭乗券を見せて、ブリッジへ"], "v": ["hnd_board_ow", "hnd_board_star"], "seq": 1, "tkv": {"ow": ["hnd_board_ow"], "star": ["hnd_board_star"]}}, {"id": "hplane", "name": "機内(深夜便)", "snd": "atop", "x": 74, "y": 90, "ico": "✈️", "tip": ["機内", "終わるとナイロビへ飛ぶ"], "v": ["hnd_plane_ow", "hnd_plane_star"], "seq": 1, "tkv": {"ow": ["hnd_plane_ow"], "star": ["hnd_plane_star"]}}],PLACES_NARR=[{"id": "immig", "name": "入国審査", "snd": "info", "x": 22, "y": 16, "ico": "🛂", "tip": ["入国審査(Immigration)", "eTA・目的・滞在日数・ホテル"], "v": ["nbo_immig1", "nbo_immig2"]}, {"id": "bag", "name": "手荷物受け取り", "snd": "hall", "x": 70, "y": 36, "ico": "🧳", "tip": ["バゲージクレーム", "スーツケース・レジ袋"], "v": ["nbo_bag1", "nbo_bag2"]}, {"id": "sim", "name": "Safaricom SIM", "snd": "info", "x": 24, "y": 58, "ico": "📱", "tip": ["Safaricom", "SIMの登録とデータ"], "v": ["nbo_sim1", "nbo_sim2"]}, {"id": "taxi", "name": "タクシー・Uber", "snd": "hall", "x": 70, "y": 82, "ico": "🚕", "tip": ["タクシー乗り場とライドシェア", "市内へ・料金は架空"], "v": ["nbo_taxi1", "nbo_taxi2"]}, {"id": "hsong", "name": "ホテルのロビー", "snd": "hotel", "x": 24, "y": 84, "ico": "🏨", "tip": ["Villa Rosa Kempinski", "夜のロビーで、歌を聴く"], "v": [], "listen": "nbo_song"}],PLACES_NAIR=[{"id": "java", "name": "Java House", "snd": "cafe", "x": 22, "y": 14, "ico": "☕", "tip": ["Java House", "ラテとケーキ・値段は架空"], "v": ["nbo_java1", "nbo_java2"]}, {"id": "art", "name": "Artcaffe", "snd": "cafe", "x": 70, "y": 32, "ico": "🥐", "tip": ["Artcaffe", "パンとジュース・値段は架空"], "v": ["nbo_art1", "nbo_art2"]}, {"id": "lounge", "name": "Pride Lounge", "snd": "ahlan", "x": 24, "y": 52, "ico": "🛋️", "tip": ["Pride Lounge", "ラウンジの受付と、となりの人"], "v": ["nbo_lounge1", "nbo_lounge2"]}, {"id": "duty", "name": "Duty Free", "snd": "cafe", "x": 70, "y": 68, "ico": "🛍️", "tip": ["免税店", "コーヒーと紅茶・値段は架空"], "v": ["nbo_duty1", "nbo_duty2"]}],PLACES_NDEP=[{"id": "qcheckin", "name": "Qatar Airways", "snd": "info", "x": 24, "y": 18, "ico": "🎫", "tip": ["Qatar Airways チェックイン", "荷物の重さ・席・搭乗券"], "v": ["nbo_checkin1", "nbo_checkin2"]}, {"id": "nsec", "name": "保安検査", "snd": "info", "x": 70, "y": 46, "ico": "🔍", "tip": ["保安検査", "荷物・上着・液体"], "v": ["nbo_sec1", "nbo_sec2"]}, {"id": "gate", "name": "搭乗ゲート", "snd": "hall", "x": 70, "y": 76, "ico": "🚪", "tip": ["搭乗ゲート", "搭乗のアナウンス"], "v": ["nbo_gate1", "nbo_gate2"]}, {"id": "qplane", "name": "機内(Qatar Airways)", "snd": "atop", "x": 26, "y": 76, "ico": "✈️", "tip": ["機内", "客室乗務員との会話。終わるとドーハへ飛ぶ"], "v": ["nbo_plane1", "nbo_plane2"]}];
+var PLACES_SAGE=[{"id": "sage", "name": "達人賢者", "snd": "sage", "x": 30, "y": 28, "ico": "🧙", "tip": ["達人賢者", "旅のはじまりを聞く"], "v": ["sage_1", "sage_2", "sage_3"], "hub": true, "hubBg": "sage", "hubHero": "blue", "hubEn": "Welcome, travelers. What would you like to ask?", "hubMsg": "達人賢者の広間。", "menu": [["Why go around the world?", "sage_1"], ["Which ticket should we choose?", "sage_2"], ["Tips for travel English", "sage_3"]]}, {"id": "ticket", "name": "チケットをえらぶ", "snd": "tdesk", "x": 70, "y": 72, "ico": "🎫", "tip": ["航空券の窓口", "世界一周の窓口で相談して、券をえらぶ"], "v": ["ticket_star", "ticket_ow"], "hubMap": 1, "win": 1}],PLACES_HDEP=[{"id": "hcheckin", "name": "チェックイン", "snd": "info", "x": 22, "y": 14, "ico": "🎫", "tip": ["羽田空港 チェックイン", "荷物を預けて、搭乗券をもらう"], "v": ["hnd_checkin_ow", "hnd_checkin_star"], "seq": 1, "tkv": {"ow": ["hnd_checkin_ow"], "star": ["hnd_checkin_star"]}}, {"id": "hsec", "name": "保安検査", "snd": "info", "x": 72, "y": 28, "ico": "🔍", "tip": ["保安検査", "荷物・上着・液体"], "v": ["hnd_sec"], "seq": 1}, {"id": "hexit", "name": "出国審査", "snd": "info", "x": 26, "y": 46, "ico": "🛂", "tip": ["出国審査", "パスポートと搭乗券"], "v": ["hnd_exit"], "seq": 1}, {"id": "hgate", "name": "出発ゲート", "snd": "hall", "x": 72, "y": 62, "ico": "🚪", "tip": ["出発ゲート", "夜の静かなゲートで待つ"], "v": ["hnd_gate_ow", "hnd_gate_star"], "seq": 1, "tkv": {"ow": ["hnd_gate_ow"], "star": ["hnd_gate_star"]}}, {"id": "hboard", "name": "搭乗", "snd": "hall", "x": 28, "y": 78, "ico": "🛫", "tip": ["搭乗", "搭乗券を見せて、ブリッジへ"], "v": ["hnd_board_ow", "hnd_board_star"], "seq": 1, "tkv": {"ow": ["hnd_board_ow"], "star": ["hnd_board_star"]}}, {"id": "hplane", "name": "機内(深夜便)", "snd": "atop", "x": 74, "y": 90, "ico": "✈️", "tip": ["機内", "終わるとナイロビへ飛ぶ"], "v": ["hnd_plane_ow", "hnd_plane_star"], "seq": 1, "tkv": {"ow": ["hnd_plane_ow"], "star": ["hnd_plane_star"]}}],PLACES_NARR=[{"id": "immig", "name": "入国審査", "snd": "info", "x": 22, "y": 16, "ico": "🛂", "tip": ["入国審査(Immigration)", "eTA・目的・滞在日数・ホテル"], "v": ["nbo_immig1", "nbo_immig2"]}, {"id": "bag", "name": "手荷物受け取り", "snd": "hall", "x": 70, "y": 36, "ico": "🧳", "tip": ["バゲージクレーム", "スーツケース・レジ袋"], "v": ["nbo_bag1", "nbo_bag2"]}, {"id": "sim", "name": "Safaricom SIM", "snd": "info", "x": 24, "y": 58, "ico": "📱", "tip": ["Safaricom", "SIMの登録とデータ"], "v": ["nbo_sim1", "nbo_sim2"]}, {"id": "taxi", "name": "タクシー・Uber", "snd": "hall", "x": 70, "y": 82, "ico": "🚕", "tip": ["タクシー乗り場とライドシェア", "市内へ・料金は架空"], "v": ["nbo_taxi1", "nbo_taxi2"]}, {"id": "hsong", "name": "ホテルのロビー", "snd": "hotel", "x": 24, "y": 84, "ico": "🏨", "tip": ["Villa Rosa Kempinski", "夜のロビーで、歌を聴く"], "v": [], "listen": "nbo_song"}, {"id": "hroom", "name": "ホテルの部屋", "snd": "hotel", "x": 48, "y": 88, "ico": "🛏️", "tip": ["Villa Rosa Kempinski", "部屋で休む"], "v": [], "rest": "nbo_room"}],PLACES_NAIR=[{"id": "java", "name": "Java House", "snd": "cafe", "x": 22, "y": 14, "ico": "☕", "tip": ["Java House", "ラテとケーキ・値段は架空"], "v": ["nbo_java1", "nbo_java2"]}, {"id": "art", "name": "Artcaffe", "snd": "cafe", "x": 70, "y": 32, "ico": "🥐", "tip": ["Artcaffe", "パンとジュース・値段は架空"], "v": ["nbo_art1", "nbo_art2"]}, {"id": "lounge", "name": "Pride Lounge", "snd": "ahlan", "x": 24, "y": 52, "ico": "🛋️", "tip": ["Pride Lounge", "ラウンジの受付と、となりの人"], "v": ["nbo_lounge1", "nbo_lounge2"]}, {"id": "duty", "name": "Duty Free", "snd": "cafe", "x": 70, "y": 68, "ico": "🛍️", "tip": ["免税店", "コーヒーと紅茶・値段は架空"], "v": ["nbo_duty1", "nbo_duty2"]}],PLACES_NDEP=[{"id": "qcheckin", "name": "Qatar Airways", "snd": "info", "x": 24, "y": 18, "ico": "🎫", "tip": ["Qatar Airways チェックイン", "荷物の重さ・席・搭乗券"], "v": ["nbo_checkin1", "nbo_checkin2"]}, {"id": "nsec", "name": "保安検査", "snd": "info", "x": 70, "y": 46, "ico": "🔍", "tip": ["保安検査", "荷物・上着・液体"], "v": ["nbo_sec1", "nbo_sec2"]}, {"id": "gate", "name": "搭乗ゲート", "snd": "hall", "x": 70, "y": 76, "ico": "🚪", "tip": ["搭乗ゲート", "搭乗のアナウンス"], "v": ["nbo_gate1", "nbo_gate2"]}, {"id": "qplane", "name": "機内(Qatar Airways)", "snd": "atop", "x": 26, "y": 76, "ico": "✈️", "tip": ["機内", "客室乗務員との会話。終わるとドーハへ飛ぶ"], "v": ["nbo_plane1", "nbo_plane2"]}];
 PLACES_AIR=PLACES_NAIR;
 PLACES_SAGE.concat(PLACES_HDEP,PLACES_NARR,PLACES_NAIR,PLACES_NDEP).forEach(function(p){PBY[p.id]=p});
 var TOUR_IDS=["hnd_checkin_ow", "hnd_checkin_star", "hnd_sec", "hnd_exit", "hnd_gate_ow", "hnd_gate_star", "hnd_board_ow", "hnd_board_star", "hnd_plane_ow", "hnd_plane_star", "nbo_immig1", "nbo_immig2", "nbo_bag1", "nbo_bag2", "nbo_sim1", "nbo_sim2", "nbo_taxi1", "nbo_taxi2", "nbo_java1", "nbo_java2", "nbo_art1", "nbo_art2", "nbo_lounge1", "nbo_lounge2", "nbo_duty1", "nbo_duty2", "nbo_checkin1", "nbo_checkin2", "nbo_sec1", "nbo_sec2", "nbo_gate1", "nbo_gate2", "nbo_plane1", "nbo_plane2"];
@@ -3947,8 +3949,7 @@ MODES={sage:{p:PLACES_SAGE,b:'🧙 賢者',h:'達人賢者の広間<small>世界
  arr:{p:PLACES_NARR,b:'🛬 到着',h:'ナイロビに到着<small>ジョモ・ケニヤッタ国際空港</small>',snd:'nbo'},
  air:{p:PLACES_NAIR,b:'✈ 空港',h:'ナイロビの空港<small>出発までの時間</small>',snd:'nbo'},
  dep:{p:PLACES_NDEP,b:'🛫 出発',h:'ナイロビから出発<small>チェックインから機内まで</small>',snd:'nbo'}};
-/* ============================================================
-   場面の絵(タスク028): 枠なし・フルブリードの新しい絵の場面
+/* =====================================================   場面の絵(タスク028): 枠なし・フルブリードの新しい絵の場面
    - 新しい背景(1536×960)を #sceneA に描く。古い背景(320×150のドット)の場面は今までどおり #scene に描く
    - 人物は キング確定版のスプライト(足もとの芝・縁の黄緑は素材づくりで除去済み)。歩行は「進む方向を向いたコマだけ」
        キング右歩き = walk-12/18 を左右反転 / ルル右歩き = walk-10→17→23→17 / 左歩きはその逆(キングは元の向き、ルルは反転)
@@ -3960,7 +3961,20 @@ var ARTI={},ARTFAIL={},ARTSHOW=0,AW=1536,AH=960;
 /* 場面の置き場。mode: wide=ワイド(人物は小さめ、キング124px) / room=室内(背景も人物も2倍、キング248px)
    base=足もとの高さ、lulu/king/suit=立つ位置(ルルが左・キングが右。グアムと同じ)、npc=相手(いつもの顔のドット)の位置と大きさ */
 var ART={
- nairobi:{bg:'nairobi-arrivals.png',mode:'wide',base:926,lulu:300,king:470,suit:575,npc:{x:1060,px:9,slide:1},fx:'night',npcS:{taxi_staff:'w-front-man-dashiki',driver:'w-front-man-suit-1'}},
+ /* ナイロビのタクシー乗り場(タスク051): 朝の屋外。人なしの背景(1536×960。黄色の公式タクシーが並ぶ到着カーブ)。歩道(y≥775)に立つ。fx は無し(昼の絵なので、夜の星・ガラスのきらめきは出さない)。
+    people=縁石の手前の歩道の右はし(係員・ふたりの動線と重ねない)。*/
+ nairobi:{bg:'nairobi-taxi-v1.png',mode:'wide',base:926,lulu:300,king:470,suit:575,npc:{x:1060,px:9,slide:1},fx:'',npcS:{taxi_staff:'w-front-man-dashiki',driver:'w-front-man-suit-1'},
+  people:[{n:'t-backpacker-front',x:1250,by:890,sw:79},{n:'t-man-thobe-front',x:1450,by:925,sw:79}]},
+ /* ナイロビのSIMの店(タスク051): 人なしの背景(JKIA到着ロビー。中央が Safaricom の緑カウンター、左 Telkom・右 airtel)。ふたりはカウンターの手前の床に立つ(足もと y=900)。
+    店員は中央のカウンターの向こう(カウンターの高さ y=500 で切る。入国審査・タクシーと同じ npc/npcS の方式)。
+    strips=背景の上・人物より奥に重ねる動き(汎用。{img,x,y,n,fw,fh,step}: 左上(x,y)に n コマの横並びの1コマ(fw×fh)を step 秒ごとに切り替える)。回転台=足もと中心(1264,896)、OPEN看板=(704,524)から128×48。
+    people=Telkom と airtel の前(背景の床の楕円の位置)。回転台(x 1204..1324)・店員・ふたりと重ねない */
+ simshop:{bg:'nairobi-sim-v1.png',mode:'wide',base:900,lulu:700,king:860,suit:965,npc:{x:768,top:372,clip:500},fx:'',npcS:{sim_staff:'w-front-man-suit-1',sim_staff2:'w-front-man-dashiki'},
+  strips:[{img:'nairobi-sim-spinner-strip.png',x:1204,y:596,n:4,fw:120,fh:300,step:.5},{img:'nairobi-sim-blink-strip.png',x:704,y:524,n:2,fw:128,fh:48,step:1}],
+  people:[{n:'t-safari-front',x:218,by:702,sw:85},{n:'t-woman-hijab-front',x:1430,by:712,sw:79}]},
+ /* ナイロビのホテルの部屋(タスク051): 到着の夜、部屋で休む場面(nbo_room)。人なしの背景をフルブリード。ふたりは後ろ姿(足もと y=884、ルル x=700・キング x=836)。人は置かない。
+    tv=壁のTV画面の矩形(1536×960座標)。今回は何も映さない。将来の映画場面のために名前つきで記録しておく */
+ nroom:{bg:'nairobi-hotel-room-v1.png',mode:'wide',hall:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884}},tv:{x:1120,y:216,w:344,h:176}},
  hotel:{bg:'hotel-front.png',mode:'room',base:895,lulu:250,king:450,suit:560,npc:{x:1290,px:15,top:262,clip:412},fx:'hotel',npcS:{c_front:'o-front-woman-blonde-suit'}},
  /* 賢者の広間(タスク040): 人なしの背景をフルブリード。賢者は壇上の中央(大人の高さ136px)、ルル(左)とキング(右)は絨毯の上に後ろ姿で寄って立つ(広い場面の大きさ)。
     globe=背景の球の位置(球の外わく 312..473×356..517)に、球だけ8コマ(96px。2倍=192px)を重ね、period秒で1回転。人は足と影を固定し、上半身だけ小さく揺れる(タスク037) */
@@ -4055,7 +4069,7 @@ ART.ngate1={bg:'nairobi-gate-v1.png',mode:'wide',dep:{lulu:{n:TLU,x:700,by:940},
 ART.ngate2={bg:'nairobi-gate-v1.png',mode:'wide',dep:{lulu:{n:TLU,x:700,by:940},king:{n:TKG,x:800,by:940},clerk:{x:1290,top:480,clip:660},
  npcS:{gate_agent:'o-front-woman-blonde-suit',gate_agent2:'tk-clerk'},bubble:{x:1290,y:470},fx:GATEFX,
  people:[{n:'t2-maasai-back',x:140,by:950},{n:'t2-man-dashiki-back',x:1440,by:950}]}};
-function artIdFor(S){var g=S&&S.d&&S.d.bg,h=S&&S.hub&&S.ctx&&S.ctx.bg,v=String(S&&S.vid||''),k=/2$/.test(v)?'2':'1';if(/^nbo_/.test(v)){if(g==='checkinQ')return'ncheckin'+k;if(g==='security')return'nsec'+k;if(g==='duty')return'nduty'+k;if(g==='lounge')return'nlounge'+k;if(g==='gate')return'ngate'+k}return g==='nlobby'?'nlobby':(g==='sage'||h==='sage')?'sage':((g==='tdesk'||g==='rtmap')?'ticket':(g==='taxi'?'nairobi':(g==='immig'?'immig':(g==='baggage'?'bagclaim':(g==='hgateOW'?'hgate_ow':(g==='hgateST'?'hgate_st':null))))))}
+function artIdFor(S){var g=S&&S.d&&S.d.bg,h=S&&S.hub&&S.ctx&&S.ctx.bg,v=String(S&&S.vid||''),k=/2$/.test(v)?'2':'1';if(/^nbo_/.test(v)){if(g==='checkinQ')return'ncheckin'+k;if(g==='security')return'nsec'+k;if(g==='duty')return'nduty'+k;if(g==='lounge')return'nlounge'+k;if(g==='gate')return'ngate'+k}return g==='nlobby'?'nlobby':g==='nroom'?'nroom':g==='sim'?'simshop':(g==='sage'||h==='sage')?'sage':((g==='tdesk'||g==='rtmap')?'ticket':(g==='taxi'?'nairobi':(g==='immig'?'immig':(g==='baggage'?'bagclaim':(g==='hgateOW'?'hgate_ow':(g==='hgateST'?'hgate_st':null))))))}
 function artImg(n){var i=ARTI[n];if(!i){i=ARTI[n]=new Image();i.onerror=function(){i.bad=1};i.src=ARTBASE+n}return i}
 function artShow(on){if(ARTSHOW===on)return;ARTSHOW=on;cv.hidden=!!on;cvA.hidden=!on}
 function artR(col,x,y,w,h){ca.fillStyle=col;ca.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h))}
@@ -4099,11 +4113,12 @@ function ARTframe(S,A0,dt){
  if(cf.dep){var dfi=artDepImgs(cf.dep);for(var dk=0;dk<dfi.length;dk++){var dim=artImg(dfi[dk]);if(!dim.bad&&!artOKimg(dim))ok=false}}   /* 出発まわり(054): 動く別素材が読めないときは、その動きだけ描かない(場面は出す)。読み込み中は暗い板 */
  if(cf.belt){var bt=[artImg(cf.belt.isl),artImg(cf.belt.bags)];for(var bi=0;bi<2;bi++){if(bt[bi].bad){ARTFAIL[id]=1;artShow(0);return false}if(!artOKimg(bt[bi]))ok=false}
   if(cf.trav){var ti=artImg('npc/'+cf.trav.n+'.png');if(!ti.bad&&!artOKimg(ti))ok=false}}   /* 旅行者の絵だけは、読めなくても場面は出す(フォールバックで描く) */
+ (cf.strips||[]).forEach(function(q){var si=artImg(q.img);if(!si.bad&&!artOKimg(si))ok=false});   /* 動きの絵が読めないときは、動きだけ出さない(背景と人は出す) */
  artShow(1);
  if(!ok){artR('#10131f',0,0,AW,AH);return true}
  if(S.artT0==null)S.artT0=t;
  var te=t-S.artT0,B=cf.base,BOB=4;
- ca.globalAlpha=1;ca.drawImage(bg,0,0);
+ ca.globalAlpha=1;ca.drawImage(bg,0,0);artStrips(cf.strips);
  if(cf.belt){artBelt(cf,exi,te,S);return true}
  if(cf.dep){artDep(cf,exi,S,te);return true}
  if(cf.hall){artPeople(cf.people,exi);artHall(cf.hall,exi);return true}
@@ -4313,6 +4328,8 @@ function artDep(cf,exi,S,te){
  if(kg&&OUT.hvis)L.push({by:D.king.by,f:function(){artShadow(D.king.x,D.king.by,70);artSway(kg,D.king.x,D.king.by,kd)}});
  L.sort(function(a,b){return a.by-b.by});for(i=0;i<L.length;i++)L[i].f();
  if(spSay&&speaker&&!speaker.ghost&&!said&&D.bubble)artBubble(D.bubble.x,D.bubble.y)}   /* 絵に出ない相手(ghost=電話の声・アナウンス)には「…」を出さない。立つ人・係員・座る人が話し相手のとき、その人の上に出す */
+/* 背景に重ねる小さな動き(タスク051)。strips=[{img,x,y,n,fw,fh,step}]。NEARESTの粒のまま(拡大縮小しない)。会話の進み方にはかかわらず、時間だけで切り替わる */
+function artStrips(list){for(var i=0;i<(list||[]).length;i++){var q=list[i],im=artImg(q.img);if(im.bad||!artOKimg(im))continue;var f=Math.floor(t/q.step)%q.n;ca.drawImage(im,f*q.fw,0,q.fw,q.fh,q.x,q.y,q.fw,q.fh)}}
 function artOKimg(i){return i.complete&&i.naturalWidth>0}
 /* この場面が使う人物の絵の名前(npc/ の中)。ひとつでも読めなければ、場面全体が今までの描画に戻る */
 function artExtra(cf){var a=[],i;if(cf.hall)['sage','lulu','king'].forEach(function(k){if(cf.hall[k])a.push(cf.hall[k].n)});if(cf.tk)['clerk','clerkS','lulu','king'].forEach(function(k){if(cf.tk[k])a.push(cf.tk[k].n)});(cf.crowd||[]).forEach(function(c){a.push('w-'+c[0])});
@@ -4434,6 +4451,7 @@ var SONGBASE=ARTBASE.replace(/art\/$/,'song/');
 var SONGFILE={theme:'song-theme.mp3'};
 var SONGVOL={theme:.65};     /* テーマは聴くのが主役(チャントの音量 0.2 は chant.js) */
 var SONGSC={"id": "nbo_song", "who": "ラウンジの歌手", "bg": "nlobby", "sp": "singer", "intro": "夜のホテルのロビー。奥のラウンジの隅から、やさしい歌声が聞こえてくる。ふたりは足をとめて、耳をかたむけた。", "after": [{"w": "singer", "who": "ラウンジの歌手", "en": "Thank you for listening. Karibu Nairobi. Welcome!"}, {"w": "lulu", "who": "ルル", "en": "That was beautiful. I could listen all night."}, {"w": "king", "who": "キング", "en": "Asante! It was a wonderful song."}, {"w": "singer", "who": "ラウンジの歌手", "en": "Asante sana. Sleep well, and enjoy Nairobi."}], "listen": 1};
+var ROOMSC={"id": "nbo_room", "who": "ホテルの部屋", "bg": "nroom", "sp": "lulu", "intro": "夜のホテルの部屋。長い一日がおわった。ふたりは、ほっと息をついた。", "lines": [{"w": "lulu", "who": "ルル", "en": "We made it. This is our room at the Villa Rosa Kempinski."}, {"w": "king", "who": "キング", "en": "It is so quiet. Look at the moon."}, {"w": "lulu", "who": "ルル", "en": "Nairobi is beautiful at night."}, {"w": "king", "who": "キング", "en": "My blue suitcase is here. I am so tired."}, {"w": "lulu", "who": "ルル", "en": "Rest well, King. Tomorrow is a new day."}, {"w": "king", "who": "キング", "en": "Lala salama, Lulu."}], "rest": 1};   /* ホテルの部屋(タスク051) */
 var SONG={el:null,key:null,ac:null,gn:null,want:null};
 SP.singer={pitch:1.1,m:[[HJ,P(2,{x:'#2d8f8a',o:'#e0b040'})]]};   /* 絵が読めなかったときの、いつものドット */
 BGS.nlobby=BGS.lobby;   /* 背景の絵が読めなかったときの、いつものドットのロビー */
@@ -4512,6 +4530,31 @@ function songListen(pl){
   S.pitch=L.w==='lulu'?1.35:(L.w==='singer'?SP.singer.pitch:1);
   setMsgInstant(L.en,L.who);
   var adv=false;function go2(){if(adv||G.sid!==sid)return;adv=true;spSay=false;stopSay();songLine(i+1)}
+  var sk=el('button','btn sub','つぎへ ▶');sk.type='button';panel.appendChild(sk);sk.addEventListener('click',go2);
+  spSay=true;say(L.en,.9,S.pitch,gd(function(){spSay=false;later(900,go2)}))}}
+
+/* ---- ホテルの部屋(タスク051): 到着の夜、部屋で休む場面 nbo_room。読み上げて表示するだけ(マイク・発音の課題・採点・単語バトルなし)。曲は鳴らさない。
+   v が空の場所なので、保存の記録(save.seen)・到着の完了条件・場面の数には何も足さない。タップ(つぎへ)で早送りできる ---- */
+BGS.nroom=function(){R('#dccbaa',0,0,VW,98);R('#c4ae8a',0,0,VW,6);R('#0f1630',22,16,70,50);R('#e8dcc4',56,16,3,50);R('#e8dcc4',22,40,70,3);
+ R('#99674a',0,98,VW,52);R('#a5623f',100,128,120,16);R('#f4f1e8',130,84,90,16);R('#b3322f',200,88,46,12);R('#2a2c34',224,26,70,36);R('#6a4a30',224,86,84,14)};   /* 背景の絵が読めなかったときの、いつものドットの部屋 */
+function roomRest(pl){
+ var d=ROOMSC;
+ G.sid++;clearTimers();stopSay();Snd.go(null);resetOUT();
+ G.scene={id:pl.id,vid:null,pl:pl,d:d,turns:[],words:[],pitch:1,from:null,anim:null,lastSp:null,tables:null};
+ speaker=null;applyCtx({bg:d.bg,who:d.who,sp:null,hero:'blue',lulu:'plain',gold:0});
+ cam=0;spX=360;spSay=false;luTalk=false;G.view='scene';G.ti=0;G.tries=0;$m('mapView').hidden=true;$m('sceneView').hidden=false;
+ clearPanel();G.phase='listen';setMsgInstant(d.intro,'');$m('tapHint').textContent='';
+ var S=G.scene,sid=G.sid;
+ var go=el('button','btn go','GO！');go.type='button';panel.appendChild(go);
+ go.addEventListener('click',function(){if(G.sid!==sid||S.roomGo)return;S.roomGo=1;Snd.go('hotel');roomLine(0)});
+ function roomLine(i){
+  var L=d.lines[i];
+  if(!L){speaker=null;luTalk=false;spSay=false;later(700,function(){showMap()});return}
+  clearPanel();G.phase='listen';
+  speaker=null;luTalk=(L.w==='lulu');
+  S.pitch=L.w==='lulu'?1.35:1;
+  setMsgInstant(L.en,L.who);
+  var adv=false;function go2(){if(adv||G.sid!==sid)return;adv=true;spSay=false;stopSay();roomLine(i+1)}
   var sk=el('button','btn sub','つぎへ ▶');sk.type='button';panel.appendChild(sk);sk.addEventListener('click',go2);
   spSay=true;say(L.en,.9,S.pitch,gd(function(){spSay=false;later(900,go2)}))}}
 

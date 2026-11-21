@@ -180,7 +180,7 @@ with sync_playwright() as pw:
     q = ctx3.new_page(); q.route('**/tour/index.html', hooked); q.goto(base + '/tour/index.html'); q.wait_for_timeout(1500)
     R = q.evaluate("()=>{var f=__T.artIdFor,o={};[['hnd_checkin_ow','checkinQ'],['hnd_sec','security'],['hnd_gate_ow','hgateOW'],['doh_x','checkinQ'],['doh_y','gate'],['nbo_plane1','cabinQ'],['nbo_plane2','cabinQ'],['nbo_java1','cafe'],['nbo_art1','cafe'],['nbo_song','nlobby'],['nbo_sim1','sim'],['nbo_immig1','immig'],['nbo_bag1','baggage'],['nbo_taxi1','taxi']].forEach(function(a){o[a[0]+'/'+a[1]]=f({vid:a[0],d:{bg:a[1]}})});return o}")
     exp = {'hnd_checkin_ow/checkinQ': None, 'hnd_sec/security': None, 'hnd_gate_ow/hgateOW': 'hgate_ow', 'doh_x/checkinQ': None, 'doh_y/gate': None, 'nbo_plane1/cabinQ': None, 'nbo_plane2/cabinQ': None,
-           'nbo_java1/cafe': None, 'nbo_art1/cafe': None, 'nbo_song/nlobby': 'nlobby', 'nbo_sim1/sim': None, 'nbo_immig1/immig': 'immig', 'nbo_bag1/baggage': 'bagclaim', 'nbo_taxi1/taxi': 'nairobi'}
+           'nbo_java1/cafe': None, 'nbo_art1/cafe': None, 'nbo_song/nlobby': 'nlobby', 'nbo_sim1/sim': 'simshop', 'nbo_immig1/immig': 'immig', 'nbo_bag1/baggage': 'bagclaim', 'nbo_taxi1/taxi': 'nairobi'}
     chk('対応: 羽田(checkinQ/security)・ドーハ側の同名bg・機内・カフェ・歌手・SIM・入国・荷物・タクシーは、これまでどおり', R == exp, {k: v for k, v in R.items() if exp[k] != v})
     ctx3.close()
     p3 = br.new_context(viewport={'width': 390, 'height': 780}); p3.add_init_script(INIT)
