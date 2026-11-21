@@ -12,7 +12,7 @@ HOOK = "requestAnimationFrame(frame);\n})();"
 OPT = lambda *ns: ",".join("%s:typeof %s!=='undefined'?%s:null" % (n, n, n) for n in ns)
 def hooked(route):
     r = route.fetch(); body = r.text(); assert HOOK in body
-    hk = "window.__T={G:G,save:save,startVid:startVid,PBY:PBY,DLG:DLG,PLACES:typeof PLACES!=='undefined'?PLACES:null,startWords:startWords,noteWord:noteWord,fastMs:fastMs,WB:WB,LIMIT:LIMIT," + OPT('dreamStart', 'dreamWords', 'TRIP', 'forkOpts') + "};"
+    hk = "window.__T={G:G,save:save,startVid:startVid,PBY:PBY,DLG:DLG,PLACES:typeof PLACES!=='undefined'?PLACES:null,startWords:startWords,noteWord:noteWord,fastMs:fastMs,WB:WB,LIMIT:LIMIT," + OPT('dreamStart', 'dreamWords', 'TRIP', 'forkOpts', 'enterPlace', 'showMap') + "};"
     route.fulfill(response=r, body=body.replace(HOOK, hk + HOOK, 1))
 bad = []; ERR = []
 def chk(name, ok, val=''):
@@ -177,6 +177,27 @@ with sync_playwright() as pw:
         q.wait_for_timeout(500)
         if q.evaluate("()=>window.__done") == 1: break
     chk('D2 ドーハ版: 夢が終わり、通じた語は持ち越しから外れる', q.evaluate("()=>window.__done") == 1 and q.evaluate("()=>__T.save.missed.length") == 0)
+    q.close()
+    # E. 夢の置き場所: 051の nbo_room(ホテルの部屋)の最後 → 夢 → 地図。同じ夜に二度は見ない
+    q = seed(ctx, 'kanpe-tour-save-v1', {'seen': {}, 'ticket': 'ow'}, tseed('ow', 4, 4, 'day')); q.route('**/tour/index.html', hooked)
+    q.goto(base + '/tour/index.html'); q.wait_for_timeout(1800)
+    q.evaluate("()=>{var T=__T;T.save.missed=[['latte','/l/','ラテ','遅い'],['iced','/i/','冷たい','間違い']];T.enterPlace('hroom')}")
+    q.wait_for_timeout(500); q.evaluate("()=>document.querySelector('.btn.go').click()")
+    for i in range(40):
+        q.wait_for_timeout(500)
+        if q.evaluate("()=>__T.G.scene&&__T.G.scene.vid")=='dream_1': break
+        q.evaluate("()=>{var b=document.querySelector('#panel .btn.sub');if(b)b.click()}")
+    chk('E1 nbo_room の6行のあと、持ち越しがあれば夢の場面に入る', q.evaluate("()=>__T.G.scene&&__T.G.scene.vid")=='dream_1')
+    q.close()
+    q = seed(ctx, 'kanpe-tour-save-v1', {'seen': {}, 'ticket': 'ow'}, tseed('ow', 4, 4, 'day')); q.route('**/tour/index.html', hooked)
+    q.goto(base + '/tour/index.html'); q.wait_for_timeout(1800)
+    q.evaluate("()=>{var T=__T;T.save.missed=[];T.enterPlace('hroom')}")
+    q.wait_for_timeout(500); q.evaluate("()=>document.querySelector('.btn.go').click()")
+    for i in range(40):
+        q.wait_for_timeout(500)
+        if q.evaluate("()=>__T.G.view")=='map': break
+        q.evaluate("()=>{var b=document.querySelector('#panel .btn.sub');if(b)b.click()}")
+    chk('E2 持ち越しがなければ、夢を挟まず地図へ戻る', q.evaluate("()=>__T.G.view")=='map')
     q.close()
     chk('JSエラーなし', not ERR, ERR)
     br.close()

@@ -40,15 +40,18 @@ function dreamGiveUp(){   /* 夢は止めない: 2回言えなければ、その
  var S=G.scene,T=S&&S.turns&&S.turns[G.ti];if(!(S&&S.d&&S.d.dream&&T&&T.dw)||G.tries<2)return false;
  G.phase='pass';G.tries=0;var m='Never mind. It is only a dream.';setMsg(m,whoNow());spSay=true;
  say(m,.9,S.pitch,gd(function(){spSay=false;later(350,advance)}));return true}
-function dreamStart(done){
+var DREAMED=0;   /* 部屋(nbo_room)で夢を見たあとの夜は、もう一度見ない(1回の眠りに夢は1回) */
+function dreamStart(done,fromRoom){
+ if(!fromRoom&&DREAMED){DREAMED=0;done();return}
  var ws=dreamWords();if(!ws.length){done();return}
+ if(fromRoom)DREAMED=1;
  var lines=[];ws.forEach(function(r){var b=dreamLine(r);lines.push({n:b[0],jp:b[1],dw:r[0]});lines.push({y:b[2],jp:b[3]})});
  DLG.dream_1={who:'達人賢者',story:1,bg:'dream',sp:'dream',hero:'blue',lulu:'plain',nogold:1,inter:[],intro:'Zzz…',lines:lines,
   words:ws.map(function(r){return [r[0],r[1],r[2]]}),ev:1,auto:1,kind:'ev',dream:1};
  var pl={id:'dream',name:'Dream',snd:'dream',tip:['Zzz…',''],v:[]};
  G.evCont=function(){try{done()}finally{if(G.view==='scene'&&G.scene&&G.scene.vid==='dream_1')showMap()}};
  startVid(pl,'dream_1','ev')}
-(function(){try{if(typeof TRIP!=='undefined'&&TRIP.hooks)TRIP.hooks.dream=function(done){dreamStart(done)}}catch(e){}})();
+(function(){try{if(typeof TRIP!=='undefined'&&TRIP.hooks)TRIP.hooks.dream=function(done){dreamStart(done)};window.__dreamRoom=function(done){dreamStart(done,1)}}catch(e){}})();
 SP.dream={pitch:.8,m:[[trav({}),P(4,{o:'#5a3a8a',p:'#3a2a5a',h:'#d9d4c6'})]]};
 BGS.dream=function(){grad(0,98,'#1b1646','#4a3a8a',16);
  for(var i=0;i<30;i++){var sx=(i*53)%320,sy=(i*31)%70;if((Math.floor(t*2)+i)%6)R('#ffe9a8',sx,sy,2,2);else R('#fff',sx,sy,1,1)}

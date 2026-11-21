@@ -109,7 +109,7 @@ function roomRest(pl){
  go.addEventListener('click',function(){if(G.sid!==sid||S.roomGo)return;S.roomGo=1;Snd.go('hotel');roomLine(0)});
  function roomLine(i){
   var L=d.lines[i];
-  if(!L){speaker=null;luTalk=false;spSay=false;later(700,function(){showMap()});return}
+  if(!L){speaker=null;luTalk=false;spSay=false;later(700,function(){try{if(window.__dreamRoom){window.__dreamRoom(function(){if(G.view==='scene'&&G.scene&&G.scene.id===pl.id)showMap()});return}}catch(e){}showMap()});return}
   clearPanel();G.phase='listen';
   speaker=null;luTalk=(L.w==='lulu');
   S.pitch=L.w==='lulu'?1.35:1;
