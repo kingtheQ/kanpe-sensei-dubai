@@ -1921,7 +1921,7 @@ function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=c
 function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),x=a[i];a[i]=a[j];a[j]=x}return a}
 function later(ms,fn){var s=G.sid;var id=setTimeout(function(){if(G.sid===s)fn()},ms);G.timers.push(id);return id}
 function gd(fn){var s=G.sid;return function(){if(G.sid===s)return fn.apply(this,arguments)}}
-function clearTimers(){G.timers.forEach(clearTimeout);G.timers=[];clearInterval(G.typeTimer)}
+function clearTimers(){G.timers.forEach(clearTimeout);G.timers=[];clearInterval(G.typeTimer);if(window.__songWatch)setTimeout(window.__songWatch,0)}
 var panel=$m('panel'),msgText=$m('msgText'),who=$m('who');
 function clearPanel(){panel.textContent=''}
 function typeText(text,cb){clearInterval(G.typeTimer);var i=0,s=G.sid;G.typeTimer=setInterval(function(){if(G.sid!==s){clearInterval(G.typeTimer);return}i++;msgText.textContent=text.slice(0,i);if(i>=text.length){clearInterval(G.typeTimer);if(cb)cb()}},26)}
@@ -1995,7 +1995,7 @@ function placeWalkers(id,instant){var p=PBY[id];[heroEl,buddyEl].forEach(functio
 function vv(p){return (p.tkv&&p.tkv[save.ticket])||p.v}
 function refreshMap(){
  PLACES.forEach(function(p){var n=nodeEls[p.id],dots=n.querySelectorAll('.dots i'),c0=0;
-  var vs=vv(p);vs.forEach(function(v,i){var on=(save.seen[v]||0)>0;if(dots[i])dots[i].classList.toggle('on',on);if(on)c0++});n.classList.toggle('done',c0===vs.length);n.classList.toggle('lock',lockedPlace(p.id))});
+  var vs=vv(p);vs.forEach(function(v,i){var on=(save.seen[v]||0)>0;if(dots[i])dots[i].classList.toggle('on',on);if(on)c0++});n.classList.toggle('done',vs.length>0&&c0===vs.length);n.classList.toggle('lock',lockedPlace(p.id))});
  var pips=$m('pips');pips.textContent='';var d=0;PLACES.forEach(function(p){vv(p).forEach(function(v){if(save.seen[v])d++})});for(var i=0;i<TOTALV;i++)pips.appendChild(el('i',i<d?'on':''))}
 function showMap(){
  G.view='map';Snd.go(MODE==='city'?'city':'map');G.sid++;clearTimers();stopSay();G.scene=null;G.camp=null;luHelp=false;luTalk=false;G.phase='idle';speaker=null;
@@ -2015,7 +2015,7 @@ function pickV(pl){
  if(!pool.length)pool=ids.filter(function(i){return i!==lastId});
  if(!pool.length)pool=ids.slice();
  return pool[Math.floor(Math.random()*pool.length)]}
-function enterPlace(id){var pl=PBY[id];if(evGate('enter',id,function(){enterPlace(id)}))return;if(pl.win&&!save.ticket){winStart();return}if(pl.hub){enterHub(pl);return}startVid(pl,pickV(pl),null)}
+function enterPlace(id){var pl=PBY[id];if(pl.listen){songListen(pl);return}if(evGate('enter',id,function(){enterPlace(id)}))return;if(pl.win&&!save.ticket){winStart();return}if(pl.hub){enterHub(pl);return}startVid(pl,pickV(pl),null)}
 function startVid(pl,vid,from){
  if(from!=='ev'&&evGate('vid',vid,function(){startVid(pl,vid,from)}))return;
  var d=DLG[vid];lastId=vid;G.sid++;clearTimers();stopSay();Snd.go(G.snd=pl.snd||pl.id);resetOUT();
@@ -2032,7 +2032,7 @@ function startScene(){
  setMsgInstant(S.d.intro||S.pl.tip[0],'');$m('tapHint').textContent='';
  if(S.d.auto){if(S.d.fx)evFx(S.d.fx);later(700,function(){playInter(-1,npcTurn)});return}
  var b=el('button','btn go','GO！');b.type='button';panel.appendChild(b);setTimeout(function(){if(b.isConnected)b.classList.add('shake')},3000);
- b.addEventListener('click',function(){if(S.d.story)playInter(-1,npcTurn);else npcTurn()})}
+ b.addEventListener('click',function(){if(window.__songGo)window.__songGo(S);if(S.d.story)playInter(-1,npcTurn);else npcTurn()})}
 function npcTurn(){
  clearPanel();G.phase='npc';var S=G.scene,T=S.turns[G.ti];
  if(T.vr&&!T.vd){T.vd=1;for(var vi=0;vi<T.vr.length;vi++){var vv=T.vr[vi];if(save.seen[vv.s]>0){T.npc=vv.n;T.npcJp=vv.jp;if(vv.y){T.cue=vv.y;T.cueJp=vv.yjp}break}}}
@@ -3937,7 +3937,7 @@ BGS.rtmap=function(ctx,S){
   if(f6>=1&&ex&&Math.floor(t*3)%2){R('#fff',ex[0]-4,ex[1]-4,9,9);R('#2f6ad8',ex[0]-3,ex[1]-3,7,7);T('✕',ex[0],ex[1],7,'#fff')}}
  Object.keys(WP).forEach(function(k){var p=WP[k],x=wmx(p[0]),y=wmy(p[1]);R('#0b1d33',x-3,y-3,6,6);R('#ffd36a',x-2,y-2,4,4);T(p[2],x+p[3],y+p[4],5,'#fff')})};
 
-var PLACES_SAGE=[{"id": "sage", "name": "達人賢者", "snd": "sage", "x": 30, "y": 28, "ico": "🧙", "tip": ["達人賢者", "旅のはじまりを聞く"], "v": ["sage_1", "sage_2", "sage_3"], "hub": true, "hubBg": "sage", "hubHero": "blue", "hubEn": "Welcome, travelers. What would you like to ask?", "hubMsg": "達人賢者の広間。", "menu": [["Why go around the world?", "sage_1"], ["Which ticket should we choose?", "sage_2"], ["Tips for travel English", "sage_3"]]}, {"id": "ticket", "name": "チケットをえらぶ", "snd": "tdesk", "x": 70, "y": 72, "ico": "🎫", "tip": ["航空券の窓口", "世界一周の窓口で相談して、券をえらぶ"], "v": ["ticket_star", "ticket_ow"], "hubMap": 1, "win": 1}],PLACES_HDEP=[{"id": "hcheckin", "name": "チェックイン", "snd": "info", "x": 22, "y": 14, "ico": "🎫", "tip": ["羽田空港 チェックイン", "荷物を預けて、搭乗券をもらう"], "v": ["hnd_checkin_ow", "hnd_checkin_star"], "seq": 1, "tkv": {"ow": ["hnd_checkin_ow"], "star": ["hnd_checkin_star"]}}, {"id": "hsec", "name": "保安検査", "snd": "info", "x": 72, "y": 28, "ico": "🔍", "tip": ["保安検査", "荷物・上着・液体"], "v": ["hnd_sec"], "seq": 1}, {"id": "hexit", "name": "出国審査", "snd": "info", "x": 26, "y": 46, "ico": "🛂", "tip": ["出国審査", "パスポートと搭乗券"], "v": ["hnd_exit"], "seq": 1}, {"id": "hgate", "name": "出発ゲート", "snd": "hall", "x": 72, "y": 62, "ico": "🚪", "tip": ["出発ゲート", "夜の静かなゲートで待つ"], "v": ["hnd_gate_ow", "hnd_gate_star"], "seq": 1, "tkv": {"ow": ["hnd_gate_ow"], "star": ["hnd_gate_star"]}}, {"id": "hboard", "name": "搭乗", "snd": "hall", "x": 28, "y": 78, "ico": "🛫", "tip": ["搭乗", "搭乗券を見せて、ブリッジへ"], "v": ["hnd_board_ow", "hnd_board_star"], "seq": 1, "tkv": {"ow": ["hnd_board_ow"], "star": ["hnd_board_star"]}}, {"id": "hplane", "name": "機内(深夜便)", "snd": "atop", "x": 74, "y": 90, "ico": "✈️", "tip": ["機内", "終わるとナイロビへ飛ぶ"], "v": ["hnd_plane_ow", "hnd_plane_star"], "seq": 1, "tkv": {"ow": ["hnd_plane_ow"], "star": ["hnd_plane_star"]}}],PLACES_NARR=[{"id": "immig", "name": "入国審査", "snd": "info", "x": 22, "y": 16, "ico": "🛂", "tip": ["入国審査(Immigration)", "eTA・目的・滞在日数・ホテル"], "v": ["nbo_immig1", "nbo_immig2"]}, {"id": "bag", "name": "手荷物受け取り", "snd": "hall", "x": 70, "y": 36, "ico": "🧳", "tip": ["バゲージクレーム", "スーツケース・レジ袋"], "v": ["nbo_bag1", "nbo_bag2"]}, {"id": "sim", "name": "Safaricom SIM", "snd": "info", "x": 24, "y": 58, "ico": "📱", "tip": ["Safaricom", "SIMの登録とデータ"], "v": ["nbo_sim1", "nbo_sim2"]}, {"id": "taxi", "name": "タクシー・Uber", "snd": "hall", "x": 70, "y": 82, "ico": "🚕", "tip": ["タクシー乗り場とライドシェア", "市内へ・料金は架空"], "v": ["nbo_taxi1", "nbo_taxi2"]}],PLACES_NAIR=[{"id": "java", "name": "Java House", "snd": "cafe", "x": 22, "y": 14, "ico": "☕", "tip": ["Java House", "ラテとケーキ・値段は架空"], "v": ["nbo_java1", "nbo_java2"]}, {"id": "art", "name": "Artcaffe", "snd": "cafe", "x": 70, "y": 32, "ico": "🥐", "tip": ["Artcaffe", "パンとジュース・値段は架空"], "v": ["nbo_art1", "nbo_art2"]}, {"id": "lounge", "name": "Pride Lounge", "snd": "ahlan", "x": 24, "y": 52, "ico": "🛋️", "tip": ["Pride Lounge", "ラウンジの受付と、となりの人"], "v": ["nbo_lounge1", "nbo_lounge2"]}, {"id": "duty", "name": "Duty Free", "snd": "cafe", "x": 70, "y": 68, "ico": "🛍️", "tip": ["免税店", "コーヒーと紅茶・値段は架空"], "v": ["nbo_duty1", "nbo_duty2"]}],PLACES_NDEP=[{"id": "qcheckin", "name": "Qatar Airways", "snd": "info", "x": 24, "y": 18, "ico": "🎫", "tip": ["Qatar Airways チェックイン", "荷物の重さ・席・搭乗券"], "v": ["nbo_checkin1", "nbo_checkin2"]}, {"id": "nsec", "name": "保安検査", "snd": "info", "x": 70, "y": 46, "ico": "🔍", "tip": ["保安検査", "荷物・上着・液体"], "v": ["nbo_sec1", "nbo_sec2"]}, {"id": "gate", "name": "搭乗ゲート", "snd": "hall", "x": 70, "y": 76, "ico": "🚪", "tip": ["搭乗ゲート", "搭乗のアナウンス"], "v": ["nbo_gate1", "nbo_gate2"]}, {"id": "qplane", "name": "機内(Qatar Airways)", "snd": "atop", "x": 26, "y": 76, "ico": "✈️", "tip": ["機内", "客室乗務員との会話。終わるとドーハへ飛ぶ"], "v": ["nbo_plane1", "nbo_plane2"]}];
+var PLACES_SAGE=[{"id": "sage", "name": "達人賢者", "snd": "sage", "x": 30, "y": 28, "ico": "🧙", "tip": ["達人賢者", "旅のはじまりを聞く"], "v": ["sage_1", "sage_2", "sage_3"], "hub": true, "hubBg": "sage", "hubHero": "blue", "hubEn": "Welcome, travelers. What would you like to ask?", "hubMsg": "達人賢者の広間。", "menu": [["Why go around the world?", "sage_1"], ["Which ticket should we choose?", "sage_2"], ["Tips for travel English", "sage_3"]]}, {"id": "ticket", "name": "チケットをえらぶ", "snd": "tdesk", "x": 70, "y": 72, "ico": "🎫", "tip": ["航空券の窓口", "世界一周の窓口で相談して、券をえらぶ"], "v": ["ticket_star", "ticket_ow"], "hubMap": 1, "win": 1}],PLACES_HDEP=[{"id": "hcheckin", "name": "チェックイン", "snd": "info", "x": 22, "y": 14, "ico": "🎫", "tip": ["羽田空港 チェックイン", "荷物を預けて、搭乗券をもらう"], "v": ["hnd_checkin_ow", "hnd_checkin_star"], "seq": 1, "tkv": {"ow": ["hnd_checkin_ow"], "star": ["hnd_checkin_star"]}}, {"id": "hsec", "name": "保安検査", "snd": "info", "x": 72, "y": 28, "ico": "🔍", "tip": ["保安検査", "荷物・上着・液体"], "v": ["hnd_sec"], "seq": 1}, {"id": "hexit", "name": "出国審査", "snd": "info", "x": 26, "y": 46, "ico": "🛂", "tip": ["出国審査", "パスポートと搭乗券"], "v": ["hnd_exit"], "seq": 1}, {"id": "hgate", "name": "出発ゲート", "snd": "hall", "x": 72, "y": 62, "ico": "🚪", "tip": ["出発ゲート", "夜の静かなゲートで待つ"], "v": ["hnd_gate_ow", "hnd_gate_star"], "seq": 1, "tkv": {"ow": ["hnd_gate_ow"], "star": ["hnd_gate_star"]}}, {"id": "hboard", "name": "搭乗", "snd": "hall", "x": 28, "y": 78, "ico": "🛫", "tip": ["搭乗", "搭乗券を見せて、ブリッジへ"], "v": ["hnd_board_ow", "hnd_board_star"], "seq": 1, "tkv": {"ow": ["hnd_board_ow"], "star": ["hnd_board_star"]}}, {"id": "hplane", "name": "機内(深夜便)", "snd": "atop", "x": 74, "y": 90, "ico": "✈️", "tip": ["機内", "終わるとナイロビへ飛ぶ"], "v": ["hnd_plane_ow", "hnd_plane_star"], "seq": 1, "tkv": {"ow": ["hnd_plane_ow"], "star": ["hnd_plane_star"]}}],PLACES_NARR=[{"id": "immig", "name": "入国審査", "snd": "info", "x": 22, "y": 16, "ico": "🛂", "tip": ["入国審査(Immigration)", "eTA・目的・滞在日数・ホテル"], "v": ["nbo_immig1", "nbo_immig2"]}, {"id": "bag", "name": "手荷物受け取り", "snd": "hall", "x": 70, "y": 36, "ico": "🧳", "tip": ["バゲージクレーム", "スーツケース・レジ袋"], "v": ["nbo_bag1", "nbo_bag2"]}, {"id": "sim", "name": "Safaricom SIM", "snd": "info", "x": 24, "y": 58, "ico": "📱", "tip": ["Safaricom", "SIMの登録とデータ"], "v": ["nbo_sim1", "nbo_sim2"]}, {"id": "taxi", "name": "タクシー・Uber", "snd": "hall", "x": 70, "y": 82, "ico": "🚕", "tip": ["タクシー乗り場とライドシェア", "市内へ・料金は架空"], "v": ["nbo_taxi1", "nbo_taxi2"]}, {"id": "hsong", "name": "ホテルのロビー", "snd": "hotel", "x": 24, "y": 84, "ico": "🏨", "tip": ["Villa Rosa Kempinski", "夜のロビーで、歌を聴く"], "v": [], "listen": "nbo_song"}],PLACES_NAIR=[{"id": "java", "name": "Java House", "snd": "cafe", "x": 22, "y": 14, "ico": "☕", "tip": ["Java House", "ラテとケーキ・値段は架空"], "v": ["nbo_java1", "nbo_java2"]}, {"id": "art", "name": "Artcaffe", "snd": "cafe", "x": 70, "y": 32, "ico": "🥐", "tip": ["Artcaffe", "パンとジュース・値段は架空"], "v": ["nbo_art1", "nbo_art2"]}, {"id": "lounge", "name": "Pride Lounge", "snd": "ahlan", "x": 24, "y": 52, "ico": "🛋️", "tip": ["Pride Lounge", "ラウンジの受付と、となりの人"], "v": ["nbo_lounge1", "nbo_lounge2"]}, {"id": "duty", "name": "Duty Free", "snd": "cafe", "x": 70, "y": 68, "ico": "🛍️", "tip": ["免税店", "コーヒーと紅茶・値段は架空"], "v": ["nbo_duty1", "nbo_duty2"]}],PLACES_NDEP=[{"id": "qcheckin", "name": "Qatar Airways", "snd": "info", "x": 24, "y": 18, "ico": "🎫", "tip": ["Qatar Airways チェックイン", "荷物の重さ・席・搭乗券"], "v": ["nbo_checkin1", "nbo_checkin2"]}, {"id": "nsec", "name": "保安検査", "snd": "info", "x": 70, "y": 46, "ico": "🔍", "tip": ["保安検査", "荷物・上着・液体"], "v": ["nbo_sec1", "nbo_sec2"]}, {"id": "gate", "name": "搭乗ゲート", "snd": "hall", "x": 70, "y": 76, "ico": "🚪", "tip": ["搭乗ゲート", "搭乗のアナウンス"], "v": ["nbo_gate1", "nbo_gate2"]}, {"id": "qplane", "name": "機内(Qatar Airways)", "snd": "atop", "x": 26, "y": 76, "ico": "✈️", "tip": ["機内", "客室乗務員との会話。終わるとドーハへ飛ぶ"], "v": ["nbo_plane1", "nbo_plane2"]}];
 PLACES_AIR=PLACES_NAIR;
 PLACES_SAGE.concat(PLACES_HDEP,PLACES_NARR,PLACES_NAIR,PLACES_NDEP).forEach(function(p){PBY[p.id]=p});
 var TOUR_IDS=["hnd_checkin_ow", "hnd_checkin_star", "hnd_sec", "hnd_exit", "hnd_gate_ow", "hnd_gate_star", "hnd_board_ow", "hnd_board_star", "hnd_plane_ow", "hnd_plane_star", "nbo_immig1", "nbo_immig2", "nbo_bag1", "nbo_bag2", "nbo_sim1", "nbo_sim2", "nbo_taxi1", "nbo_taxi2", "nbo_java1", "nbo_java2", "nbo_art1", "nbo_art2", "nbo_lounge1", "nbo_lounge2", "nbo_duty1", "nbo_duty2", "nbo_checkin1", "nbo_checkin2", "nbo_sec1", "nbo_sec2", "nbo_gate1", "nbo_gate2", "nbo_plane1", "nbo_plane2"];
@@ -3995,8 +3995,11 @@ var ART={
     描く順: 奥の半分(sin<0)の荷物 → 中央の島 → 手前の半分の荷物 → ふたり。荷物は奥ほど小さく暗い(絵の段階 lv=13 を sin で引く)。手前では左→右、奥では右→左。
     ルル(左)とキング(右)は広間と同じ後ろ姿で、足もとは y=884(素材の静止画と同じ)。stopFor=この場面ではベルトを止める(雨もりの出来事「ベルトが止まった」) */
  bagclaim:{bg:'nairobi-baggage-base.png',mode:'wide',hall:{lulu:{n:'hall-lulu-back',x:716,by:884},king:{n:'hall-king-back',x:800,by:884},bubble:{x:1210,y:540}},
-  belt:{isl:'nairobi-baggage-island.png',ix:552,iy:602,bags:'nairobi-baggage-bags.png',cw:112,ch:104,ax:56,ay:92,lv:13,n:6,cx:400,cy:330,rx:178,ry:28,period:24,stopFor:['nbo_ev_b_leak'],hero:{i:1,vid:'nbo_bag1',also:['nbo_ev_b_leak'],line:2,th:1.1,tpre:10,creep:.25,ease:1.2,hide:4}}}};
-function artIdFor(S){var g=S&&S.d&&S.d.bg,h=S&&S.hub&&S.ctx&&S.ctx.bg;return (g==='sage'||h==='sage')?'sage':((g==='tdesk'||g==='rtmap')?'ticket':(g==='taxi'?'nairobi':(g==='immig'?'immig':(g==='baggage'?'bagclaim':(g==='hgateOW'?'hgate_ow':(g==='hgateST'?'hgate_st':null))))))}
+  belt:{isl:'nairobi-baggage-island.png',ix:552,iy:602,bags:'nairobi-baggage-bags.png',cw:112,ch:104,ax:56,ay:92,lv:13,n:6,cx:400,cy:330,rx:178,ry:28,period:24,stopFor:['nbo_ev_b_leak'],hero:{i:1,vid:'nbo_bag1',also:['nbo_ev_b_leak'],line:2,th:1.1,tpre:10,creep:.25,ease:1.2,hide:4}}},
+ /* ナイロビのホテルのロビー・歌手のイベント(タスク049): 人なしの背景(夜のロビー。右はしの肘かけ椅子のあるラウンジの隅)をフルブリード。
+    歌手(正面・大人の高さ136px)はラウンジの隅の手前に立ち、歌っているあいだ 音符(♪)がのぼる(notes)。ルル(左)とキング(右)は広間と同じ後ろ姿で、歌手のほうを向いて少し離れて立つ。 */
+ nlobby:{bg:'nairobi-hotel-lobby-v1.png',mode:'wide',hall:{sage:{n:'hall-singer',x:1130,by:800},lulu:{n:'hall-lulu-back',x:985,by:915},king:{n:'hall-king-back',x:1060,by:915},notes:1}}};
+function artIdFor(S){var g=S&&S.d&&S.d.bg,h=S&&S.hub&&S.ctx&&S.ctx.bg;return g==='nlobby'?'nlobby':(g==='sage'||h==='sage')?'sage':((g==='tdesk'||g==='rtmap')?'ticket':(g==='taxi'?'nairobi':(g==='immig'?'immig':(g==='baggage'?'bagclaim':(g==='hgateOW'?'hgate_ow':(g==='hgateST'?'hgate_st':null))))))}
 function artImg(n){var i=ARTI[n];if(!i){i=ARTI[n]=new Image();i.onerror=function(){i.bad=1};i.src=ARTBASE+n}return i}
 function artShow(on){if(ARTSHOW===on)return;ARTSHOW=on;cv.hidden=!!on;cvA.hidden=!on}
 function artR(col,x,y,w,h){ca.fillStyle=col;ca.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h))}
@@ -4124,7 +4127,10 @@ function artHall(H,exi){var g=H.globe,gi=g&&artImg(g.img);
  if(g&&artOKimg(gi)){var f=Math.floor(t/(g.period/g.n))%g.n;ca.drawImage(gi,f*g.fw,0,g.fw,g.fw,g.x,g.y,g.fw*g.z,g.fw*g.z)}   /* 球だけ回す(NEAREST。ぼかさない) */
  var sg=H.sage&&exi[H.sage.n],lu=exi[H.lulu.n],kg=exi[H.king.n],sd=Math.floor(t*.8)%2?3:0,ld=Math.floor(t*1.1+.5)%2?3:0,kd=Math.floor(t*1.1)%2?3:0;
  if(sg){artShadow(H.sage.x,H.sage.by,sg.naturalWidth*.6,.45);artSway(sg,H.sage.x,H.sage.by,sd);
-  if(spSay&&speaker)artBubble(H.sage.x+Math.round(sg.naturalWidth*.3),H.sage.by-sg.naturalHeight-18)}
+  if(spSay&&speaker)artBubble(H.sage.x+Math.round(sg.naturalWidth*.3),H.sage.by-sg.naturalHeight-18);
+  /* 歌っているあいだ(テーマ曲が鳴っているあいだ)だけ、音符が歌手の頭の上をのぼって消える(タスク049) */
+  if(H.notes&&typeof songPlaying==='function'&&songPlaying()){for(var nq=0;nq<3;nq++){var np2=(t*.45+nq/3)%1;ca.globalAlpha=np2<.65?1:(1-np2)/.35;ca.font='800 44px sans-serif';ca.textAlign='center';ca.textBaseline='middle';ca.lineJoin='round';ca.lineWidth=7;ca.strokeStyle='#05070f';ca.fillStyle='#ffe9a8';
+   var nx2=H.sage.x+28+nq*30+Math.round(Math.sin(t*2+nq*2)*8),ny2=H.sage.by-sg.naturalHeight-16-np2*70,nc=nq%2?'♫':'♪';ca.strokeText(nc,nx2,ny2);ca.fillText(nc,nx2,ny2)}ca.globalAlpha=1}}
  else if(H.bubble&&spSay&&speaker)artBubble(H.bubble.x,H.bubble.y);   /* 相手を絵に出さない場面(羽田のゲート): 声のぬしの場所に「…」 */
  if(OUT.lvis){artShadow(H.lulu.x,H.lulu.by,29);artSway(lu,H.lulu.x,H.lulu.by,ld);
   if(luTalk&&spSay)artBubble(H.lulu.x+20,H.lulu.by-lu.naturalHeight-26)}
@@ -4219,12 +4225,107 @@ function ambApply(){var c=ambCat&&AMB[ambCat];
  ambEl.volume=c.vol;var p=ambEl.play();if(p&&p.catch)p.catch(function(){})}
 window.__ambGo=function(kind){ambCat=AMBSND[kind]||null;ambApply()};
 window.__ambScene=function(kind,bg){ambCat=AMBBG[bg]||AMBSND[kind]||null;ambApply()};
-window.__ambDuck=function(f){ambDuck=!!f;ambApply()};
+window.__ambDuck=function(f){ambDuck=!!f;ambApply();if(window.__songSync)window.__songSync()};   /* マイクで聞いているあいだは、曲(タスク049)も止める */
 window.__ambSync=ambApply;window.__AMB=AMB;
 document.addEventListener('visibilitychange',ambApply);
+/* ============================================================
+   宣言文ソングの組み込み(タスク049)。ナイロビ(tour/)だけに入る。art.js のあと・エンジンと同じ場所に置かれる。
+   - 掛け声チャント版(song-chant.mp3 / 51秒)=オープニング(賢者の広間の最初の会話 sage_1)。再生は、最初のGOを押したあと。音量は控えめ。
+     賢者の広間にいるあいだだけ鳴り、広間を離れたら止まる(または自然に終わる)。マイクで聞いているあいだは止まる。会話はふつうに進む。
+   - メインテーマ(song-theme.mp3 / 1分15秒)=ホテルのロビーの「聴く」イベント(場所 hsong)専用。ほかの場面・タイトル・メニューでは流さない。
+     発音の課題・採点・単語バトルはない。曲の途中でも出口ボタンでマップに戻れ、戻ったら止まる。
+   - 再生はユーザーの操作(GOボタン・つぎへ)のあとだけ始める(自動再生の制限)。鳴らせなかったときは、曲なしで先へ進める。
+   - 保存データ(kanpe-tour-save-v1 など)には何も書かない。再生の状態はこのファイルの変数だけ。
+   ============================================================ */
+var SONGBASE=ARTBASE.replace(/art\/$/,'song/');
+var SONGFILE={chant:'song-chant.mp3',theme:'song-theme.mp3'};
+var SONGVOL={chant:.2,theme:.65};     /* チャントは会話の読み上げ・効果音の邪魔にならない控えめな音量。テーマは聴くのが主役 */
+var SONGSC={"id": "nbo_song", "who": "ラウンジの歌手", "bg": "nlobby", "sp": "singer", "intro": "夜のホテルのロビー。奥のラウンジの隅から、やさしい歌声が聞こえてくる。ふたりは足をとめて、耳をかたむけた。", "after": [{"w": "singer", "who": "ラウンジの歌手", "en": "Thank you for listening. Karibu Nairobi. Welcome!"}, {"w": "lulu", "who": "ルル", "en": "That was beautiful. I could listen all night."}, {"w": "king", "who": "キング", "en": "Asante! It was a wonderful song."}, {"w": "singer", "who": "ラウンジの歌手", "en": "Asante sana. Sleep well, and enjoy Nairobi."}], "listen": 1};
+var SONG={el:null,key:null,ac:null,gn:null,opened:0,open:0,want:null};
+SP.singer={pitch:1.1,m:[[HJ,P(2,{x:'#2d8f8a',o:'#e0b040'})]]};   /* 絵が読めなかったときの、いつものドット */
+BGS.nlobby=BGS.lobby;   /* 背景の絵が読めなかったときの、いつものドットのロビー */
+/* 曲が鳴っているあいだは、場面の背景の音楽(Snd.go)を止めて重ならないようにする。曲が止まったら、いまの場面の音楽に戻す */
+var SONGSNDGO=Snd.go;
+Snd.go=function(k){SONG.want=k;return SONGSNDGO.call(Snd,SONG.el?null:k)};
+function songRestore(){SONGSNDGO.call(Snd,SONG.want||null)}
+function songSndOn(){try{return localStorage.getItem('kd_snd')!=='off'}catch(e){return true}}
+function songPlaying(){return !!(SONG.el&&SONG.key==='theme'&&!SONG.el.paused&&!SONG.el.ended)}
+function songStop(){
+ var e=SONG.el,k=SONG.key;SONG.el=null;SONG.key=null;
+ if(e){try{e.onended=null;e.onerror=null;e.pause();e.removeAttribute('src');e.load()}catch(x){}songRestore()}
+ if(SONG.ac){try{SONG.ac.close()}catch(x){}SONG.ac=null}
+ return k}
+/* iPhone / iPad(Safari)は audio.volume が効かない(いつも最大)ので、控えめな音量にするため Web Audio のゲインを通す。通せなければ、そのまま鳴らす */
+function songIOS(){try{return /iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)}catch(x){return false}}
+/* 曲を鳴らす。必ずユーザー操作(クリック)のなかで呼ぶ。鳴らせない(音オフ・ブロック・読み込み失敗)なら cb('off'|'blocked'|'error') */
+function songStart(key,cb){
+ songStop();
+ if(!songSndOn()){if(cb)cb('off');return false}
+ var e=new Audio(SONGBASE+SONGFILE[key]);e.preload='auto';e.loop=false;e.volume=SONGVOL[key];SONG.el=e;SONG.key=key;SONGSNDGO.call(Snd,null);
+ if(songIOS()){try{var AC0=window.AudioContext||window.webkitAudioContext,ac=new AC0(),gn=ac.createGain();gn.gain.value=SONGVOL[key];gn.connect(ac.destination);ac.createMediaElementSource(e).connect(gn);e.volume=1;SONG.ac=ac;SONG.gn=gn;if(ac.resume)ac.resume()}catch(x){}}
+ e.onended=function(){if(SONG.el!==e)return;var k=SONG.key;SONG.el=null;SONG.key=null;if(SONG.ac){try{SONG.ac.close()}catch(x){}SONG.ac=null}songRestore();if(cb)cb('end',k)};
+ e.onerror=function(){if(SONG.el!==e)return;songStop();if(cb)cb('error')};
+ var p;try{p=e.play()}catch(x){p=null}
+ if(p&&p.catch)p.catch(function(){if(SONG.el===e){songStop();if(cb)cb('blocked')}});
+ return true}
+/* マイクで聞いているあいだ・タブが見えないあいだ・音オフのあいだは止め、戻ったら続きから */
+window.__songSync=function(){var e=SONG.el;if(!e)return;
+ var hold=(typeof ambDuck!=='undefined'&&ambDuck)||document.hidden||!songSndOn();
+ if(hold){if(!e.paused){try{e.pause()}catch(x){}}}
+ else if(e.paused&&!e.ended){var p;try{p=e.play()}catch(x){}if(p&&p.catch)p.catch(function(){})}};
+document.addEventListener('visibilitychange',function(){window.__songSync()});
+/* 場面を離れたら止める: チャントは賢者の広間のあいだだけ。テーマは聴く場面のあいだだけ */
+function songWatch(){
+ if(!SONG.el)return;var S=G.scene,inside;
+ if(SONG.key==='chant')inside=G.view==='scene'&&!!S&&!!S.pl&&S.pl.id==='sage';
+ else inside=G.view==='scene'&&!!S&&!!S.d&&S.d.listen===1;
+ if(!inside)songStop()}
+window.__songWatch=songWatch;setInterval(songWatch,250);
+/* ---- オープニングのチャント: 賢者の広間の最初の会話(sage_1)の「GO！」を押したあと、1回だけ ---- */
+window.__songGo=function(S){
+ if(!SONG.open||SONG.opened||!S||S.vid!=='sage_1')return;
+ SONG.opened=1;songStart('chant',null)};
+/* ---- ホテルのロビーの「聴く」イベント ---- */
+function songListen(pl){
+ var d=SONGSC;
+ G.sid++;clearTimers();stopSay();Snd.go(null);resetOUT();
+ G.scene={id:pl.id,vid:null,pl:pl,d:d,turns:[],words:[],pitch:1,from:null,anim:null,lastSp:null,tables:null};
+ speaker=null;applyCtx({bg:d.bg,who:d.who,sp:d.sp,hero:'blue',lulu:'plain',gold:0});
+ cam=0;spX=360;spSay=false;luTalk=false;G.view='scene';G.ti=0;G.tries=0;$m('mapView').hidden=true;$m('sceneView').hidden=false;
+ clearPanel();G.phase='listen';setMsgInstant(d.intro,'');$m('tapHint').textContent='';
+ var S=G.scene,sid=G.sid;
+ var go=el('button','btn go','GO！');go.type='button';panel.appendChild(go);
+ go.addEventListener('click',function(){
+  if(G.sid!==sid||S.songGo)return;S.songGo=1;
+  clearPanel();setMsgInstant('♪','');
+  function next(){if(G.sid!==sid||S.songAfter)return;S.songAfter=1;songLine(0)}
+  function nextBtn(){if(G.sid!==sid||S.songAfter||panel.querySelector('.songnext'))return;
+   var b=el('button','btn sub songnext','つぎへ ▶');b.type='button';panel.appendChild(b);
+   b.addEventListener('click',function(){if(G.sid!==sid)return;songStop();next()})}
+  var ok=songStart('theme',function(why){
+   if(G.sid!==sid)return;
+   if(why==='end')next();                        /* 曲が終わった */
+   else{nextBtn()}                               /* 音オフ・ブロック・読み込み失敗: 曲なしで先へ進める */
+  });
+  if(!ok)nextBtn();
+  else later(20000,nextBtn);                     /* 十分聴いたら、先へ進めるボタンを出す(曲の途中でも出口ボタンでマップに戻れる) */
+  });
+ /* 歌手・ルル・キングの短いやりとり。読み上げて表示するだけ(マイクなし・採点なし)。タップで早送りできる */
+ function songLine(i){
+  var L=d.after[i];
+  if(!L){speaker=null;luTalk=false;spSay=false;later(700,function(){showMap()});return}
+  clearPanel();G.phase='listen';
+  if(L.w==='singer'){speaker=SP.singer;luTalk=false}
+  else if(L.w==='lulu'){speaker=null;luTalk=true}
+  else{speaker=null;luTalk=false}
+  S.pitch=L.w==='lulu'?1.35:(L.w==='singer'?SP.singer.pitch:1);
+  setMsgInstant(L.en,L.who);
+  var adv=false;function go2(){if(adv||G.sid!==sid)return;adv=true;spSay=false;stopSay();songLine(i+1)}
+  var sk=el('button','btn sub','つぎへ ▶');sk.type='button';panel.appendChild(sk);sk.addEventListener('click',go2);
+  spSay=true;say(L.en,.9,S.pitch,gd(function(){spSay=false;later(900,go2)}))}}
 
 setMode(save.ticket?(hdepOn()?'hdep':'arr'):'sage');
-if(/[?&]pho=/.test(location.search)){}else TRIP.enter(function(){if(TOUR_FRESH&&!save.ticket){enterHub(PBY.sage);runStory('sage_1')}},'tour');
+if(/[?&]pho=/.test(location.search)){}else TRIP.enter(function(){if(TOUR_FRESH&&!save.ticket){SONG.open=1;enterHub(PBY.sage);runStory('sage_1')}},'tour');
 var phoQ=/[?&]pho=(\d)/.exec(location.search);if(phoQ){var PLAN={fw:["fine","fountain","flight"],mw:[{w:"fine",h:"hine"},{w:"flight",h:"hlight"},{w:"food",h:"hood"}],ss:["That is fine. Please bring it to the room."]};var sn=+phoQ[1],sq=/[&?]snd=(\w+)/.exec(location.search),sd=sq&&SND[sq[1]]?sq[1]:'f';if(sd!=='f')PLAN.fw=SND[sd].def.slice();showPho({fw:PLAN.fw,snd:sd,mw:PLAN.mw,ss:PLAN.ss,stages:sn===1?[1,2,3]:[sn]},true)}
 requestAnimationFrame(frame);
 })();

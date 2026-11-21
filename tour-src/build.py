@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import json, re, sys, os
 sys.path.insert(0, os.path.dirname(__file__))
-import ipa, data
+import ipa, data, song_data
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 src = open(os.path.join(ROOT, 'dubai', 'index.html'), encoding='utf-8').read()
 
@@ -71,7 +71,9 @@ ARR = [
  place('immig', '入国審査', 'info', 22, 16, '🛂', ['入国審査(Immigration)', 'eTA・目的・滞在日数・ホテル'], ['nbo_immig1', 'nbo_immig2']),
  place('bag', '手荷物受け取り', 'hall', 70, 36, '🧳', ['バゲージクレーム', 'スーツケース・レジ袋'], ['nbo_bag1', 'nbo_bag2']),
  place('sim', 'Safaricom SIM', 'info', 24, 58, '📱', ['Safaricom', 'SIMの登録とデータ'], ['nbo_sim1', 'nbo_sim2']),
- place('taxi', 'タクシー・Uber', 'hall', 70, 82, '🚕', ['タクシー乗り場とライドシェア', '市内へ・料金は架空'], ['nbo_taxi1', 'nbo_taxi2'])]
+ place('taxi', 'タクシー・Uber', 'hall', 70, 82, '🚕', ['タクシー乗り場とライドシェア', '市内へ・料金は架空'], ['nbo_taxi1', 'nbo_taxi2']),
+# ホテルのロビーの歌手(タスク049): 聴くだけの場面。v は空 = 到着の完了条件・場面の数・保存の記録(save.seen)に入らない(任意)。到着の場所を上から順に開く決まりで、タクシーのあとに開く
+ place('hsong', 'ホテルのロビー', 'hotel', 24, 84, '🏨', ['Villa Rosa Kempinski', '夜のロビーで、歌を聴く'], [], listen='nbo_song')]
 AIR = [
  place('java', 'Java House', 'cafe', 22, 14, '☕', ['Java House', 'ラテとケーキ・値段は架空'], ['nbo_java1', 'nbo_java2']),
  place('art', 'Artcaffe', 'cafe', 70, 32, '🥐', ['Artcaffe', 'パンとジュース・値段は架空'], ['nbo_art1', 'nbo_art2']),
@@ -598,12 +600,16 @@ FULLBLEED_CSS = (
  "#scene,#sceneA{display:block;width:100%;border:0;border-radius:0;background:#222}\n"
  "#scene{aspect-ratio:320/150;image-rendering:pixelated}#sceneA{aspect-ratio:1536/960}\n"
  "#sceneView .stage #exitBtn,#sceneView .stage #tip,#sceneView .stage .setbtn{top:calc(6px + env(safe-area-inset-top,0px))}")
+def song_js():
+    sc = dict(song_data.SONG_SCENE); sc['listen'] = 1
+    return _rd('song.js').replace('/*SONGDATA*/null', J(sc))
 def art_js(base, sel): return _rd('art.js').replace("/*ARTBASE*/", base).replace("/*ARTSEL*/", sel)
 
 # ---------- ナイロビ(tour/index.html) ----------
 dn = dict(sub('sage_')); dn.update(sub('ticket_')); dn.update(sub('win_')); dn.update(sub('nbo_')); dn.update(sub('hnd_'))
 main = MAIN % dict(dlg=J(dn), sp=SPJS + SPW, bg=BGJS + BGN, world=WORLDJS, voice=VOICEJS, diag=DIAGJS, ev=EVJS, win=WINJS, sage=J(SAGE), arr=J(ARR), air=J(AIR), dep=J(NDEP), hdep=J(HDEP), ids=J(TOUR_IDS))
-main += art_js('assets/art/', "function artIdFor(S){var g=S&&S.d&&S.d.bg,h=S&&S.hub&&S.ctx&&S.ctx.bg;return (g==='sage'||h==='sage')?'sage':((g==='tdesk'||g==='rtmap')?'ticket':(g==='taxi'?'nairobi':(g==='immig'?'immig':(g==='baggage'?'bagclaim':(g==='hgateOW'?'hgate_ow':(g==='hgateST'?'hgate_st':null))))))}")   # 羽田の出発ゲート(タスク043。券で絵が出し分け)・賢者の広間(sage_1〜3の会話・賢者のメニュー)・チケット売り場(窓口の全場面 ticket_*・win_*。bg が tdesk か rtmap。タスク041)・ナイロビ到着(タクシー乗り場)・入国審査・手荷物受け取り(bg が baggage。ナイロビだけ。タスク045)
+main += art_js('assets/art/', "function artIdFor(S){var g=S&&S.d&&S.d.bg,h=S&&S.hub&&S.ctx&&S.ctx.bg;return g==='nlobby'?'nlobby':(g==='sage'||h==='sage')?'sage':((g==='tdesk'||g==='rtmap')?'ticket':(g==='taxi'?'nairobi':(g==='immig'?'immig':(g==='baggage'?'bagclaim':(g==='hgateOW'?'hgate_ow':(g==='hgateST'?'hgate_st':null))))))}")   # 羽田の出発ゲート(タスク043。券で絵が出し分け)・賢者の広間(sage_1〜3の会話・賢者のメニュー)・チケット売り場(窓口の全場面 ticket_*・win_*。bg が tdesk か rtmap。タスク041)・ナイロビ到着(タクシー乗り場)・入国審査・手荷物受け取り(bg が baggage。ナイロビだけ。タスク045)
+main += song_js()   # 宣言文ソング(タスク049): チャント(オープニング)・テーマ(ホテルのロビーの歌手イベント)。ナイロビ(tour/)だけ
 o = ev_patches(common(src, 'Africa/Nairobi'))
 o = rep(o, "(S.d.inter||[]).forEach(function(n){if(n.set&&n.set.gold)save.gold=1});storeSave();worldSync();",
         "(S.d.inter||[]).forEach(function(n){if(n.set&&n.set.gold)save.gold=1});if(S.d.keep&&/^[a-z0-9_]{1,16}$/.test(S.d.keep)){if(!save.keep||typeof save.keep!=='object')save.keep={};save.keep[S.d.keep]=1}storeSave();worldSync();")
@@ -668,10 +674,19 @@ o = rep(o, "b.classList.toggle('on',b.dataset.m===MODE)});", "b.classList.toggle
 o = rep(o, "dep:['#e9e2f2','#d9d0e8','#8a7ac0']}[MODE]", "dep:['#e9e2f2','#d9d0e8','#8a7ac0'],sage:['#e4dff2','#d3cbe8','#8a7ac0'],hdep:['#dfe6f2','#cdd7ea','#8a98c0']}[MODE]")
 o = rep(o, "g.fillStyle='#143fb0';g.fillRect(0,0,5,ch);g.fillRect(cw-5,0,5,ch)", "g.fillStyle='#2f7a4a';g.fillRect(0,0,5,ch);g.fillRect(cw-5,0,5,ch)")
 o_pre = o   # 終わりの場面の土台(エンジンの部品はナイロビと同じ)
+# ---- 宣言文ソング(タスク049): ナイロビ(tour/)だけ。終わりの場面・ドーハには入れない ----
+# 場所に入る: ホテルのロビー(listen)は「聴くだけ」の場面へ(出来事の割りこみ・発音の流れは通らない)
+o = rep(o, "function enterPlace(id){var pl=PBY[id];if(evGate(", "function enterPlace(id){var pl=PBY[id];if(pl.listen){songListen(pl);return}if(evGate(")
+# オープニングのチャント: 賢者の広間の最初の会話の「GO！」(最初の操作)を押したあとに鳴らす
+o = rep(o, "b.addEventListener('click',function(){if(S.d.story)playInter(-1,npcTurn);else npcTurn()})}", "b.addEventListener('click',function(){if(window.__songGo)window.__songGo(S);if(S.d.story)playInter(-1,npcTurn);else npcTurn()})}")
+# 場面が変わったら、曲を鳴らしてよい場面にいるかを確かめる(離れたらすぐ止める)
+o = rep(o, "function clearTimers(){G.timers.forEach(clearTimeout);G.timers=[];clearInterval(G.typeTimer)}", "function clearTimers(){G.timers.forEach(clearTimeout);G.timers=[];clearInterval(G.typeTimer);if(window.__songWatch)setTimeout(window.__songWatch,0)}")
+# 場面の数が空の場所(ホテルのロビー)に「済」の印を出さない
+o = rep(o, "n.classList.toggle('done',c0===vs.length)", "n.classList.toggle('done',vs.length>0&&c0===vs.length)")
 # 記録(kanpe-tour-save-v1)がない初回だけ: マップでなく 賢者の広間に入り、賢者の最初の会話(sage_1)を開く(タスク022)
 o = rep(o, "function storeSave(){", "var TOUR_FRESH=(function(){try{return localStorage.getItem(SAVEKEY)===null}catch(e){return false}})();\nfunction storeSave(){")
 o = rep(o, "setMode('arr');\nvar phoQ", main + "\nsetMode(save.ticket?(hdepOn()?'hdep':'arr'):'sage');\n"
-        "if(/[?&]pho=/.test(location.search)){}else TRIP.enter(function(){if(TOUR_FRESH&&!save.ticket){enterHub(PBY.sage);runStory('sage_1')}},'tour');\nvar phoQ")
+        "if(/[?&]pho=/.test(location.search)){}else TRIP.enter(function(){if(TOUR_FRESH&&!save.ticket){SONG.open=1;enterHub(PBY.sage);runStory('sage_1')}},'tour');\nvar phoQ")
 os.makedirs(os.path.join(ROOT, 'tour'), exist_ok=True)
 open(os.path.join(ROOT, 'tour', 'index.html'), 'w', encoding='utf-8').write(o)
 print('nairobi built', len(o), 'bytes; dialogues', len(dn), 'words', sum(len(v['words']) for v in dn.values()))
