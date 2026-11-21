@@ -4001,7 +4001,61 @@ var ART={
  /* ナイロビのホテルのロビー・歌手のイベント(タスク049): 人なしの背景(夜のロビー。右はしの肘かけ椅子のあるラウンジの隅)をフルブリード。
     歌手(正面・大人の高さ136px)はラウンジの隅の手前に立ち、歌っているあいだ 音符(♪)がのぼる(notes)。ルル(左)とキング(右)は広間と同じ後ろ姿で、歌手のほうを向いて少し離れて立つ。 */
  nlobby:{bg:'nairobi-hotel-lobby-v1.png',mode:'wide',hall:{sage:{n:'hall-singer',x:1130,by:800},lulu:{n:'hall-lulu-back',x:985,by:915},king:{n:'hall-king-back',x:1060,by:915},notes:1}}};
-function artIdFor(S){var g=S&&S.d&&S.d.bg,h=S&&S.hub&&S.ctx&&S.ctx.bg;return g==='nlobby'?'nlobby':(g==='sage'||h==='sage')?'sage':((g==='tdesk'||g==='rtmap')?'ticket':(g==='taxi'?'nairobi':(g==='immig'?'immig':(g==='baggage'?'bagclaim':(g==='hgateOW'?'hgate_ow':(g==='hgateST'?'hgate_st':null))))))}
+
+/* ナイロビ出発まわり(タスク054)。ほかの場面と同じく、絵は 1536×960 の座標。mode:'wide' は歩く人物の絵の読み込み用(この場面では歩かない)。
+   背景は人なし。ルル(左)とキング(右)は室内の大きさの後ろ姿(tk-)。立つ旅行者は室内の大きさ(t2-=高さ252px)。係員はカウンターの高さで切って下は描かない。
+   場面ごとの配置は、背景の画素から測った値(カウンターの上端・ベルトの面・床の線)に合わせてある */
+var TLU='tk-lulu-back',TKG='tk-king-back';
+/* チェックイン: 赤いカウンター7〜10番。係員(1)は8番、(2)は「となりのカウンター」の9番。カウンターの上端(濃い灰のふた)は y=528。荷物は8番/9番の右どなりのベルト(x 814〜920 / 1130〜1236, 面は y=604) */
+ART.ncheckin1={bg:'nairobi-checkin-v1.png',mode:'wide',dep:{lulu:{n:TLU,x:690,by:925},king:{n:TKG,x:790,by:925},clerk:{x:709,top:388,clip:528},
+ npcS:{qr_checkin:'tk-clerk-star',qr_checkin2:'tk-clerk'},bubble:{x:709,y:372},
+ fx:[{k:'shuttle',img:'nairobi-checkin-belt-bag.png',x0:814,x1:920,w:80,h:96,by:604,v:20,wait:2}],
+ people:[{n:'t2-safari-back',x:200,by:940},{n:'t2-man-thobe-back',x:330,by:945},{n:'t2-woman-hijab-front',x:1390,by:940}]}};
+ART.ncheckin2={bg:'nairobi-checkin-v1.png',mode:'wide',dep:{lulu:{n:TLU,x:1006,by:925},king:{n:TKG,x:1106,by:925},clerk:{x:1025,top:388,clip:528},
+ npcS:{qr_checkin:'tk-clerk-star',qr_checkin2:'tk-clerk'},bubble:{x:1025,y:372},
+ fx:[{k:'shuttle',img:'nairobi-checkin-belt-bag.png',x0:1130,x1:1236,w:80,h:96,by:604,v:20,wait:2}],
+ people:[{n:'t2-maasai-back',x:200,by:940},{n:'t2-backpacker-back',x:330,by:945},{n:'t2-man-dashiki-front',x:1390,by:940}]}};
+
+/* 保安検査: 左の手前のベルト(x 0〜528・面 y=648)は X線の機械へ入り、右のベルト(x 862〜1258)は機械から出てくる。トレイは両はしで切る */
+var SECQ=function(it,it2){return [{k:'queue',img:'nairobi-security-items.png',x0:0,x1:528,by:648,v:14,gap:150,items:it},{k:'queue',img:'nairobi-security-items.png',x0:862,x1:1258,by:648,v:14,gap:150,items:it2}]};
+ART.nsec1={bg:'nairobi-security-v1.png',mode:'wide',dep:{lulu:{n:TLU,x:700,by:930},king:{n:TKG,x:800,by:930},bubble:{x:1215,y:400},
+ npcS:{sec_n1:{n:'o2-front-officer-green-1',x:1215,by:730,sw:140},sec_n2:{n:'o2-front-officer-blue',x:1215,by:730,sw:130}},
+ fx:SECQ([{c:2,s:0,x:60},{c:3,s:0,x:260}],[{c:1,s:0,x:900},{c:4,s:0,x:1100}]),
+ people:[{n:'t2-safari-back',x:200,by:950},{n:'t2-woman-hijab-back',x:330,by:955}]}};
+ART.nsec2={bg:'nairobi-security-v1.png',mode:'wide',dep:{lulu:{n:TLU,x:700,by:930},king:{n:TKG,x:800,by:930},bubble:{x:1215,y:400},
+ npcS:{sec_n1:{n:'o2-front-officer-green-1',x:1215,by:730,sw:140},sec_n2:{n:'o2-front-officer-blue',x:1215,by:730,sw:130}},
+ fx:SECQ([{c:4,s:0,x:80},{c:0,s:0,x:300}],[{c:5,s:0,x:880},{c:2,s:0,x:1120}]),
+ people:[{n:'t2-maasai-back',x:200,by:950},{n:'t2-backpacker-back',x:330,by:955}]}};
+/* 免税店: 広告画面は左の棚のテレビ(外枠 x 300〜477 / y 280〜393)。レジのカウンターの上端は y=602(右の棚の下) */
+var DFAD={k:'strip',img:'nairobi-dutyfree-screen-strip.png',x:301,y:281,fw:176,fh:112,n:3,every:2.5};
+ART.nduty1={bg:'nairobi-dutyfree-v1.png',mode:'wide',dep:{lulu:{n:TLU,x:1130,by:935},king:{n:TKG,x:1240,by:935},clerk:{x:1280,top:417,clip:602},
+ npcS:{duty_staff:'tk-clerk',duty_staff2:'o-front-woman-blonde-suit',ev_trav3:{n:'t2-woman-hijab-front',x:1010,by:900}},bubble:{x:1280,y:400},fx:[DFAD],
+ people:[{n:'t2-man-thobe-back',x:170,by:930},{n:'t2-woman-hijab-back',x:300,by:940}]}};
+ART.nduty2={bg:'nairobi-dutyfree-v1.png',mode:'wide',dep:{lulu:{n:TLU,x:1130,by:935},king:{n:TKG,x:1240,by:935},clerk:{x:1280,top:417,clip:602},
+ npcS:{duty_staff:'tk-clerk',duty_staff2:'o-front-woman-blonde-suit'},bubble:{x:1280,y:400},fx:[{k:'strip',img:'nairobi-dutyfree-screen-strip.png',x:301,y:281,fw:176,fh:112,n:3,every:2.5,ph:2.5}],
+ people:[{n:'t2-safari-back',x:170,by:930},{n:'t2-backpacker-back',x:300,by:940}]}};
+
+/* ラウンジ: 座る人6人の配置・ポーズ・向きは正本プレビュー(nairobi-lounge-v2-preview2.png)から測った値(sit は座面に足が着く全身。影なし)。
+   時計の針の中心(850,222)(954,222)(1058,222)・TV画面 x826〜1082 / y348〜476。丸ブースのマサイ男性だけ、正本どおり手前のテーブルが下半身を隠す(after) */
+var LOUNGEFX=[{k:'clock',img:'nairobi-lounge-clock-hands.png',fw:64,fh:64,n:12,every:1,c:[[850,222],[954,222],[1058,222]],off:[0,4,8]},
+ {k:'strip',img:'nairobi-lounge-tv-strip.png',x:826,y:348,fw:256,fh:128,n:4,every:2.5}];
+var LOUNGEPPL=[{id:'hijab',sit:1,n:'t-woman-hijab-sit-side-2',x:576,by:735},{id:'dashiki',sit:1,n:'t-man-dashiki-sit-side-2',x:632,by:863},
+ {id:'maasai',sit:1,n:'t-maasai-sit-side-1',x:1305.5,by:865,after:{img:'nairobi-lounge-front-054.png',x:1256,y:667}},{id:'backpacker',sit:1,n:'t-backpacker-sit-side-1',x:1380.5,by:955},
+ {id:'safari',sit:1,n:'t-safari-sit-side-2',x:545,by:960},{id:'thobe',sit:1,n:'t-man-thobe-sit-side-2',x:1051,by:959}];
+ART.nlounge1={bg:'nairobi-lounge-v2.png',mode:'wide',dep:{lulu:{n:TLU,x:801,by:905},king:{n:TKG,x:904,by:905},clerk:{x:1030,top:330,clip:516},
+ npcS:{lounge_staff:'o-front-woman-blonde-suit'},bubble:{x:1030,y:310},fx:LOUNGEFX,people:LOUNGEPPL}};
+ART.nlounge2={bg:'nairobi-lounge-v2.png',mode:'wide',dep:{lulu:{n:TLU,x:801,by:905},king:{n:TKG,x:904,by:905},clerk:{x:1030,top:330,clip:516},
+ npcS:{lounge_guest:{p:'dashiki'}},bubble:{x:1030,y:310},fx:LOUNGEFX,people:LOUNGEPPL}};
+/* ゲート: 窓の外の飛行機=重ね絵を左へゆっくりタキシング(柱・桟の手前には出ない)。FIDS は (1184,356) に静止。受付の机(14番)の上端は y=660 */
+var GATEFX=[{k:'plane',img:'nairobi-gate-plane.png',dx0:70,span:320,v:8,fade:2.5,pause:3,clip:[22,86,1490,506],front:[[760,86,27,506],[1140,86,26,506],[1218,86,39,506],[380,86,26,506],[280,86,42,506],[0,336,1536,16]]},
+ {k:'still',img:'nairobi-gate-fids.png',x:1184,y:356}];
+ART.ngate1={bg:'nairobi-gate-v1.png',mode:'wide',dep:{lulu:{n:TLU,x:700,by:940},king:{n:TKG,x:800,by:940},clerk:{x:1290,top:480,clip:660},
+ npcS:{gate_agent:'o-front-woman-blonde-suit',gate_agent2:'tk-clerk'},bubble:{x:1290,y:470},fx:GATEFX,
+ people:[{n:'t2-safari-back',x:140,by:950},{n:'t2-man-thobe-back',x:1440,by:950}]}};
+ART.ngate2={bg:'nairobi-gate-v1.png',mode:'wide',dep:{lulu:{n:TLU,x:700,by:940},king:{n:TKG,x:800,by:940},clerk:{x:1290,top:480,clip:660},
+ npcS:{gate_agent:'o-front-woman-blonde-suit',gate_agent2:'tk-clerk'},bubble:{x:1290,y:470},fx:GATEFX,
+ people:[{n:'t2-maasai-back',x:140,by:950},{n:'t2-man-dashiki-back',x:1440,by:950}]}};
+function artIdFor(S){var g=S&&S.d&&S.d.bg,h=S&&S.hub&&S.ctx&&S.ctx.bg,v=String(S&&S.vid||''),k=/2$/.test(v)?'2':'1';if(/^nbo_/.test(v)){if(g==='checkinQ')return'ncheckin'+k;if(g==='security')return'nsec'+k;if(g==='duty')return'nduty'+k;if(g==='lounge')return'nlounge'+k;if(g==='gate')return'ngate'+k}return g==='nlobby'?'nlobby':(g==='sage'||h==='sage')?'sage':((g==='tdesk'||g==='rtmap')?'ticket':(g==='taxi'?'nairobi':(g==='immig'?'immig':(g==='baggage'?'bagclaim':(g==='hgateOW'?'hgate_ow':(g==='hgateST'?'hgate_st':null))))))}
 function artImg(n){var i=ARTI[n];if(!i){i=ARTI[n]=new Image();i.onerror=function(){i.bad=1};i.src=ARTBASE+n}return i}
 function artShow(on){if(ARTSHOW===on)return;ARTSHOW=on;cv.hidden=!!on;cvA.hidden=!on}
 function artR(col,x,y,w,h){ca.fillStyle=col;ca.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h))}
@@ -4042,6 +4096,7 @@ function ARTframe(S,A0,dt){
  if(bg.bad){ARTFAIL[id]=1;artShow(0);return false}
  for(var j=0;j<names.length;j++)if(im[names[j]].bad){ARTFAIL[id]=1;artShow(0);return false}
  var ex=artExtra(cf),exi={};for(var e=0;e<ex.length;e++){var xi=artImg('npc/'+ex[e]+'.png');if(xi.bad){ARTFAIL[id]=1;artShow(0);return false}if(!artOKimg(xi))ok=false;exi[ex[e]]=xi}
+ if(cf.dep){var dfi=artDepImgs(cf.dep);for(var dk=0;dk<dfi.length;dk++){var dim=artImg(dfi[dk]);if(!dim.bad&&!artOKimg(dim))ok=false}}   /* 出発まわり(054): 動く別素材が読めないときは、その動きだけ描かない(場面は出す)。読み込み中は暗い板 */
  if(cf.belt){var bt=[artImg(cf.belt.isl),artImg(cf.belt.bags)];for(var bi=0;bi<2;bi++){if(bt[bi].bad){ARTFAIL[id]=1;artShow(0);return false}if(!artOKimg(bt[bi]))ok=false}
   if(cf.trav){var ti=artImg('npc/'+cf.trav.n+'.png');if(!ti.bad&&!artOKimg(ti))ok=false}}   /* 旅行者の絵だけは、読めなくても場面は出す(フォールバックで描く) */
  artShow(1);
@@ -4050,6 +4105,7 @@ function ARTframe(S,A0,dt){
  var te=t-S.artT0,B=cf.base,BOB=4;
  ca.globalAlpha=1;ca.drawImage(bg,0,0);
  if(cf.belt){artBelt(cf,exi,te,S);return true}
+ if(cf.dep){artDep(cf,exi,S,te);return true}
  if(cf.hall){artPeople(cf.people,exi);artHall(cf.hall,exi);return true}
  if(cf.tk){artTicket(cf.tk,exi,S);return true}
  if(cf.fx==='night')artFxNight();else if(cf.fx==='hotel')artFxHotel();
@@ -4207,11 +4263,61 @@ function artRoute(R,S){
  /* 小さい飛行機: いま飛んでいる区間の先頭。どこも引いていないときは羽田で待つ */
  if(!head)head=[A.tok[0],A.tok[1]];
  rtPlane(head[0],head[1]-14+(Math.floor(t*3)%2?-1:0),face)}
+
+/* ============================================================
+   ナイロビ出発まわり(タスク054): チェックイン・保安検査・免税店・ラウンジ・ゲートの新しい背景(1536×960・人なし)
+   描く順: 背景 → 動く別素材(fx) → 相手(カウンター越し) → 人(座る人・立つ旅行者・ルル・キングを足もとの高さの順) → 手前の覆い(after)
+   - fx: still=止まった重ね絵 / strip=コマ切り替え(NEAREST) / clock=時計の針(3つ) / shuttle=ベルトを1個だけ横へ(両はしのカウンターに隠れる)
+         / queue=トレイが列でベルトを流れる(両はしで切る) / plane=窓の外の飛行機(ゆっくり横へ。柱の手前には出ない)
+   - 人は 047 の artSway(足と影は固定・上半身だけ小さく揺れる)。座る人(sit)は影なし。
+   - npcS: 話し相手(SP のキー)→ 絵。文字列=カウンター越しの係員(頭と肩だけ。clerk の top〜clip で切って下は描かない)。{p:'id'}=座る人のひとりが話し相手。{n,x,by,sw}=立つ人
+   - 相手を絵に出さない声だけの場面(電話・アナウンス)は bubble の位置に「…」 */
+function artDepImgs(D){var a=[];(D.fx||[]).forEach(function(f){if(f.img)a.push(f.img)});(D.people||[]).forEach(function(q){if(q.after)a.push(q.after.img)});return a}
+function artDepNames(D){var a=[];['lulu','king'].forEach(function(k){if(D[k])a.push(D[k].n)});(D.people||[]).forEach(function(q){a.push(q.n)});
+ if(D.npcS)for(var k in D.npcS){var v=D.npcS[k];if(typeof v==='string')a.push(v);else if(v&&v.n)a.push(v.n)}return a}
+function artFx(f,te,bg){var im=f.img?artImg(f.img):null,i,k;
+ if(im&&(im.bad||!artOKimg(im)))return;
+ if(f.k==='still'){ca.drawImage(im,f.x,f.y)}
+ else if(f.k==='strip'){var fr=Math.floor((t+(f.ph||0))/f.every)%f.n;ca.drawImage(im,fr*f.fw,0,f.fw,f.fh,f.x,f.y,f.fw,f.fh)}
+ else if(f.k==='clock'){var cn=Math.floor(t/f.every);for(i=0;i<f.c.length;i++){var fc=(cn+(f.off[i]||0))%f.n;ca.drawImage(im,fc*f.fw,0,f.fw,f.fh,f.c[i][0]-f.fw/2,f.c[i][1]-f.fh/2,f.fw,f.fh)}}
+ else if(f.k==='shuttle'){   /* ベルトの上の荷物1個。左のカウンターの奥から出て右のカウンターの奥へ消え、wait 秒あいてまた出てくる */
+  var W=f.x1-f.x0+f.w,mv=W/f.v,u=(te%(mv+f.wait))*f.v;if(u>W)return;
+  ca.save();ca.beginPath();ca.rect(f.x0,f.by-f.h-4,f.x1-f.x0,f.h+8);ca.clip();ca.drawImage(im,2*Math.round((f.x0-f.w+u)/2),f.by-f.h);ca.restore()}
+ else if(f.k==='queue'){   /* トレイ(と中身)が列でベルトを流れる。x0〜x1の外は描かない(機械に入る・出てくる)。large=112×96のコマ(トレイの底は y=86)、small=88×60のコマ(底は y=58) */
+  var L=f.x1-f.x0+f.gap,p;ca.save();ca.beginPath();ca.rect(f.x0,f.by-100,f.x1-f.x0,104);ca.clip();
+  for(i=0;i<f.items.length;i++){var it=f.items[i],sm=it.s?1:0,cw=sm?88:112,ch=sm?60:96,bt=sm?58:86;
+   p=((it.x-f.x0+f.v*te)%L+L)%L+f.x0-cw;ca.drawImage(im,it.c*cw,sm?96:0,cw,ch,2*Math.round(p/2),f.by-bt,cw,ch)}ca.restore()}
+ else if(f.k==='plane'){   /* 窓の外の飛行機(1536×960の重ね絵)。左へゆっくりタキシング(機首が左)。両はしでフェード。柱・窓の桟の手前には出ない(front=背景から柱を描き直す) */
+  var T=f.span/f.v,P=T+f.pause,u2=te%P;if(u2>T)return;var a=Math.max(0,Math.min(1,u2/f.fade,(T-u2)/f.fade));
+  ca.save();ca.beginPath();ca.rect(f.clip[0],f.clip[1],f.clip[2],f.clip[3]);ca.clip();ca.globalAlpha=a;ca.drawImage(im,2*Math.round((f.dx0-f.v*u2)/2),0);ca.globalAlpha=1;
+  for(k=0;k<f.front.length;k++){var r=f.front[k];ca.drawImage(bg,r[0],r[1],r[2],r[3],r[0],r[1],r[2],r[3])}ca.restore()}}
+/* カウンター越しの相手: 頭と肩〜カウンターの高さ(clip)まで。腰より上だけ小さく伸び縮み(037)。下は描かない */
+function artCounterNpc(img,x,top,clip,d){var w=img.naturalWidth,h=img.naturalHeight,cx=Math.round(x-w/2),cut=Math.round(h*.58),vis=clip-top;
+ ca.drawImage(img,0,0,w,Math.min(cut,vis),cx,top-d,w,Math.min(cut,vis)+d);if(vis>cut)ca.drawImage(img,0,cut,w,vis-cut,cx,top+cut,w,vis-cut)}
+function artDep(cf,exi,S,te){
+ var D=cf.dep,bg=artImg(cf.bg),i,fx=D.fx||[],sk=artSpKey(),sv=(D.npcS&&sk)?D.npcS[sk]:null,said=false,L=[];
+ for(i=0;i<fx.length;i++)artFx(fx[i],te,bg);
+ /* 話し相手が カウンター越しの係員 */
+ if(typeof sv==='string'&&D.clerk&&exi[sv]){var cl=exi[sv],cs=Math.floor(t*.8)%2?3:0,cy=D.clerk.top+(spSay&&Math.floor(t*6)%2?-3:0);
+  artCounterNpc(cl,D.clerk.x,cy,D.clerk.clip,cs);if(spSay&&speaker)artBubble(D.clerk.x+Math.round(cl.naturalWidth*.3),D.clerk.top-18);said=true}
+ /* 人: 座る人・立つ旅行者(話し相手が立つ人{n,x,by,sw}なら、それもここに入る) */
+ var ppl=(D.people||[]).slice();if(sv&&typeof sv==='object'&&sv.n)ppl.push({n:sv.n,x:sv.x,by:sv.by,sw:sv.sw,spk:1});
+ ppl.forEach(function(q,qi){var im=exi[q.n];if(!im||im.bad||!artOKimg(im))return;
+  L.push({by:q.by,f:function(){if(!q.sit)artShadowP(q.x,q.by,q.sw||Math.round(im.naturalWidth*1.15));artSway(im,q.x,q.by,artSwayD(qi*.37+.2,1));
+   if(q.after){var ai=artImg(q.after.img);if(artOKimg(ai))ca.drawImage(ai,q.after.x,q.after.y)}
+   if(spSay&&speaker&&(q.spk||(sv&&sv.p&&sv.p===q.id))){artBubble(q.x+Math.round(im.naturalWidth*.3),q.by-im.naturalHeight-18);said=true}}})});
+ var lu=D.lulu&&exi[D.lulu.n],kg=D.king&&exi[D.king.n],ld=Math.floor(t*1.1+.5)%2?3:0,kd=Math.floor(t*1.1)%2?3:0;
+ if(lu&&OUT.lvis)L.push({by:D.lulu.by,f:function(){artShadow(D.lulu.x,D.lulu.by,56);artSway(lu,D.lulu.x,D.lulu.by,ld);
+  if(luTalk&&spSay)artBubble(D.lulu.x+20,D.lulu.by-lu.naturalHeight-26);
+  if(luHelp){ca.fillStyle='#e8452c';ca.font='800 26px sans-serif';ca.textAlign='center';ca.textBaseline='middle';ca.fillText('♪',D.lulu.x+Math.round(lu.naturalWidth*.5),D.lulu.by-lu.naturalHeight-12)}}});
+ if(kg&&OUT.hvis)L.push({by:D.king.by,f:function(){artShadow(D.king.x,D.king.by,70);artSway(kg,D.king.x,D.king.by,kd)}});
+ L.sort(function(a,b){return a.by-b.by});for(i=0;i<L.length;i++)L[i].f();
+ if(spSay&&speaker&&!speaker.ghost&&!said&&D.bubble)artBubble(D.bubble.x,D.bubble.y)}   /* 絵に出ない相手(ghost=電話の声・アナウンス)には「…」を出さない。立つ人・係員・座る人が話し相手のとき、その人の上に出す */
 function artOKimg(i){return i.complete&&i.naturalWidth>0}
 /* この場面が使う人物の絵の名前(npc/ の中)。ひとつでも読めなければ、場面全体が今までの描画に戻る */
 function artExtra(cf){var a=[],i;if(cf.hall)['sage','lulu','king'].forEach(function(k){if(cf.hall[k])a.push(cf.hall[k].n)});if(cf.tk)['clerk','clerkS','lulu','king'].forEach(function(k){if(cf.tk[k])a.push(cf.tk[k].n)});(cf.crowd||[]).forEach(function(c){a.push('w-'+c[0])});
  (cf.booths||[]).forEach(function(b){a.push(b.n);if(b.sw)a.push(b.sw)});(cf.people||[]).forEach(function(q){a.push(q.n)});
- if(cf.npcS)for(var k in cf.npcS)a.push(cf.npcS[k]);return a}
+ if(cf.npcS)for(var k in cf.npcS)a.push(cf.npcS[k]);if(cf.dep)a=a.concat(artDepNames(cf.dep));return a}
 function artSpKey(){if(!speaker)return null;for(var k in SP)if(SP[k]===speaker)return k;return null}
 /* ============================================================
    場面の環境音(タスク028): 場面→音の対応表 + 再生の口 + ミュート。音源ファイルは素材パック第2弾で納品する
