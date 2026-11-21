@@ -46,7 +46,9 @@ var ART={
     描く順: 奥の半分(sin<0)の荷物 → 中央の島 → 手前の半分の荷物 → ふたり。荷物は奥ほど小さく暗い(絵の段階 lv=13 を sin で引く)。手前では左→右、奥では右→左。
     ルル(左)とキング(右)は広間と同じ後ろ姿で、足もとは y=884(素材の静止画と同じ)。stopFor=この場面ではベルトを止める(雨もりの出来事「ベルトが止まった」) */
  bagclaim:{bg:'nairobi-baggage-base.png',mode:'wide',hall:{lulu:{n:'hall-lulu-back',x:716,by:884},king:{n:'hall-king-back',x:800,by:884},bubble:{x:1210,y:540}},
-  belt:{isl:'nairobi-baggage-island.png',ix:552,iy:602,bags:'nairobi-baggage-bags.png',cw:112,ch:104,ax:56,ay:92,lv:13,n:6,cx:400,cy:330,rx:178,ry:28,period:24,stopFor:['nbo_ev_b_leak'],hero:{i:1,vid:'nbo_bag1',also:['nbo_ev_b_leak'],line:2,th:1.1,tpre:10,creep:.25,ease:1.2,hide:4}}},
+  belt:{isl:'nairobi-baggage-island.png',ix:552,iy:602,bags:'nairobi-baggage-bags.png',cw:112,ch:104,ax:56,ay:92,lv:13,n:6,cx:400,cy:330,rx:178,ry:28,period:24,stopFor:['nbo_ev_b_leak'],hero:{i:1,vid:'nbo_bag1',also:['nbo_ev_b_leak'],line:2,th:1.1,tpre:10,creep:.25,ease:1.2,hide:4}},
+  /* 同じ便の旅行者(タスク047): nbo_bag1 の5往復のあいだ、ベルトの右端の横に立ち続ける(出入り・移動なし)。n=縮めた素材(126px)、x=足もとの中心、by=足もとの高さ、sw=影の幅(配置の正本プレビューから測定)。絵が読めないときは SP.traveler のドット絵で描く */
+  trav:{vid:'nbo_bag1',n:'t-backpacker-front',x:1065,by:708,sw:79}},
  /* ナイロビのホテルのロビー・歌手のイベント(タスク049): 人なしの背景(夜のロビー。右はしの肘かけ椅子のあるラウンジの隅)をフルブリード。
     歌手(正面・大人の高さ136px)はラウンジの隅の手前に立ち、歌っているあいだ 音符(♪)がのぼる(notes)。ルル(左)とキング(右)は広間と同じ後ろ姿で、歌手のほうを向いて少し離れて立つ。 */
  nlobby:{bg:'nairobi-hotel-lobby-v1.png',mode:'wide',hall:{sage:{n:'hall-singer',x:1130,by:800},lulu:{n:'hall-lulu-back',x:985,by:915},king:{n:'hall-king-back',x:1060,by:915},notes:1}}};
@@ -91,14 +93,15 @@ function ARTframe(S,A0,dt){
  if(bg.bad){ARTFAIL[id]=1;artShow(0);return false}
  for(var j=0;j<names.length;j++)if(im[names[j]].bad){ARTFAIL[id]=1;artShow(0);return false}
  var ex=artExtra(cf),exi={};for(var e=0;e<ex.length;e++){var xi=artImg('npc/'+ex[e]+'.png');if(xi.bad){ARTFAIL[id]=1;artShow(0);return false}if(!artOKimg(xi))ok=false;exi[ex[e]]=xi}
- if(cf.belt){var bt=[artImg(cf.belt.isl),artImg(cf.belt.bags)];for(var bi=0;bi<2;bi++){if(bt[bi].bad){ARTFAIL[id]=1;artShow(0);return false}if(!artOKimg(bt[bi]))ok=false}}
+ if(cf.belt){var bt=[artImg(cf.belt.isl),artImg(cf.belt.bags)];for(var bi=0;bi<2;bi++){if(bt[bi].bad){ARTFAIL[id]=1;artShow(0);return false}if(!artOKimg(bt[bi]))ok=false}
+  if(cf.trav){var ti=artImg('npc/'+cf.trav.n+'.png');if(!ti.bad&&!artOKimg(ti))ok=false}}   /* 旅行者の絵だけは、読めなくても場面は出す(フォールバックで描く) */
  artShow(1);
  if(!ok){artR('#10131f',0,0,AW,AH);return true}
  if(S.artT0==null)S.artT0=t;
  var te=t-S.artT0,B=cf.base,BOB=4;
  ca.globalAlpha=1;ca.drawImage(bg,0,0);
  if(cf.belt){artBelt(cf,exi,te,S);return true}
- if(cf.hall){artHall(cf.hall,exi);return true}
+ if(cf.hall){artPeople(cf.people,exi);artHall(cf.hall,exi);return true}
  if(cf.tk){artTicket(cf.tk,exi,S);return true}
  if(cf.fx==='night')artFxNight();else if(cf.fx==='hotel')artFxHotel();
  /* 相手(いつもの顔のドット): 空港では右から入ってくる。カウンターの中は動かず、頭と肩だけ見せる(カウンターの高さで切る) */
@@ -127,6 +130,7 @@ function ARTframe(S,A0,dt){
  var dir=cf.dir||1,sp=room?260:150,dist=cf.dist||(dir>0?cf.king+150:AW+150-cf.king),walked=Math.min(dist,sp*te),walking=walked<dist-.5,sh=dist-walked;
  var kx=cf.king-dir*sh,lx=cf.lulu-dir*sh,shw=room?70:36,L=[];
  /* 並ぶ人・歩く人: 小さく上下にゆれる(ふたりより小さく、ゆっくり。人ごとに周期をずらす)。歩く人は少し速く */
+ (cf.people||[]).forEach(function(q,qi){L.push({by:q.by,f:function(){artPeople([q],exi)}})});
  (cf.crowd||[]).forEach(function(c,ci){L.push({by:c[2],f:function(){var img=exi['w-'+c[0]],bw=img.naturalWidth,
    o=c[3]==='walk'?(Math.floor(t*3.2+ci*.4)%2?-3:0):(Math.floor(t*1.1+ci*.53)%2?-2:0);
    artShadow(c[1],c[2],bw*.42,.3);artSpr(img,c[1],c[2]+o,false)}})});
@@ -169,7 +173,21 @@ function artBelt(cf,exi,te,S){var B=cf.belt,bi=artImg(B.bags),isl=artImg(B.isl),
   for(var k=0;k<g.length;k++){var o=g[k],lv=Math.max(0,Math.min(B.lv-1,Math.round((o.sn+1)/2*(B.lv-1))));
    ca.drawImage(bi,lv*B.cw,o.i*B.ch,B.cw,B.ch,o.x-B.ax,o.y-B.ay,B.cw,B.ch)}};
  drawG(true);ca.drawImage(isl,B.ix,B.iy);drawG(false);
+ if(cf.trav&&S&&S.vid===cf.trav.vid)artTrav(cf.trav);
  artHall(cf.hall,exi)}
+/* 場面の人(タスク047)。人は「いる」だけ(会話・採点の対象にしない)。足と影は動かさず、腰から上だけ小さく揺れる(037)。縮小は素材づくりの段階(NEAREST)で済んでいて、ここでは拡大縮小しない。
+   影: 正本プレビューの楕円(幅 sw の9行。縦の半径は約4画素)。色 rgba(68,70,82,.62)(床で(196,202,210)→(117,121,131)、ベルトの縁で(128,136,148)→(90,95,107)。正本と同じ) */
+var ARTSHK=[.835,.899,.949,.975,1,.975,.949,.899,.835];
+function artShadowP(cx,by,sw){ca.fillStyle='rgba(68,70,82,.62)';for(var r=0;r<9;r++){var w=Math.round(sw*ARTSHK[r]);ca.fillRect(Math.round(cx-w/2),by-1+r-4,w,1)}}
+function artSwayD(ph,per){return Math.floor(t*(per||1.1)+(ph||0))%2?3:0}
+/* 荷物受け取りの旅行者。ベルトの右端の横。絵が読めないときは SP.traveler(コードで描いたドット絵)で同じ高さに描く */
+function artTrav(T){var im=artImg('npc/'+T.n+'.png');
+ if(!im.bad&&artOKimg(im)){artShadowP(T.x,T.by,T.sw);artSway(im,T.x,T.by,artSwayD(.7,.9));return}
+ var m=SP.traveler&&SP.traveler.m&&SP.traveler.m[0];if(!m)return;var nm=m[0],px=Math.max(1,Math.round(126/nm.length));
+ artShadowP(T.x,T.by,T.sw);artSpA(nm,m[1],Math.round(T.x-nm[0].length*px/2),T.by-nm.length*px,px,0)}
+/* 人なし背景の場面に置く旅行者。list=[{n:'t-safari-front',x:足もとの中心,by:足もとの高さ,sw:影の幅,sit:座り(影なし。座面に足が着く)}]。端の位置に置くのは場面を入れる側 */
+function artPeople(list,exi){for(var i=0;i<(list||[]).length;i++){var P=list[i],im=exi[P.n];if(!im||im.bad||!artOKimg(im))continue;
+ if(!P.sit)artShadowP(P.x,P.by,P.sw||Math.round(im.naturalWidth*1.2));artSway(im,P.x,P.by,artSwayD(i*.37+.2,1))}}
 /* 賢者の広間を描く(タスク040)。歩かない。足と影は動かさず、上半身だけ小さく揺れる(タスク037)。話しているとき「…」を出す */
 function artSway(img,cx,by,d){var w=img.naturalWidth,h=img.naturalHeight,x=Math.round(cx-w/2),y=by-h,cut=Math.round(h*.58);
  ca.drawImage(img,0,0,w,cut,x,y-d,w,cut+d);   /* 上半身: 上へd画素のばす(足側は動かない) */
@@ -243,7 +261,7 @@ function artRoute(R,S){
 function artOKimg(i){return i.complete&&i.naturalWidth>0}
 /* この場面が使う人物の絵の名前(npc/ の中)。ひとつでも読めなければ、場面全体が今までの描画に戻る */
 function artExtra(cf){var a=[],i;if(cf.hall)['sage','lulu','king'].forEach(function(k){if(cf.hall[k])a.push(cf.hall[k].n)});if(cf.tk)['clerk','clerkS','lulu','king'].forEach(function(k){if(cf.tk[k])a.push(cf.tk[k].n)});(cf.crowd||[]).forEach(function(c){a.push('w-'+c[0])});
- (cf.booths||[]).forEach(function(b){a.push(b.n);if(b.sw)a.push(b.sw)});
+ (cf.booths||[]).forEach(function(b){a.push(b.n);if(b.sw)a.push(b.sw)});(cf.people||[]).forEach(function(q){a.push(q.n)});
  if(cf.npcS)for(var k in cf.npcS)a.push(cf.npcS[k]);return a}
 function artSpKey(){if(!speaker)return null;for(var k in SP)if(SP[k]===speaker)return k;return null}
 /* ============================================================
