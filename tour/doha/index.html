@@ -444,7 +444,7 @@ var Snd=(function(){
    st:function(s,t,e){if(Math.random()<.04)chime(t,.06);if(Math.random()<.025)jet(t,5)}}
  };
  K.souk=K.cafe;K.mosque=K.ahlan;K.atop=K.hall;K.hotel=K.costa;K.vault=K.s34;K.room=K.ahlan;K.city=K.map;
- K.mall=K.cafe;K.fountain=K.hall;K.safari=K.ahlan;K.marina=K.s34;K.beach=K.costa;K.doh={bpm:function(){return 66},amb:function(){loopNoise(320,.6,.015,.08,.008,'lowpass')},st:function(s,t,e){var KD=[62,63,65,67,69,67,65,63];if(s%4===0)pluck(hz(KD[(s>>2)%8]),t,e*3.4,ngt?.07:.1);if(s%16===8)pluck(hz(KD[0]-12),t,e*5,.08);if(s%32===0)tone(hz(38),t,e*30,'sine',.06,.6)}};K.dohc={bpm:function(){return ngt?60:72},amb:function(){loopNoise(260,.5,.012,.07,.006,'lowpass')},st:function(s,t,e){var KC=[62,63,66,67,69,67,66,63];if(s%4===0)pluck(hz(KC[(s>>2)%8]-12),t,e*3.6,ngt?.08:.1);if(s%8===6)pluck(hz(KC[((s>>3)+2)%8]-12),t,e*2,.05);if(s%16===0)tone(hz(43),t,e*14,'sine',.06,.5)}};
+ K.mall=K.cafe;K.fountain=K.hall;K.safari=K.ahlan;K.marina=K.s34;K.beach=K.costa;K.doh={bpm:function(){return 66},amb:function(){loopNoise(320,.6,.015,.08,.008,'lowpass')},st:function(s,t,e){var KD=[62,63,65,67,69,67,65,63];if(s%4===0)pluck(hz(KD[(s>>2)%8]),t,e*3.4,ngt?.07:.1);if(s%16===8)pluck(hz(KD[0]-12),t,e*5,.08);if(s%32===0)tone(hz(38),t,e*30,'sine',.06,.6)}};K.dohc={bpm:function(){return ngt?60:72},amb:function(){loopNoise(260,.5,.012,.07,.006,'lowpass')},st:function(s,t,e){var KC=[62,63,66,67,69,67,66,63];if(s%4===0)pluck(hz(KC[(s>>2)%8]-12),t,e*3.6,ngt?.08:.1);if(s%8===6)pluck(hz(KC[((s>>3)+2)%8]-12),t,e*2,.05);if(s%16===0)tone(hz(43),t,e*14,'sine',.06,.5)}};K.dream={bpm:function(){return 64},amb:function(){loopNoise(400,.6,.015,.08,.01,'lowpass')},st:function(s,t,e){var N=[72,76,79,84,79,76,74,71];if(s%4===0)pluck(hz(N[(s>>2)%8]),t,e*3,.07);if(s%16===0)tone(hz(48),t,e*16,'sine',.05,.5)}};
  function fade(g){if(!g)return;try{g.gain.cancelScheduledValues(AC.currentTime);g.gain.setValueAtTime(Math.max(.0001,g.gain.value),AC.currentTime);g.gain.linearRampToValueAtTime(.0001,AC.currentTime+.3)}catch(e){}
   setTimeout(function(){try{g.disconnect()}catch(e){}},700)}
  function halt(){
@@ -1367,9 +1367,13 @@ var TOTALV=PLACES.reduce(function(a,p){return a+p.v.length},0);
 /* ---------- 状態 ---------- */
 var $m=function(i){return document.getElementById(i)};
 var cam=0,t=0,speaker=null,spX=360,spSay=false,lastId=null,LIMIT=5000;
+/* 即答の線(タスク053): 語を選ぶまでの時間(ms)が 制限時間の前半(fastFrac)以内なら「即答」=卒業。仮置き。後から実データ(save.wrec の ms)を見て調整できるよう、線の値はここ1か所にまとめる */
+var WB={limit:LIMIT,fastFrac:.5};function fastMs(){return Math.round(WB.limit*WB.fastFrac)}
 var G={view:'map',at:'info',scene:null,ti:0,tries:0,phase:'idle',sid:0,timers:[],typeTimer:0,camp:null},luHelp=false;
-var HELPMAX=5,save={seen:{},help:HELPMAX,weak:[],missed:[]},SAVEKEY='kanpe-tour-save-v1';
-try{var s0=JSON.parse(localStorage.getItem(SAVEKEY)||'null');if(s0&&s0.seen&&typeof s0.seen==='object')save.seen=s0.seen;if(s0&&s0.gold)save.gold=1;if(s0&&s0.ev&&typeof s0.ev==='object')save.ev=s0.ev;if(s0&&s0.keep&&typeof s0.keep==='object'){var kp={};Object.keys(s0.keep).forEach(function(k){if(/^[a-z0-9_]{1,16}$/.test(k)&&s0.keep[k])kp[k]=1});save.keep=kp}if(s0&&(s0.ticket==='star'||s0.ticket==='ow'))save.ticket=s0.ticket;if(s0&&typeof s0.help==='number'&&s0.help>=0&&s0.help<=HELPMAX)save.help=Math.floor(s0.help);if(s0&&Array.isArray(s0.weak))save.weak=s0.weak.filter(function(w){return w&&typeof w.c==='string'}).slice(0,8);if(s0&&Array.isArray(s0.missed))save.missed=s0.missed.filter(function(w){return Array.isArray(w)&&typeof w[0]==='string'}).slice(0,16)}catch(e){}
+/* 語ごとの記録(タスク053): fast=即答 / slow=遅い / wrong=間違い / timeout=時間切れ / dream=夢で通じた */
+var WREC_OK={fast:1,slow:1,wrong:1,timeout:1,dream:1};
+var HELPMAX=5,save={seen:{},help:HELPMAX,weak:[],missed:[],wrec:{}},SAVEKEY='kanpe-tour-save-v1';
+try{var s0=JSON.parse(localStorage.getItem(SAVEKEY)||'null');if(s0&&s0.seen&&typeof s0.seen==='object')save.seen=s0.seen;if(s0&&s0.gold)save.gold=1;if(s0&&s0.ev&&typeof s0.ev==='object')save.ev=s0.ev;if(s0&&s0.keep&&typeof s0.keep==='object'){var kp={};Object.keys(s0.keep).forEach(function(k){if(/^[a-z0-9_]{1,16}$/.test(k)&&s0.keep[k])kp[k]=1});save.keep=kp}if(s0&&(s0.ticket==='star'||s0.ticket==='ow'))save.ticket=s0.ticket;if(s0&&typeof s0.help==='number'&&s0.help>=0&&s0.help<=HELPMAX)save.help=Math.floor(s0.help);if(s0&&Array.isArray(s0.weak))save.weak=s0.weak.filter(function(w){return w&&typeof w.c==='string'}).slice(0,8);if(s0&&Array.isArray(s0.missed))save.missed=s0.missed.filter(function(w){return Array.isArray(w)&&typeof w[0]==='string'}).slice(0,16);if(s0&&s0.wrec&&typeof s0.wrec==='object'){var wr={};Object.keys(s0.wrec).slice(0,200).forEach(function(k){var r=s0.wrec[k];if(r&&typeof r==='object'&&WREC_OK[r.o]===1)wr[k]={o:r.o,ms:Math.max(0,Math.min(60000,Math.round(+r.ms||0))),n:Math.max(1,Math.min(999,Math.floor(+r.n||1))),t:+r.t||0}});save.wrec=wr}}catch(e){}
 /* ===== 世界一周編: 旅の骨組み(タスク030。設計の正本: docs/pm/deliverables/020-journey-structure-design-v1.md) =====
    DAY(朝の1枚を開いた回数)・券の束(搭乗券のつづり)・日ごとの記録(kanpe-trip-v1)・夜の1枚・精算とアルバムへの渡し。
    tour/・tour/doha/・tour/ending/・world/ に、ビルド(tour-src/build.py)が同じものを入れる。
@@ -1804,7 +1808,7 @@ var TRIP=(function(){
  /* ---- 夜の1枚(今日の写真がゆっくり浮かぶ) ---- */
  function night(cb){
   var n=nightInfo();if(!n){if(cb)cb();return false}
-  var o=overlay('',function(){o.close();closeNight();after(cb)});
+  var o=overlay('',function(){o.close();closeNight();dream(function(){after(cb)})});
   o.appendChild(E('div','trip-sub','DAY '+n.day));
   var cv=E('canvas','trip-photo');cv.width=320;cv.height=150;o.appendChild(cv);drawPhoto(cv,n.photo);
   o.appendChild(E('div','trip-line',n.line));
@@ -1812,6 +1816,8 @@ var TRIP=(function(){
   o.appendChild(E('div','trip-hint','▶'));
   o.busy=true;setTimeout(function(){cv.classList.add('on');fx('develop')},120);setTimeout(function(){o.busy=false},1400);
   say('Good night, King.');return true}
+ /* 夢(タスク053): 夜の1枚のあと、持ち越しの語があれば、寝る場面で夢の会話に出す。ページが夢のしくみ(hooks.dream)を持たないとき(世界マップ・終わりの場面)・語がないときは何も起きない */
+ function dream(k){var h=hooks.dream,done=false;function go(){if(done)return;done=true;k()}if(!h){go();return}try{h(go)}catch(e){go()}}
  function after(cb){   /* 夜のあと: 次の日を、いる場所で開けるなら続けて朝の1枚 */
   if(morningInfo()){morning(cb)}else if(cb)cb()}
  /* ---- ちぎる ---- */
@@ -1927,7 +1933,7 @@ function say(text,rate,pitch,done){
 function stopSay(){sayTok++;paMark(0);try{speechSynthesis.cancel()}catch(e){}}
 function cueText(c){return c.replace(/\*/g,'')}
 function parseCue(c){return c.split(' ').map(function(k){return {txt:k.replace(/\*/g,''),s:k.indexOf('*')>=0}})}
-function turnsOf(id){var L=DLG[id].lines,T=[],i=0;while(i<L.length){var n=L[i];if(n.n&&L[i+1]&&L[i+1].y!==undefined){var Y=L[i+1];T.push({npc:n.n,npcJp:n.jp,cue:Y.y,cueJp:Y.jp,by:n.by,vr:n.vr,cueBy:Y.cueBy,opts:Y.opts,diag:Y.diag,rep:Y.rep,route:n.route});i+=2}else i++}return T}
+function turnsOf(id){var L=DLG[id].lines,T=[],i=0;while(i<L.length){var n=L[i];if(n.n&&L[i+1]&&L[i+1].y!==undefined){var Y=L[i+1];T.push({npc:n.n,npcJp:n.jp,cue:Y.y,cueJp:Y.jp,by:n.by,vr:n.vr,cueBy:Y.cueBy,opts:Y.opts,diag:Y.diag,rep:Y.rep,route:n.route,fork:Y.fork,dw:n.dw});i+=2}else i++}return T}
 
 /* ---------- 描く(場面) ---------- */
 function sp2(map,pal,x,y,px){for(var r=0;r<map.length;r++){var row=map[r];for(var k=0;k<row.length;k++){var ch=row.charAt(k);if(ch!=='.'){c.fillStyle=pal[ch]||'#f0f';c.fillRect(Math.round(x+k*px),Math.round(y+r*px),px,px)}}}}
@@ -2029,6 +2035,7 @@ function npcTurn(){
  if(T.vr&&!T.vd){T.vd=1;for(var vi=0;vi<T.vr.length;vi++){var vv=T.vr[vi];if(save.seen[vv.s]>0){T.npc=vv.n;T.npcJp=vv.jp;if(vv.y){T.cue=vv.y;T.cueJp=vv.yjp}break}}}
  var bv=T.by&&S.pick&&T.by[S.pick];if(bv){T.npc=bv.n;T.npcJp=bv.jp}var cv=T.cueBy&&S.pick&&T.cueBy[S.pick];if(cv){T.cue=cv.y;T.cueJp=cv.jp}
  if(T.route!=null){S.rf=S.rn||0;S.rn=T.route;S.rt=t}
+ if(T.dw&&!T.dts)T.dts=Date.now();
  if(T.ctx)applyCtx(T.ctx);
  who.textContent=T.ctx?T.ctx.who:S.d.who;
  msgText.textContent='';typeText(T.npc);
@@ -2043,7 +2050,7 @@ function fitCue(card){
   var cr=card.getBoundingClientRect(),av=cr.height-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom);return (bot-top)>av}
  for(var i=0;i<20&&over()&&k>.45;i++){k-=.05;ws.forEach(function(w,j){w.style.fontSize=(base[j]*k).toFixed(1)+'px'})}}
 function showCue(){
- G.cueSil=PREF.silent;G.phase='cue';clearPanel();var T=G.scene.turns[G.ti];if(T.opts&&!T.pk){((G.scene.d.ev||typeof winOpts!=='function')?evOpts:winOpts)(T);return}var toks=parseCue(T.cue);clearInterval(G.typeTimer);msgText.textContent=T.npc;
+ G.cueSil=PREF.silent;G.phase='cue';clearPanel();var T=G.scene.turns[G.ti];if(T.opts&&!T.pk){(T.fork?forkOpts:((G.scene.d.ev||typeof winOpts!=='function')?evOpts:winOpts))(T);return}var toks=parseCue(T.cue);clearInterval(G.typeTimer);msgText.textContent=T.npc;
  var card=el('div','cue');card.appendChild(el('span','lab','カンペ'));
  var spans=toks.map(function(k){var s=el('span','w'+(k.s?' s':''),k.txt);card.appendChild(s);return s});
  panel.appendChild(card);var stat=el('div','stat','');card.appendChild(stat);
@@ -2305,15 +2312,16 @@ var RETRY=["Sorry, one more time?","Could you say that again, please?","Pardon? 
 var THANKS=["Okay.","Sure.","I see.","Right.","Got it.","Of course."];
 function onFail(){
  Snd.jingle('buzz');A_shake();G.tries++;
+ if(dreamGiveUp())return;
  if(G.tries>=3){G.phase='assist';var T=G.scene.turns[G.ti];noteWeak(T);setMsgInstant('Listen, then try again.',whoNow());say(cueText(T.cue),.6,1,gd(function(){G.tries=0;later(300,function(){var st=panel.querySelector('.stat');if(st){st.className='stat';st.textContent=''}})}));return}
  G.phase='retry';var line=RETRY[Math.min(G.tries-1,RETRY.length-1)];setMsg(line,whoNow());say(line,.9,G.scene.pitch,gd(function(){later(400,function(){if(G.kick)G.kick()})}))}
 function A_shake(){var a=$m('app');a.classList.remove('shake');void a.offsetWidth;a.classList.add('shake')}
 function advance(){
  if(!G.camp){var D0=G.scene.turns[G.ti];if(D0&&D0.rep&&!D0.repd){D0.repd=1;G.phase='rep';setMsg(D0.rep.n,D0.rep.who||whoNow());spSay=true;(paRep(G.scene,D0.rep)?paSay:say)(D0.rep.n,.95,G.scene.pitch,gd(function(){spSay=false;later(450,advance)}));return}}
  if(G.camp){var done=G.scene.turns[G.ti];save.weak=save.weak.filter(function(w){return w.c!==done.cue});storeSave();G.ti++;if(G.ti>=G.scene.turns.length)campDone();else npcTurn();return}
- G.ti++;playInter(G.ti-1,function(){if(G.ti>=G.scene.turns.length){G.phase='clear';Snd.jingle('clear');var W0=G.scene.d&&(G.scene.d.win||G.scene.d.ev);setMsgInstant(W0?'Clear!':'Clear!  ぜんぶ いえた！',whoNow());later(W0?1300:2000,W0?finishScene:startWords)}else npcTurn()})}
+ G.ti++;playInter(G.ti-1,function(){if(G.ti>=G.scene.turns.length){G.phase='clear';Snd.jingle('clear');var W0=G.scene.d&&(G.scene.d.win||G.scene.d.ev||G.scene.d.conv);setMsgInstant(G.scene.d.dream?'Good night.':W0?'Clear!':'Clear!  ぜんぶ いえた！',whoNow());later(W0?1300:2000,W0?finishScene:startWords)}else npcTurn()})}
 function onPass(){
- Snd.jingle('pass');G.phase='pass';G.tries=0;var th=THANKS[Math.floor(Math.random()*THANKS.length)];setMsg(th,whoNow());spSay=true;
+ Snd.jingle('pass');G.phase='pass';G.tries=0;dreamPass();var th=THANKS[Math.floor(Math.random()*THANKS.length)];setMsg(th,whoNow());spSay=true;
  say(th,1,G.scene.pitch,gd(function(){spSay=false;later(350,advance)}))}
 
 /* ---------- ヘルプ(るるが かわりに 発音)と 強化合宿(グアム編と同じ仕組み) ---------- */
@@ -2741,11 +2749,11 @@ function phoExit(proceed){
 /* ---------- 単語バトル(英語+発音記号 → 日本語を3択) ---------- */
 function startWords(){
  G.phase='words';clearPanel();stopSay();var S=G.scene;setMsgInstant('Word Battle','');$m('tapHint').textContent='';
- var queue=trainFirst(shuffle(S.words.slice())),done=0,total=S.words.length,combo=0;
+ var queue=trainFirst(shuffle(S.words.slice())),done=0,total=S.words.length,combo=0,tried={};
  var allJp=[];Object.keys(DLG).forEach(function(k){DLG[k].words.forEach(function(w){allJp.push(w[2])})});
  function next(){
   clearPanel();if(!queue.length){wordsClear();return}
-  var q=queue[0],answered=false;
+  var q=queue[0],answered=false,tw0=performance.now();
   var dots=el('div','dots');for(var i=0;i<total;i++)dots.appendChild(el('i',i<done?'on':''));panel.appendChild(dots);
   var prompt=el('div','prompt');prompt.appendChild(el('span','en',q[0]));prompt.appendChild(el('span','ipa',q[1]));
   if(combo>=2)prompt.appendChild(el('span','combo','×'+combo));
@@ -2753,14 +2761,23 @@ function startWords(){
   var bar=el('div','bar'),fill=el('i');bar.appendChild(fill);panel.appendChild(bar);
   var wrong=shuffle(allJp.filter(function(x){return x!==q[2]})).slice(0,2),opts=shuffle([q[2]].concat(wrong)),box=el('div','choices'),btns=[],tmo;
   function lock(){answered=true;clearTimeout(tmo);btns.forEach(function(x){x.disabled=true})}
-  function miss(b){lock();combo=0;noteMiss(q,b?'間違い':'時間切れ');queue.push(queue.shift());A_shake();btns.forEach(function(x){if(x.textContent===q[2])x.classList.add('good')});if(b)b.classList.add('bad');say(q[0],.9,1);later(900,next)}
+  function miss(b){lock();combo=0;if(!tried[q[0]]){tried[q[0]]=1;noteWord(q,b?'wrong':'timeout',b?performance.now()-tw0:LIMIT)}queue.push(queue.shift());A_shake();btns.forEach(function(x){if(x.textContent===q[2])x.classList.add('good')});if(b)b.classList.add('bad');say(q[0],.9,1);later(900,next)}
   opts.forEach(function(o){var b=el('button','ch',o);b.type='button';btns.push(b);b.addEventListener('click',function(){if(answered)return;
-   if(o===q[2]){lock();combo++;b.classList.add('good');queue.shift();done++;later(380,next)}else miss(b)});box.appendChild(b)});
+   if(o===q[2]){lock();var ms0=performance.now()-tw0;if(!tried[q[0]]){tried[q[0]]=1;noteWord(q,ms0<=fastMs()?'fast':'slow',ms0)}combo++;b.classList.add('good');queue.shift();done++;later(380,next)}else miss(b)});box.appendChild(b)});
   panel.appendChild(box);say(q[0],.9,1);
   fill.style.transition='none';fill.style.width='100%';void fill.offsetWidth;fill.style.transition='width '+LIMIT+'ms linear';fill.style.width='0%';
   tmo=later(LIMIT,function(){if(!answered)miss(null)})}
  next()}
 /* 単語バトルの間違い・時間切れの記録(グアム編と同じ形 [単語・発音記号・意味] に、理由 '間違い'/'時間切れ' を足す)。出口(夢など)は未作成で、記録だけ */
+/* 語ごとの記録と選別(タスク053): 即答=卒業(持ち越しに入れない・すでにあれば外す)。遅い・間違い・時間切れ=持ち越し(save.missed。理由つき・上限16)。
+   意味(日本語)は保存だけして、画面には出さない。画面にも点数にも出さず、裏で記録するだけ */
+function dropMissed(w){if(save.missed)save.missed=save.missed.filter(function(m){return m[0]!==w})}
+function noteWord(q,o,ms){
+ var k=String(q[0]).toLowerCase();if(!save.wrec||typeof save.wrec!=='object')save.wrec={};
+ var r=save.wrec[k];save.wrec[k]={o:o,ms:Math.round(ms||0),n:(r&&r.n||0)+1,t:Date.now()};
+ var ks=Object.keys(save.wrec);if(ks.length>200){ks.sort(function(a,b){return save.wrec[a].t-save.wrec[b].t});ks.slice(0,ks.length-200).forEach(function(x){delete save.wrec[x]})}
+ if(o==='fast'||o==='dream')dropMissed(q[0]);else noteMiss(q,o==='slow'?'遅い':o==='wrong'?'間違い':'時間切れ');
+ storeSave()}
 function noteMiss(q,why){if(!save.missed)save.missed=[];save.missed=save.missed.filter(function(w){return w[0]!==q[0]});save.missed.unshift([q[0],q[1],q[2],why]);if(save.missed.length>16)save.missed.length=16;storeSave()}
 function wordsClear(){later(700,startReveal)}
 
@@ -3792,6 +3809,66 @@ function paSay(text,rate,pitch,done){
  try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(text);u.lang='en-US';u.rate=(rate||.95)*.92*PREF.rate;u.pitch=pitch||1;u.volume=PREF.voice/100;
   u.onstart=function(){if(my===sayTok)paMark(1)};u.onend=fin;u.onerror=fin;speechSynthesis.speak(u)}catch(e){}
  setTimeout(fin,text.length*85+2200)}
+/* ===== 会話に溶かす分かれ目と、夢(タスク053 / 設計 015 案2＋夢) =====
+   1. 分かれ目(forkOpts): 相手の一言に「今日の語」が入り、プレイヤーは▶で英語の返事を2〜3個から選んで声に出す。
+      選ぶまでの時間(ms)を裏で測って、語ごとの記録(noteWord)に入れる。日本語の選択肢・○×・点数は出さない。計時は画面に出さない。
+      即答の線は WB(fastFrac)の1か所。時間切れ(LIMIT をこえても選ばない)は裏で記録するだけで、物語は止めない。
+   2. 夢(dreamStart): 寝る場面(夜の1枚のあと)で、持ち越し(save.missed)の語が上位5語まで夢の会話に出る。3択にしない。
+      自然に通じたら(発音が7割以上で、その語が言えていたら)持ち越しから外れる。通じなかった語は残す(会話は止めない)。 */
+var DREAMBANK={"latte": ["Welcome to the Cloud Café. What can I make for you?", "雲のカフェへようこそ。何をお作りしましょう。", "A *latte*, *please*.", "ラテをお願いします。"], "iced": ["It is a warm night on the moon. Would you like it iced?", "月の夜はあたたかいね。氷入りにしますか。", "*Yes*, *iced*, *please*.", "はい、アイスでお願いします。"], "slice": ["The star oven just finished. Would you like a slice?", "星のオーブンが焼きあがったよ。ひと切れどう？", "*Yes*, a *slice*, *please*.", "はい、ひと切れお願いします。"], "carrot cake": ["Tonight we have moon cheese and carrot cake. Which one?", "今夜は、月のチーズとキャロットケーキがあるよ。どっち？", "*Carrot* *cake*, *please*.", "キャロットケーキをお願いします。"], "shillings": ["That is eight hundred shillings. Or one good dream.", "800シリング。それか、いい夢をひとつ。", "*Here* are *eight* *hundred* *shillings*.", "800シリングです、どうぞ。"]},DREAMFB=["A word is floating by. Can you catch it?", "ひとつ、ことばがふわふわ浮いているよ。つかまえられる？"];
+function forkWord(S,w){var ws=(S&&S.words)||[];for(var i=0;i<ws.length;i++)if(ws[i][0]===w)return ws[i];return [w,'','']}
+function forkNote(T,why,ms){var S=G.scene;((T.fork&&T.fork.tw)||[]).forEach(function(w){noteWord(forkWord(S,w),why,ms)})}
+function forkOpts(T){
+ G.phase='opts';clearPanel();clearInterval(G.typeTimer);msgText.textContent=T.npc;var S=G.scene,sid=G.sid;
+ var box=el('div','dqbox'),bs=[],t0=performance.now();
+ T.opts.forEach(function(o){var b=el('button','dq');b.type='button';b.appendChild(el('span','cur','▶'));b.appendChild(el('span','',cueText(o.y)));
+  b.addEventListener('click',function(){forkPick(T,o,performance.now()-t0)});box.appendChild(b);bs.push(b)});
+ panel.appendChild(box);
+ function sel(i){bs.forEach(function(b,j){b.classList.toggle('sel',j===i)})}
+ bs.forEach(function(b,i){['focus','pointerenter','pointerdown'].forEach(function(ev){b.addEventListener(ev,function(){sel(i)})})});
+ sel(0);
+ /* 制限時間をこえても選ばれなければ、裏で「時間切れ」を記録する(画面には何も出さない・物語は止めない) */
+ later(LIMIT,function(){if(G.sid===sid&&G.phase==='opts'&&!T.fk){T.fk=1;forkNote(T,'timeout',LIMIT)}});
+ (function rd(i){if(G.sid!==sid||G.phase!=='opts'||i>=T.opts.length)return;sel(i);say(cueText(T.opts[i].y),.9,1,gd(function(){later(300,function(){if(G.phase==='opts')rd(i+1)})}))})(0)}
+function forkPick(T,o,ms){
+ if(G.phase!=='opts')return;
+ if(!T.fk){T.fk=1;forkNote(T,o.ok?(ms<=fastMs()?'fast':(ms<=LIMIT?'slow':'timeout')):'wrong',ms)}
+ evPick(T,o)}
+/* ---- 夢 ---- */
+var DREAMW={'時間切れ':2,'間違い':2,'遅い':1};
+function dreamWords(){   /* 持ち越しの上位5語: 重い(間違い・時間切れ)を先に、同じ重さなら新しい順 */
+ var idx=(save.missed||[]).map(function(r,i){return {r:r,i:i}});
+ idx.sort(function(a,b){return (DREAMW[b.r[3]]||1)-(DREAMW[a.r[3]]||1)||a.i-b.i});
+ return idx.slice(0,5).map(function(x){return x.r})}
+function dreamLine(r){var b=DREAMBANK[String(r[0]).toLowerCase()];if(b)return b;
+ var tk=String(r[0]).split(' ').map(function(x){return '*'+x+'*'}).join(' ');return [DREAMFB[0],DREAMFB[1],tk+'.','']}
+function dreamPass(){
+ var S=G.scene,T=S&&S.turns&&S.turns[G.ti];if(!(S&&S.d&&S.d.dream&&T&&T.dw))return;
+ var ks=String(T.dw).split(' ').map(missKey),a=plogLoad(),last=a[a.length-1],bad=false;
+ if(last&&last.v==='dream_1'&&last.ts>=(T.dts||0))(last.miss||[]).forEach(function(m){if(ks.indexOf(m.t)>=0)bad=true});
+ if(!bad)noteWord([T.dw,'',''],'dream',0)}
+function dreamGiveUp(){   /* 夢は止めない: 2回言えなければ、そのまま先へ(その語は持ち越しに残る) */
+ var S=G.scene,T=S&&S.turns&&S.turns[G.ti];if(!(S&&S.d&&S.d.dream&&T&&T.dw)||G.tries<2)return false;
+ G.phase='pass';G.tries=0;var m='Never mind. It is only a dream.';setMsg(m,whoNow());spSay=true;
+ say(m,.9,S.pitch,gd(function(){spSay=false;later(350,advance)}));return true}
+function dreamStart(done){
+ var ws=dreamWords();if(!ws.length){done();return}
+ var lines=[];ws.forEach(function(r){var b=dreamLine(r);lines.push({n:b[0],jp:b[1],dw:r[0]});lines.push({y:b[2],jp:b[3]})});
+ DLG.dream_1={who:'達人賢者',story:1,bg:'dream',sp:'dream',hero:'blue',lulu:'plain',nogold:1,inter:[],intro:'Zzz…',lines:lines,
+  words:ws.map(function(r){return [r[0],r[1],r[2]]}),ev:1,auto:1,kind:'ev',dream:1};
+ var pl={id:'dream',name:'Dream',snd:'dream',tip:['Zzz…',''],v:[]};
+ G.evCont=function(){try{done()}finally{if(G.view==='scene'&&G.scene&&G.scene.vid==='dream_1')showMap()}};
+ startVid(pl,'dream_1','ev')}
+(function(){try{if(typeof TRIP!=='undefined'&&TRIP.hooks)TRIP.hooks.dream=function(done){dreamStart(done)}}catch(e){}})();
+SP.dream={pitch:.8,m:[[trav({}),P(4,{o:'#5a3a8a',p:'#3a2a5a',h:'#d9d4c6'})]]};
+BGS.dream=function(){grad(0,98,'#1b1646','#4a3a8a',16);
+ for(var i=0;i<30;i++){var sx=(i*53)%320,sy=(i*31)%70;if((Math.floor(t*2)+i)%6)R('#ffe9a8',sx,sy,2,2);else R('#fff',sx,sy,1,1)}
+ for(var dy=0;dy<22;dy++){var w=Math.floor(Math.sqrt(121-(dy-11)*(dy-11)));R('#fff3c0',212-w,10+dy,w*2,1)}
+ for(dy=0;dy<22;dy++){w=Math.floor(Math.sqrt(100-(dy-10)*(dy-10)));R('#2c2563',216-w,9+dy,w*2,1)}
+ R('#6a5aa8',20,58,70,10);R('#8a7ac8',34,52,44,8);R('#6a5aa8',200,66,86,10);R('#8a7ac8',214,60,52,8);
+ R('#d9d2f0',0,98,VW,52);for(var x=0;x<VW;x+=22)R('#c7bee6',x+((x/22)%2)*8,104+((x/22)%3)*12,16,3);R('#bdb2e0',0,98,VW,2);
+ for(i=0;i<7;i++){var by=96-((t*12+i*23)%70),bx=24+i*42+Math.sin(t+i)*6;c.globalAlpha=.5;R('#e8e2ff',bx,by,5,5);R('#fff',bx+1,by+1,2,2);c.globalAlpha=1}
+ R('#9a8ad0',120,96,80,6);R('#7a6ab0',124,102,6,14);R('#7a6ab0',190,102,6,14);R('#fff',150,88,10,8);R('#caa06a',152,90,6,4)};
 
 var PLACES_DARR=[{"id": "dimmig", "name": "入国審査", "snd": "info", "x": 76, "y": 18, "ico": "🛂", "tip": ["入国審査(Passport Control)", "滞在日数・次の航空券・ホテル"], "v": ["doh_immig1", "doh_immig2"]}, {"id": "dbag", "name": "手荷物受け取り", "snd": "hall", "x": 28, "y": 38, "ico": "🧳", "tip": ["バゲージクレーム", "ベルト・カート・そっくりなスーツケース"], "v": ["doh_bag1", "doh_bag2"]}, {"id": "dsim", "name": "Ooredoo SIM", "snd": "info", "x": 74, "y": 60, "ico": "📱", "tip": ["Ooredoo", "旅行者用SIM・値段は架空"], "v": ["doh_sim1", "doh_sim2"]}, {"id": "dride", "name": "タクシー・Doha Metro", "snd": "hall", "x": 28, "y": 82, "ico": "🚕", "tip": ["Karwaタクシーと Doha Metro", "どちらで街へ行く？"], "v": ["doh_taxi", "doh_metro"], "hub": true, "hubMap": 1, "hubBg": "dtaxi", "hubHero": "blue", "hubEn": "Would you like a taxi, or the metro?", "hubMsg": "タクシー乗り場と Doha Metro の案内。", "menu": [["Karwa Taxi", "doh_taxi"], ["Doha Metro", "doh_metro"]]}],PLACES_DCITY=[{"id": "calley", "name": "スークの路地", "snd": "souk", "x": 14, "y": 84, "ico": "🏮", "tip": ["スーク・ワキーフの路地", "夜・道をきく・お茶"], "v": ["doh_city_t2", "doh_city_t1", "doh_city_t3"], "seq": 1}, {"id": "chotel", "name": "ホテル", "snd": "hotel", "x": 26, "y": 58, "ico": "🏨", "tip": ["ホテル(夜)", "チェックインと夕食の相談"], "v": ["doh_city_h1", "doh_city_h2"], "seq": 1}, {"id": "csouq", "name": "スークの店", "snd": "souk", "x": 48, "y": 40, "ico": "🧺", "tip": ["スーク・ワキーフの店", "香辛料・布・みやげ。値段は架空"], "v": ["doh_city_s1", "doh_city_s2", "doh_city_s3"]}, {"id": "crest", "name": "レストラン", "snd": "cafe", "x": 72, "y": 26, "ico": "🍽️", "tip": ["スークの中のレストラン", "注文・となりの家族・会計"], "v": ["doh_city_r1", "doh_city_r2", "doh_city_r3"], "seq": 1}, {"id": "cbreak", "name": "ホテルの朝", "snd": "hotel", "x": 84, "y": 50, "ico": "☕", "tip": ["ホテル(朝)", "朝ごはんとチェックアウト"], "v": ["doh_city_h3", "doh_city_h4"], "seq": 1}, {"id": "ccorn", "name": "コルニーシュ", "snd": "beach", "x": 60, "y": 72, "ico": "⛵", "tip": ["コルニーシュ(湾ぞいの遊歩道)", "写真・木の舟・学生。値段は架空"], "v": ["doh_city_c1", "doh_city_c2", "doh_city_c3"]}],PLACES_DDEP=[{"id": "dcounter", "name": "カウンター・出国審査", "snd": "info", "x": 20, "y": 14, "ico": "🎫", "tip": ["出発カウンターと出国審査", "荷物を預けて、出国へ"], "v": ["doh_dep_checkin", "doh_dep_passport"], "seq": 1}, {"id": "dsouth", "name": "南の広場", "snd": "hall", "x": 72, "y": 30, "ico": "🧸", "tip": ["南の広場", "大きなクマの前で"], "v": ["doh_dep_bear"]}, {"id": "dtrain", "name": "空港の列車", "snd": "info", "x": 46, "y": 52, "ico": "🚝", "tip": ["空港の中の列車", "南から北の広場へ"], "v": ["doh_dep_train"]}, {"id": "dnorth", "name": "北の広場", "snd": "ahlan", "x": 24, "y": 74, "ico": "🌳", "tip": ["北の広場", "木のある広場とラウンジの入口"], "v": ["doh_dep_orchard", "doh_dep_lounge"]}, {"id": "dgate", "name": "ゲート・機内", "snd": "atop", "x": 74, "y": 84, "ico": "✈️", "tip": ["ヘルシンキ行きのゲート", "機内の会話が終わると、ドーハを出発"], "v": ["doh_dep_gate", "doh_dep_plane"], "hub": true, "hubMap": 1, "hubBg": "dgate", "hubHero": "blue", "hubEn": "The gate for Helsinki. Where would you like to go?", "hubMsg": "ヘルシンキ行きのゲート。", "menu": [["Gate desk", "doh_dep_gate"], ["Board the plane", "doh_dep_plane"]]}];
 PLACES_AIR=PLACES_DDEP;   /* 世界マップのクリアの印: 出発の場所を全部(各1つ以上)あそんだら */

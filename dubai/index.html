@@ -1354,9 +1354,13 @@ var TOTALV=PLACES.reduce(function(a,p){return a+p.v.length},0);
 /* ---------- 状態 ---------- */
 var $m=function(i){return document.getElementById(i)};
 var cam=0,t=0,speaker=null,spX=360,spSay=false,lastId=null,LIMIT=5000;
+/* 即答の線(タスク053): 語を選ぶまでの時間(ms)が 制限時間の前半(fastFrac)以内なら「即答」=卒業。仮置き。後から実データ(save.wrec の ms)を見て調整できるよう、線の値はここ1か所にまとめる */
+var WB={limit:LIMIT,fastFrac:.5};function fastMs(){return Math.round(WB.limit*WB.fastFrac)}
 var G={view:'map',at:'info',scene:null,ti:0,tries:0,phase:'idle',sid:0,timers:[],typeTimer:0,camp:null},luHelp=false;
-var HELPMAX=5,save={seen:{},help:HELPMAX,weak:[],missed:[]},SAVEKEY='kanpe-dubai-save-v2';
-try{var s0=JSON.parse(localStorage.getItem(SAVEKEY)||'null');if(s0&&s0.seen&&typeof s0.seen==='object')save.seen=s0.seen;if(s0&&s0.gold)save.gold=1;if(s0&&typeof s0.help==='number'&&s0.help>=0&&s0.help<=HELPMAX)save.help=Math.floor(s0.help);if(s0&&Array.isArray(s0.weak))save.weak=s0.weak.filter(function(w){return w&&typeof w.c==='string'}).slice(0,8);if(s0&&Array.isArray(s0.missed))save.missed=s0.missed.filter(function(w){return Array.isArray(w)&&typeof w[0]==='string'}).slice(0,16)}catch(e){}
+/* 語ごとの記録(タスク053): fast=即答 / slow=遅い / wrong=間違い / timeout=時間切れ / dream=夢で通じた */
+var WREC_OK={fast:1,slow:1,wrong:1,timeout:1,dream:1};
+var HELPMAX=5,save={seen:{},help:HELPMAX,weak:[],missed:[],wrec:{}},SAVEKEY='kanpe-dubai-save-v2';
+try{var s0=JSON.parse(localStorage.getItem(SAVEKEY)||'null');if(s0&&s0.seen&&typeof s0.seen==='object')save.seen=s0.seen;if(s0&&s0.gold)save.gold=1;if(s0&&typeof s0.help==='number'&&s0.help>=0&&s0.help<=HELPMAX)save.help=Math.floor(s0.help);if(s0&&Array.isArray(s0.weak))save.weak=s0.weak.filter(function(w){return w&&typeof w.c==='string'}).slice(0,8);if(s0&&Array.isArray(s0.missed))save.missed=s0.missed.filter(function(w){return Array.isArray(w)&&typeof w[0]==='string'}).slice(0,16);if(s0&&s0.wrec&&typeof s0.wrec==='object'){var wr={};Object.keys(s0.wrec).slice(0,200).forEach(function(k){var r=s0.wrec[k];if(r&&typeof r==='object'&&WREC_OK[r.o]===1)wr[k]={o:r.o,ms:Math.max(0,Math.min(60000,Math.round(+r.ms||0))),n:Math.max(1,Math.min(999,Math.floor(+r.n||1))),t:+r.t||0}});save.wrec=wr}}catch(e){}
 function storeSave(){try{localStorage.setItem(SAVEKEY,JSON.stringify(save))}catch(e){}}
 /* 世界マップへ「クリア」を伝える: 6つの場所を、それぞれ1回以上あそんだら */
 function worldMark(k){try{var w=JSON.parse(localStorage.getItem('kanpe-world-v1')||'null');if(!w||typeof w!=='object')w={v:1,at:'haneda',seen:{haneda:1},cleared:{haneda:1}};w.seen=w.seen&&typeof w.seen==='object'?w.seen:{};w.cleared=w.cleared&&typeof w.cleared==='object'?w.cleared:{};w.seen[k]=1;w.cleared[k]=1;localStorage.setItem('kanpe-world-v1',JSON.stringify(w))}catch(e){}}
@@ -2185,11 +2189,11 @@ function phoExit(proceed){
 /* ---------- 単語バトル(英語+発音記号 → 日本語を3択) ---------- */
 function startWords(){
  G.phase='words';clearPanel();stopSay();var S=G.scene;setMsgInstant('Word Battle','');$m('tapHint').textContent='';
- var queue=trainFirst(shuffle(S.words.slice())),done=0,total=S.words.length,combo=0;
+ var queue=trainFirst(shuffle(S.words.slice())),done=0,total=S.words.length,combo=0,tried={};
  var allJp=[];Object.keys(DLG).forEach(function(k){DLG[k].words.forEach(function(w){allJp.push(w[2])})});
  function next(){
   clearPanel();if(!queue.length){wordsClear();return}
-  var q=queue[0],answered=false;
+  var q=queue[0],answered=false,tw0=performance.now();
   var dots=el('div','dots');for(var i=0;i<total;i++)dots.appendChild(el('i',i<done?'on':''));panel.appendChild(dots);
   var prompt=el('div','prompt');prompt.appendChild(el('span','en',q[0]));prompt.appendChild(el('span','ipa',q[1]));
   if(combo>=2)prompt.appendChild(el('span','combo','×'+combo));
@@ -2197,14 +2201,23 @@ function startWords(){
   var bar=el('div','bar'),fill=el('i');bar.appendChild(fill);panel.appendChild(bar);
   var wrong=shuffle(allJp.filter(function(x){return x!==q[2]})).slice(0,2),opts=shuffle([q[2]].concat(wrong)),box=el('div','choices'),btns=[],tmo;
   function lock(){answered=true;clearTimeout(tmo);btns.forEach(function(x){x.disabled=true})}
-  function miss(b){lock();combo=0;noteMiss(q,b?'間違い':'時間切れ');queue.push(queue.shift());A_shake();btns.forEach(function(x){if(x.textContent===q[2])x.classList.add('good')});if(b)b.classList.add('bad');say(q[0],.9,1);later(900,next)}
+  function miss(b){lock();combo=0;if(!tried[q[0]]){tried[q[0]]=1;noteWord(q,b?'wrong':'timeout',b?performance.now()-tw0:LIMIT)}queue.push(queue.shift());A_shake();btns.forEach(function(x){if(x.textContent===q[2])x.classList.add('good')});if(b)b.classList.add('bad');say(q[0],.9,1);later(900,next)}
   opts.forEach(function(o){var b=el('button','ch',o);b.type='button';btns.push(b);b.addEventListener('click',function(){if(answered)return;
-   if(o===q[2]){lock();combo++;b.classList.add('good');queue.shift();done++;later(380,next)}else miss(b)});box.appendChild(b)});
+   if(o===q[2]){lock();var ms0=performance.now()-tw0;if(!tried[q[0]]){tried[q[0]]=1;noteWord(q,ms0<=fastMs()?'fast':'slow',ms0)}combo++;b.classList.add('good');queue.shift();done++;later(380,next)}else miss(b)});box.appendChild(b)});
   panel.appendChild(box);say(q[0],.9,1);
   fill.style.transition='none';fill.style.width='100%';void fill.offsetWidth;fill.style.transition='width '+LIMIT+'ms linear';fill.style.width='0%';
   tmo=later(LIMIT,function(){if(!answered)miss(null)})}
  next()}
 /* 単語バトルの間違い・時間切れの記録(グアム編と同じ形 [単語・発音記号・意味] に、理由 '間違い'/'時間切れ' を足す)。出口(夢など)は未作成で、記録だけ */
+/* 語ごとの記録と選別(タスク053): 即答=卒業(持ち越しに入れない・すでにあれば外す)。遅い・間違い・時間切れ=持ち越し(save.missed。理由つき・上限16)。
+   意味(日本語)は保存だけして、画面には出さない。画面にも点数にも出さず、裏で記録するだけ */
+function dropMissed(w){if(save.missed)save.missed=save.missed.filter(function(m){return m[0]!==w})}
+function noteWord(q,o,ms){
+ var k=String(q[0]).toLowerCase();if(!save.wrec||typeof save.wrec!=='object')save.wrec={};
+ var r=save.wrec[k];save.wrec[k]={o:o,ms:Math.round(ms||0),n:(r&&r.n||0)+1,t:Date.now()};
+ var ks=Object.keys(save.wrec);if(ks.length>200){ks.sort(function(a,b){return save.wrec[a].t-save.wrec[b].t});ks.slice(0,ks.length-200).forEach(function(x){delete save.wrec[x]})}
+ if(o==='fast'||o==='dream')dropMissed(q[0]);else noteMiss(q,o==='slow'?'遅い':o==='wrong'?'間違い':'時間切れ');
+ storeSave()}
 function noteMiss(q,why){if(!save.missed)save.missed=[];save.missed=save.missed.filter(function(w){return w[0]!==q[0]});save.missed.unshift([q[0],q[1],q[2],why]);if(save.missed.length>16)save.missed.length=16;storeSave()}
 function wordsClear(){later(700,startReveal)}
 

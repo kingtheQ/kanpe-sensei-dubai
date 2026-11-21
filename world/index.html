@@ -692,7 +692,7 @@ var TRIP=(function(){
  /* ---- 夜の1枚(今日の写真がゆっくり浮かぶ) ---- */
  function night(cb){
   var n=nightInfo();if(!n){if(cb)cb();return false}
-  var o=overlay('',function(){o.close();closeNight();after(cb)});
+  var o=overlay('',function(){o.close();closeNight();dream(function(){after(cb)})});
   o.appendChild(E('div','trip-sub','DAY '+n.day));
   var cv=E('canvas','trip-photo');cv.width=320;cv.height=150;o.appendChild(cv);drawPhoto(cv,n.photo);
   o.appendChild(E('div','trip-line',n.line));
@@ -700,6 +700,8 @@ var TRIP=(function(){
   o.appendChild(E('div','trip-hint','▶'));
   o.busy=true;setTimeout(function(){cv.classList.add('on');fx('develop')},120);setTimeout(function(){o.busy=false},1400);
   say('Good night, King.');return true}
+ /* 夢(タスク053): 夜の1枚のあと、持ち越しの語があれば、寝る場面で夢の会話に出す。ページが夢のしくみ(hooks.dream)を持たないとき(世界マップ・終わりの場面)・語がないときは何も起きない */
+ function dream(k){var h=hooks.dream,done=false;function go(){if(done)return;done=true;k()}if(!h){go();return}try{h(go)}catch(e){go()}}
  function after(cb){   /* 夜のあと: 次の日を、いる場所で開けるなら続けて朝の1枚 */
   if(morningInfo()){morning(cb)}else if(cb)cb()}
  /* ---- ちぎる ---- */
