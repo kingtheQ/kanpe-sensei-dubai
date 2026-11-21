@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """タスク049 の動作確認(ヘッドレス)。使い方: python3 tour-src/tests/test_song049.py [OLDROOT=変更前の作業コピー]
-(1)オープニング: 最初の画面(DAY 1)をタップ→賢者の最初の会話の「GO！」を押す前は曲が鳴らず、押した直後に song-chant.mp3 が(ユーザー操作の中で・控えめな音量で)鳴りはじめる
-(2)チャント: 会話(スマホ・カンペ)がふつうに進む(曲が鳴っていても)。広間を離れる(マップへ)と止まる。マイクで聞いているあいだ(ducking)は止まり、終わると続きから
+(1)オープニング: 最初の画面(DAY 1)をタップ→賢者の最初の会話の「GO！」を押しても曲(チャント)は鳴らない(タスク050でチャントはタイトル画面の曲へ。再生・ループ・継続・停止は test_chant050.py)
+(2)会話はふつうに進む
 (3)ホテルのロビー(hsong): 到着タブの最後にある・到着の完了条件には入らない(場面の数・済の印・保存の記録 save.seen が変わらない)・タクシーのあとに開く
 (4)歌手の場面: 「GO！」のあとテーマ曲が鳴る(操作の中で)・発音/採点/単語バトルの画面にならない・音符が出る・曲の途中でも出口ボタンでマップに戻れて曲が止まる
 (5)曲が最後まで鳴ると歌手・ルル・キングの短いやりとり→マップへ。音オフのときは曲なしで先へ進める
@@ -42,36 +42,18 @@ def newpage(br, init=INIT):
     pg = ctx.new_page(); pg.add_init_script(init); pg.route('**/tour/index.html', hooked); return pg
 with sync_playwright() as pw:
     br = pw.chromium.launch(args=['--autoplay-policy=document-user-activation-required'])
-    # ---------------- (1)(2) オープニングのチャント ----------------
+    # ---------------- (1)(2) オープニング: チャントはタイトルの曲(タスク050)。賢者の広間の「GO！」では鳴らない ----------------
     pg = newpage(br); pg.goto(base + '/tour/index.html'); pg.wait_for_timeout(1200)
     chk('オープニングは最初の画面(DAY 1)から始まる(まだ曲は鳴らない)', pg.evaluate("__T.G.view") == 'map' and plays(pg, 'song-chant') == [], plays(pg, 'song-chant'))
     pg.mouse.click(215, 450); pg.wait_for_timeout(900)
-    chk('最初の操作のあと、賢者の広間の最初の会話(sage_1)が開く・まだ曲は鳴らない', pg.evaluate("[__T.G.scene&&__T.G.scene.vid,__T.SONG.open]") == ['sage_1', 1] and plays(pg, 'song-chant') == [])
+    chk('最初の操作のあと、賢者の広間の最初の会話(sage_1)が開く・曲は鳴らない', pg.evaluate("__T.G.scene&&__T.G.scene.vid") == 'sage_1' and plays(pg, 'song-chant') == [])
     pg.click('button.btn.go'); pg.wait_for_timeout(1500)
-    pc = plays(pg, 'song-chant')
-    chk('「GO！」のあと song-chant.mp3 が鳴りはじめる(1回・ユーザー操作の中)', len(pc) == 1 and pc[0][1] is True, pc)
-    chk('音量は控えめ(0.2・会話の読み上げの邪魔にならない)', len(pc) == 1 and pc[0][0] <= 0.25, pc)
-    st = pg.evaluate("(function(){var e=__T.SONG.el;return [__T.SONG.key,e.paused,+e.currentTime.toFixed(1),+e.duration.toFixed(1)]})()")
-    chk('チャントが実際に再生されている(51秒の曲・時間が進む)', st[0] == 'chant' and st[1] is False and st[2] > 0.5 and abs(st[3] - 51.4) < 0.5, st)
+    chk('「GO！」を押してもチャントは鳴らない(050でタイトルへ移した。再生は test_chant050.py)', plays(pg, 'song-chant') == [] and pg.evaluate("__T.SONG.el") is None, plays(pg, 'song-chant'))
     # 会話がふつうに進む: 相手の台詞→カンペ(画面にカンペが出る)
     pg.wait_for_timeout(1500)
     ph = pg.evaluate("[__T.G.phase,!!document.querySelector('.cue'),__T.G.scene.pl.id]")
-    chk('曲が鳴っていても会話が進む(相手の台詞のあとカンペが出る)', ph[1] is True and ph[2] == 'sage', ph)
-    # マイクで聞いているあいだ(ducking)は止まる→戻ると続きから
-    pg.evaluate("window.__ambDuck(true)"); pg.wait_for_timeout(300)
-    chk('マイクで聞いているあいだ(duck)はチャントが止まる', paused(pg) is True)
-    t0 = pg.evaluate("__T.SONG.el.currentTime"); pg.evaluate("window.__ambDuck(false)"); pg.wait_for_timeout(1200)
-    t1 = pg.evaluate("__T.SONG.el.currentTime")
-    chk('聞き終わると続きから鳴る(最初に戻らない)', paused(pg) is False and t1 >= t0, [round(t0, 1), round(t1, 1)])
-    # 広間を離れたら止まる
-    pg.evaluate("__T.showMap()"); pg.wait_for_timeout(500)
-    chk('広間を離れる(マップへ)とチャントが止まる', pg.evaluate("__T.SONG.el") is None and len(pauses(pg, 'song-chant')) >= 1)
-    chk('チャントを鳴らしたあとも、テーマ曲は鳴っていない', plays(pg, 'song-theme') == [])
-    # 2回目にsage_1を開いても、チャントは繰り返さない(オープニングの1回だけ)
-    pg.evaluate("__T.enterPlace('sage')"); pg.wait_for_timeout(300)
-    pg.evaluate("__T.startVid(__T.PBY.sage,'sage_2','hub')"); pg.wait_for_timeout(300)
-    pg.click('button.btn.go'); pg.wait_for_timeout(500)
-    chk('2回目以降の広間ではチャントを鳴らさない(1回のまま)', len(plays(pg, 'song-chant')) == 1)
+    chk('会話がふつうに進む(相手の台詞のあとカンペが出る)', ph[1] is True and ph[2] == 'sage', ph)
+    chk('オープニングでテーマ曲は鳴らない', plays(pg, 'song-theme') == [])
     chk('エラーなし(オープニング)', pg.evaluate('window.__errs') == [], pg.evaluate('window.__errs'))
     pg.context.close()
     # ---------------- (3)(4)(5) ホテルのロビーの歌手 ----------------
@@ -142,17 +124,6 @@ with sync_playwright() as pw:
     chk('音オフでも「つぎへ」で先へ進める(曲なしで詰まらない)', pg.evaluate("!!document.querySelector('.songnext')") is True)
     pg.click('.songnext'); pg.wait_for_timeout(600)
     chk('「つぎへ」で歌手のあいさつへ', 'Thank you for listening' in pg.evaluate("document.querySelector('#msg').innerText"))
-    pg.context.close()
-    # ---------------- iPhone(Safari): audio.volume が効かないので、Web Audio のゲインで控えめな音量にする ----------------
-    ctx = br.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1,
-                         user_agent='Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1')
-    pg = ctx.new_page(); pg.add_init_script(INIT); pg.route('**/tour/index.html', hooked)
-    pg.goto(base + '/tour/index.html'); pg.wait_for_timeout(1200); pg.mouse.click(195, 420); pg.wait_for_timeout(900)
-    pg.click('button.btn.go'); pg.wait_for_timeout(1500)
-    io = pg.evaluate("(function(){var S=__T.SONG;return [!!S.ac,S.gn&&+S.gn.gain.value.toFixed(2),S.el&&S.el.volume,S.el&&!S.el.paused]})()")
-    chk('iPhone: チャントは Web Audio のゲイン(0.2)を通して控えめに鳴る', io == [True, 0.2, 1, True], io)
-    pg.evaluate("__T.showMap()"); pg.wait_for_timeout(500)
-    chk('iPhone: 広間を離れると止まり、音の経路も閉じる', pg.evaluate("[__T.SONG.el,__T.SONG.ac]") == [None, None])
     pg.context.close()
     # ---------------- 画像・音の素材が読めている ----------------
     pg = newpage(br); pg.goto(base + '/tour/index.html'); pg.wait_for_timeout(500)

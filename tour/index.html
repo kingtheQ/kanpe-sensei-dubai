@@ -4247,24 +4247,94 @@ window.__ambDuck=function(f){ambDuck=!!f;ambApply();if(window.__songSync)window.
 window.__ambSync=ambApply;window.__AMB=AMB;
 document.addEventListener('visibilitychange',ambApply);
 /* ============================================================
+   タイトル(スタート)画面の掛け声チャント(タスク050)。world/(タイトル)と tour/(賢者の広間)の両方にビルドが入れる。チャントの再生はこの1か所だけ。
+   - song-chant.mp3(51秒)。音量 0.2。タイトル画面のどこかを最初にタッチしたとき、先頭から鳴らす(自動再生の制限のため、起動直後の無操作では鳴らさない・エラーにもしない)。
+   - タイトル画面にいるあいだはループ。すでに鳴っていれば新たに始めない(二重に鳴らない)。
+   - 「はじめる」で tour/ へページが変わるため、離れる瞬間の再生位置を sessionStorage(kw-chant。保存データではない・15秒で無効)に置き、
+     tour/ の最初に、その続きから鳴らす(先頭に戻さない)。tour/ ではループしない。賢者の広間の最初の会話が始まったら止め、そのあとは再開しない。
+   - マイクで聞いているあいだ・タブが見えないあいだ・音オフのあいだは止め、戻ったら続きから(最初の会話が始まる前だけ)。
+   - 保存データ(kanpe-tour-save-v1 など)には何も書かない。
+   ============================================================ */
+var CHANT=(function(){
+ var BASE='assets/song/',FILE='song-chant.mp3',VOL=.2,KEY='kw-chant',WIN=15000;
+ var st={el:null,ac:null,loop:0,done:0,armed:0,evs:['pointerup','touchend','click','keydown'],hook:null};
+ function sndOn(){try{return localStorage.getItem('kd_snd')!=='off'}catch(e){return true}}
+ function ios(){try{return /iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)}catch(x){return false}}
+ function hook(k){try{if(st.hook&&st.hook[k])st.hook[k]()}catch(x){}}
+ function clean(){
+  var e=st.el;st.el=null;
+  if(e){try{e.onended=null;e.onerror=null;e.pause();e.removeAttribute('src');e.load()}catch(x){}}
+  if(st.ac){try{st.ac.close()}catch(x){}st.ac=null}
+  if(e)hook('off')}
+ /* 鳴らす。すでに鳴っていれば何もしない。必ずユーザー操作の中から呼ぶ(鳴らせなければ、そっと諦める) */
+ function start(at,loop,blocked){
+  if(st.el||st.done||!sndOn())return false;
+  var e=new Audio(BASE+FILE);e.preload='auto';e.loop=!!loop;e.volume=VOL;st.el=e;st.loop=loop?1:0;
+  if(at>0){try{e.currentTime=at}catch(x){}}
+  /* iPhone / iPad(Safari)は audio.volume が効かないので、Web Audio のゲインを通す */
+  if(ios()){try{var C=window.AudioContext||window.webkitAudioContext,ac=new C(),gn=ac.createGain();gn.gain.value=VOL;gn.connect(ac.destination);ac.createMediaElementSource(e).connect(gn);e.volume=1;st.ac=ac;if(ac.resume)ac.resume()}catch(x){}}
+  e.onended=function(){if(st.el===e)clean()};
+  e.onerror=function(){if(st.el===e)clean()};
+  hook('on');
+  var p;try{p=e.play()}catch(x){p=null}
+  if(p&&p.catch)p.catch(function(){if(st.el===e){clean();if(blocked)blocked()}});
+  return true}
+ /* 止める。そのあとは再開しない(done) */
+ function stop(){st.done=1;unbind();try{sessionStorage.removeItem(KEY)}catch(x){}clean()}
+ /* マイクで聞いているあいだ・タブが見えないあいだ・音オフのあいだは止め、戻ったら続きから */
+ function sync(){var e=st.el;if(!e)return;
+  var hold=(typeof ambDuck!=='undefined'&&ambDuck)||document.hidden||!sndOn();
+  if(hold){if(!e.paused){try{e.pause()}catch(x){}}}
+  else if(e.paused&&!e.ended){var p;try{p=e.play()}catch(x){}if(p&&p.catch)p.catch(function(){})}}
+ document.addEventListener('visibilitychange',sync);
+ /* ---- タイトル画面(world/): 最初のタッチで先頭から。ループ ---- */
+ function onTouch(){
+  if(st.el){unbind();return}
+  if(start(0,true,function(){if(st.armed)bind()}))unbind()}
+ function bind(){if(st.bound)return;st.bound=1;st.evs.forEach(function(n){document.addEventListener(n,onTouch,true)})}
+ function unbind(){if(!st.bound)return;st.bound=0;st.evs.forEach(function(n){document.removeEventListener(n,onTouch,true)})}
+ function arm(){st.armed=1;st.done=0;bind()}
+ function leave(){st.armed=0;st.done=0;unbind();clean()}      /* タイトルを離れる(続きから・地図へ): 止める */
+ /* ページが変わる瞬間(はじめる→tour/)の再生位置を渡す。タイトルで鳴らしているときだけ */
+ window.addEventListener('pagehide',function(){var e=st.el;if(e&&st.loop){try{sessionStorage.setItem(KEY,JSON.stringify({t:e.currentTime,at:Date.now()}))}catch(x){}}});
+ /* ---- tour/: ページの最初に、続きから。初回(賢者の広間へ行くとき)だけ。ループしない ---- */
+ function resume(ok){
+  var raw=null,o=null;try{raw=sessionStorage.getItem(KEY);sessionStorage.removeItem(KEY)}catch(x){}
+  if(!ok||!raw)return;
+  try{o=JSON.parse(raw)}catch(x){return}
+  if(!o||typeof o.t!=='number'||typeof o.at!=='number'||!isFinite(o.t)||!isFinite(o.at))return;
+  function pos(){return Math.max(0,o.t+(Date.now()-o.at)/1000)}
+  if(Date.now()-o.at>WIN||o.at>Date.now()+1000)return;
+  if(start(pos(),false,retry))return;
+  function retry(){   /* 開いた直後に鳴らせなかったとき: この画面での最初のタッチで、続きから */
+   function again(){if(st.done||st.el){off();return}if(start(pos(),false,null))off()}
+   function off(){['pointerup','touchend','click','keydown'].forEach(function(n){document.removeEventListener(n,again,true)})}
+   ['pointerup','touchend','click','keydown'].forEach(function(n){document.addEventListener(n,again,true)})}
+ }
+ return {start:start,stop:stop,sync:sync,arm:arm,leave:leave,resume:resume,has:function(){return !!st.el},
+  playing:function(){return !!(st.el&&!st.el.paused&&!st.el.ended)},set hook(h){st.hook=h},get hook(){return st.hook}}
+})();
+window.CHANT=CHANT;
+/* ============================================================
    宣言文ソングの組み込み(タスク049)。ナイロビ(tour/)だけに入る。art.js のあと・エンジンと同じ場所に置かれる。
-   - 掛け声チャント版(song-chant.mp3 / 51秒)=オープニング(賢者の広間の最初の会話 sage_1)。再生は、最初のGOを押したあと。音量は控えめ。
-     賢者の広間にいるあいだだけ鳴り、広間を離れたら止まる(または自然に終わる)。マイクで聞いているあいだは止まる。会話はふつうに進む。
+   - 掛け声チャント版(song-chant.mp3 / 51秒)=タイトル(スタート)画面の曲(タスク050で賢者の広間から移した)。再生は chant.js の1か所だけ(world/ のタイトルで開始・ループ、
+     tour/ では続きから)。ここ(song.js)はテーマ曲の再生と、チャントとの背景音の受け渡し・マイク中の一時停止の連動・最初の会話が始まったらチャントを止める呼び出しだけを持つ。
    - メインテーマ(song-theme.mp3 / 1分15秒)=ホテルのロビーの「聴く」イベント(場所 hsong)専用。ほかの場面・タイトル・メニューでは流さない。
      発音の課題・採点・単語バトルはない。曲の途中でも出口ボタンでマップに戻れ、戻ったら止まる。
    - 再生はユーザーの操作(GOボタン・つぎへ)のあとだけ始める(自動再生の制限)。鳴らせなかったときは、曲なしで先へ進める。
    - 保存データ(kanpe-tour-save-v1 など)には何も書かない。再生の状態はこのファイルの変数だけ。
    ============================================================ */
 var SONGBASE=ARTBASE.replace(/art\/$/,'song/');
-var SONGFILE={chant:'song-chant.mp3',theme:'song-theme.mp3'};
-var SONGVOL={chant:.2,theme:.65};     /* チャントは会話の読み上げ・効果音の邪魔にならない控えめな音量。テーマは聴くのが主役 */
+var SONGFILE={theme:'song-theme.mp3'};
+var SONGVOL={theme:.65};     /* テーマは聴くのが主役(チャントの音量 0.2 は chant.js) */
 var SONGSC={"id": "nbo_song", "who": "ラウンジの歌手", "bg": "nlobby", "sp": "singer", "intro": "夜のホテルのロビー。奥のラウンジの隅から、やさしい歌声が聞こえてくる。ふたりは足をとめて、耳をかたむけた。", "after": [{"w": "singer", "who": "ラウンジの歌手", "en": "Thank you for listening. Karibu Nairobi. Welcome!"}, {"w": "lulu", "who": "ルル", "en": "That was beautiful. I could listen all night."}, {"w": "king", "who": "キング", "en": "Asante! It was a wonderful song."}, {"w": "singer", "who": "ラウンジの歌手", "en": "Asante sana. Sleep well, and enjoy Nairobi."}], "listen": 1};
-var SONG={el:null,key:null,ac:null,gn:null,opened:0,open:0,want:null};
+var SONG={el:null,key:null,ac:null,gn:null,want:null};
 SP.singer={pitch:1.1,m:[[HJ,P(2,{x:'#2d8f8a',o:'#e0b040'})]]};   /* 絵が読めなかったときの、いつものドット */
 BGS.nlobby=BGS.lobby;   /* 背景の絵が読めなかったときの、いつものドットのロビー */
 /* 曲が鳴っているあいだは、場面の背景の音楽(Snd.go)を止めて重ならないようにする。曲が止まったら、いまの場面の音楽に戻す */
 var SONGSNDGO=Snd.go;
-Snd.go=function(k){SONG.want=k;return SONGSNDGO.call(Snd,SONG.el?null:k)};
+Snd.go=function(k){SONG.want=k;return SONGSNDGO.call(Snd,(SONG.el||CHANT.has())?null:k)};
+CHANT.hook={on:function(){SONGSNDGO.call(Snd,null)},off:function(){if(!SONG.el)songRestore()}};   /* チャントが鳴っているあいだも背景音を止め、止まったら戻す */
 function songRestore(){SONGSNDGO.call(Snd,SONG.want||null)}
 function songSndOn(){try{return localStorage.getItem('kd_snd')!=='off'}catch(e){return true}}
 function songPlaying(){return !!(SONG.el&&SONG.key==='theme'&&!SONG.el.paused&&!SONG.el.ended)}
@@ -4287,22 +4357,19 @@ function songStart(key,cb){
  if(p&&p.catch)p.catch(function(){if(SONG.el===e){songStop();if(cb)cb('blocked')}});
  return true}
 /* マイクで聞いているあいだ・タブが見えないあいだ・音オフのあいだは止め、戻ったら続きから */
-window.__songSync=function(){var e=SONG.el;if(!e)return;
+window.__songSync=function(){CHANT.sync();var e=SONG.el;if(!e)return;
  var hold=(typeof ambDuck!=='undefined'&&ambDuck)||document.hidden||!songSndOn();
  if(hold){if(!e.paused){try{e.pause()}catch(x){}}}
  else if(e.paused&&!e.ended){var p;try{p=e.play()}catch(x){}if(p&&p.catch)p.catch(function(){})}};
 document.addEventListener('visibilitychange',function(){window.__songSync()});
-/* 場面を離れたら止める: チャントは賢者の広間のあいだだけ。テーマは聴く場面のあいだだけ */
+/* 場面を離れたら止める: テーマは聴く場面のあいだだけ(チャントは場面の遷移では止めない。最初の会話が始まったら止める) */
 function songWatch(){
  if(!SONG.el)return;var S=G.scene,inside;
- if(SONG.key==='chant')inside=G.view==='scene'&&!!S&&!!S.pl&&S.pl.id==='sage';
- else inside=G.view==='scene'&&!!S&&!!S.d&&S.d.listen===1;
+ inside=G.view==='scene'&&!!S&&!!S.d&&S.d.listen===1;
  if(!inside)songStop()}
 window.__songWatch=songWatch;setInterval(songWatch,250);
-/* ---- オープニングのチャント: 賢者の広間の最初の会話(sage_1)の「GO！」を押したあと、1回だけ ---- */
-window.__songGo=function(S){
- if(!SONG.open||SONG.opened||!S||S.vid!=='sage_1')return;
- SONG.opened=1;songStart('chant',null)};
+/* ---- チャントは、最初の会話が始まった(「GO！」でたがいの会話に入る)ときに止める。そのあとは再開しない。始めるのは chant.js だけ(タスク050) ---- */
+window.__songGo=function(S){CHANT.stop()};
 /* ---- ホテルのロビーの「聴く」イベント ---- */
 function songListen(pl){
  var d=SONGSC;
@@ -4343,7 +4410,7 @@ function songListen(pl){
   spSay=true;say(L.en,.9,S.pitch,gd(function(){spSay=false;later(900,go2)}))}}
 
 setMode(save.ticket?(hdepOn()?'hdep':'arr'):'sage');
-if(/[?&]pho=/.test(location.search)){}else TRIP.enter(function(){if(TOUR_FRESH&&!save.ticket){SONG.open=1;enterHub(PBY.sage);runStory('sage_1')}},'tour');
+if(/[?&]pho=/.test(location.search)){}else {CHANT.resume(TOUR_FRESH&&!save.ticket);TRIP.enter(function(){if(TOUR_FRESH&&!save.ticket){enterHub(PBY.sage);runStory('sage_1')}},'tour')}
 var phoQ=/[?&]pho=(\d)/.exec(location.search);if(phoQ){var PLAN={fw:["fine","fountain","flight"],mw:[{w:"fine",h:"hine"},{w:"flight",h:"hlight"},{w:"food",h:"hood"}],ss:["That is fine. Please bring it to the room."]};var sn=+phoQ[1],sq=/[&?]snd=(\w+)/.exec(location.search),sd=sq&&SND[sq[1]]?sq[1]:'f';if(sd!=='f')PLAN.fw=SND[sd].def.slice();showPho({fw:PLAN.fw,snd:sd,mw:PLAN.mw,ss:PLAN.ss,stages:sn===1?[1,2,3]:[sn]},true)}
 requestAnimationFrame(frame);
 })();

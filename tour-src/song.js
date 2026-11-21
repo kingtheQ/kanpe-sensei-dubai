@@ -1,22 +1,23 @@
 /* ============================================================
    宣言文ソングの組み込み(タスク049)。ナイロビ(tour/)だけに入る。art.js のあと・エンジンと同じ場所に置かれる。
-   - 掛け声チャント版(song-chant.mp3 / 51秒)=オープニング(賢者の広間の最初の会話 sage_1)。再生は、最初のGOを押したあと。音量は控えめ。
-     賢者の広間にいるあいだだけ鳴り、広間を離れたら止まる(または自然に終わる)。マイクで聞いているあいだは止まる。会話はふつうに進む。
+   - 掛け声チャント版(song-chant.mp3 / 51秒)=タイトル(スタート)画面の曲(タスク050で賢者の広間から移した)。再生は chant.js の1か所だけ(world/ のタイトルで開始・ループ、
+     tour/ では続きから)。ここ(song.js)はテーマ曲の再生と、チャントとの背景音の受け渡し・マイク中の一時停止の連動・最初の会話が始まったらチャントを止める呼び出しだけを持つ。
    - メインテーマ(song-theme.mp3 / 1分15秒)=ホテルのロビーの「聴く」イベント(場所 hsong)専用。ほかの場面・タイトル・メニューでは流さない。
      発音の課題・採点・単語バトルはない。曲の途中でも出口ボタンでマップに戻れ、戻ったら止まる。
    - 再生はユーザーの操作(GOボタン・つぎへ)のあとだけ始める(自動再生の制限)。鳴らせなかったときは、曲なしで先へ進める。
    - 保存データ(kanpe-tour-save-v1 など)には何も書かない。再生の状態はこのファイルの変数だけ。
    ============================================================ */
 var SONGBASE=ARTBASE.replace(/art\/$/,'song/');
-var SONGFILE={chant:'song-chant.mp3',theme:'song-theme.mp3'};
-var SONGVOL={chant:.2,theme:.65};     /* チャントは会話の読み上げ・効果音の邪魔にならない控えめな音量。テーマは聴くのが主役 */
+var SONGFILE={theme:'song-theme.mp3'};
+var SONGVOL={theme:.65};     /* テーマは聴くのが主役(チャントの音量 0.2 は chant.js) */
 var SONGSC=/*SONGDATA*/null;
-var SONG={el:null,key:null,ac:null,gn:null,opened:0,open:0,want:null};
+var SONG={el:null,key:null,ac:null,gn:null,want:null};
 SP.singer={pitch:1.1,m:[[HJ,P(2,{x:'#2d8f8a',o:'#e0b040'})]]};   /* 絵が読めなかったときの、いつものドット */
 BGS.nlobby=BGS.lobby;   /* 背景の絵が読めなかったときの、いつものドットのロビー */
 /* 曲が鳴っているあいだは、場面の背景の音楽(Snd.go)を止めて重ならないようにする。曲が止まったら、いまの場面の音楽に戻す */
 var SONGSNDGO=Snd.go;
-Snd.go=function(k){SONG.want=k;return SONGSNDGO.call(Snd,SONG.el?null:k)};
+Snd.go=function(k){SONG.want=k;return SONGSNDGO.call(Snd,(SONG.el||CHANT.has())?null:k)};
+CHANT.hook={on:function(){SONGSNDGO.call(Snd,null)},off:function(){if(!SONG.el)songRestore()}};   /* チャントが鳴っているあいだも背景音を止め、止まったら戻す */
 function songRestore(){SONGSNDGO.call(Snd,SONG.want||null)}
 function songSndOn(){try{return localStorage.getItem('kd_snd')!=='off'}catch(e){return true}}
 function songPlaying(){return !!(SONG.el&&SONG.key==='theme'&&!SONG.el.paused&&!SONG.el.ended)}
@@ -39,22 +40,19 @@ function songStart(key,cb){
  if(p&&p.catch)p.catch(function(){if(SONG.el===e){songStop();if(cb)cb('blocked')}});
  return true}
 /* マイクで聞いているあいだ・タブが見えないあいだ・音オフのあいだは止め、戻ったら続きから */
-window.__songSync=function(){var e=SONG.el;if(!e)return;
+window.__songSync=function(){CHANT.sync();var e=SONG.el;if(!e)return;
  var hold=(typeof ambDuck!=='undefined'&&ambDuck)||document.hidden||!songSndOn();
  if(hold){if(!e.paused){try{e.pause()}catch(x){}}}
  else if(e.paused&&!e.ended){var p;try{p=e.play()}catch(x){}if(p&&p.catch)p.catch(function(){})}};
 document.addEventListener('visibilitychange',function(){window.__songSync()});
-/* 場面を離れたら止める: チャントは賢者の広間のあいだだけ。テーマは聴く場面のあいだだけ */
+/* 場面を離れたら止める: テーマは聴く場面のあいだだけ(チャントは場面の遷移では止めない。最初の会話が始まったら止める) */
 function songWatch(){
  if(!SONG.el)return;var S=G.scene,inside;
- if(SONG.key==='chant')inside=G.view==='scene'&&!!S&&!!S.pl&&S.pl.id==='sage';
- else inside=G.view==='scene'&&!!S&&!!S.d&&S.d.listen===1;
+ inside=G.view==='scene'&&!!S&&!!S.d&&S.d.listen===1;
  if(!inside)songStop()}
 window.__songWatch=songWatch;setInterval(songWatch,250);
-/* ---- オープニングのチャント: 賢者の広間の最初の会話(sage_1)の「GO！」を押したあと、1回だけ ---- */
-window.__songGo=function(S){
- if(!SONG.open||SONG.opened||!S||S.vid!=='sage_1')return;
- SONG.opened=1;songStart('chant',null)};
+/* ---- チャントは、最初の会話が始まった(「GO！」でたがいの会話に入る)ときに止める。そのあとは再開しない。始めるのは chant.js だけ(タスク050) ---- */
+window.__songGo=function(S){CHANT.stop()};
 /* ---- ホテルのロビーの「聴く」イベント ---- */
 function songListen(pl){
  var d=SONGSC;

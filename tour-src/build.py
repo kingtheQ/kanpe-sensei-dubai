@@ -603,13 +603,14 @@ FULLBLEED_CSS = (
 def song_js():
     sc = dict(song_data.SONG_SCENE); sc['listen'] = 1
     return _rd('song.js').replace('/*SONGDATA*/null', J(sc))
+def chant_js(base): return _rd('chant.js').replace('/*CHANTBASE*/', base)   # タイトルのチャント(タスク050): world/(開始・ループ)と tour/(続きから)に同じものを入れる
 def art_js(base, sel): return _rd('art.js').replace("/*ARTBASE*/", base).replace("/*ARTSEL*/", sel)
 
 # ---------- ナイロビ(tour/index.html) ----------
 dn = dict(sub('sage_')); dn.update(sub('ticket_')); dn.update(sub('win_')); dn.update(sub('nbo_')); dn.update(sub('hnd_'))
 main = MAIN % dict(dlg=J(dn), sp=SPJS + SPW, bg=BGJS + BGN, world=WORLDJS, voice=VOICEJS, diag=DIAGJS, ev=EVJS, win=WINJS, sage=J(SAGE), arr=J(ARR), air=J(AIR), dep=J(NDEP), hdep=J(HDEP), ids=J(TOUR_IDS))
 main += art_js('assets/art/', "function artIdFor(S){var g=S&&S.d&&S.d.bg,h=S&&S.hub&&S.ctx&&S.ctx.bg;return g==='nlobby'?'nlobby':(g==='sage'||h==='sage')?'sage':((g==='tdesk'||g==='rtmap')?'ticket':(g==='taxi'?'nairobi':(g==='immig'?'immig':(g==='baggage'?'bagclaim':(g==='hgateOW'?'hgate_ow':(g==='hgateST'?'hgate_st':null))))))}")   # 羽田の出発ゲート(タスク043。券で絵が出し分け)・賢者の広間(sage_1〜3の会話・賢者のメニュー)・チケット売り場(窓口の全場面 ticket_*・win_*。bg が tdesk か rtmap。タスク041)・ナイロビ到着(タクシー乗り場)・入国審査・手荷物受け取り(bg が baggage。ナイロビだけ。タスク045)
-main += song_js()   # 宣言文ソング(タスク049): チャント(オープニング)・テーマ(ホテルのロビーの歌手イベント)。ナイロビ(tour/)だけ
+main += chant_js('assets/song/') + song_js()   # 宣言文ソング(タスク049): テーマ(ホテルのロビーの歌手イベント)。チャントはタイトルの曲(タスク050)で再生は chant.js だけ。ナイロビ(tour/)だけ
 o = ev_patches(common(src, 'Africa/Nairobi'))
 o = rep(o, "(S.d.inter||[]).forEach(function(n){if(n.set&&n.set.gold)save.gold=1});storeSave();worldSync();",
         "(S.d.inter||[]).forEach(function(n){if(n.set&&n.set.gold)save.gold=1});if(S.d.keep&&/^[a-z0-9_]{1,16}$/.test(S.d.keep)){if(!save.keep||typeof save.keep!=='object')save.keep={};save.keep[S.d.keep]=1}storeSave();worldSync();")
@@ -686,7 +687,7 @@ o = rep(o, "n.classList.toggle('done',c0===vs.length)", "n.classList.toggle('don
 # 記録(kanpe-tour-save-v1)がない初回だけ: マップでなく 賢者の広間に入り、賢者の最初の会話(sage_1)を開く(タスク022)
 o = rep(o, "function storeSave(){", "var TOUR_FRESH=(function(){try{return localStorage.getItem(SAVEKEY)===null}catch(e){return false}})();\nfunction storeSave(){")
 o = rep(o, "setMode('arr');\nvar phoQ", main + "\nsetMode(save.ticket?(hdepOn()?'hdep':'arr'):'sage');\n"
-        "if(/[?&]pho=/.test(location.search)){}else TRIP.enter(function(){if(TOUR_FRESH&&!save.ticket){SONG.open=1;enterHub(PBY.sage);runStory('sage_1')}},'tour');\nvar phoQ")
+        "if(/[?&]pho=/.test(location.search)){}else {CHANT.resume(TOUR_FRESH&&!save.ticket);TRIP.enter(function(){if(TOUR_FRESH&&!save.ticket){enterHub(PBY.sage);runStory('sage_1')}},'tour')}\nvar phoQ")
 os.makedirs(os.path.join(ROOT, 'tour'), exist_ok=True)
 open(os.path.join(ROOT, 'tour', 'index.html'), 'w', encoding='utf-8').write(o)
 print('nairobi built', len(o), 'bytes; dialogues', len(dn), 'words', sum(len(v['words']) for v in dn.values()))
@@ -758,4 +759,8 @@ _w = open(os.path.join(ROOT, 'world', 'index.html'), encoding='utf-8').read()
 _i, _j = _w.index('/*TRIPJS-BEGIN*/'), _w.index('/*TRIPJS-END*/')
 _w = _w[:_i] + '/*TRIPJS-BEGIN*/' + _rd('trip.js') + _w[_j:]
 open(os.path.join(ROOT, 'world', 'index.html'), 'w', encoding='utf-8').write(_w)
-print('world trip.js injected')
+_w = open(os.path.join(ROOT, 'world', 'index.html'), encoding='utf-8').read()
+_i, _j = _w.index('/*CHANTJS-BEGIN*/'), _w.index('/*CHANTJS-END*/')
+_w = _w[:_i] + '/*CHANTJS-BEGIN*/' + chant_js('../tour/assets/song/') + _w[_j:]
+open(os.path.join(ROOT, 'world', 'index.html'), 'w', encoding='utf-8').write(_w)
+print('world trip.js + chant.js injected')
