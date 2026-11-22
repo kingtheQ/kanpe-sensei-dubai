@@ -4287,10 +4287,10 @@ var ART={
     歌手(正面・大人の高さ136px)はラウンジの隅の手前に立ち、歌っているあいだ 音符(♪)がのぼる(notes)。ルル(左)とキング(右)は広間と同じ後ろ姿で、歌手のほうを向いて少し離れて立つ。 */
  nlobby:{bg:'nairobi-hotel-lobby-v1.png',mode:'wide',hall:{sage:{n:'hall-singer',x:1130,by:800},lulu:{n:'hall-lulu-back',x:985,by:915},king:{n:'hall-king-back',x:1060,by:915},notes:1}},
  /* 機内の対面アップ(タスク048): 1日目の最初の長距離便。CAアナウンス・イベントの2場面。背景は人なし(cabin-close-bg)と、食事のあと(cabin-close-meal。ふたりは絵に描かれている)。
-    cabinseat=CAが席に来る場面とマイク画面: キング・ルルは座った上半身。既存の室内の絵(room-king-idle / room-lulu-idle)を、食事の絵(cabin-close-meal)の人物に合わせた 約2.17倍(NEAREST)・同じ位置(x,y=左上)で重ね、
+    cabinseat=CAが席に来る場面とマイク画面: キング・ルルは座った上半身。既存の室内の絵(room-king-idle / room-lulu-idle)を、食事の絵(cabin-close-meal)より小さめの 約1.82倍(NEAREST。タスク063: キングの頭がCAの1.2倍以内になるよう2.17から下げた)・頭の中心の横位置はそのまま、テーブルの上端に腰が来る高さ(x,y=左上)で重ね、
       テーブルの上端(clip=585)で切る(テーブルは背景の絵)。CAは正面の絵(npc/ca-front・139×266)を同じ倍率で、右の通路側に立たせる(足もと by)。話しているとき「…」を出す。
     cabinmeal=食事の場面: 背景の絵そのまま。ルルが話しているとき、ルルの頭の上に「…」を出す(bubble) */
- cabinseat:{bg:'cabin-close-bg.png',mode:'room',seat:{king:{x:832,y:158,s:2.17},lulu:{x:444,y:202,s:2.18},clip:585,ca:{n:'ca-front',x:1345,by:700,s:2.17}}},
+ cabinseat:{bg:'cabin-close-bg.png',mode:'room',seat:{king:{x:855,y:227,s:1.82},lulu:{x:468,y:263,s:1.83},clip:585,ca:{n:'ca-front',x:1345,by:700,s:2.17}}},
  cabinmeal:{bg:'cabin-close-meal.png',mode:'room',meal:{bubble:{x:672,y:176}}}};
 
 /* ナイロビ出発まわり(タスク054)。ほかの場面と同じく、絵は 1536×960 の座標。mode:'wide' は歩く人物の絵の読み込み用(この場面では歩かない)。
