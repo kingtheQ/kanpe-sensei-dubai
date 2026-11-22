@@ -18,7 +18,10 @@ def play_until(p, secs, cond):
     t0 = time.time()
     while time.time() - t0 < secs:
         if cond(p): return True
-        if ovstep(p): continue
+        try:
+            if ovstep(p): continue
+        except Exception:
+            p.wait_for_timeout(300); continue   # 場面の切り替え(ページ移動)の最中は、次の周でやり直す
         try: click_any(p)
         except Exception: pass
         p.wait_for_timeout(300)

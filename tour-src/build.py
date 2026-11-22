@@ -73,7 +73,9 @@ ARR = [
  place('sim', 'Safaricom SIM', 'info', 24, 58, '📱', ['Safaricom', 'SIMの登録とデータ'], ['nbo_sim1', 'nbo_sim2']),
  place('taxi', 'タクシー・Uber', 'hall', 70, 82, '🚕', ['タクシー乗り場とライドシェア', '市内へ・料金は架空'], ['nbo_taxi1', 'nbo_taxi2']),
 # ホテルのロビーの歌手(タスク049): 聴くだけの場面。v は空 = 到着の完了条件・場面の数・保存の記録(save.seen)に入らない(任意)。到着の場所を上から順に開く決まりで、タクシーのあとに開く
- place('hsong', 'ホテルのロビー', 'hotel', 24, 84, '🏨', ['Villa Rosa Kempinski', '夜のロビーで、歌を聴く'], [], listen='nbo_song')]
+ place('hsong', 'ホテルのロビー', 'hotel', 24, 84, '🏨', ['Villa Rosa Kempinski', '夜のロビーで、歌を聴く'], [], listen='nbo_song'),
+# ホテルの部屋(タスク051): 到着の夜、部屋で休む場面。hsong と同じホテル。v は空 = 到着の完了条件・場面の数・保存の記録(save.seen)に入らない(任意・休憩)。hsong の次に開く(下の lockedPlace の補正)
+ place('hroom', 'ホテルの部屋', 'hotel', 48, 88, '🛏️', ['Villa Rosa Kempinski', '部屋で休む'], [], rest='nbo_room')]
 AIR = [
  place('java', 'Java House', 'cafe', 22, 14, '☕', ['Java House', 'ラテとケーキ・値段は架空'], ['nbo_java1', 'nbo_java2']),
  place('art', 'Artcaffe', 'cafe', 70, 32, '🥐', ['Artcaffe', 'パンとジュース・値段は架空'], ['nbo_art1', 'nbo_art2']),
@@ -605,7 +607,8 @@ FULLBLEED_CSS = (
  "#sceneView .stage #exitBtn,#sceneView .stage #tip,#sceneView .stage .setbtn{top:calc(6px + env(safe-area-inset-top,0px))}")
 def song_js():
     sc = dict(song_data.SONG_SCENE); sc['listen'] = 1
-    return _rd('song.js').replace('/*SONGDATA*/null', J(sc))
+    rm = dict(song_data.ROOM_SCENE); rm['rest'] = 1   # ホテルの部屋(タスク051)
+    return _rd('song.js').replace('/*SONGDATA*/null', J(sc)).replace('/*ROOMDATA*/null', J(rm))
 def pa_js():   # CAアナウンス・イベント(タスク048): ナイロビ(tour/)だけ。声は端末の中だけ(外へ送るコードなし)
     return _rd('pa.js').replace('/*PADATA*/null', J(dict((k, {'chunks': pa_data.chunks(k), 'text': pa_data.text(k)}) for k in pa_data.VARIANTS)))
 def chant_js(base): return _rd('chant.js').replace('/*CHANTBASE*/', base)   # タイトルのチャント(タスク050): world/(開始・ループ)と tour/(続きから)に同じものを入れる
@@ -614,8 +617,8 @@ def art_js(base, sel): return _rd('art.js').replace("/*ARTBASE*/", base).replace
 # ---------- ナイロビ(tour/index.html) ----------
 dn = dict(sub('sage_')); dn.update(sub('ticket_')); dn.update(sub('win_')); dn.update(sub('nbo_')); dn.update(sub('hnd_'))
 main = MAIN % dict(dlg=J(dn), sp=SPJS + SPW, bg=BGJS + BGN, world=WORLDJS, voice=VOICEJS, diag=DIAGJS, ev=EVJS, win=WINJS, sage=J(SAGE), arr=J(ARR), air=J(AIR), dep=J(NDEP), hdep=J(HDEP), ids=J(TOUR_IDS))
-main += art_js('assets/art/', "function artIdFor(S){var g=S&&S.d&&S.d.bg,h=S&&S.hub&&S.ctx&&S.ctx.bg,v0=String(S&&S.vid||'');if(/^hnd_ev_ca_/.test(v0))return 'cabinseat';if(/^hnd_ev_meal_/.test(v0))return 'cabinmeal';return g==='nlobby'?'nlobby':(g==='sage'||h==='sage')?'sage':((g==='tdesk'||g==='rtmap')?'ticket':(g==='taxi'?'nairobi':(g==='immig'?'immig':(g==='baggage'?'bagclaim':(g==='hgateOW'?'hgate_ow':(g==='hgateST'?'hgate_st':null))))))}")   # 羽田の出発ゲート(タスク043。券で絵が出し分け)・賢者の広間(sage_1〜3の会話・賢者のメニュー)・チケット売り場(窓口の全場面 ticket_*・win_*。bg が tdesk か rtmap。タスク041)・ナイロビ到着(タクシー乗り場)・入国審査・手荷物受け取り(bg が baggage。ナイロビだけ。タスク045)
-main += chant_js('assets/song/') + song_js() + pa_js()   # 宣言文ソング(タスク049): テーマ(ホテルのロビーの歌手イベント)。チャントはタイトルの曲(タスク050)で再生は chant.js だけ。ナイロビ(tour/)だけ
+main += art_js('assets/art/', "function artIdFor(S){var g=S&&S.d&&S.d.bg,h=S&&S.hub&&S.ctx&&S.ctx.bg;if(/^hnd_ev_ca_/.test(String(S&&S.vid||'')))return 'cabinseat';if(/^hnd_ev_meal_/.test(String(S&&S.vid||'')))return 'cabinmeal';return g==='nlobby'?'nlobby':g==='nroom'?'nroom':g==='sim'?'simshop':(g==='sage'||h==='sage')?'sage':((g==='tdesk'||g==='rtmap')?'ticket':(g==='taxi'?'nairobi':(g==='immig'?'immig':(g==='baggage'?'bagclaim':(g==='hgateOW'?'hgate_ow':(g==='hgateST'?'hgate_st':null))))))}")   # 羽田の出発ゲート(タスク043。券で絵が出し分け)・賢者の広間(sage_1〜3の会話・賢者のメニュー)・チケット売り場(窓口の全場面 ticket_*・win_*。bg が tdesk か rtmap。タスク041)・ナイロビ到着(タクシー乗り場)・入国審査・手荷物受け取り(bg が baggage。ナイロビだけ。タスク045)
+main += chant_js('assets/song/') + song_js() + pa_js() + pa_js()   # 宣言文ソング(タスク049): テーマ(ホテルのロビーの歌手イベント)。チャントはタイトルの曲(タスク050)で再生は chant.js だけ。ナイロビ(tour/)だけ
 o = ev_patches(common(src, 'Africa/Nairobi'))
 o = rep(o, "(S.d.inter||[]).forEach(function(n){if(n.set&&n.set.gold)save.gold=1});storeSave();worldSync();",
         "(S.d.inter||[]).forEach(function(n){if(n.set&&n.set.gold)save.gold=1});if(S.d.keep&&/^[a-z0-9_]{1,16}$/.test(S.d.keep)){if(!save.keep||typeof save.keep!=='object')save.keep={};save.keep[S.d.keep]=1}storeSave();worldSync();")
@@ -682,7 +685,9 @@ o = rep(o, "g.fillStyle='#143fb0';g.fillRect(0,0,5,ch);g.fillRect(cw-5,0,5,ch)",
 o_pre = o   # 終わりの場面の土台(エンジンの部品はナイロビと同じ)
 # ---- 宣言文ソング(タスク049): ナイロビ(tour/)だけ。終わりの場面・ドーハには入れない ----
 # 場所に入る: ホテルのロビー(listen)は「聴くだけ」の場面へ(出来事の割りこみ・発音の流れは通らない)
-o = rep(o, "function enterPlace(id){var pl=PBY[id];if(evGate(", "function enterPlace(id){var pl=PBY[id];if(pl.listen){songListen(pl);return}if(evGate(")
+o = rep(o, "function enterPlace(id){var pl=PBY[id];if(evGate(", "function enterPlace(id){var pl=PBY[id];if(pl.listen){songListen(pl);return}if(pl.rest){roomRest(pl);return}if(evGate(")
+# 場所を上から順に開く決まり: 場面の数が空の場所(ホテルのロビー・ホテルの部屋。任意)は「遊んだか」の数に入れず、飛ばして次の場所を開く(タスク051)
+o = rep(o, "if(!PLACES[k].v.some(function(v){return save.seen[v]>0}))return true}return false}", "if(PLACES[k].v.length&&!PLACES[k].v.some(function(v){return save.seen[v]>0}))return true}return false}")
 # オープニングのチャント: 賢者の広間の最初の会話の「GO！」(最初の操作)を押したあとに鳴らす
 o = rep(o, "b.addEventListener('click',function(){if(S.d.story)playInter(-1,npcTurn);else npcTurn()})}", "b.addEventListener('click',function(){if(window.__songGo)window.__songGo(S);if(S.d.story)playInter(-1,npcTurn);else npcTurn()})}")
 # 場面が変わったら、曲を鳴らしてよい場面にいるかを確かめる(離れたらすぐ止める)

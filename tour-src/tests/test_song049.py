@@ -60,7 +60,7 @@ with sync_playwright() as pw:
     pg = newpage(br); pg.goto(base + '/tour/index.html'); pg.wait_for_timeout(1200)
     pg.mouse.click(215, 450); pg.wait_for_timeout(800)
     ids = pg.evaluate("__T.PLACES_NARR.map(function(p){return p.id})")
-    chk('到着タブの最後(タクシーのあと)にホテルのロビー hsong がある', ids == ['immig', 'bag', 'sim', 'taxi', 'hsong'], ids)
+    chk('到着タブのタクシーのあとにホテルのロビー hsong がある(タスク051でそのあとにホテルの部屋 hroom が増えた)', ids == ['immig', 'bag', 'sim', 'taxi', 'hsong', 'hroom'], ids)
     pl = pg.evaluate("(function(){var p=__T.PBY.hsong;return [p.v.length,p.listen,p.name,p.tip[0]]})()")
     chk('場面の数は空(完了条件・場面の数に入らない)・実名のホテル名', pl[0] == 0 and pl[1] == 'nbo_song' and pl[3] == 'Villa Rosa Kempinski', pl)
     # 順に開く: 入国審査を遊ぶ前は鍵がかかっている(到着のあと)

@@ -17,3 +17,22 @@ SONG_SCENE = {
         {'w': 'singer', 'who': 'ラウンジの歌手', 'en': 'Asante sana. Sleep well, and enjoy Nairobi.'},
     ],
 }
+
+# ホテルの部屋(タスク051): 到着の夜、部屋で休む場面 nbo_room(クロが執筆)。049のホテルロビー(Villa Rosa Kempinski)と同じホテル。
+# 読み上げ+表示だけ(発音の課題・言い直し・採点・マイク・単語バトルはない)。英文は短く、夜の静けさに合う長さ。個人名なし。
+# 画面に出る日本語は、場面の入り(intro)だけ(ほかの場面と同じ)。w = 話す人(lulu / king)
+ROOM_SCENE = {
+    'id': 'nbo_room',
+    'who': 'ホテルの部屋',
+    'bg': 'nroom',
+    'sp': 'lulu',
+    'intro': '夜のホテルの部屋。長い一日がおわった。ふたりは、ほっと息をついた。',
+    'lines': [
+        {'w': 'lulu', 'who': 'ルル',   'en': 'We made it. This is our room at the Villa Rosa Kempinski.'},
+        {'w': 'king', 'who': 'キング', 'en': 'It is so quiet. Look at the moon.'},
+        {'w': 'lulu', 'who': 'ルル',   'en': 'Nairobi is beautiful at night.'},
+        {'w': 'king', 'who': 'キング', 'en': 'My blue suitcase is here. I am so tired.'},
+        {'w': 'lulu', 'who': 'ルル',   'en': 'Rest well, King. Tomorrow is a new day.'},
+        {'w': 'king', 'who': 'キング', 'en': 'Lala salama, Lulu.'},
+    ],
+}

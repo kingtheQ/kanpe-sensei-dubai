@@ -2006,7 +2006,7 @@ function showMap(){
  G.view='map';Snd.go(MODE==='city'?'city':'map');G.sid++;clearTimers();stopSay();G.scene=null;G.camp=null;luHelp=false;luTalk=false;G.phase='idle';speaker=null;
  $m('sceneView').hidden=true;$m('boothView').hidden=true;$m('mapView').hidden=false;refreshBoothBtn();refreshCityBtn();
  if(!heroEl||!heroEl.isConnected)buildMap();refreshMap();drawMapBg();placeWalkers(G.at,true)}
-function lockedPlace(id){if(TRIP.lockedPlace(id))return true;if(MODE!=='arr'&&MODE!=='dep'&&MODE!=='hdep')return false;for(var k=0;k<PLACES.length;k++){if(PLACES[k].id===id)return false;if(!PLACES[k].v.some(function(v){return save.seen[v]>0}))return true}return false}
+function lockedPlace(id){if(TRIP.lockedPlace(id))return true;if(MODE!=='arr'&&MODE!=='dep'&&MODE!=='hdep')return false;for(var k=0;k<PLACES.length;k++){if(PLACES[k].id===id)return false;if(PLACES[k].v.length&&!PLACES[k].v.some(function(v){return save.seen[v]>0}))return true}return false}
 function onNode(id){
  if(G.view!=='map')return;
  if(lockedPlace(id)){try{Snd.jingle('buzz')}catch(e){}return}
@@ -2020,7 +2020,7 @@ function pickV(pl){
  if(!pool.length)pool=ids.filter(function(i){return i!==lastId});
  if(!pool.length)pool=ids.slice();
  return pool[Math.floor(Math.random()*pool.length)]}
-function enterPlace(id){var pl=PBY[id];if(pl.listen){songListen(pl);return}if(evGate('enter',id,function(){enterPlace(id)}))return;if(pl.win&&!save.ticket){winStart();return}if(pl.hub){enterHub(pl);return}startVid(pl,pickV(pl),null)}
+function enterPlace(id){var pl=PBY[id];if(pl.listen){songListen(pl);return}if(pl.rest){roomRest(pl);return}if(evGate('enter',id,function(){enterPlace(id)}))return;if(pl.win&&!save.ticket){winStart();return}if(pl.hub){enterHub(pl);return}startVid(pl,pickV(pl),null)}
 function startVid(pl,vid,from){
  if(from!=='ev'&&evGate('vid',vid,function(){startVid(pl,vid,from)}))return;
  var d=DLG[vid];lastId=vid;G.sid++;clearTimers();stopSay();Snd.go(G.snd=pl.snd||pl.id);resetOUT();
@@ -3261,9 +3261,11 @@ var box=el('div','dqbox'),plh=G.scene&&G.scene.pl;
 if(plh&&plh.menu){
   setMsgInstant(plh.hubMsg||'どうする？','');
   if(plh.hubEn){msgText.textContent=plh.hubEn;say(plh.hubEn,.9,1)}
+  var first=0;
+  if(plh.id==='sage'){first=-1;plh.menu.forEach(function(m,i){if(first<0&&!save.seen[m[1]])first=i});if(first<0)first=0}
   plh.menu.forEach(function(m){item(m[0],save.seen[m[1]],function(){runStory(m[1])})});
   item('マップに もどる',0,function(){showMap()});
-  dqFinish(box);return}
+  dqFinish(box,first);return}
  if(w==='tv'){
   setMsgInstant('どのチャンネルを見る？（壁の大きなテレビ）','');
   item('BBC News',save.seen.tv_bbc,function(){runStory('tv_bbc')});
@@ -3277,11 +3279,11 @@ if(plh&&plh.menu){
   item('フロントにいく',save.seen.vault_story,function(){runStory('vault_story')});
   item('ねる',0,sleepNow)}
  dqFinish(box)}
-function dqFinish(box){
+function dqFinish(box,init){
  panel.appendChild(box);var bs=[].slice.call(box.children);
  function sel(i){bs.forEach(function(b,j){b.classList.toggle('sel',j===i)})}
  bs.forEach(function(b,i){['focus','pointerenter','pointerdown'].forEach(function(ev){b.addEventListener(ev,function(){sel(i)})})});
- sel(0)}
+ sel(init||0)}
 function runStory(vid){if(vid==='ticket_star'||vid==='ticket_ow'){save.ticket=vid==='ticket_star'?'star':'ow';storeSave()}startVid(G.scene.pl,vid,'hub')}
 function sleepNow(){
  clearPanel();G.phase='inter';setMsgInstant('キングとルルは、ふかふかのベッドで ぐっすり… おやすみなさい。','');say('Goodnight!',.9,1);
@@ -3942,7 +3944,7 @@ BGS.rtmap=function(ctx,S){
   if(f6>=1&&ex&&Math.floor(t*3)%2){R('#fff',ex[0]-4,ex[1]-4,9,9);R('#2f6ad8',ex[0]-3,ex[1]-3,7,7);T('✕',ex[0],ex[1],7,'#fff')}}
  Object.keys(WP).forEach(function(k){var p=WP[k],x=wmx(p[0]),y=wmy(p[1]);R('#0b1d33',x-3,y-3,6,6);R('#ffd36a',x-2,y-2,4,4);T(p[2],x+p[3],y+p[4],5,'#fff')})};
 
-var PLACES_SAGE=[{"id": "sage", "name": "達人賢者", "snd": "sage", "x": 30, "y": 28, "ico": "🧙", "tip": ["達人賢者", "旅のはじまりを聞く"], "v": ["sage_1", "sage_2", "sage_3"], "hub": true, "hubBg": "sage", "hubHero": "blue", "hubEn": "Welcome, travelers. What would you like to ask?", "hubMsg": "達人賢者の広間。", "menu": [["Why go around the world?", "sage_1"], ["Which ticket should we choose?", "sage_2"], ["Tips for travel English", "sage_3"]]}, {"id": "ticket", "name": "チケットをえらぶ", "snd": "tdesk", "x": 70, "y": 72, "ico": "🎫", "tip": ["航空券の窓口", "世界一周の窓口で相談して、券をえらぶ"], "v": ["ticket_star", "ticket_ow"], "hubMap": 1, "win": 1}],PLACES_HDEP=[{"id": "hcheckin", "name": "チェックイン", "snd": "info", "x": 22, "y": 14, "ico": "🎫", "tip": ["羽田空港 チェックイン", "荷物を預けて、搭乗券をもらう"], "v": ["hnd_checkin_ow", "hnd_checkin_star"], "seq": 1, "tkv": {"ow": ["hnd_checkin_ow"], "star": ["hnd_checkin_star"]}}, {"id": "hsec", "name": "保安検査", "snd": "info", "x": 72, "y": 28, "ico": "🔍", "tip": ["保安検査", "荷物・上着・液体"], "v": ["hnd_sec"], "seq": 1}, {"id": "hexit", "name": "出国審査", "snd": "info", "x": 26, "y": 46, "ico": "🛂", "tip": ["出国審査", "パスポートと搭乗券"], "v": ["hnd_exit"], "seq": 1}, {"id": "hgate", "name": "出発ゲート", "snd": "hall", "x": 72, "y": 62, "ico": "🚪", "tip": ["出発ゲート", "夜の静かなゲートで待つ"], "v": ["hnd_gate_ow", "hnd_gate_star"], "seq": 1, "tkv": {"ow": ["hnd_gate_ow"], "star": ["hnd_gate_star"]}}, {"id": "hboard", "name": "搭乗", "snd": "hall", "x": 28, "y": 78, "ico": "🛫", "tip": ["搭乗", "搭乗券を見せて、ブリッジへ"], "v": ["hnd_board_ow", "hnd_board_star"], "seq": 1, "tkv": {"ow": ["hnd_board_ow"], "star": ["hnd_board_star"]}}, {"id": "hplane", "name": "機内(深夜便)", "snd": "atop", "x": 74, "y": 90, "ico": "✈️", "tip": ["機内", "終わるとナイロビへ飛ぶ"], "v": ["hnd_plane_ow", "hnd_plane_star"], "seq": 1, "tkv": {"ow": ["hnd_plane_ow"], "star": ["hnd_plane_star"]}}],PLACES_NARR=[{"id": "immig", "name": "入国審査", "snd": "info", "x": 22, "y": 16, "ico": "🛂", "tip": ["入国審査(Immigration)", "eTA・目的・滞在日数・ホテル"], "v": ["nbo_immig1", "nbo_immig2"]}, {"id": "bag", "name": "手荷物受け取り", "snd": "hall", "x": 70, "y": 36, "ico": "🧳", "tip": ["バゲージクレーム", "スーツケース・レジ袋"], "v": ["nbo_bag1", "nbo_bag2"]}, {"id": "sim", "name": "Safaricom SIM", "snd": "info", "x": 24, "y": 58, "ico": "📱", "tip": ["Safaricom", "SIMの登録とデータ"], "v": ["nbo_sim1", "nbo_sim2"]}, {"id": "taxi", "name": "タクシー・Uber", "snd": "hall", "x": 70, "y": 82, "ico": "🚕", "tip": ["タクシー乗り場とライドシェア", "市内へ・料金は架空"], "v": ["nbo_taxi1", "nbo_taxi2"]}, {"id": "hsong", "name": "ホテルのロビー", "snd": "hotel", "x": 24, "y": 84, "ico": "🏨", "tip": ["Villa Rosa Kempinski", "夜のロビーで、歌を聴く"], "v": [], "listen": "nbo_song"}],PLACES_NAIR=[{"id": "java", "name": "Java House", "snd": "cafe", "x": 22, "y": 14, "ico": "☕", "tip": ["Java House", "ラテとケーキ・値段は架空"], "v": ["nbo_java1", "nbo_java2"]}, {"id": "art", "name": "Artcaffe", "snd": "cafe", "x": 70, "y": 32, "ico": "🥐", "tip": ["Artcaffe", "パンとジュース・値段は架空"], "v": ["nbo_art1", "nbo_art2"]}, {"id": "lounge", "name": "Pride Lounge", "snd": "ahlan", "x": 24, "y": 52, "ico": "🛋️", "tip": ["Pride Lounge", "ラウンジの受付と、となりの人"], "v": ["nbo_lounge1", "nbo_lounge2"]}, {"id": "duty", "name": "Duty Free", "snd": "cafe", "x": 70, "y": 68, "ico": "🛍️", "tip": ["免税店", "コーヒーと紅茶・値段は架空"], "v": ["nbo_duty1", "nbo_duty2"]}],PLACES_NDEP=[{"id": "qcheckin", "name": "Qatar Airways", "snd": "info", "x": 24, "y": 18, "ico": "🎫", "tip": ["Qatar Airways チェックイン", "荷物の重さ・席・搭乗券"], "v": ["nbo_checkin1", "nbo_checkin2"]}, {"id": "nsec", "name": "保安検査", "snd": "info", "x": 70, "y": 46, "ico": "🔍", "tip": ["保安検査", "荷物・上着・液体"], "v": ["nbo_sec1", "nbo_sec2"]}, {"id": "gate", "name": "搭乗ゲート", "snd": "hall", "x": 70, "y": 76, "ico": "🚪", "tip": ["搭乗ゲート", "搭乗のアナウンス"], "v": ["nbo_gate1", "nbo_gate2"]}, {"id": "qplane", "name": "機内(Qatar Airways)", "snd": "atop", "x": 26, "y": 76, "ico": "✈️", "tip": ["機内", "客室乗務員との会話。終わるとドーハへ飛ぶ"], "v": ["nbo_plane1", "nbo_plane2"]}];
+var PLACES_SAGE=[{"id": "sage", "name": "達人賢者", "snd": "sage", "x": 30, "y": 28, "ico": "🧙", "tip": ["達人賢者", "旅のはじまりを聞く"], "v": ["sage_1", "sage_2", "sage_3"], "hub": true, "hubBg": "sage", "hubHero": "blue", "hubEn": "Welcome, travelers. What would you like to ask?", "hubMsg": "達人賢者の広間。", "menu": [["Why go around the world?", "sage_1"], ["Which ticket should we choose?", "sage_2"], ["Tips for travel English", "sage_3"]]}, {"id": "ticket", "name": "チケットをえらぶ", "snd": "tdesk", "x": 70, "y": 72, "ico": "🎫", "tip": ["航空券の窓口", "世界一周の窓口で相談して、券をえらぶ"], "v": ["ticket_star", "ticket_ow"], "hubMap": 1, "win": 1}],PLACES_HDEP=[{"id": "hcheckin", "name": "チェックイン", "snd": "info", "x": 22, "y": 14, "ico": "🎫", "tip": ["羽田空港 チェックイン", "荷物を預けて、搭乗券をもらう"], "v": ["hnd_checkin_ow", "hnd_checkin_star"], "seq": 1, "tkv": {"ow": ["hnd_checkin_ow"], "star": ["hnd_checkin_star"]}}, {"id": "hsec", "name": "保安検査", "snd": "info", "x": 72, "y": 28, "ico": "🔍", "tip": ["保安検査", "荷物・上着・液体"], "v": ["hnd_sec"], "seq": 1}, {"id": "hexit", "name": "出国審査", "snd": "info", "x": 26, "y": 46, "ico": "🛂", "tip": ["出国審査", "パスポートと搭乗券"], "v": ["hnd_exit"], "seq": 1}, {"id": "hgate", "name": "出発ゲート", "snd": "hall", "x": 72, "y": 62, "ico": "🚪", "tip": ["出発ゲート", "夜の静かなゲートで待つ"], "v": ["hnd_gate_ow", "hnd_gate_star"], "seq": 1, "tkv": {"ow": ["hnd_gate_ow"], "star": ["hnd_gate_star"]}}, {"id": "hboard", "name": "搭乗", "snd": "hall", "x": 28, "y": 78, "ico": "🛫", "tip": ["搭乗", "搭乗券を見せて、ブリッジへ"], "v": ["hnd_board_ow", "hnd_board_star"], "seq": 1, "tkv": {"ow": ["hnd_board_ow"], "star": ["hnd_board_star"]}}, {"id": "hplane", "name": "機内(深夜便)", "snd": "atop", "x": 74, "y": 90, "ico": "✈️", "tip": ["機内", "終わるとナイロビへ飛ぶ"], "v": ["hnd_plane_ow", "hnd_plane_star"], "seq": 1, "tkv": {"ow": ["hnd_plane_ow"], "star": ["hnd_plane_star"]}}],PLACES_NARR=[{"id": "immig", "name": "入国審査", "snd": "info", "x": 22, "y": 16, "ico": "🛂", "tip": ["入国審査(Immigration)", "eTA・目的・滞在日数・ホテル"], "v": ["nbo_immig1", "nbo_immig2"]}, {"id": "bag", "name": "手荷物受け取り", "snd": "hall", "x": 70, "y": 36, "ico": "🧳", "tip": ["バゲージクレーム", "スーツケース・レジ袋"], "v": ["nbo_bag1", "nbo_bag2"]}, {"id": "sim", "name": "Safaricom SIM", "snd": "info", "x": 24, "y": 58, "ico": "📱", "tip": ["Safaricom", "SIMの登録とデータ"], "v": ["nbo_sim1", "nbo_sim2"]}, {"id": "taxi", "name": "タクシー・Uber", "snd": "hall", "x": 70, "y": 82, "ico": "🚕", "tip": ["タクシー乗り場とライドシェア", "市内へ・料金は架空"], "v": ["nbo_taxi1", "nbo_taxi2"]}, {"id": "hsong", "name": "ホテルのロビー", "snd": "hotel", "x": 24, "y": 84, "ico": "🏨", "tip": ["Villa Rosa Kempinski", "夜のロビーで、歌を聴く"], "v": [], "listen": "nbo_song"}, {"id": "hroom", "name": "ホテルの部屋", "snd": "hotel", "x": 48, "y": 88, "ico": "🛏️", "tip": ["Villa Rosa Kempinski", "部屋で休む"], "v": [], "rest": "nbo_room"}],PLACES_NAIR=[{"id": "java", "name": "Java House", "snd": "cafe", "x": 22, "y": 14, "ico": "☕", "tip": ["Java House", "ラテとケーキ・値段は架空"], "v": ["nbo_java1", "nbo_java2"]}, {"id": "art", "name": "Artcaffe", "snd": "cafe", "x": 70, "y": 32, "ico": "🥐", "tip": ["Artcaffe", "パンとジュース・値段は架空"], "v": ["nbo_art1", "nbo_art2"]}, {"id": "lounge", "name": "Pride Lounge", "snd": "ahlan", "x": 24, "y": 52, "ico": "🛋️", "tip": ["Pride Lounge", "ラウンジの受付と、となりの人"], "v": ["nbo_lounge1", "nbo_lounge2"]}, {"id": "duty", "name": "Duty Free", "snd": "cafe", "x": 70, "y": 68, "ico": "🛍️", "tip": ["免税店", "コーヒーと紅茶・値段は架空"], "v": ["nbo_duty1", "nbo_duty2"]}],PLACES_NDEP=[{"id": "qcheckin", "name": "Qatar Airways", "snd": "info", "x": 24, "y": 18, "ico": "🎫", "tip": ["Qatar Airways チェックイン", "荷物の重さ・席・搭乗券"], "v": ["nbo_checkin1", "nbo_checkin2"]}, {"id": "nsec", "name": "保安検査", "snd": "info", "x": 70, "y": 46, "ico": "🔍", "tip": ["保安検査", "荷物・上着・液体"], "v": ["nbo_sec1", "nbo_sec2"]}, {"id": "gate", "name": "搭乗ゲート", "snd": "hall", "x": 70, "y": 76, "ico": "🚪", "tip": ["搭乗ゲート", "搭乗のアナウンス"], "v": ["nbo_gate1", "nbo_gate2"]}, {"id": "qplane", "name": "機内(Qatar Airways)", "snd": "atop", "x": 26, "y": 76, "ico": "✈️", "tip": ["機内", "客室乗務員との会話。終わるとドーハへ飛ぶ"], "v": ["nbo_plane1", "nbo_plane2"]}];
 PLACES_AIR=PLACES_NAIR;
 PLACES_SAGE.concat(PLACES_HDEP,PLACES_NARR,PLACES_NAIR,PLACES_NDEP).forEach(function(p){PBY[p.id]=p});
 var TOUR_IDS=["hnd_checkin_ow", "hnd_checkin_star", "hnd_sec", "hnd_exit", "hnd_gate_ow", "hnd_gate_star", "hnd_board_ow", "hnd_board_star", "hnd_plane_ow", "hnd_plane_star", "nbo_immig1", "nbo_immig2", "nbo_bag1", "nbo_bag2", "nbo_sim1", "nbo_sim2", "nbo_taxi1", "nbo_taxi2", "nbo_java1", "nbo_java2", "nbo_art1", "nbo_art2", "nbo_lounge1", "nbo_lounge2", "nbo_duty1", "nbo_duty2", "nbo_checkin1", "nbo_checkin2", "nbo_sec1", "nbo_sec2", "nbo_gate1", "nbo_gate2", "nbo_plane1", "nbo_plane2"];
@@ -3965,7 +3967,20 @@ var ARTI={},ARTFAIL={},ARTSHOW=0,AW=1536,AH=960;
 /* 場面の置き場。mode: wide=ワイド(人物は小さめ、キング124px) / room=室内(背景も人物も2倍、キング248px)
    base=足もとの高さ、lulu/king/suit=立つ位置(ルルが左・キングが右。グアムと同じ)、npc=相手(いつもの顔のドット)の位置と大きさ */
 var ART={
- nairobi:{bg:'nairobi-arrivals.png',mode:'wide',base:926,lulu:300,king:470,suit:575,npc:{x:1060,px:9,slide:1},fx:'night',npcS:{taxi_staff:'w-front-man-dashiki',driver:'w-front-man-suit-1'}},
+ /* ナイロビのタクシー乗り場(タスク051): 朝の屋外。人なしの背景(1536×960。黄色の公式タクシーが並ぶ到着カーブ)。歩道(y≥775)に立つ。fx は無し(昼の絵なので、夜の星・ガラスのきらめきは出さない)。
+    people=縁石の手前の歩道の右はし(係員・ふたりの動線と重ねない)。*/
+ nairobi:{bg:'nairobi-taxi-v1.png',mode:'wide',base:926,lulu:300,king:470,suit:575,npc:{x:1060,px:9,slide:1},fx:'',npcS:{taxi_staff:'w-front-man-dashiki',driver:'w-front-man-suit-1'},
+  people:[{n:'t-backpacker-front',x:1250,by:890,sw:79},{n:'t-man-thobe-front',x:1450,by:925,sw:79}]},
+ /* ナイロビのSIMの店(タスク051): 人なしの背景(JKIA到着ロビー。中央が Safaricom の緑カウンター、左 Telkom・右 airtel)。ふたりはカウンターの手前の床に立つ(足もと y=900)。
+    店員は中央のカウンターの向こう(カウンターの高さ y=500 で切る。入国審査・タクシーと同じ npc/npcS の方式)。
+    strips=背景の上・人物より奥に重ねる動き(汎用。{img,x,y,n,fw,fh,step}: 左上(x,y)に n コマの横並びの1コマ(fw×fh)を step 秒ごとに切り替える)。回転台=足もと中心(1264,896)、OPEN看板=(704,524)から128×48。
+    people=Telkom と airtel の前(背景の床の楕円の位置)。回転台(x 1204..1324)・店員・ふたりと重ねない */
+ simshop:{bg:'nairobi-sim-v1.png',mode:'wide',base:900,lulu:700,king:860,suit:965,npc:{x:768,top:372,clip:500},fx:'',npcS:{sim_staff:'w-front-man-suit-1',sim_staff2:'w-front-man-dashiki'},
+  strips:[{img:'nairobi-sim-spinner-strip.png',x:1204,y:596,n:4,fw:120,fh:300,step:.5},{img:'nairobi-sim-blink-strip.png',x:704,y:524,n:2,fw:128,fh:48,step:1}],
+  people:[{n:'t-safari-front',x:218,by:702,sw:85},{n:'t-woman-hijab-front',x:1430,by:712,sw:79}]},
+ /* ナイロビのホテルの部屋(タスク051): 到着の夜、部屋で休む場面(nbo_room)。人なしの背景をフルブリード。ふたりは後ろ姿(足もと y=884、ルル x=700・キング x=836)。人は置かない。
+    tv=壁のTV画面の矩形(1536×960座標)。今回は何も映さない。将来の映画場面のために名前つきで記録しておく */
+ nroom:{bg:'nairobi-hotel-room-v1.png',mode:'wide',hall:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884}},tv:{x:1120,y:216,w:344,h:176}},
  hotel:{bg:'hotel-front.png',mode:'room',base:895,lulu:250,king:450,suit:560,npc:{x:1290,px:15,top:262,clip:412},fx:'hotel',npcS:{c_front:'o-front-woman-blonde-suit'}},
  /* 賢者の広間(タスク040): 人なしの背景をフルブリード。賢者は壇上の中央(大人の高さ136px)、ルル(左)とキング(右)は絨毯の上に後ろ姿で寄って立つ(広い場面の大きさ)。
     globe=背景の球の位置(球の外わく 312..473×356..517)に、球だけ8コマ(96px。2倍=192px)を重ね、period秒で1回転。人は足と影を固定し、上半身だけ小さく揺れる(タスク037) */
@@ -4012,7 +4027,7 @@ var ART={
     cabinmeal=食事の場面: 背景の絵そのまま。ルルが話しているとき、ルルの頭の上に「…」を出す(bubble) */
  cabinseat:{bg:'cabin-close-bg.png',mode:'room',seat:{king:{x:832,y:158,s:2.17},lulu:{x:444,y:202,s:2.18},clip:585,ca:{n:'ca-front',x:1345,by:700,s:2.17}}},
  cabinmeal:{bg:'cabin-close-meal.png',mode:'room',meal:{bubble:{x:672,y:176}}}};
-function artIdFor(S){var g=S&&S.d&&S.d.bg,h=S&&S.hub&&S.ctx&&S.ctx.bg,v0=String(S&&S.vid||'');if(/^hnd_ev_ca_/.test(v0))return 'cabinseat';if(/^hnd_ev_meal_/.test(v0))return 'cabinmeal';return g==='nlobby'?'nlobby':(g==='sage'||h==='sage')?'sage':((g==='tdesk'||g==='rtmap')?'ticket':(g==='taxi'?'nairobi':(g==='immig'?'immig':(g==='baggage'?'bagclaim':(g==='hgateOW'?'hgate_ow':(g==='hgateST'?'hgate_st':null))))))}
+function artIdFor(S){var g=S&&S.d&&S.d.bg,h=S&&S.hub&&S.ctx&&S.ctx.bg;if(/^hnd_ev_ca_/.test(String(S&&S.vid||'')))return 'cabinseat';if(/^hnd_ev_meal_/.test(String(S&&S.vid||'')))return 'cabinmeal';return g==='nlobby'?'nlobby':g==='nroom'?'nroom':g==='sim'?'simshop':(g==='sage'||h==='sage')?'sage':((g==='tdesk'||g==='rtmap')?'ticket':(g==='taxi'?'nairobi':(g==='immig'?'immig':(g==='baggage'?'bagclaim':(g==='hgateOW'?'hgate_ow':(g==='hgateST'?'hgate_st':null))))))}
 function artImg(n){var i=ARTI[n];if(!i){i=ARTI[n]=new Image();i.onerror=function(){i.bad=1};i.src=ARTBASE+n}return i}
 function artShow(on){if(ARTSHOW===on)return;ARTSHOW=on;cv.hidden=!!on;cvA.hidden=!on}
 function artR(col,x,y,w,h){ca.fillStyle=col;ca.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h))}
@@ -4055,11 +4070,12 @@ function ARTframe(S,A0,dt){
  var ex=artExtra(cf),exi={};for(var e=0;e<ex.length;e++){var xi=artImg('npc/'+ex[e]+'.png');if(xi.bad){ARTFAIL[id]=1;artShow(0);return false}if(!artOKimg(xi))ok=false;exi[ex[e]]=xi}
  if(cf.belt){var bt=[artImg(cf.belt.isl),artImg(cf.belt.bags)];for(var bi=0;bi<2;bi++){if(bt[bi].bad){ARTFAIL[id]=1;artShow(0);return false}if(!artOKimg(bt[bi]))ok=false}
   if(cf.trav){var ti=artImg('npc/'+cf.trav.n+'.png');if(!ti.bad&&!artOKimg(ti))ok=false}}   /* 旅行者の絵だけは、読めなくても場面は出す(フォールバックで描く) */
+ (cf.strips||[]).forEach(function(q){var si=artImg(q.img);if(!si.bad&&!artOKimg(si))ok=false});   /* 動きの絵が読めないときは、動きだけ出さない(背景と人は出す) */
  artShow(1);
  if(!ok){artR('#10131f',0,0,AW,AH);return true}
  if(S.artT0==null)S.artT0=t;
  var te=t-S.artT0,B=cf.base,BOB=4;
- ca.globalAlpha=1;ca.drawImage(bg,0,0);
+ ca.globalAlpha=1;ca.drawImage(bg,0,0);artStrips(cf.strips);
  if(cf.belt){artBelt(cf,exi,te,S);return true}
  if(cf.seat){artSeat(cf.seat,im,exi,S);return true}
  if(cf.meal){artMeal(cf.meal);return true}
@@ -4232,6 +4248,8 @@ function artRoute(R,S){
  /* 小さい飛行機: いま飛んでいる区間の先頭。どこも引いていないときは羽田で待つ */
  if(!head)head=[A.tok[0],A.tok[1]];
  rtPlane(head[0],head[1]-14+(Math.floor(t*3)%2?-1:0),face)}
+/* 背景に重ねる小さな動き(タスク051)。strips=[{img,x,y,n,fw,fh,step}]。NEARESTの粒のまま(拡大縮小しない)。会話の進み方にはかかわらず、時間だけで切り替わる */
+function artStrips(list){for(var i=0;i<(list||[]).length;i++){var q=list[i],im=artImg(q.img);if(im.bad||!artOKimg(im))continue;var f=Math.floor(t/q.step)%q.n;ca.drawImage(im,f*q.fw,0,q.fw,q.fh,q.x,q.y,q.fw,q.fh)}}
 function artOKimg(i){return i.complete&&i.naturalWidth>0}
 /* この場面が使う人物の絵の名前(npc/ の中)。ひとつでも読めなければ、場面全体が今までの描画に戻る */
 function artExtra(cf){var a=[],i;if(cf.seat&&cf.seat.ca)a.push(cf.seat.ca.n);if(cf.hall)['sage','lulu','king'].forEach(function(k){if(cf.hall[k])a.push(cf.hall[k].n)});if(cf.tk)['clerk','clerkS','lulu','king'].forEach(function(k){if(cf.tk[k])a.push(cf.tk[k].n)});(cf.crowd||[]).forEach(function(c){a.push('w-'+c[0])});
@@ -4353,6 +4371,7 @@ var SONGBASE=ARTBASE.replace(/art\/$/,'song/');
 var SONGFILE={theme:'song-theme.mp3'};
 var SONGVOL={theme:.65};     /* テーマは聴くのが主役(チャントの音量 0.2 は chant.js) */
 var SONGSC={"id": "nbo_song", "who": "ラウンジの歌手", "bg": "nlobby", "sp": "singer", "intro": "夜のホテルのロビー。奥のラウンジの隅から、やさしい歌声が聞こえてくる。ふたりは足をとめて、耳をかたむけた。", "after": [{"w": "singer", "who": "ラウンジの歌手", "en": "Thank you for listening. Karibu Nairobi. Welcome!"}, {"w": "lulu", "who": "ルル", "en": "That was beautiful. I could listen all night."}, {"w": "king", "who": "キング", "en": "Asante! It was a wonderful song."}, {"w": "singer", "who": "ラウンジの歌手", "en": "Asante sana. Sleep well, and enjoy Nairobi."}], "listen": 1};
+var ROOMSC={"id": "nbo_room", "who": "ホテルの部屋", "bg": "nroom", "sp": "lulu", "intro": "夜のホテルの部屋。長い一日がおわった。ふたりは、ほっと息をついた。", "lines": [{"w": "lulu", "who": "ルル", "en": "We made it. This is our room at the Villa Rosa Kempinski."}, {"w": "king", "who": "キング", "en": "It is so quiet. Look at the moon."}, {"w": "lulu", "who": "ルル", "en": "Nairobi is beautiful at night."}, {"w": "king", "who": "キング", "en": "My blue suitcase is here. I am so tired."}, {"w": "lulu", "who": "ルル", "en": "Rest well, King. Tomorrow is a new day."}, {"w": "king", "who": "キング", "en": "Lala salama, Lulu."}], "rest": 1};   /* ホテルの部屋(タスク051) */
 var SONG={el:null,key:null,ac:null,gn:null,want:null};
 SP.singer={pitch:1.1,m:[[HJ,P(2,{x:'#2d8f8a',o:'#e0b040'})]]};   /* 絵が読めなかったときの、いつものドット */
 BGS.nlobby=BGS.lobby;   /* 背景の絵が読めなかったときの、いつものドットのロビー */
@@ -4433,6 +4452,144 @@ function songListen(pl){
   var adv=false;function go2(){if(adv||G.sid!==sid)return;adv=true;spSay=false;stopSay();songLine(i+1)}
   var sk=el('button','btn sub','つぎへ ▶');sk.type='button';panel.appendChild(sk);sk.addEventListener('click',go2);
   spSay=true;say(L.en,.9,S.pitch,gd(function(){spSay=false;later(900,go2)}))}}
+
+/* ---- ホテルの部屋(タスク051): 到着の夜、部屋で休む場面 nbo_room。読み上げて表示するだけ(マイク・発音の課題・採点・単語バトルなし)。曲は鳴らさない。
+   v が空の場所なので、保存の記録(save.seen)・到着の完了条件・場面の数には何も足さない。タップ(つぎへ)で早送りできる ---- */
+BGS.nroom=function(){R('#dccbaa',0,0,VW,98);R('#c4ae8a',0,0,VW,6);R('#0f1630',22,16,70,50);R('#e8dcc4',56,16,3,50);R('#e8dcc4',22,40,70,3);
+ R('#99674a',0,98,VW,52);R('#a5623f',100,128,120,16);R('#f4f1e8',130,84,90,16);R('#b3322f',200,88,46,12);R('#2a2c34',224,26,70,36);R('#6a4a30',224,86,84,14)};   /* 背景の絵が読めなかったときの、いつものドットの部屋 */
+function roomRest(pl){
+ var d=ROOMSC;
+ G.sid++;clearTimers();stopSay();Snd.go(null);resetOUT();
+ G.scene={id:pl.id,vid:null,pl:pl,d:d,turns:[],words:[],pitch:1,from:null,anim:null,lastSp:null,tables:null};
+ speaker=null;applyCtx({bg:d.bg,who:d.who,sp:null,hero:'blue',lulu:'plain',gold:0});
+ cam=0;spX=360;spSay=false;luTalk=false;G.view='scene';G.ti=0;G.tries=0;$m('mapView').hidden=true;$m('sceneView').hidden=false;
+ clearPanel();G.phase='listen';setMsgInstant(d.intro,'');$m('tapHint').textContent='';
+ var S=G.scene,sid=G.sid;
+ var go=el('button','btn go','GO！');go.type='button';panel.appendChild(go);
+ go.addEventListener('click',function(){if(G.sid!==sid||S.roomGo)return;S.roomGo=1;Snd.go('hotel');roomLine(0)});
+ function roomLine(i){
+  var L=d.lines[i];
+  if(!L){speaker=null;luTalk=false;spSay=false;later(700,function(){showMap()});return}
+  clearPanel();G.phase='listen';
+  speaker=null;luTalk=(L.w==='lulu');
+  S.pitch=L.w==='lulu'?1.35:1;
+  setMsgInstant(L.en,L.who);
+  var adv=false;function go2(){if(adv||G.sid!==sid)return;adv=true;spSay=false;stopSay();roomLine(i+1)}
+  var sk=el('button','btn sub','つぎへ ▶');sk.type='button';panel.appendChild(sk);sk.addEventListener('click',go2);
+  spSay=true;say(L.en,.9,S.pitch,gd(function(){spSay=false;later(900,go2)}))}}
+/* ===== CAアナウンス・イベント(タスク048): 自分の声が機内放送になる =====
+   流れ: 羽田の機内(hnd_plane_*)の会話のあと → CA場面(hnd_ev_ca_*) → マイクを渡される画面(rec) → 食事のあと、チャイム→自分の声の放送(pre)→ルルの反応(hnd_ev_meal_*)
+   声の扱い(必須・絶対):
+     1. 声は端末の中だけ。MediaRecorder で録り、IndexedDB(DB名・保存キー kanpe-pa-rec-v1)に置く。ネットワークには一切出さない
+        (このファイルに fetch / XMLHttpRequest / sendBeacon / WebSocket / 画像・スクリプトの外部読みこみは無い。再生は端末内の blob: URL)。
+     2. 発音を調べる Azure の中継(voice.js)とは別系統。このファイルは voice.js の関数・保存(kanpe-voice-v1 / kanpe-pron-v1)を呼ばない・書かない。
+     3. 保持はその便のあいだだけ。食事の場面が終わったとき・羽田の便が終わるとき(ナイロビへ飛ぶ前)・別の便が始まるとき・中断したとき・6時間たったとき に消す。
+     4. 何度でも録り直せる(確定の「これでOK」まで、保存はしない)。
+     5. マイクが許可されない・MediaRecorder が使えない・「こえを ださない モード」のときは、イベントを静かに飛ばして、通常どおり進む。
+   画面に「録音」「テスト」「測定」などの言葉は出さない。 */
+(function(){
+ var DBN='kanpe-pa-rec-v1',STO='rec',RID='cur',MAXMS=40000,TTL=6*3600*1000;
+ var DATA={"ow": {"chunks": [["Welcome aboard,", "everyone."], ["This is King,", "your guest announcer."], ["We are flying", "to Doha."], ["We will arrive", "at six o'clock", "in the morning."], ["Please enjoy", "the flight."], ["Thank you!"]], "text": "Welcome aboard, everyone. This is King, your guest announcer. We are flying to Doha. We will arrive at six o'clock in the morning. Please enjoy the flight. Thank you!"}, "star": {"chunks": [["Welcome aboard,", "everyone."], ["This is King,", "your guest announcer."], ["We are flying", "to Istanbul."], ["We will arrive", "at eight o'clock", "in the morning."], ["Please enjoy", "the flight."], ["Thank you!"]], "text": "Welcome aboard, everyone. This is King, your guest announcer. We are flying to Istanbul. We will arrive at eight o'clock in the morning. Please enjoy the flight. Thank you!"}};   /* {ow:{chunks:[[..]],text:'..'},star:{..}} (pa_data.py) */
+ var cur=null,R=null;       /* cur=確定した声 {buf,type,ms,ts} / R=いま録っている途中 */
+ function kOf(v){var m=/_(ow|star)$/.exec(String(v||''));return m?m[1]:'ow'}
+ /* ---- 端末内の保存(IndexedDB。最善努力。使えなくても、その場のメモリだけで進む) ---- */
+ function idb(fn){try{var q=indexedDB.open(DBN,1);q.onupgradeneeded=function(){try{q.result.createObjectStore(STO)}catch(e){}};
+  q.onsuccess=function(){var db=q.result;try{fn(db,function(){try{db.close()}catch(e){}})}catch(e){try{db.close()}catch(e2){}}};q.onerror=function(){}}catch(e){}}
+ function idbPut(rec){idb(function(db,done){var tx=db.transaction(STO,'readwrite');tx.objectStore(STO).put(rec,RID);tx.oncomplete=tx.onerror=tx.onabort=done})}
+ function idbDel(){idb(function(db,done){var tx=db.transaction(STO,'readwrite');tx.objectStore(STO).delete(RID);tx.oncomplete=tx.onerror=tx.onabort=done})}
+ function idbGet(cb){var called=false;function once(v){if(!called){called=true;cb(v)}}
+  idb(function(db,done){var tx=db.transaction(STO,'readonly'),r=tx.objectStore(STO).get(RID);r.onsuccess=function(){once(r.result||null)};r.onerror=function(){once(null)};tx.oncomplete=tx.onerror=tx.onabort=done});
+  setTimeout(function(){once(null)},3000)}
+ function fired(n){try{var e=evS();return !!e.fired[n]}catch(x){return false}}
+ function discard(){cur=null;abortRec();idbDel()}
+ /* 起動: 前のページで残った声があれば、食事の場面が済んでいる・古い(6時間)ときは消す。残すのは「声は録れたが、食事の場面がまだ」のときだけ */
+ try{idbGet(function(r){if(!r)return;if(r.buf&&r.ts&&Date.now()-r.ts<TTL&&fired('pa1')&&!fired('pa2'))cur=r;else idbDel()})}catch(e){}
+ /* ---- 使えるか ---- */
+ function supported(){try{return typeof MediaRecorder!=='undefined'&&!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)&&!PREF.silent}catch(e){return false}}
+ function typ(){var L=['audio/mp4','audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus'];try{for(var i=0;i<L.length;i++)if(MediaRecorder.isTypeSupported(L[i]))return L[i]}catch(e){}return ''}
+ /* ---- 録る(ボタンを押したときだけマイクを開く。録り終えたらすぐ閉じる) ---- */
+ function relStream(r){try{if(r&&r.stream)r.stream.getTracks().forEach(function(t){try{t.stop()}catch(e){}})}catch(e){}}
+ function abortRec(){var r=R;R=null;if(!r)return;try{r.mr.ondataavailable=null;r.mr.onstop=null;if(r.mr.state!=='inactive')r.mr.stop()}catch(e){}relStream(r)}
+ function recStart(cb){
+  try{navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+   try{var ty=typ(),mr=ty?new MediaRecorder(stream,{mimeType:ty}):new MediaRecorder(stream),r={stream:stream,mr:mr,parts:[],t0:Date.now(),ty:mr.mimeType||ty||'audio/mp4'};
+    mr.ondataavailable=function(e){if(e.data&&e.data.size)r.parts.push(e.data)};
+    R=r;mr.start();cb(null)}catch(e){relStream({stream:stream});R=null;cb(e||'mr')}
+  },function(e){cb(e||'denied')})}catch(e){cb(e||'gum')}}
+ function toBuf(blob,cb){try{if(blob.arrayBuffer){blob.arrayBuffer().then(cb,function(){cb(null)});return}}catch(e){}
+  try{var fr=new FileReader();fr.onload=function(){cb(fr.result)};fr.onerror=function(){cb(null)};fr.readAsArrayBuffer(blob)}catch(e){cb(null)}}
+ function recStop(cb){var r=R;if(!r){cb(null);return}var fin=false;
+  function done(){if(fin)return;fin=true;if(R===r)R=null;relStream(r);var blob=new Blob(r.parts,{type:r.ty}),ms=Date.now()-r.t0;
+   if(!blob.size){cb(null);return}toBuf(blob,function(buf){cb(buf?{buf:buf,type:r.ty,ms:ms,ts:Date.now()}:null)})}
+  r.mr.onstop=done;try{if(r.mr.state!=='inactive')r.mr.stop();else done()}catch(e){done()}
+  setTimeout(done,2500)}
+ /* ---- マイクを渡される画面。「カンペ」(意味のまとまりごとに区切る)・おてほん・はなす・もういちど・これでOK。done(true=声が決まった / false=飛ばす) ---- */
+ function rec(S,done){
+  var sid=G.sid,k=kOf(S.vid),D=DATA[k],who0=S.d.who,fin=false,state='idle',tmp=null,card,row,tm=null,wd=null;
+  function alive(){return G.sid===sid&&G.view==='scene'&&!fin}
+  function crew(t,cb){spSay=true;setMsg(t,who0);say(t,.95,(S.pitch||1.2),gd(function(){spSay=false;if(cb)cb()}))}
+  function leave(ok){if(fin)return;fin=true;clearTimeout(tm);clearInterval(wd);try{Snd.duck(0)}catch(e){}if(!ok)discard();done(ok)}
+  /* 中断(✕で地図へ・別の場面へ)したら、マイクを閉じて声を消す */
+  wd=setInterval(function(){if(!fin&&(G.sid!==sid||G.view!=='scene')){fin=true;clearTimeout(tm);clearInterval(wd);try{Snd.duck(0)}catch(e){}discard()}},400);
+  function btn(label,cls,fn){var b=el('button','btn'+(cls?' '+cls:''),label);b.type='button';b.addEventListener('click',fn);row.appendChild(b);return b}
+  function show(st){state=st;row.textContent='';
+   if(st==='idle'){btn('おてほん','sub',function(){if(!alive())return;stopSay();say(D.text,.8,1,function(){})});btn('🎤 はなす','',start)}
+   else if(st==='rec'){var b=btn('■ きいてます…','down',stop);b.style.flex='1 1 100%'}
+   else if(st==='review'){btn('もういちど','',function(){if(alive()&&state==='review'){tmp=null;start()}});btn('これでOK','',ok)}}
+  function fit(){var ws=[].slice.call(card.querySelectorAll('.pac'));if(!ws.length)return;var f=34;
+   function set(){ws.forEach(function(w){w.style.fontSize=f+'px'})}
+   function over(){return card.scrollHeight>card.clientHeight+1||card.scrollWidth>card.clientWidth+1}
+   set();for(var i=0;i<24&&over()&&f>14;i++){f-=1;set()}}
+  function start(){
+   if(!alive()||state!=='idle'&&state!=='review')return;state='wait';stopSay();try{Snd.duck(1)}catch(e){}
+   recStart(function(err){
+    if(!alive()){abortRec();try{Snd.duck(0)}catch(e){}return}
+    if(err){try{Snd.duck(0)}catch(e){}abortRec();row.textContent='';crew("No problem. I will do it myself. Thank you!",function(){later(600,function(){leave(false)})});return}
+    show('rec');tm=setTimeout(stop,MAXMS)})}
+  function stop(){if(!alive()||state!=='rec')return;clearTimeout(tm);state='wait';
+   recStop(function(r){try{Snd.duck(0)}catch(e){}if(!alive())return;
+    if(!r||r.ms<700){tmp=null;show('idle');return}   /* 短すぎる・取れなかった: 静かに最初の状態へ */
+    tmp=r;show('review')})}
+  function ok(){if(!alive()||state!=='review'||!tmp)return;state='wait';cur=tmp;tmp=null;idbPut(cur);row.textContent='';
+   crew("Perfect! Thank you so much!",function(){later(500,function(){leave(true)})})}
+  G.phase='pa';clearPanel();clearInterval(G.typeTimer);spSay=false;$m('tapHint').textContent='';
+  setMsgInstant('Here is the microphone. Please read this card.',who0);
+  card=el('div','cue pacard');card.appendChild(el('span','lab','カンペ'));
+  D.chunks.forEach(function(sn){var line=el('div','pal');sn.forEach(function(c){line.appendChild(el('span','pac',c))});card.appendChild(line)});
+  panel.appendChild(card);row=el('div','row cuerow');panel.appendChild(row);show('idle');
+  fit();requestAnimationFrame(fit)}
+ /* ---- 食事の場面の始まり: チャイム → 自分の声の放送 → go()(ルルの反応へ)。音の設定がオフなら、声は出さず文だけ出して進む。再生できなくても止まらない ---- */
+ function pre(S,go){
+  var sid=G.sid,D=DATA[kOf(S.vid)],r=cur,fin=false,au=null,url=null,wd=null,snd=paOn();
+  function end(){if(fin)return;fin=true;clearInterval(wd);paMark(0);try{if(au)au.pause()}catch(e){}try{if(url)URL.revokeObjectURL(url)}catch(e){}
+   if(G.sid===sid)later(600,go)}
+  wd=setInterval(function(){if(!fin&&G.sid!==sid){fin=true;clearInterval(wd);try{if(au)au.pause()}catch(e){}try{if(url)URL.revokeObjectURL(url)}catch(e){}paMark(0)}},300);
+  G.phase='pa';clearPanel();spSay=false;$m('tapHint').textContent='';
+  setMsgInstant(D.text,'Announcement');paMark(1);
+  if(snd){try{Snd.fx('pachime')}catch(e){}}
+  later(snd?2100:900,function(){
+   if(!snd||!r){later(Math.min(D.text.length*26+900,4200),end);return}
+   try{url=URL.createObjectURL(new Blob([r.buf],{type:r.type}));au=new Audio(url);au.volume=Math.max(0,Math.min(1,(PREF.voice==null?100:PREF.voice)/100));
+    au.onended=end;au.onerror=end;var p=au.play();if(p&&p.catch)p.catch(end);
+    setTimeout(end,(r.ms||15000)+3500)}catch(e){end()}})}
+ /* ---- 差しこみ口: 羽田の機内の会話が終わったとき(finishScene のあと、ほかの出来事より先)。始めたら true ---- */
+ function gate(S,cont){
+  try{
+   if(!S||!S.pl||S.pl.id!=='hplane'||(S.d&&S.d.ev)||EVQ==='off'||(TRIP.restToday&&TRIP.restToday()))return false;
+   var m=/^hnd_plane_(ow|star)$/.exec(S.vid||'');if(!m)return false;var k=m[1],caId='hnd_ev_ca_'+k,mealId='hnd_ev_meal_'+k;
+   if(!DLG[caId]||!DLG[mealId]||!DATA[k])return false;
+   var e=evS(),f=e.fired;
+   function meal(){f.pa2=1;e.streak=0;e.last='ev';storeSave();G.evCont=function(){discard();cont()};startVid(S.pl,mealId,'ev')}
+   if(!f.pa1){   /* 最初の長距離便で1回だけ(以後の便・もう一度の旅でも勝手に再発しない) */
+    if(!supported())return false;
+    f.pa1=1;e.streak=0;e.last='ev';storeSave();
+    G.evCont=function(){rec(G.scene,function(ok){if(ok&&cur)meal();else{discard();cont()}})};
+    startVid(S.pl,caId,'ev');return true}
+   if(!f.pa2&&cur){meal();return true}   /* 声は録れたのに食事の場面の前でページが切れたとき(再読みこみ)の続き */
+  }catch(e){}
+  return false}
+ window.PA={gate:gate,pre:pre,discard:discard,supported:supported,has:function(){return !!cur}};
+})();
 /* ===== CAアナウンス・イベント(タスク048): 自分の声が機内放送になる =====
    流れ: 羽田の機内(hnd_plane_*)の会話のあと → CA場面(hnd_ev_ca_*) → マイクを渡される画面(rec) → 食事のあと、チャイム→自分の声の放送(pre)→ルルの反応(hnd_ev_meal_*)
    声の扱い(必須・絶対):

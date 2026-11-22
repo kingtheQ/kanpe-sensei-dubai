@@ -124,3 +124,8 @@
 
 ## 参考にしたURL
 `docs/sources.md` を参照。
+
+## 今回（11/21）タスク051でやったこと（ナイロビ到着まわりの新背景）
+- SIM（art id `simshop`）・タクシー（`nairobi` の差し替え）に新しい背景。回転台とOPEN看板の strip アニメは汎用部品 `artStrips`（`art.js`。`strips:[{img,x,y,n,fw,fh,step}]`）。SIMとタクシーに旅行者2人ずつ。
+- 新しい場所「ホテルの部屋」`hroom`（`nbo_room`。読み上げ＋表示だけ・v 空・完了条件に入らない）。tour だけ `lockedPlace` を「場面の数が空の場所は飛ばして次を開く」に補正。TV画面の矩形は `ART.nroom.tv` に記録（未使用）。
+- 詳細・数値・未確認は `docs/pm/deliverables/051-nairobi-arrival-backgrounds-report-v1.md`。確認は `tour-src/tests/test_arrival051.py`。

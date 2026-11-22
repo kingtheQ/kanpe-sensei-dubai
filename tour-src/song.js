@@ -11,6 +11,7 @@ var SONGBASE=ARTBASE.replace(/art\/$/,'song/');
 var SONGFILE={theme:'song-theme.mp3'};
 var SONGVOL={theme:.65};     /* テーマは聴くのが主役(チャントの音量 0.2 は chant.js) */
 var SONGSC=/*SONGDATA*/null;
+var ROOMSC=/*ROOMDATA*/null;   /* ホテルの部屋(タスク051) */
 var SONG={el:null,key:null,ac:null,gn:null,want:null};
 SP.singer={pitch:1.1,m:[[HJ,P(2,{x:'#2d8f8a',o:'#e0b040'})]]};   /* 絵が読めなかったときの、いつものドット */
 BGS.nlobby=BGS.lobby;   /* 背景の絵が読めなかったときの、いつものドットのロビー */
@@ -89,5 +90,30 @@ function songListen(pl){
   S.pitch=L.w==='lulu'?1.35:(L.w==='singer'?SP.singer.pitch:1);
   setMsgInstant(L.en,L.who);
   var adv=false;function go2(){if(adv||G.sid!==sid)return;adv=true;spSay=false;stopSay();songLine(i+1)}
+  var sk=el('button','btn sub','つぎへ ▶');sk.type='button';panel.appendChild(sk);sk.addEventListener('click',go2);
+  spSay=true;say(L.en,.9,S.pitch,gd(function(){spSay=false;later(900,go2)}))}}
+
+/* ---- ホテルの部屋(タスク051): 到着の夜、部屋で休む場面 nbo_room。読み上げて表示するだけ(マイク・発音の課題・採点・単語バトルなし)。曲は鳴らさない。
+   v が空の場所なので、保存の記録(save.seen)・到着の完了条件・場面の数には何も足さない。タップ(つぎへ)で早送りできる ---- */
+BGS.nroom=function(){R('#dccbaa',0,0,VW,98);R('#c4ae8a',0,0,VW,6);R('#0f1630',22,16,70,50);R('#e8dcc4',56,16,3,50);R('#e8dcc4',22,40,70,3);
+ R('#99674a',0,98,VW,52);R('#a5623f',100,128,120,16);R('#f4f1e8',130,84,90,16);R('#b3322f',200,88,46,12);R('#2a2c34',224,26,70,36);R('#6a4a30',224,86,84,14)};   /* 背景の絵が読めなかったときの、いつものドットの部屋 */
+function roomRest(pl){
+ var d=ROOMSC;
+ G.sid++;clearTimers();stopSay();Snd.go(null);resetOUT();
+ G.scene={id:pl.id,vid:null,pl:pl,d:d,turns:[],words:[],pitch:1,from:null,anim:null,lastSp:null,tables:null};
+ speaker=null;applyCtx({bg:d.bg,who:d.who,sp:null,hero:'blue',lulu:'plain',gold:0});
+ cam=0;spX=360;spSay=false;luTalk=false;G.view='scene';G.ti=0;G.tries=0;$m('mapView').hidden=true;$m('sceneView').hidden=false;
+ clearPanel();G.phase='listen';setMsgInstant(d.intro,'');$m('tapHint').textContent='';
+ var S=G.scene,sid=G.sid;
+ var go=el('button','btn go','GO！');go.type='button';panel.appendChild(go);
+ go.addEventListener('click',function(){if(G.sid!==sid||S.roomGo)return;S.roomGo=1;Snd.go('hotel');roomLine(0)});
+ function roomLine(i){
+  var L=d.lines[i];
+  if(!L){speaker=null;luTalk=false;spSay=false;later(700,function(){showMap()});return}
+  clearPanel();G.phase='listen';
+  speaker=null;luTalk=(L.w==='lulu');
+  S.pitch=L.w==='lulu'?1.35:1;
+  setMsgInstant(L.en,L.who);
+  var adv=false;function go2(){if(adv||G.sid!==sid)return;adv=true;spSay=false;stopSay();roomLine(i+1)}
   var sk=el('button','btn sub','つぎへ ▶');sk.type='button';panel.appendChild(sk);sk.addEventListener('click',go2);
   spSay=true;say(L.en,.9,S.pitch,gd(function(){spSay=false;later(900,go2)}))}}
