@@ -63,6 +63,13 @@ var ART={
   trav:{vid:'nbo_bag1',n:'t-backpacker-front',x:1065,by:708,sw:79}},
  /* ナイロビのホテルのロビー・歌手のイベント(タスク049): 人なしの背景(夜のロビー。右はしの肘かけ椅子のあるラウンジの隅)をフルブリード。
     歌手(正面・大人の高さ136px)はラウンジの隅の手前に立ち、歌っているあいだ 音符(♪)がのぼる(notes)。ルル(左)とキング(右)は広間と同じ後ろ姿で、歌手のほうを向いて少し離れて立つ。 */
+ /* ホテルの歌場面(タスク060): 歌場面版の背景(nairobi-hotel-lobby-song-v1.png。受付前の赤カーペットの上に低い木の台とマイクスタンド)。通常のロビー(nlobby)は変えず、歌場面(nbo_song)だけがこちらを使う。
+    座標は 1536×960。配置の正本=素材パックの配置プレビュー(tour-src/art/ref-song060/)から実測した値。歌手は台の上(中心 x=790・足もと y=734・高さ236)。
+    観客5人は後ろ姿を半円に(people。奥=足もとの小さい順に描く。足と影は動かさず上半身だけ小さく揺れる)。ルル(左)とキング(右)は観客の中央(中心 708 / 844.5・足もと 948)。
+    ダシキの男性は、プレビューでも手前のバックパッカーとマサイの陰にほぼ隠れる(見えるのは左はしだけ) */
+ nsong:{bg:'nairobi-hotel-lobby-song-v1.png',mode:'wide',
+  hall:{sage:{n:'hall-singer-stage',x:790,by:734},lulu:{n:'tk-lulu-back',x:708,by:948,rx:60,bx:46},king:{n:'tk-king-back',x:844,by:948,rx:64},notes:1},
+  people:[{n:'a-back-safari',x:494,by:872,sw:150},{n:'a-back-thobe',x:584,by:898,sw:140},{n:'a-back-dashiki',x:1000,by:905,sw:138},{n:'a-back-backpacker',x:990,by:888,sw:118},{n:'a-back-maasai',x:1075,by:862,sw:128}]},
  nlobby:{bg:'nairobi-hotel-lobby-v1.png',mode:'wide',hall:{sage:{n:'hall-singer',x:1130,by:800},lulu:{n:'hall-lulu-back',x:985,by:915},king:{n:'hall-king-back',x:1060,by:915},notes:1}},
  /* 機内の対面アップ(タスク048): 1日目の最初の長距離便。CAアナウンス・イベントの2場面。背景は人なし(cabin-close-bg)と、食事のあと(cabin-close-meal。ふたりは絵に描かれている)。
     cabinseat=CAが席に来る場面とマイク画面: キング・ルルは座った上半身。既存の室内の絵(room-king-idle / room-lulu-idle)を、食事の絵(cabin-close-meal)より小さめの 約1.82倍(NEAREST。タスク063: キングの頭がCAの1.2倍以内になるよう2.17から下げた)・頭の中心の横位置はそのまま、テーブルの上端に腰が来る高さ(x,y=左上)で重ね、
@@ -290,9 +297,9 @@ function artHall(H,exi){var g=H.globe,gi=g&&artImg(g.img);
   if(H.notes&&typeof songPlaying==='function'&&songPlaying()){for(var nq=0;nq<3;nq++){var np2=(t*.45+nq/3)%1;ca.globalAlpha=np2<.65?1:(1-np2)/.35;ca.font='800 44px sans-serif';ca.textAlign='center';ca.textBaseline='middle';ca.lineJoin='round';ca.lineWidth=7;ca.strokeStyle='#05070f';ca.fillStyle='#ffe9a8';
    var nx2=H.sage.x+28+nq*30+Math.round(Math.sin(t*2+nq*2)*8),ny2=H.sage.by-sg.naturalHeight-16-np2*70,nc=nq%2?'♫':'♪';ca.strokeText(nc,nx2,ny2);ca.fillText(nc,nx2,ny2)}ca.globalAlpha=1}}
  else if(H.bubble&&spSay&&speaker)artBubble(H.bubble.x,H.bubble.y);   /* 相手を絵に出さない場面(羽田のゲート): 声のぬしの場所に「…」 */
- if(OUT.lvis){artShadow(H.lulu.x,H.lulu.by,29);artSway(lu,H.lulu.x,H.lulu.by,ld);
-  if(luTalk&&spSay)artBubble(H.lulu.x+20,H.lulu.by-lu.naturalHeight-26)}
- if(OUT.hvis){artShadow(H.king.x,H.king.by,36);artSway(kg,H.king.x,H.king.by,kd)}}
+ if(OUT.lvis){artShadow(H.lulu.x,H.lulu.by,H.lulu.rx||29);artSway(lu,H.lulu.x,H.lulu.by,ld);
+  if(luTalk&&spSay)artBubble(H.lulu.x+(H.lulu.bx||20),H.lulu.by-lu.naturalHeight-26)}
+ if(OUT.hvis){artShadow(H.king.x,H.king.by,H.king.rx||36);artSway(kg,H.king.x,H.king.by,kd)}}
 /* チケット売り場を描く(タスク041)。歩かない。足と影は動かさず、上半身だけ小さく揺れる(037)。係員は話しているとき「…」を出す。
    航路の地図(route)は、窓口の「線を引く」会話(bg:'rtmap')のあいだだけ。描けなければ、航路入りの静止画に切りかえる。会話の進み方には一切かかわらない(時間だけで動く) */
 function artTicket(H,exi,S){

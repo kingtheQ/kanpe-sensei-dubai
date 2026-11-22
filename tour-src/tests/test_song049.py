@@ -81,6 +81,7 @@ with sync_playwright() as pw:
     txt = pg.evaluate("document.body.innerText")
     for w in ['勉強', 'テスト', '測定', '練習', '復習', '採点']:
         chk('画面に「%s」の言葉がない(入口)' % w, w not in txt)
+    pg.click('#songNotice'); pg.wait_for_timeout(500)   # タスク060: 入り→「つぎへ」でルルの一言→「GO！」
     pg.click('button.btn.go'); pg.wait_for_timeout(2000)
     pt = plays(pg, 'song-theme')
     chk('「GO！」のあと song-theme.mp3 が鳴りはじめる(1回・ユーザー操作の中)', len(pt) == 1 and pt[0][1] is True, pt)
@@ -96,7 +97,7 @@ with sync_playwright() as pw:
     chk('場面を離れたらテーマが止まる', pg.evaluate("__T.SONG.el") is None and len(pauses(pg, 'song-theme')) >= 1, pauses(pg, 'song-theme'))
     chk('歌手の場面は保存の記録(save.seen)を変えない', pg.evaluate("JSON.stringify(__T.save.seen)") == seen0)
     # もう一度入って、最後まで聴く(終わり近くへ飛ばす)→歌手・ルル・キングのやりとり→マップ
-    pg.click('.node[data-id=hsong]'); pg.wait_for_timeout(1500); pg.click('button.btn.go'); pg.wait_for_timeout(1200)
+    pg.click('.node[data-id=hsong]'); pg.wait_for_timeout(1500); pg.click('#songNotice'); pg.wait_for_timeout(400); pg.click('button.btn.go'); pg.wait_for_timeout(1200)
     chk('もう一度入ると、また最初から聴ける(任意・何度でも)', len(plays(pg, 'song-theme')) == 2)
     pg.evaluate("(function(){var e=__T.SONG.el;e.playbackRate=16})()"); pg.wait_for_timeout(100)   # 16倍速で自然に最後まで鳴らす(試験用の簡易サーバーは途中からの読み込みに対応しないため)
     def waitmsg(k, ms=9000):
@@ -119,7 +120,7 @@ with sync_playwright() as pw:
     pg = newpage(br, INIT + "localStorage.setItem('kd_snd','off');")
     pg.goto(base + '/tour/index.html'); pg.wait_for_timeout(1200); pg.mouse.click(215, 450); pg.wait_for_timeout(800)
     pg.evaluate("(function(){var T=__T;T.save.ticket='ow';['nbo_immig1','nbo_bag1','nbo_sim1','nbo_taxi1'].forEach(function(v){T.save.seen[v]=1});T.setMode('arr');T.showMap()})()"); pg.wait_for_timeout(400)
-    pg.click('.node[data-id=hsong]'); pg.wait_for_timeout(1500); pg.click('button.btn.go'); pg.wait_for_timeout(800)
+    pg.click('.node[data-id=hsong]'); pg.wait_for_timeout(1500); pg.click('#songNotice'); pg.wait_for_timeout(400); pg.click('button.btn.go'); pg.wait_for_timeout(800)
     chk('音オフのときは曲を鳴らさない', plays(pg, 'song-theme') == [])
     chk('音オフでも「つぎへ」で先へ進める(曲なしで詰まらない)', pg.evaluate("!!document.querySelector('.songnext')") is True)
     pg.click('.songnext'); pg.wait_for_timeout(600)
