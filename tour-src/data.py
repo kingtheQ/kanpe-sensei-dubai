@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # 世界一周編 ナイロビ+賢者+券選び。会話は創作(5往復)。値段は架空。個人名なし。実在名: Java House / Artcaffe / Safaricom / Pride Lounge / Jomo Kenyatta Intl / Villa Rosa Kempinski / Turkish Airlines / Qatar Airways
 D=[]
+import window_data as W
 def d(id,who,bg,sp,intro,pairs,words,**kw):
     D.append(dict(id=id,who=who,bg=bg,sp=sp,intro=intro,pairs=pairs,words=words,**kw))
 
@@ -102,13 +103,29 @@ d('nbo_taxi2','ライドシェアの運転手','taxi','driver','Uber アプリ�
 [("passenger","乗客"),("suitcase","スーツケース"),("heavy","重い"),("air conditioner","エアコン"),("ride","乗ること")])
 
 # ---- 空港: ナイロビ ----
+# タスク053(案2: 会話に溶かす): Word Battle と Meaning! をなくし、会話の中の2か所を「▶で英語の返事を選んで声に出す」分かれ目にした(conv=1)。
+# 分かれ目は fork(tw=その一言に入っている今日の語)。選ぶまでの時間は裏で測る(ok=1 が通じた返事・無印は聞き違えた人が選ぶ返事)。点数・○×は出さない
 d('nbo_java1','Java Houseの店員','cafeK','cafe_staff','Java House に入った。コーヒーのいい香り。',[
 ("Jambo! Welcome to Java House. What can I get you?","ジャンボ！Java Houseへようこそ。ご注文は？","*I'd* *like* *a* *latte*, *please*.","ラテをお願いします。"),
-("Sure. Hot or iced?","かしこまりました。ホットですか、アイスですか。","*Hot*, *please*. *And* *a* *slice* *of* *cake*.","ホットでお願いします。それとケーキをひと切れ。"),
+W.OT("Sure. Hot or iced? And a slice of cake with it?","かしこまりました。ホットですか、アイスですか。ケーキもひと切れいかがですか。",[
+    W.O('ice',"Iced, please. And a slice of cake.","アイスで。それとケーキをひと切れ。",ok=1,
+        rep=("An iced latte. Nice on a warm day.","アイスラテ。暑い日にいいですね。")),
+    W.O('hot',"Hot, please. And a slice of cake.","ホットで。それとケーキをひと切れ。",ok=1,
+        rep=("One hot latte. Coming right up.","ホットラテをひとつ。すぐお持ちします。")),
+    W.O('off',"No, thanks. I do not skate.","いいえ。スケートはしません。",
+        rep=("Skate? Ha! I meant ice in your coffee. And a slice of cake.","スケート？ははは。コーヒーの氷のことですよ。それと、ケーキをひと切れ。"))],
+    fork={'tw':['iced','slice']}),
 ("We have chocolate and carrot cake. Which one?","チョコレートとキャロットのケーキがあります。どちらにしますか。","*Carrot* *cake*, *please*.","キャロットケーキをお願いします。"),
-("Okay. That is eight hundred shillings.","はい。800シリングです。","*Can* *I* *pay* *by* *card*?","カードで払えますか。"),
-("Yes. Here you go. Enjoy!","はい。どうぞ。ごゆっくり。","*Thank* *you*. *Asante*!","ありがとう。アサンテ！")],
-[("latte","ラテ"),("iced","冷たい・氷入りの"),("slice","ひと切れ"),("carrot cake","キャロットケーキ"),("shillings","シリング(ケニアのお金)")])
+W.OT("Okay. That is eight hundred shillings.","はい。800シリングです。",[
+    W.O('card',"Can I pay by card?","カードで払えますか。",ok=1,
+        rep=("Of course. Card is fine.","もちろん。カードで大丈夫です。")),
+    W.O('cash',"Okay. I will pay in cash.","わかりました。現金で払います。",ok=1,
+        rep=("Thank you. Cash is fine, too.","ありがとうございます。現金も大丈夫ですよ。")),
+    W.O('off',"A shirt? I do not need a shirt.","シャツ？シャツはいりません。",
+        rep=("A shirt? No, no! Shillings, our money. Eight hundred. Card or cash is fine.","シャツ？いえいえ！シリング、このお金です。800です。カードでも現金でも大丈夫ですよ。"))],
+    fork={'tw':['shillings']}),
+("Here you go. Enjoy!","どうぞ。ごゆっくり。","*Thank* *you*. *Asante*!","ありがとう。アサンテ！")],
+[("latte","ラテ"),("iced","冷たい・氷入りの"),("slice","ひと切れ"),("carrot cake","キャロットケーキ"),("shillings","シリング(ケニアのお金)")],conv=1)
 d('nbo_java2','となりのお客さん','cafeK','cafe_staff2','店は混んでいる。隣のお客さんが話しかけてきた。',[
 ("Excuse me. Is this seat free?","すみません。この席は空いていますか。","*Yes*, *it* *is*. *Please* *sit* *down*.","はい、空いています。どうぞ座ってください。"),
 ("Thank you. Are you traveling?","ありがとう。旅行中ですか。","*Yes*. *We* *are* *traveling* *around* *the* *world*.","はい。世界一周をしています。"),

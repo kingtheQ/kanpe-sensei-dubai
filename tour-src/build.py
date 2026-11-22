@@ -32,6 +32,7 @@ for x in data.D:
             if 'opts' in p: yl['opts'] = [dict((k2, v2) if k2 != 'rep' else (k2, repo(v2)) for k2, v2 in o.items()) for o in p['opts']]
             if 'cueBy' in p: yl['cueBy'] = dict((k, {'y': v[0], 'jp': v[1]}) for k, v in p['cueBy'].items())
             if 'diag' in p: yl['diag'] = p['diag']
+            if 'fork' in p: yl['fork'] = p['fork']   # 分かれ目(タスク053): 選ぶまでの時間を測る語
             if 'rep' in p: yl['rep'] = {'n': p['rep'][0], 'jp': p['rep'][1]}
             lines.append(nl); lines.append(yl)
         else:
@@ -48,6 +49,7 @@ for x in data.D:
         for k in ('lvis', 'nohelp'):
             if x.get(k) is not None: dl[x['id']][k] = x[k]
     if x.get('kind'): dl[x['id']]['kind'] = x['kind']
+    if x.get('conv'): dl[x['id']]['conv'] = 1   # 会話に溶かした場面(タスク053): Word Battle と Meaning! を出さない
     if x.get('keep'): dl[x['id']]['keep'] = x['keep']   # 秘密イベントの下地(タスク043): この場面を遊び終えたらルルが拾い物をする(画面には出さない)
 # ---------- 持ち越し(005案B): 相手のセリフの差しかえ。種の場面(save.seen)を遊んでいたときだけ返る ----------
 import event_data, window_data, doha_data
@@ -482,19 +484,22 @@ def record(label, memo=False):
 # 分かれ目(opts)・相手の言い分け(by)・持ち越しの差しかえ(vr)・あとの一言(rep)・自動で始まる場面(auto)・単語バトルに入らない場面(win/ev)
 SHARED = [
  ("if(n.n&&L[i+1]&&L[i+1].y){T.push({npc:n.n,npcJp:n.jp,cue:L[i+1].y,cueJp:L[i+1].jp});i+=2}",
-  "if(n.n&&L[i+1]&&L[i+1].y!==undefined){var Y=L[i+1];T.push({npc:n.n,npcJp:n.jp,cue:Y.y,cueJp:Y.jp,by:n.by,vr:n.vr,cueBy:Y.cueBy,opts:Y.opts,diag:Y.diag,rep:Y.rep,route:n.route});i+=2}"),
+  "if(n.n&&L[i+1]&&L[i+1].y!==undefined){var Y=L[i+1];T.push({npc:n.n,npcJp:n.jp,cue:Y.y,cueJp:Y.jp,by:n.by,vr:n.vr,cueBy:Y.cueBy,opts:Y.opts,diag:Y.diag,rep:Y.rep,route:n.route,fork:Y.fork,dw:n.dw});i+=2}"),
  (" clearPanel();G.phase='npc';var S=G.scene,T=S.turns[G.ti];\n if(T.ctx)applyCtx(T.ctx);",
   " clearPanel();G.phase='npc';var S=G.scene,T=S.turns[G.ti];\n"
   " if(T.vr&&!T.vd){T.vd=1;for(var vi=0;vi<T.vr.length;vi++){var vv=T.vr[vi];if(save.seen[vv.s]>0){T.npc=vv.n;T.npcJp=vv.jp;if(vv.y){T.cue=vv.y;T.cueJp=vv.yjp}break}}}\n"
   " var bv=T.by&&S.pick&&T.by[S.pick];if(bv){T.npc=bv.n;T.npcJp=bv.jp}var cv=T.cueBy&&S.pick&&T.cueBy[S.pick];if(cv){T.cue=cv.y;T.cueJp=cv.jp}\n"
   " if(T.route!=null){S.rf=S.rn||0;S.rn=T.route;S.rt=t}\n"
+  " if(T.dw&&!T.dts)T.dts=Date.now();\n"
   " if(T.ctx)applyCtx(T.ctx);"),
  ("var T=G.scene.turns[G.ti],toks=parseCue(T.cue);clearInterval(G.typeTimer);msgText.textContent=T.npc;",
-  "var T=G.scene.turns[G.ti];if(T.opts&&!T.pk){((G.scene.d.ev||typeof winOpts!=='function')?evOpts:winOpts)(T);return}var toks=parseCue(T.cue);clearInterval(G.typeTimer);msgText.textContent=T.npc;"),
+  "var T=G.scene.turns[G.ti];if(T.opts&&!T.pk){(T.fork?forkOpts:((G.scene.d.ev||typeof winOpts!=='function')?evOpts:winOpts))(T);return}var toks=parseCue(T.cue);clearInterval(G.typeTimer);msgText.textContent=T.npc;"),
  ("function advance(){\n",
   "function advance(){\n if(!G.camp){var D0=G.scene.turns[G.ti];if(D0&&D0.rep&&!D0.repd){D0.repd=1;G.phase='rep';setMsg(D0.rep.n,D0.rep.who||whoNow());spSay=true;(paRep(G.scene,D0.rep)?paSay:say)(D0.rep.n,.95,G.scene.pitch,gd(function(){spSay=false;later(450,advance)}));return}}\n"),
+ ("G.phase='pass';G.tries=0;var th=", "G.phase='pass';G.tries=0;dreamPass();var th="),
+ ("G.tries++;\n if(G.tries>=3){G.phase='assist'", "G.tries++;\n if(dreamGiveUp())return;\n if(G.tries>=3){G.phase='assist'"),
  ("setMsgInstant('Clear!  ぜんぶ いえた！',whoNow());later(2000,startWords)",
-  "var W0=G.scene.d&&(G.scene.d.win||G.scene.d.ev);setMsgInstant(W0?'Clear!':'Clear!  ぜんぶ いえた！',whoNow());later(W0?1300:2000,W0?finishScene:startWords)"),
+  "var W0=G.scene.d&&(G.scene.d.win||G.scene.d.ev||G.scene.d.conv);setMsgInstant(G.scene.d.dream?'Good night.':W0?'Clear!':'Clear!  ぜんぶ いえた！',whoNow());later(W0?1300:2000,W0?finishScene:startWords)"),
  (" setMsgInstant(S.d.intro||S.pl.tip[0],'');$m('tapHint').textContent='';\n var b=el('button','btn go','GO！');",
   " setMsgInstant(S.d.intro||S.pl.tip[0],'');$m('tapHint').textContent='';\n if(S.d.auto){if(S.d.fx)evFx(S.d.fx);later(700,function(){playInter(-1,npcTurn)});return}\n var b=el('button','btn go','GO！');"),
 ]
@@ -561,9 +566,13 @@ function paSay(text,rate,pitch,done){
   u.onstart=function(){if(my===sayTok)paMark(1)};u.onend=fin;u.onerror=fin;speechSynthesis.speak(u)}catch(e){}
  setTimeout(fin,text.length*85+2200)}
 """
+import conv_data
+EVJS += _rd('conv.js').replace('DREAMBANK_JSON', json.dumps(dict((k, [v[0], v[1], window_data.star(v[2]), v[3]]) for k, v in conv_data.DREAM.items()), ensure_ascii=False)).replace('DREAMFB_JSON', json.dumps(conv_data.FALLBACK, ensure_ascii=False))
 EVJS = EVJS.replace('EVSLOTS_JSON', json.dumps(event_data.SLOTS + doha_data.SLOTS, ensure_ascii=False)).replace('\\\\w', '\\w')
 
 def ev_patches(o):
+    o = rep(o, KBASE, KBASE + "K.dream={bpm:function(){return 64},amb:function(){loopNoise(400,.6,.015,.08,.01,'lowpass')},"
+        "st:function(s,t,e){var N=[72,76,79,84,79,76,74,71];if(s%4===0)pluck(hz(N[(s>>2)%8]),t,e*3,.07);if(s%16===0)tone(hz(48),t,e*16,'sine',.05,.5)}};")
     o = rep(o, "if(s0&&s0.gold)save.gold=1;", "if(s0&&s0.gold)save.gold=1;if(s0&&s0.ev&&typeof s0.ev==='object')save.ev=s0.ev;"
         "if(s0&&s0.keep&&typeof s0.keep==='object'){var kp={};Object.keys(s0.keep).forEach(function(k){if(/^[a-z0-9_]{1,16}$/.test(k)&&s0.keep[k])kp[k]=1});save.keep=kp}")
     o = rep(o, "sign:d.sign,tv:d.tv};", "sign:d.sign,tv:d.tv,lvis:d.lvis};")
@@ -617,8 +626,8 @@ def art_js(base, sel): return _rd('art.js').replace("/*ARTBASE*/", base).replace
 # ---------- ナイロビ(tour/index.html) ----------
 dn = dict(sub('sage_')); dn.update(sub('ticket_')); dn.update(sub('win_')); dn.update(sub('nbo_')); dn.update(sub('hnd_'))
 main = MAIN % dict(dlg=J(dn), sp=SPJS + SPW, bg=BGJS + BGN, world=WORLDJS, voice=VOICEJS, diag=DIAGJS, ev=EVJS, win=WINJS, sage=J(SAGE), arr=J(ARR), air=J(AIR), dep=J(NDEP), hdep=J(HDEP), ids=J(TOUR_IDS))
-main += art_js('assets/art/', "function artIdFor(S){var g=S&&S.d&&S.d.bg,h=S&&S.hub&&S.ctx&&S.ctx.bg;if(/^hnd_ev_ca_/.test(String(S&&S.vid||'')))return 'cabinseat';if(/^hnd_ev_meal_/.test(String(S&&S.vid||'')))return 'cabinmeal';return g==='nlobby'?'nlobby':g==='nroom'?'nroom':g==='sim'?'simshop':(g==='sage'||h==='sage')?'sage':((g==='tdesk'||g==='rtmap')?'ticket':(g==='taxi'?'nairobi':(g==='immig'?'immig':(g==='baggage'?'bagclaim':(g==='hgateOW'?'hgate_ow':(g==='hgateST'?'hgate_st':null))))))}")   # 羽田の出発ゲート(タスク043。券で絵が出し分け)・賢者の広間(sage_1〜3の会話・賢者のメニュー)・チケット売り場(窓口の全場面 ticket_*・win_*。bg が tdesk か rtmap。タスク041)・ナイロビ到着(タクシー乗り場)・入国審査・手荷物受け取り(bg が baggage。ナイロビだけ。タスク045)
-main += chant_js('assets/song/') + song_js() + pa_js() + pa_js()   # 宣言文ソング(タスク049): テーマ(ホテルのロビーの歌手イベント)。チャントはタイトルの曲(タスク050)で再生は chant.js だけ。ナイロビ(tour/)だけ
+main += art_js('assets/art/', "function artIdFor(S){var g=S&&S.d&&S.d.bg,h=S&&S.hub&&S.ctx&&S.ctx.bg,v=String(S&&S.vid||''),k=/2$/.test(v)?'2':'1';if(/^nbo_/.test(v)){if(g==='checkinQ')return'ncheckin'+k;if(g==='security')return'nsec'+k;if(g==='duty')return'nduty'+k;if(g==='lounge')return'nlounge'+k;if(g==='gate')return'ngate'+k}if(/^hnd_ev_ca_/.test(v))return 'cabinseat';if(/^hnd_ev_meal_/.test(v))return 'cabinmeal';return g==='nlobby'?'nlobby':g==='nroom'?'nroom':g==='sim'?'simshop':(g==='sage'||h==='sage')?'sage':((g==='tdesk'||g==='rtmap')?'ticket':(g==='taxi'?'nairobi':(g==='immig'?'immig':(g==='baggage'?'bagclaim':(g==='hgateOW'?'hgate_ow':(g==='hgateST'?'hgate_st':null))))))}")   # ナイロビ出発まわり(タスク054: bg が checkinQ/security/duty/lounge/gate で vid が nbo_ のとき。羽田・ドーハの同名の bg は対象外。末尾の 2 で2つ目の配置)・羽田の出発ゲート(タスク043。券で絵が出し分け)・賢者の広間(sage_1〜3の会話・賢者のメニュー)・チケット売り場(窓口の全場面 ticket_*・win_*。bg が tdesk か rtmap。タスク041)・ナイロビ到着(タクシー乗り場)・入国審査・手荷物受け取り(bg が baggage。ナイロビだけ。タスク045)
+main += chant_js('assets/song/') + song_js() + pa_js()   # 宣言文ソング(タスク049): テーマ(ホテルのロビーの歌手イベント)。チャントはタイトルの曲(タスク050)で再生は chant.js だけ。ナイロビ(tour/)だけ
 o = ev_patches(common(src, 'Africa/Nairobi'))
 o = rep(o, "(S.d.inter||[]).forEach(function(n){if(n.set&&n.set.gold)save.gold=1});storeSave();worldSync();",
         "(S.d.inter||[]).forEach(function(n){if(n.set&&n.set.gold)save.gold=1});if(S.d.keep&&/^[a-z0-9_]{1,16}$/.test(S.d.keep)){if(!save.keep||typeof save.keep!=='object')save.keep={};save.keep[S.d.keep]=1}storeSave();worldSync();")
