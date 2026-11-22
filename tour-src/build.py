@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import json, re, sys, os
 sys.path.insert(0, os.path.dirname(__file__))
-import ipa, data, song_data
+import ipa, data, song_data, pa_data
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 src = open(os.path.join(ROOT, 'dubai', 'index.html'), encoding='utf-8').read()
 
@@ -43,7 +43,7 @@ for x in data.D:
     if x.get('win'): dl[x['id']]['win'] = 1; dl[x['id']]['auto'] = x.get('auto', 1)
     if x.get('ev'):   # 割りこみ・ひとこと場面(タスク014)。自動で始まり、単語バトルに入らず、終わると元の流れにもどる
         dl[x['id']]['ev'] = 1; dl[x['id']]['auto'] = 1
-        for k in ('lvis', 'nohelp', 'fx'):
+        for k in ('lvis', 'nohelp', 'fx', 'pre'):   # pre='own': 食事の場面の始まりに、自分の声の放送を流す(タスク048)
             if x.get(k) is not None: dl[x['id']][k] = x[k]
     elif x.get('lvis') is not None or x.get('nohelp'):   # ふつうの5往復でも、ルルがいない始まり(タスク023 doh_city_t3)
         for k in ('lvis', 'nohelp'):
@@ -445,6 +445,9 @@ SNOTE_OLD = '<p class="snote">音声は 保存も 送信も しません。発�
 SNOTE_NEW = ('<p class="snote">声は、ゲームでは 保存しません。マイクの声は ブラウザの音声認識が 文字にします(Chrome は Google、Safari は Apple の サーバーに 声が おくられます)。'
              '「こえを おくる」を ONに した ときだけ、旅の はじめと おわりの 宣言の 声が、発音を しらべる ために Microsoft Azure に おくられます。発音の きろくは この端末の中だけに のこります。</p>')
 
+# 機内アナウンスで読んだ声(タスク048)は、その便のあいだだけ端末の中に置く。「保存しません」の一文を、その事実に合わせる(ナイロビ tour/ だけ。画面に「録音」などの言葉は出さない)
+SNOTE_TOUR = SNOTE_NEW.replace('声は、ゲームでは 保存しません。', '声は、ゲームでは 保存しません(機内アナウンスで 読んだ声だけは、その便の あいだ、この端末の中に 置きます。外には 送らず、便が おわると 消えます)。')
+assert SNOTE_TOUR != SNOTE_NEW
 def trip_patches(o, page):
     """タスク030: 旅の骨組み(DAY・券の束・記録)を、場面のあと・場所の鍵・タブの鍵につなぐ"""
     tj = _rd('trip.js')
@@ -615,6 +618,8 @@ def song_js():
     sc = dict(song_data.SONG_SCENE); sc['listen'] = 1
     rm = dict(song_data.ROOM_SCENE); rm['rest'] = 1   # ホテルの部屋(タスク051)
     return _rd('song.js').replace('/*SONGDATA*/null', J(sc)).replace('/*ROOMDATA*/null', J(rm))
+def pa_js():   # CAアナウンス・イベント(タスク048): ナイロビ(tour/)だけ。声は端末の中だけ(外へ送るコードなし)
+    return _rd('pa.js').replace('/*PADATA*/null', J(dict((k, {'chunks': pa_data.chunks(k), 'text': pa_data.text(k)}) for k in pa_data.VARIANTS)))
 def chant_js(base): return _rd('chant.js').replace('/*CHANTBASE*/', base)   # タイトルのチャント(タスク050): world/(開始・ループ)と tour/(続きから)に同じものを入れる
 def art_js(base, sel): return _rd('art.js').replace("/*ARTBASE*/", base).replace("/*ARTSEL*/", sel)
 
@@ -622,8 +627,8 @@ def art_js(base, sel): return _rd('art.js').replace("/*ARTBASE*/", base).replace
 dn = dict(sub('sage_')); dn.update(sub('ticket_')); dn.update(sub('win_')); dn.update(sub('nbo_')); dn.update(sub('hnd_'))
 main = MAIN % dict(dlg=J(dn), sp=SPJS + SPW, bg=BGJS + BGN, world=WORLDJS, voice=VOICEJS, diag=DIAGJS, ev=EVJS, win=WINJS, sage=J(SAGE), arr=J(ARR), air=J(AIR), dep=J(NDEP), hdep=J(HDEP), ids=J(TOUR_IDS))
 main += _rd('check.js').replace('__OTHER_HREF__', 'doha/?check=1').replace('__OTHER_LABEL__', 'ドーハ')
-main += art_js('assets/art/', "function artIdFor(S){var g=S&&S.d&&S.d.bg,h=S&&S.hub&&S.ctx&&S.ctx.bg,v=String(S&&S.vid||''),k=/2$/.test(v)?'2':'1';if(/^nbo_/.test(v)){if(g==='checkinQ')return'ncheckin'+k;if(g==='security')return'nsec'+k;if(g==='duty')return'nduty'+k;if(g==='lounge')return'nlounge'+k;if(g==='gate')return'ngate'+k}return g==='nlobby'?'nlobby':g==='nroom'?'nroom':g==='sim'?'simshop':(g==='sage'||h==='sage')?'sage':((g==='tdesk'||g==='rtmap')?'ticket':(g==='taxi'?'nairobi':(g==='immig'?'immig':(g==='baggage'?'bagclaim':(g==='hgateOW'?'hgate_ow':(g==='hgateST'?'hgate_st':null))))))}")   # ナイロビ出発まわり(タスク054: bg が checkinQ/security/duty/lounge/gate で vid が nbo_ のとき。羽田・ドーハの同名の bg は対象外。末尾の 2 で2つ目の配置)・羽田の出発ゲート(タスク043。券で絵が出し分け)・賢者の広間(sage_1〜3の会話・賢者のメニュー)・チケット売り場(窓口の全場面 ticket_*・win_*。bg が tdesk か rtmap。タスク041)・ナイロビ到着(タクシー乗り場)・入国審査・手荷物受け取り(bg が baggage。ナイロビだけ。タスク045)
-main += chant_js('assets/song/') + song_js()   # 宣言文ソング(タスク049): テーマ(ホテルのロビーの歌手イベント)。チャントはタイトルの曲(タスク050)で再生は chant.js だけ。ナイロビ(tour/)だけ
+main += art_js('assets/art/', "function artIdFor(S){var g=S&&S.d&&S.d.bg,h=S&&S.hub&&S.ctx&&S.ctx.bg,v=String(S&&S.vid||''),k=/2$/.test(v)?'2':'1';if(/^nbo_/.test(v)){if(g==='checkinQ')return'ncheckin'+k;if(g==='security')return'nsec'+k;if(g==='duty')return'nduty'+k;if(g==='lounge')return'nlounge'+k;if(g==='gate')return'ngate'+k}if(/^hnd_ev_ca_/.test(v))return 'cabinseat';if(/^hnd_ev_meal_/.test(v))return 'cabinmeal';return g==='nlobby'?'nlobby':g==='nroom'?'nroom':g==='sim'?'simshop':(g==='sage'||h==='sage')?'sage':((g==='tdesk'||g==='rtmap')?'ticket':(g==='taxi'?'nairobi':(g==='immig'?'immig':(g==='baggage'?'bagclaim':(g==='hgateOW'?'hgate_ow':(g==='hgateST'?'hgate_st':null))))))}")   # ナイロビ出発まわり(タスク054: bg が checkinQ/security/duty/lounge/gate で vid が nbo_ のとき。羽田・ドーハの同名の bg は対象外。末尾の 2 で2つ目の配置)・羽田の出発ゲート(タスク043。券で絵が出し分け)・賢者の広間(sage_1〜3の会話・賢者のメニュー)・チケット売り場(窓口の全場面 ticket_*・win_*。bg が tdesk か rtmap。タスク041)・ナイロビ到着(タクシー乗り場)・入国審査・手荷物受け取り(bg が baggage。ナイロビだけ。タスク045)
+main += chant_js('assets/song/') + song_js() + pa_js()   # 宣言文ソング(タスク049): テーマ(ホテルのロビーの歌手イベント)。チャントはタイトルの曲(タスク050)で再生は chant.js だけ。ナイロビ(tour/)だけ
 o = ev_patches(common(src, 'Africa/Nairobi'))
 o = rep(o, "(S.d.inter||[]).forEach(function(n){if(n.set&&n.set.gold)save.gold=1});storeSave();worldSync();",
         "(S.d.inter||[]).forEach(function(n){if(n.set&&n.set.gold)save.gold=1});if(S.d.keep&&/^[a-z0-9_]{1,16}$/.test(S.d.keep)){if(!save.keep||typeof save.keep!=='object')save.keep={};save.keep[S.d.keep]=1}storeSave();worldSync();")
@@ -701,6 +706,20 @@ o = rep(o, "function clearTimers(){G.timers.forEach(clearTimeout);G.timers=[];cl
 o = rep(o, "n.classList.toggle('done',c0===vs.length)", "n.classList.toggle('done',vs.length>0&&c0===vs.length)")
 # 記録(kanpe-tour-save-v1)がない初回だけ: マップでなく 賢者の広間に入り、賢者の最初の会話(sage_1)を開く(タスク022)
 o = rep(o, "function storeSave(){", "var TOUR_FRESH=(function(){try{return localStorage.getItem(SAVEKEY)===null}catch(e){return false}})();\nfunction storeSave(){")
+# ---- CAアナウンス・イベント(タスク048): ナイロビ(tour/)だけ ----
+# 設定の注意書き(声の扱い)と、マイク画面のカンペの見た目。終わりの場面(o_pre のあと)には入れない
+o = rep(o, SNOTE_NEW, SNOTE_TOUR)
+o = rep(o, ".cue .heard.live{color:#8a7b55}", ".cue .heard.live{color:#8a7b55}\n" + _rd('pa.css'))
+# 羽田の機内の会話が終わったとき、ほかの出来事より先に差しこむ(最初の長距離便で1回)
+o = rep(o, "if(evGate('after',S.pl.id,function(){G.scene=S;finishScene()}))return}",
+        "if(window.PA&&PA.gate(S,function(){G.scene=S;finishScene()}))return;if(evGate('after',S.pl.id,function(){G.scene=S;finishScene()}))return}")
+# 食事の場面(pre='own')は、最初の台詞の前に チャイム→自分の声の放送 を流す
+o = rep(o, "later(700,function(){playInter(-1,npcTurn)});return}", "var go0=function(){playInter(-1,npcTurn)};if(S.d.pre==='own'&&window.PA)PA.pre(S,go0);else later(700,go0);return}")
+# 機内のチャイム(自作の3音。搭乗案内と同じ音)
+o = rep(o, "else if(k==='sparkle'){tone(1568", "else if(k==='pachime'){chime(t0,.08)}else if(k==='sparkle'){tone(1568")
+# 便が終わる(ナイロビへ・ドーハへ飛ぶ)とき、声を消す
+o = rep(o, "if(S.pl.id==='qplane'){worldAt('nairobi');", "if(S.pl.id==='qplane'){if(window.PA)PA.discard();worldAt('nairobi');")
+o = rep(o, "if(S.pl.id==='hplane'){worldAt('haneda');", "if(S.pl.id==='hplane'){if(window.PA)PA.discard();worldAt('haneda');")
 o = rep(o, "setMode('arr');\nvar phoQ", main + "\nsetMode(save.ticket?(hdepOn()?'hdep':'arr'):'sage');\n"
         "if(/[?&]pho=/.test(location.search)||window.__CHK){}else {CHANT.resume(TOUR_FRESH&&!save.ticket);TRIP.enter(function(){if(TOUR_FRESH&&!save.ticket){enterHub(PBY.sage);runStory('sage_1')}},'tour')}\nvar phoQ")
 o = rep(o, '<head>', '<head><script>' + _rd('check_shim.js') + '</script>')   # タスク056: ?check=1 のときだけ効く(専用の記録)

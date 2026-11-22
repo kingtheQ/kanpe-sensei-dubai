@@ -1,4 +1,21 @@
-<!doctype html><html lang="ja" translate="no"><head><meta charset=utf8><meta name="google" content="notranslate"><meta http-equiv="content-language" content="ja"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+<!doctype html><html lang="ja" translate="no"><head><script>/* ===== チェックモード(タスク056)の入口: ページの最初に走る。URL に ?check=1 がなければ何もしない(通常の見た目・動作のまま) =====
+   ?check=1 のときだけ、localStorage の読み書きを専用の名前(chk1:)へ向ける。通常のセーブ(kanpe-…)は読まず・書かず・消さない。
+   設定(音のON/OFFなど)だけは、専用の記録が空のあいだ通常の値を読む(書くのは専用側)。 */
+(function(){
+ var CHK=/[?&]check=1(?:&|#|$)/.test(location.search);
+ window.__CHK=CHK;if(!CHK)return;
+ var P='chk1:',SHARE={'kd_snd':1,'kanpe-set-v1':1},S=Storage.prototype,g=S.getItem,s=S.setItem,r=S.removeItem;
+ function mine(o){try{return o===window.localStorage}catch(e){return false}}
+ S.getItem=function(k){if(!mine(this))return g.call(this,k);k=String(k);var v=g.call(this,P+k);if(v===null&&SHARE[k])return g.call(this,k);return v};
+ S.setItem=function(k,v){if(!mine(this))return s.call(this,k,v);return s.call(this,P+String(k),v)};
+ S.removeItem=function(k){if(!mine(this))return r.call(this,k);return r.call(this,P+String(k))};
+ /* IndexedDB(CAアナウンスの録音 kanpe-pa-rec-v1)も、専用の名前(chk1:…)へ向ける。通常の録音は読まず・書かず・消さない */
+ var IDBX=null;try{var F=IDBFactory.prototype,io=F.open,idd=F.deleteDatabase;IDBX={del:function(n){try{idd.call(window.indexedDB,P+n)}catch(e){}}};
+  F.open=function(n){return io.apply(this,[P+String(n)].concat([].slice.call(arguments,1)))};F.deleteDatabase=function(n){return idd.call(this,P+String(n))}}catch(e){}
+ /* 専用の記録だけを消す(通常のセーブは消さない) */
+ window.__chkReset=function(){var ks=[],i,L=window.localStorage;for(i=0;i<L.length;i++){var k=L.key(i);if(k&&k.indexOf(P)===0)ks.push(k)}ks.forEach(function(k){r.call(L,k)});if(IDBX)IDBX.del('kanpe-pa-rec-v1')};
+})();
+</script><meta charset=utf8><meta name="google" content="notranslate"><meta http-equiv="content-language" content="ja"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
 .node.lock{opacity:.38;filter:grayscale(1)}
 </style></head><body translate="no" class="notranslate">
 <title>空港えいご物語 世界一周編 ドーハ</title>
@@ -1997,7 +2014,7 @@ function showMap(){
  G.view='map';Snd.go(MODES[MODE].snd);G.sid++;clearTimers();stopSay();G.scene=null;G.camp=null;luHelp=false;luTalk=false;G.phase='idle';speaker=null;
  $m('sceneView').hidden=true;$m('boothView').hidden=true;$m('mapView').hidden=false;refreshBoothBtn();refreshCityBtn();
  if(!heroEl||!heroEl.isConnected)buildMap();refreshMap();drawMapBg();placeWalkers(G.at,true)}
-function lockedPlace(id){if(TRIP.lockedPlace(id))return true;if(MODE!=='arr'&&MODE!=='dep')return false;for(var k=0;k<PLACES.length;k++){if(PLACES[k].id===id)return false;if(!PLACES[k].v.some(function(v){return save.seen[v]>0}))return true}return false}
+function lockedPlace(id){if(window.__CHK)return false;if(TRIP.lockedPlace(id))return true;if(MODE!=='arr'&&MODE!=='dep')return false;for(var k=0;k<PLACES.length;k++){if(PLACES[k].id===id)return false;if(!PLACES[k].v.some(function(v){return save.seen[v]>0}))return true}return false}
 function onNode(id){
  if(G.view!=='map')return;
  if(lockedPlace(id)){try{Snd.jingle('buzz')}catch(e){}return}
@@ -2032,7 +2049,7 @@ function startScene(){
  b.addEventListener('click',function(){if(S.d.story)playInter(-1,npcTurn);else npcTurn()})}
 function npcTurn(){
  clearPanel();G.phase='npc';var S=G.scene,T=S.turns[G.ti];
- if(T.vr&&!T.vd){T.vd=1;for(var vi=0;vi<T.vr.length;vi++){var vv=T.vr[vi];if(save.seen[vv.s]>0){T.npc=vv.n;T.npcJp=vv.jp;if(vv.y){T.cue=vv.y;T.cueJp=vv.yjp}break}}}
+ if(T.vr&&!T.vd){T.vd=1;for(var vi=0;vi<T.vr.length;vi++){var vv=T.vr[vi];if(window.__CHK||save.seen[vv.s]>0){T.npc=vv.n;T.npcJp=vv.jp;if(vv.y){T.cue=vv.y;T.cueJp=vv.yjp}break}}}
  var bv=T.by&&S.pick&&T.by[S.pick];if(bv){T.npc=bv.n;T.npcJp=bv.jp}var cv=T.cueBy&&S.pick&&T.cueBy[S.pick];if(cv){T.cue=cv.y;T.cueJp=cv.jp}
  if(T.route!=null){S.rf=S.rn||0;S.rn=T.route;S.rt=t}
  if(T.dw&&!T.dts)T.dts=Date.now();
@@ -2805,7 +2822,7 @@ function startReveal(){
  one()}
 function finishScene(){
  var S=G.scene;if(S.d&&S.d.ev){evFinish(S);return}if(!S.evd){S.evd=1;evNote(S);if(evGate('after',S.pl.id,function(){G.scene=S;finishScene()}))return}save.seen[S.vid]=(save.seen[S.vid]||0)+1;(S.d.inter||[]).forEach(function(n){if(n.set&&n.set.gold)save.gold=1});storeSave();worldSync();
- TRIP.afterScene(S,function(){if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}if(S.vid==='doh_dep_plane'){worldMark('doha');Snd.go(null);location.href='../../world/?map=1';return}showMap();if(S.pl.id==='dride')setMode('city')})}
+ (window.__CHK?function(a,c){c()}:TRIP.afterScene)(S,function(){if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}if(S.vid==='doh_dep_plane'){worldMark('doha');Snd.go(null);location.href=window.__CHK?'./?check=1':'../../world/?map=1';return}showMap();if(S.pl.id==='dride')setMode('city')})}
 
 /* ---------- お店の中(Veranda・S34・Costa・Ahlan): 入るたびに、食べている人と相手がかわる ---------- */
 var INSIDE={cafe:1,s34:1,costa:1,ahlan:1};
@@ -3366,7 +3383,7 @@ var MODES={arr:{p:PLACES_ARR,b:'🛬 到着',h:'ドバイに到着<small>入国�
  city:{p:PLACES_CITY,b:'🏙 街',h:'ドバイの街<small>バスで出かけよう・実在の場所</small>',snd:'city'},
  dep:{p:PLACES_DEP,b:'🛫 出発',h:'ドバイから出発<small>チェックインから機内まで</small>',snd:'map'}};
 function refreshCityBtn(){
- var bar=$m('modeBar');if(!bar.childNodes.length){Object.keys(MODES).forEach(function(k){var b=el('button','mbtn',MODES[k].b);b.type='button';b.dataset.m=k;b.addEventListener('click',function(){if(G.view==='map'&&MODE!==k&&TRIP.lockedMode(k)){try{Snd.jingle('buzz')}catch(e){}return}if(G.view==='map'&&MODE!==k)setMode(k)});bar.appendChild(b)})}
+ var bar=$m('modeBar');if(!bar.childNodes.length){Object.keys(MODES).forEach(function(k){var b=el('button','mbtn',MODES[k].b);b.type='button';b.dataset.m=k;b.addEventListener('click',function(){if(G.view==='map'&&MODE!==k&&!window.__CHK&&TRIP.lockedMode(k)){try{Snd.jingle('buzz')}catch(e){}return}if(G.view==='map'&&MODE!==k)setMode(k)});bar.appendChild(b)})}
  bar.querySelectorAll('.mbtn').forEach(function(b){b.classList.toggle('on',b.dataset.m===MODE)});
  var h=document.querySelector('#mapView .mapbar h1');if(h)h.innerHTML=MODES[MODE].h;
  mapEl.classList.toggle('dense',MODE==='city')}
@@ -3753,7 +3770,7 @@ function setupDiagAz(act,stat,toks,spans,T,card){
    save.ev = {fired:{枠:1}, streak, last}。「飽きのサイン」は未決定(決定005-3)。いまの仮の定義は EVC.sameN だけ。 */
 var EVSLOTS=[{"id": "a", "vid": "nbo_ev_a_dropped", "at": "after", "key": "immig", "sign": 1}, {"id": "b", "vid": "nbo_ev_b_leak", "at": "enter", "key": "bag", "sign": 1}, {"id": "c", "vid": "nbo_ev_c_phone", "at": "enter", "key": "qcheckin", "sign": 1}, {"id": "d", "vid": "nbo_ev_d_lulu", "at": "after", "key": "duty", "sign": 1}, {"id": "e", "vid": "nbo_ev_e_gate", "at": "enter", "key": "gate", "sign": 1}, {"id": "f", "vid": "nbo_ev_f_captain", "at": "after", "key": "qplane", "sign": 1}, {"id": "g", "vid": "doh_ev_g_card", "at": "vid", "key": "doh_metro", "sign": 1}, {"id": "f1", "vid": "nbo_ev_f1_ribbon", "at": "enter", "key": "qplane", "sign": 0}, {"id": "f2", "vid": "doh_ev_f2_customs", "at": "after", "key": "dbag", "sign": 0, "need": "nbo_sec2"}, {"id": "h", "vid": "doh_ev_h_prayer", "at": "enter", "key": "calley", "sign": 1}, {"id": "j", "vid": "doh_ev_j_ask", "at": "enter", "key": "ccorn", "sign": 1}, {"id": "k", "vid": "doh_ev_k_ribbon", "at": "enter", "key": "dgate", "sign": 0, "need": "doh_bag2"}, {"id": "i", "vid": "doh_ev_i_board", "at": "enter", "key": "dgate", "sign": 1}];
 var EVC={sameN:2};   /* 未決定: 同じ型の場面が何回つづいたら「飽き」とみなすか(仮に2) */
-var EVQ=(location.search.match(/[?&]ev=(\w+)/)||[])[1]||'';
+var EVQ=(location.search.match(/[?&]ev=(\w+)/)||[])[1]||(window.__CHK?'off':'');
 function evS(){var e=save.ev;if(!e||typeof e!=='object')e=save.ev={};if(!e.fired||typeof e.fired!=='object')e.fired={};if(typeof e.streak!=='number')e.streak=0;if(typeof e.last!=='string')e.last='';return e}
 function evFx(k){try{Snd.fx('ding')}catch(e){}}
 function evNote(S){
@@ -3881,6 +3898,71 @@ MODES={arr:{p:PLACES_DARR,b:'🛬 到着',h:'ドーハに到着<small>ハマド�
  city:{p:PLACES_DCITY,b:'🏙 市内',h:'ドーハの街<small>スーク・ワキーフとコルニーシュ・1泊</small>',snd:'dohc'},
  dep:{p:PLACES_DDEP,b:'🛫 出発',h:'ドーハから出発<small>カウンターからヘルシンキ行きの機内まで</small>',snd:'doh'}};
 worldAt('doha');
+/* ===== チェックモード(タスク056): ?check=1 を付けた時だけ動く。付けなければ、ここは何もしない =====
+   (1) 場所は全部ロックなしで開く(build.py 側で lockedPlace・タブの鍵・券のタブの出し入れを window.__CHK で外す)
+   (2) 「CHECK」ボタンから場面一覧を開き、どの場面でも直接始められる。券は Star / oneworld をここで切りかえる
+   (3) 前提は満たしたものとして扱う: 券は選んだ扱い・前の場面の言い分け(持ち越し)は返る・割りこみ(出来事)は自動では入らない
+   (4) 進行は専用の記録(chk1:)へ。通常のセーブは変わらない(check_shim.js)。旅の骨組み(TRIP: DAY・お金・場所の鍵)は動かさない */
+(function(){
+if(!window.__CHK)return;
+var OTHER_HREF='../?check=1',OTHER_LABEL='ナイロビ';
+if(save.ticket!=='star'&&save.ticket!=='ow')save.ticket='ow';
+try{document.title='[CHECK] '+document.title}catch(e){}
+var css=document.createElement('style');
+css.textContent='#chkBtn{position:fixed;left:0;top:46%;z-index:99990;min-width:48px;min-height:40px;padding:4px 8px;border-left:0!important;border-radius:0 8px 8px 0!important;font:700 13px monospace;color:#10131f;background:#ffc72c;border:2px solid #10131f;opacity:.9}'
++'#chkPan{position:fixed;inset:0;z-index:99991;overflow:auto;-webkit-overflow-scrolling:touch;background:#10131f;color:#fff;font:14px/1.45 monospace;padding:12px 12px 80px;box-sizing:border-box}'
++'#chkPan[hidden]{display:none}#chkPan h2{margin:0 0 4px;font-size:16px;color:#ffc72c}#chkPan h3{margin:14px 0 4px;font-size:14px;color:#9ad0e4;border-bottom:1px solid #3a4260}'
++'#chkPan .row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0}#chkPan .pn{flex:0 0 100%;font-size:12px;color:#c9cfe4}'
++'#chkPan button,#chkPan a.b{min-height:40px;padding:6px 10px;font:13px monospace;color:#fff;background:#2a3050;border:2px solid #6a74a8;border-radius:6px;text-decoration:none;display:inline-flex;align-items:center}'
++'#chkPan button.on{background:#ffc72c;color:#10131f;border-color:#fff}#chkPan .x{position:sticky;top:0;float:right;background:#8a1538;border-color:#fff}#chkPan p{margin:4px 0;font-size:12px;color:#c9cfe4}';
+document.head.appendChild(css);
+var btn=el('button','','CHECK');btn.id='chkBtn';btn.type='button';document.body.appendChild(btn);
+var pan=el('div','');pan.id='chkPan';pan.hidden=true;document.body.appendChild(pan);
+function close(){pan.hidden=true}
+function modeOf(id){var ks=Object.keys(MODES),i,j;for(i=0;i<ks.length;i++){var ps=MODES[ks[i]].p;for(j=0;j<ps.length;j++)if(ps[j].id===id)return ks[i]}return null}
+/* 場面を直接始める。前の場面・券・お金は満たしたものとして、場所の鍵は見ない */
+function start(pl,vid,from){
+ if(!DLG[vid])return;close();
+ var mk=modeOf(pl.id);if(mk&&MODE!==mk)setMode(mk);G.at=pl.id;showMap();
+ G.evCont=null;startVid(pl,vid,from||null)}
+function startWin(key){
+ var i=WSTEP.indexOf(key);if(i<0)return;close();
+ if(MODE!=='sage'&&MODES.sage){setMode('sage')}G.at='ticket';showMap();
+ save.win={step:i,m:{},cont:5,pick:save.ticket==='ow'?'ow':'star'};storeSave();winRun()}
+function openPlace(pl){close();var mk=modeOf(pl.id);if(mk&&MODE!==mk)setMode(mk);G.at=pl.id;showMap();enterPlace(pl.id)}
+function vids(p){var a=[],add=function(v){if(v&&a.indexOf(v)<0&&DLG[v])a.push(v)};(p.v||[]).forEach(add);if(p.tkv)Object.keys(p.tkv).forEach(function(k){p.tkv[k].forEach(add)});if(p.menu)p.menu.forEach(function(m){add(m[1])});return a}
+function sbtn(t,fn,on){var b=el('button',on?'on':'',t);b.type='button';b.addEventListener('click',fn);return b}
+function build(){
+ pan.textContent='';
+ var x=sbtn('閉じる',close);x.className='x';pan.appendChild(x);
+ pan.appendChild(el('h2','','点検モード(?check=1)'));
+ pan.appendChild(el('p','','記録は専用の置き場。通常のセーブは読みも書きも消しもしません。'));
+ pan.appendChild(el('h3','','券(場面が券ごとに分かれる場所に効く)'));
+ var r1=el('div','row');
+ r1.appendChild(sbtn('Star Alliance',function(){save.ticket='star';storeSave();build()},save.ticket==='star'));
+ r1.appendChild(sbtn('oneworld',function(){save.ticket='ow';storeSave();build()},save.ticket==='ow'));
+ pan.appendChild(r1);
+ pan.appendChild(el('h3','','ページ'));
+ var r2=el('div','row'),a=el('a','b',OTHER_LABEL+'へ(点検モードのまま)');a.href=OTHER_HREF;r2.appendChild(a);
+ var a2=el('a','b','通常モードで開く');a2.href=location.pathname;r2.appendChild(a2);
+ r2.appendChild(sbtn('専用の記録を消す',function(){if(window.__chkReset)window.__chkReset();location.reload()}));
+ pan.appendChild(r2);
+ Object.keys(MODES).forEach(function(k){
+  pan.appendChild(el('h3','','場面一覧: '+MODES[k].b));
+  MODES[k].p.forEach(function(p){
+   var row=el('div','row');row.appendChild(el('div','pn',(p.name||p.id)+'  ['+p.id+']'));
+   var vs=vids(p);
+   vs.forEach(function(v){row.appendChild(sbtn(v,function(){start(p,v,p.hub?'hub':null)}))});
+   if(!vs.length||p.listen||p.rest)row.appendChild(sbtn('開く',function(){openPlace(p)}));
+   pan.appendChild(row)})});
+ var evs=[];(typeof EVSLOTS!=='undefined'?EVSLOTS:[]).forEach(function(s){if(DLG[s.vid]&&evs.indexOf(s.vid)<0)evs.push(s.vid)});
+ if(evs.length){pan.appendChild(el('h3','','割りこみ・顔なじみ(出来事の場面)'));var re=el('div','row');
+  evs.forEach(function(v){var sl=null;EVSLOTS.forEach(function(s){if(s.vid===v&&!sl)sl=s});var pl=(sl&&PBY[sl.key])||PBY[Object.keys(PBY)[0]];re.appendChild(sbtn(v,function(){start(pl,v,'ev')}))});pan.appendChild(re)}
+ if(typeof WSTEP!=='undefined'&&MODES.sage){pan.appendChild(el('h3','','窓口の流れ(選んだ段から先へ進む)'));var rw=el('div','row');
+  WSTEP.forEach(function(k){rw.appendChild(sbtn(k,function(){startWin(k)}))});pan.appendChild(rw)}
+}
+btn.addEventListener('click',function(){build();pan.hidden=false;pan.scrollTop=0});
+})();
 /* =====================================================   場面の絵(タスク028): 枠なし・フルブリードの新しい絵の場面
    - 新しい背景(1536×960)を #sceneA に描く。古い背景(320×150のドット)の場面は今までどおり #scene に描く
    - 人物は キング確定版のスプライト(足もとの芝・縁の黄緑は素材づくりで除去済み)。歩行は「進む方向を向いたコマだけ」
@@ -3946,7 +4028,13 @@ var ART={
   trav:{vid:'nbo_bag1',n:'t-backpacker-front',x:1065,by:708,sw:79}},
  /* ナイロビのホテルのロビー・歌手のイベント(タスク049): 人なしの背景(夜のロビー。右はしの肘かけ椅子のあるラウンジの隅)をフルブリード。
     歌手(正面・大人の高さ136px)はラウンジの隅の手前に立ち、歌っているあいだ 音符(♪)がのぼる(notes)。ルル(左)とキング(右)は広間と同じ後ろ姿で、歌手のほうを向いて少し離れて立つ。 */
- nlobby:{bg:'nairobi-hotel-lobby-v1.png',mode:'wide',hall:{sage:{n:'hall-singer',x:1130,by:800},lulu:{n:'hall-lulu-back',x:985,by:915},king:{n:'hall-king-back',x:1060,by:915},notes:1}}};
+ nlobby:{bg:'nairobi-hotel-lobby-v1.png',mode:'wide',hall:{sage:{n:'hall-singer',x:1130,by:800},lulu:{n:'hall-lulu-back',x:985,by:915},king:{n:'hall-king-back',x:1060,by:915},notes:1}},
+ /* 機内の対面アップ(タスク048): 1日目の最初の長距離便。CAアナウンス・イベントの2場面。背景は人なし(cabin-close-bg)と、食事のあと(cabin-close-meal。ふたりは絵に描かれている)。
+    cabinseat=CAが席に来る場面とマイク画面: キング・ルルは座った上半身。既存の室内の絵(room-king-idle / room-lulu-idle)を、食事の絵(cabin-close-meal)の人物に合わせた 約2.17倍(NEAREST)・同じ位置(x,y=左上)で重ね、
+      テーブルの上端(clip=585)で切る(テーブルは背景の絵)。CAは正面の絵(npc/ca-front・139×266)を同じ倍率で、右の通路側に立たせる(足もと by)。話しているとき「…」を出す。
+    cabinmeal=食事の場面: 背景の絵そのまま。ルルが話しているとき、ルルの頭の上に「…」を出す(bubble) */
+ cabinseat:{bg:'cabin-close-bg.png',mode:'room',seat:{king:{x:832,y:158,s:2.17},lulu:{x:444,y:202,s:2.18},clip:585,ca:{n:'ca-front',x:1345,by:700,s:2.17}}},
+ cabinmeal:{bg:'cabin-close-meal.png',mode:'room',meal:{bubble:{x:672,y:176}}}};
 
 /* ナイロビ出発まわり(タスク054)。ほかの場面と同じく、絵は 1536×960 の座標。mode:'wide' は歩く人物の絵の読み込み用(この場面では歩かない)。
    背景は人なし。ルル(左)とキング(右)は室内の大きさの後ろ姿(tk-)。立つ旅行者は室内の大きさ(t2-=高さ252px)。係員はカウンターの高さで切って下は描かない。
@@ -4052,6 +4140,8 @@ function ARTframe(S,A0,dt){
  var te=t-S.artT0,B=cf.base,BOB=4;
  ca.globalAlpha=1;ca.drawImage(bg,0,0);artStrips(cf.strips);
  if(cf.belt){artBelt(cf,exi,te,S);return true}
+ if(cf.seat){artSeat(cf.seat,im,exi,S);return true}
+ if(cf.meal){artMeal(cf.meal);return true}
  if(cf.dep){artDep(cf,exi,S,te);return true}
  if(cf.hall){artPeople(cf.people,exi);artHall(cf.hall,exi);return true}
  if(cf.tk){artTicket(cf.tk,exi,S);return true}
@@ -4140,6 +4230,18 @@ function artTrav(T){var im=artImg('npc/'+T.n+'.png');
 /* 人なし背景の場面に置く旅行者。list=[{n:'t-safari-front',x:足もとの中心,by:足もとの高さ,sw:影の幅,sit:座り(影なし。座面に足が着く)}]。端の位置に置くのは場面を入れる側 */
 function artPeople(list,exi){for(var i=0;i<(list||[]).length;i++){var P=list[i],im=exi[P.n];if(!im||im.bad||!artOKimg(im))continue;
  if(!P.sit)artShadowP(P.x,P.by,P.sw||Math.round(im.naturalWidth*1.2));artSway(im,P.x,P.by,artSwayD(i*.37+.2,1))}}
+/* 機内の対面アップ(タスク048)。ふたりは座った上半身(テーブルの上端で切る)。小さく上下にゆれる。CAは右の通路側に立ち、話しているとき小さく跳ねて「…」を出す */
+function artSeat(H,im,exi,S){
+ var ki=im['king-idle'],li=im['lulu-idle'],kd=Math.floor(t*1.1)%2?3:0,ld=Math.floor(t*1.1+.5)%2?3:0;
+ ca.save();ca.beginPath();ca.rect(0,0,AW,H.clip);ca.clip();
+ ca.drawImage(li,Math.round(H.lulu.x),Math.round(H.lulu.y-ld),Math.round(li.naturalWidth*H.lulu.s),Math.round(li.naturalHeight*H.lulu.s));
+ ca.drawImage(ki,Math.round(H.king.x),Math.round(H.king.y-kd),Math.round(ki.naturalWidth*H.king.s),Math.round(ki.naturalHeight*H.king.s));
+ ca.restore();
+ var ci=exi[H.ca.n];if(!ci)return;var cw=Math.round(ci.naturalWidth*H.ca.s),chh=Math.round(ci.naturalHeight*H.ca.s),hop=spSay&&Math.floor(t*6)%2?-4:0,cx=Math.round(H.ca.x-cw/2),cy=H.ca.by-chh+hop+(Math.floor(t*1.3)%2?-2:0);
+ ca.drawImage(ci,cx,cy,cw,chh);
+ if(spSay)artBubble(cx+Math.round(cw*.2),cy-20)}
+/* 機内食の場面(タスク048): 背景の絵そのまま。ルルが話しているとき、ルルの頭の上に「…」 */
+function artMeal(M){if(luTalk&&spSay)artBubble(M.bubble.x,M.bubble.y)}
 /* 賢者の広間を描く(タスク040)。歩かない。足と影は動かさず、上半身だけ小さく揺れる(タスク037)。話しているとき「…」を出す */
 function artSway(img,cx,by,d){var w=img.naturalWidth,h=img.naturalHeight,x=Math.round(cx-w/2),y=by-h,cut=Math.round(h*.58);
  ca.drawImage(img,0,0,w,cut,x,y-d,w,cut+d);   /* 上半身: 上へd画素のばす(足側は動かない) */
@@ -4264,7 +4366,7 @@ function artDep(cf,exi,S,te){
 function artStrips(list){for(var i=0;i<(list||[]).length;i++){var q=list[i],im=artImg(q.img);if(im.bad||!artOKimg(im))continue;var f=Math.floor(t/q.step)%q.n;ca.drawImage(im,f*q.fw,0,q.fw,q.fh,q.x,q.y,q.fw,q.fh)}}
 function artOKimg(i){return i.complete&&i.naturalWidth>0}
 /* この場面が使う人物の絵の名前(npc/ の中)。ひとつでも読めなければ、場面全体が今までの描画に戻る */
-function artExtra(cf){var a=[],i;if(cf.hall)['sage','lulu','king'].forEach(function(k){if(cf.hall[k])a.push(cf.hall[k].n)});if(cf.tk)['clerk','clerkS','lulu','king'].forEach(function(k){if(cf.tk[k])a.push(cf.tk[k].n)});(cf.crowd||[]).forEach(function(c){a.push('w-'+c[0])});
+function artExtra(cf){var a=[],i;if(cf.seat&&cf.seat.ca)a.push(cf.seat.ca.n);if(cf.hall)['sage','lulu','king'].forEach(function(k){if(cf.hall[k])a.push(cf.hall[k].n)});if(cf.tk)['clerk','clerkS','lulu','king'].forEach(function(k){if(cf.tk[k])a.push(cf.tk[k].n)});(cf.crowd||[]).forEach(function(c){a.push('w-'+c[0])});
  (cf.booths||[]).forEach(function(b){a.push(b.n);if(b.sw)a.push(b.sw)});(cf.people||[]).forEach(function(q){a.push(q.n)});
  if(cf.npcS)for(var k in cf.npcS)a.push(cf.npcS[k]);if(cf.dep)a=a.concat(artDepNames(cf.dep));return a}
 function artSpKey(){if(!speaker)return null;for(var k in SP)if(SP[k]===speaker)return k;return null}
@@ -4302,7 +4404,7 @@ window.__ambDuck=function(f){ambDuck=!!f;ambApply();if(window.__songSync)window.
 window.__ambSync=ambApply;window.__AMB=AMB;
 document.addEventListener('visibilitychange',ambApply);
 
-setMode('arr');if(!/[?&]pho=/.test(location.search))TRIP.enter(function(){},'doha');
+setMode('arr');if(!/[?&]pho=/.test(location.search)&&!window.__CHK)TRIP.enter(function(){},'doha');
 var phoQ=/[?&]pho=(\d)/.exec(location.search);if(phoQ){var PLAN={fw:["fine","fountain","flight"],mw:[{w:"fine",h:"hine"},{w:"flight",h:"hlight"},{w:"food",h:"hood"}],ss:["That is fine. Please bring it to the room."]};var sn=+phoQ[1],sq=/[&?]snd=(\w+)/.exec(location.search),sd=sq&&SND[sq[1]]?sq[1]:'f';if(sd!=='f')PLAN.fw=SND[sd].def.slice();showPho({fw:PLAN.fw,snd:sd,mw:PLAN.mw,ss:PLAN.ss,stages:sn===1?[1,2,3]:[sn]},true)}
 requestAnimationFrame(frame);
 })();

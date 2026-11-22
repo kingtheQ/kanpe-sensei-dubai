@@ -135,6 +135,13 @@ with sync_playwright() as p:
     ck0 = sorted(chk_keys(pg))
     go('tour/doha/index.html')
     chk('ドーハ通常: CHECKボタンなし・専用キーを増やさない・通常のセーブ不変', pg.evaluate("()=>!document.getElementById('chkBtn')") and sorted(chk_keys(pg)) == ck0)
+    # IndexedDB(CAアナウンスの録音 kanpe-pa-rec-v1)も専用の名前へ向く。点検ページだけを開いた新しい環境で、通常の名前のDBが作られないこと
+    ctx2 = b.new_context(viewport={'width': 390, 'height': 800}); ctx2.add_init_script(INIT)
+    pa = ctx2.new_page(); pa.route(re.compile(r'/index\.html'), hk); pb = ctx2.new_page(); pb.goto('http://127.0.0.1:%d/README.md' % PORT)
+    pa.goto('http://127.0.0.1:%d/tour/index.html?check=1' % PORT); pa.wait_for_timeout(1500)
+    pa.evaluate("()=>new Promise(function(res){var q=indexedDB.open('kanpe-pa-rec-v1',1);q.onupgradeneeded=function(){q.result.createObjectStore('rec')};q.onsuccess=function(){q.result.close();res()};q.onerror=function(){res()}})")
+    names = pb.evaluate("()=>indexedDB.databases().then(function(a){return a.map(function(d){return d.name})})")
+    chk('点検: IndexedDB は専用の名前(chk1:kanpe-pa-rec-v1)だけに作られる', 'chk1:kanpe-pa-rec-v1' in names and 'kanpe-pa-rec-v1' not in names, names)
     errs = pg.evaluate("()=>window.__errs")
     chk('ページのエラーなし', not errs, errs[:3])
     b.close()

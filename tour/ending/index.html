@@ -2029,7 +2029,7 @@ function showMap(){
  G.view='map';Snd.go(MODE==='city'?'city':'map');G.sid++;clearTimers();stopSay();G.scene=null;G.camp=null;luHelp=false;luTalk=false;G.phase='idle';speaker=null;
  $m('sceneView').hidden=true;$m('boothView').hidden=true;$m('mapView').hidden=false;refreshBoothBtn();refreshCityBtn();
  if(!heroEl||!heroEl.isConnected)buildMap();refreshMap();drawMapBg();placeWalkers(G.at,true)}
-function lockedPlace(id){if(TRIP.lockedPlace(id))return true;if(MODE!=='arr'&&MODE!=='dep'&&MODE!=='hdep')return false;for(var k=0;k<PLACES.length;k++){if(PLACES[k].id===id)return false;if(!PLACES[k].v.some(function(v){return save.seen[v]>0}))return true}return false}
+function lockedPlace(id){if(window.__CHK)return false;if(TRIP.lockedPlace(id))return true;if(MODE!=='arr'&&MODE!=='dep'&&MODE!=='hdep')return false;for(var k=0;k<PLACES.length;k++){if(PLACES[k].id===id)return false;if(!PLACES[k].v.some(function(v){return save.seen[v]>0}))return true}return false}
 function onNode(id){
  if(G.view!=='map')return;
  if(lockedPlace(id)){try{Snd.jingle('buzz')}catch(e){}return}
@@ -2063,7 +2063,7 @@ function startScene(){
  b.addEventListener('click',function(){if(S.d.story)playInter(-1,npcTurn);else npcTurn()})}
 function npcTurn(){
  clearPanel();G.phase='npc';var S=G.scene,T=S.turns[G.ti];
- if(T.vr&&!T.vd){T.vd=1;for(var vi=0;vi<T.vr.length;vi++){var vv=T.vr[vi];if(save.seen[vv.s]>0){T.npc=vv.n;T.npcJp=vv.jp;if(vv.y){T.cue=vv.y;T.cueJp=vv.yjp}break}}}
+ if(T.vr&&!T.vd){T.vd=1;for(var vi=0;vi<T.vr.length;vi++){var vv=T.vr[vi];if(window.__CHK||save.seen[vv.s]>0){T.npc=vv.n;T.npcJp=vv.jp;if(vv.y){T.cue=vv.y;T.cueJp=vv.yjp}break}}}
  var bv=T.by&&S.pick&&T.by[S.pick];if(bv){T.npc=bv.n;T.npcJp=bv.jp}var cv=T.cueBy&&S.pick&&T.cueBy[S.pick];if(cv){T.cue=cv.y;T.cueJp=cv.jp}
  if(T.route!=null){S.rf=S.rn||0;S.rn=T.route;S.rt=t}
  if(T.dw&&!T.dts)T.dts=Date.now();
@@ -2842,7 +2842,7 @@ function startReveal(){
  one()}
 function finishScene(){
  var S=G.scene;if(S.d&&S.d.win){save.seen[S.vid]=(save.seen[S.vid]||0)+1;storeSave();winAfter(S);return}if(S.d&&S.d.ev){evFinish(S);return}if(!S.evd){S.evd=1;evNote(S);if(evGate('after',S.pl.id,function(){G.scene=S;finishScene()}))return}save.seen[S.vid]=(save.seen[S.vid]||0)+1;(S.d.inter||[]).forEach(function(n){if(n.set&&n.set.gold)save.gold=1});if(S.d.keep&&/^[a-z0-9_]{1,16}$/.test(S.d.keep)){if(!save.keep||typeof save.keep!=='object')save.keep={};save.keep[S.d.keep]=1}storeSave();worldSync();
- TRIP.afterScene(S,function(){if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}if(S.pl.id==='qplane'){worldAt('nairobi');Snd.go(null);location.href='../world/?fly=doha';return}if(S.pl.id==='hplane'){worldAt('haneda');Snd.go(null);location.href='../world/?fly=nairobi';return}if(S.pl.id==='ticket'&&save.ticket){setMode('hdep');showMap();return}showMap();})}
+ (window.__CHK?function(a,c){c()}:TRIP.afterScene)(S,function(){if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}if(S.pl.id==='qplane'){worldAt('nairobi');Snd.go(null);location.href=window.__CHK?'doha/?check=1':'../world/?fly=doha';return}if(S.pl.id==='hplane'){worldAt('haneda');Snd.go(null);location.href=window.__CHK?'./?check=1':'../world/?fly=nairobi';return}if(S.pl.id==='ticket'&&save.ticket){setMode('hdep');showMap();return}showMap();})}
 
 /* ---------- お店の中(Veranda・S34・Costa・Ahlan): 入るたびに、食べている人と相手がかわる ---------- */
 var INSIDE={cafe:1,s34:1,costa:1,ahlan:1};
@@ -3403,8 +3403,8 @@ var MODES={arr:{p:PLACES_ARR,b:'🛬 到着',h:'ドバイに到着<small>入国�
  city:{p:PLACES_CITY,b:'🏙 街',h:'ドバイの街<small>バスで出かけよう・実在の場所</small>',snd:'city'},
  dep:{p:PLACES_DEP,b:'🛫 出発',h:'ドバイから出発<small>チェックインから機内まで</small>',snd:'map'}};
 function refreshCityBtn(){
- var bar=$m('modeBar');if(!bar.childNodes.length){Object.keys(MODES).forEach(function(k){var b=el('button','mbtn',MODES[k].b);b.type='button';b.dataset.m=k;b.addEventListener('click',function(){if(G.view==='map'&&MODE!==k&&TRIP.lockedMode(k)){try{Snd.jingle('buzz')}catch(e){}return}if(G.view==='map'&&MODE!==k){if(k!=='sage'&&!save.ticket){setMode('sage');G.at='ticket';placeWalkers('ticket',true);return}setMode(k)}});bar.appendChild(b)})}
- bar.querySelectorAll('.mbtn').forEach(function(b){b.classList.toggle('on',b.dataset.m===MODE);if(b.dataset.m==='sage')b.hidden=!!save.ticket;if(b.dataset.m==='hdep')b.hidden=!hdepOn()});
+ var bar=$m('modeBar');if(!bar.childNodes.length){Object.keys(MODES).forEach(function(k){var b=el('button','mbtn',MODES[k].b);b.type='button';b.dataset.m=k;b.addEventListener('click',function(){if(G.view==='map'&&MODE!==k&&!window.__CHK&&TRIP.lockedMode(k)){try{Snd.jingle('buzz')}catch(e){}return}if(G.view==='map'&&MODE!==k){if(k!=='sage'&&!save.ticket&&!window.__CHK){setMode('sage');G.at='ticket';placeWalkers('ticket',true);return}setMode(k)}});bar.appendChild(b)})}
+ bar.querySelectorAll('.mbtn').forEach(function(b){b.classList.toggle('on',b.dataset.m===MODE);if(b.dataset.m==='sage')b.hidden=!!save.ticket&&!window.__CHK;if(b.dataset.m==='hdep')b.hidden=!hdepOn()&&!window.__CHK});
  var h=document.querySelector('#mapView .mapbar h1');if(h)h.innerHTML=MODES[MODE].h;
  mapEl.classList.toggle('dense',MODE==='city')}
 function setMode(m){
@@ -3719,7 +3719,7 @@ function setupDiag(act,stat,toks,spans,T,card){
    save.ev = {fired:{枠:1}, streak, last}。「飽きのサイン」は未決定(決定005-3)。いまの仮の定義は EVC.sameN だけ。 */
 var EVSLOTS=[{"id": "a", "vid": "nbo_ev_a_dropped", "at": "after", "key": "immig", "sign": 1}, {"id": "b", "vid": "nbo_ev_b_leak", "at": "enter", "key": "bag", "sign": 1}, {"id": "c", "vid": "nbo_ev_c_phone", "at": "enter", "key": "qcheckin", "sign": 1}, {"id": "d", "vid": "nbo_ev_d_lulu", "at": "after", "key": "duty", "sign": 1}, {"id": "e", "vid": "nbo_ev_e_gate", "at": "enter", "key": "gate", "sign": 1}, {"id": "f", "vid": "nbo_ev_f_captain", "at": "after", "key": "qplane", "sign": 1}, {"id": "g", "vid": "doh_ev_g_card", "at": "vid", "key": "doh_metro", "sign": 1}, {"id": "f1", "vid": "nbo_ev_f1_ribbon", "at": "enter", "key": "qplane", "sign": 0}, {"id": "f2", "vid": "doh_ev_f2_customs", "at": "after", "key": "dbag", "sign": 0, "need": "nbo_sec2"}, {"id": "h", "vid": "doh_ev_h_prayer", "at": "enter", "key": "calley", "sign": 1}, {"id": "j", "vid": "doh_ev_j_ask", "at": "enter", "key": "ccorn", "sign": 1}, {"id": "k", "vid": "doh_ev_k_ribbon", "at": "enter", "key": "dgate", "sign": 0, "need": "doh_bag2"}, {"id": "i", "vid": "doh_ev_i_board", "at": "enter", "key": "dgate", "sign": 1}];
 var EVC={sameN:2};   /* 未決定: 同じ型の場面が何回つづいたら「飽き」とみなすか(仮に2) */
-var EVQ=(location.search.match(/[?&]ev=(\w+)/)||[])[1]||'';
+var EVQ=(location.search.match(/[?&]ev=(\w+)/)||[])[1]||(window.__CHK?'off':'');
 function evS(){var e=save.ev;if(!e||typeof e!=='object')e=save.ev={};if(!e.fired||typeof e.fired!=='object')e.fired={};if(typeof e.streak!=='number')e.streak=0;if(typeof e.last!=='string')e.last='';return e}
 function evFx(k){try{Snd.fx('ding')}catch(e){}}
 function evNote(S){
