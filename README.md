@@ -23,6 +23,10 @@
 - `tour/` : 世界一周編 賢者・窓口・ナイロビ(到着・空港・出発)。機内の会話を終えると、世界マップの飛ぶ画面をはさんでドーハへ。
 - `tour/doha/` : 世界一周編 ドーハ(到着)。
 
+## 実機の点検用「チェックモード」
+
+`tour/` と `tour/doha/` のURLに `?check=1` を付けた時だけ動く(付けなければ従来どおり)。全場所がロックなしで開き、左端の「CHECK」から場面一覧を開いて、どの場面も直接始められる(券は Star / oneworld を一覧で切りかえ、前の場面・券・お金は満たした扱い。割りこみは自動では入らず、一覧から始める)。進行は専用キー `chk1:…` にだけ入り、通常のセーブ(`kanpe-…`)は読みも書きも消しもしない。旅の骨組み(DAY・お金・場所の鍵)は動かさない。対象はナイロビ・ドーハ(`tour/ending/` は対象外)。実装は `tour-src/check_shim.js`(記録の向きかえ)と `tour-src/check.js`(一覧)、build.py の `window.__CHK` の分岐。確認は `python3 tour-src/tests/test_check056.py`。
+
 ## 世界一周編の作り方
 
 `tour-src/data.py` に会話、`tour-src/build.py` に場所・人物・背景・音を書き、`python3 tour-src/build.py` で `dubai/index.html` から `tour/index.html` と `tour/doha/index.html` を作る(`pip install cmudict` が必要)。
