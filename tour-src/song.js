@@ -15,6 +15,7 @@ var ROOMSC=/*ROOMDATA*/null;   /* ホテルの部屋(タスク051) */
 var SONG={el:null,key:null,ac:null,gn:null,want:null};
 SP.singer={pitch:1.1,m:[[HJ,P(2,{x:'#2d8f8a',o:'#e0b040'})]]};   /* 絵が読めなかったときの、いつものドット */
 BGS.nlobby=BGS.lobby;   /* 背景の絵が読めなかったときの、いつものドットのロビー */
+BGS.nsong=BGS.lobby;    /* 歌場面版の背景(タスク060)が読めなかったときも、いつものドットのロビー */
 /* 曲が鳴っているあいだは、場面の背景の音楽(Snd.go)を止めて重ならないようにする。曲が止まったら、いまの場面の音楽に戻す */
 var SONGSNDGO=Snd.go;
 Snd.go=function(k){SONG.want=k;return SONGSNDGO.call(Snd,(SONG.el||CHANT.has())?null:k)};
@@ -63,8 +64,15 @@ function songListen(pl){
  cam=0;spX=360;spSay=false;luTalk=false;G.view='scene';G.ti=0;G.tries=0;$m('mapView').hidden=true;$m('sceneView').hidden=false;
  clearPanel();G.phase='listen';setMsgInstant(d.intro,'');$m('tapHint').textContent='';
  var S=G.scene,sid=G.sid;
- var go=el('button','btn go','GO！');go.type='button';panel.appendChild(go);
- go.addEventListener('click',function(){
+ /* タスク060: 入りは、観客が集まった絵を見せ(入りの1行)、「つぎへ」でルルが歌手に気づく一言(英語だけ・読み上げ)→「GO！」で歌が始まる。曲はユーザー操作(GO！)の中だけで始める */
+ var nx=el('button','btn sub','つぎへ ▶');nx.type='button';nx.id='songNotice';panel.appendChild(nx);
+ nx.addEventListener('click',function(){if(G.sid!==sid||S.songNotice)return;S.songNotice=1;noticeLine()});
+ function noticeLine(){
+  clearPanel();G.phase='listen';speaker=null;luTalk=true;S.pitch=1.35;
+  if(d.notice){setMsgInstant(d.notice.en,d.notice.who);spSay=true;say(d.notice.en,.9,1.35,gd(function(){spSay=false}))}
+  var go=el('button','btn go','GO！');go.type='button';panel.appendChild(go);
+  go.addEventListener('click',function(){stopSay();spSay=false;luTalk=false;onGo()})}
+ function onGo(){
   if(G.sid!==sid||S.songGo)return;S.songGo=1;
   clearPanel();setMsgInstant('♪','');
   function next(){if(G.sid!==sid||S.songAfter)return;S.songAfter=1;songLine(0)}
@@ -78,7 +86,7 @@ function songListen(pl){
   });
   if(!ok)nextBtn();
   else later(20000,nextBtn);                     /* 十分聴いたら、先へ進めるボタンを出す(曲の途中でも出口ボタンでマップに戻れる) */
-  });
+  }
  /* 歌手・ルル・キングの短いやりとり。読み上げて表示するだけ(マイクなし・採点なし)。タップで早送りできる */
  function songLine(i){
   var L=d.after[i];

@@ -6,9 +6,11 @@
 SONG_SCENE = {
     'id': 'nbo_song',
     'who': 'ラウンジの歌手',
-    'bg': 'nlobby',
+    'bg': 'nsong',   # タスク060: 歌場面版の背景(台とマイクスタンド)＋観客。通常のロビー(nlobby)は変えない
     'sp': 'singer',
-    'intro': '夜のホテルのロビー。奥のラウンジの隅から、やさしい歌声が聞こえてくる。ふたりは足をとめて、耳をかたむけた。',
+    'intro': '夜のホテルのロビー。受付の前の小さな台のまわりに、人が集まっている。ふたりも、その輪に加わった。',
+    # タスク060: 歌を始める前の、ルルが歌手に気づく一言(英語だけ。日本語訳は出さない。読み上げ+表示。マイクなし)
+    'notice': {'who': 'ルル', 'en': 'Look, King! Someone is going to sing.'},
     # 曲が終わったあとの短いやりとり(読み上げ+表示。マイクは使わない)。w = 話す人(singer / lulu / king)
     'after': [
         {'w': 'singer', 'who': 'ラウンジの歌手', 'en': 'Thank you for listening. Karibu Nairobi. Welcome!'},

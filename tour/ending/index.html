@@ -1439,8 +1439,8 @@ var TRIP=(function(){
  var ROWS={
   ow:[[1,'HND','air',1,'Tokyo. Today our trip begins.',['hnd','hnd_dep']],
    [2,'NBO','move',1,'Nairobi. We landed in Kenya.',['nbo_arr']],
-   [3,'NBO','city',1,"Nairobi. Let's meet the giraffes.",[]],
-   [4,'NBO','city',2,"Nairobi. Let's go on a safari.",[]],
+   [3,'NBO','city',1,"Nairobi. Let's go to the Maasai Market.",['nbo_market']],   /* 058: 3日目=マサイマーケット(旧「キリンセンター(候補)」。キリンは4日目のサファリで会う) */
+   [4,'NBO','city',2,"Nairobi. Let's go on a safari.",['nbo_safari']],
    [5,'NBO','rest',0,'Nairobi. A slow morning.',[]],
    [6,'NBO','air',1,'Nairobi. Our flight to Doha is today.',['nbo_air','nbo_dep','doh_arr']],
    [7,'DOH','city',1,"Doha. Let's walk through the old market.",['doh_city','doh_hotel_am']],
@@ -1459,7 +1459,7 @@ var TRIP=(function(){
   star:[[1,'HND','air',1,'Tokyo. Today our trip begins.',['hnd','hnd_dep']],
    [2,'IST','move',1,'Istanbul. A long wait between flights.',[]],
    [3,'NBO','air',1,'Nairobi. We landed in the middle of the night.',['nbo_arr']],
-   [4,'NBO','city',2,"Nairobi. Let's go on a safari.",[]],[5,'NBO','rest',0,'Nairobi. A slow morning.',[]],
+   [4,'NBO','city',2,"Nairobi. Let's go on a safari.",['nbo_market','nbo_safari']],[5,'NBO','rest',0,'Nairobi. A slow morning.',[]],
    [6,'NBO','air',1,'Nairobi. Our flight to Addis Ababa is today.',['nbo_air']],
    [7,'ADD','move',1,'Addis Ababa. Fog this morning.',[]],[8,'IST','city',1,'Istanbul. The old city and the bazaar.',[]],
    [9,'IST','air',2,'Istanbul. We fly north today.',[]],[10,'RVN','city',1,'Lapland. Dogs and reindeer.',[]],
@@ -1490,6 +1490,7 @@ var TRIP=(function(){
   hnd:[['ticket_ow','ticket_star']],
   hnd_dep:[['hnd_checkin_ow','hnd_checkin_star'],['hnd_sec'],['hnd_exit'],['hnd_gate_ow','hnd_gate_star'],['hnd_board_ow','hnd_board_star'],['hnd_plane_ow','hnd_plane_star']],   /* 1日目の羽田(タスク043): 券ごとに場面がちがう。どちらか1本あそべば、その場所は終わり */
   nbo_arr:[['nbo_immig1','nbo_immig2'],['nbo_bag1','nbo_bag2'],['nbo_sim1','nbo_sim2'],['nbo_taxi1','nbo_taxi2']],
+  nbo_market:[['nbo_market']],nbo_safari:[['nbo_safari']],   /* 058: ナイロビの滞在。市場=3日目(スターは4日目)・サファリ=4日目 */
   nbo_air:[['nbo_java1','nbo_java2'],['nbo_art1','nbo_art2'],['nbo_lounge1','nbo_lounge2'],['nbo_duty1','nbo_duty2']],
   nbo_dep:[['nbo_checkin1','nbo_checkin2'],['nbo_sec1','nbo_sec2'],['nbo_gate1','nbo_gate2'],['nbo_plane1','nbo_plane2']],
   doh_arr:[['doh_immig1','doh_immig2'],['doh_bag1','doh_bag2'],['doh_sim1','doh_sim2'],['doh_taxi','doh_metro']],
@@ -1497,13 +1498,13 @@ var TRIP=(function(){
   doh_hotel_am:[['doh_city_h3','doh_city_h4']],
   doh_dep:[['doh_dep_checkin','doh_dep_passport'],['doh_dep_bear'],['doh_dep_train'],['doh_dep_orchard','doh_dep_lounge'],['doh_dep_gate','doh_dep_plane']]};
  /* 場所の名前(各ページの place id) → まとまり。鍵(ロック)と、タブの開きに使う */
- var PLACEGRP={hcheckin:'hnd_dep',hsec:'hnd_dep',hexit:'hnd_dep',hgate:'hnd_dep',hboard:'hnd_dep',hplane:'hnd_dep',immig:'nbo_arr',bag:'nbo_arr',sim:'nbo_arr',taxi:'nbo_arr',java:'nbo_air',art:'nbo_air',lounge:'nbo_air',duty:'nbo_air',
+ var PLACEGRP={hcheckin:'hnd_dep',hsec:'hnd_dep',hexit:'hnd_dep',hgate:'hnd_dep',hboard:'hnd_dep',hplane:'hnd_dep',immig:'nbo_arr',bag:'nbo_arr',sim:'nbo_arr',taxi:'nbo_arr',market:'nbo_market',safari:'nbo_safari',java:'nbo_air',art:'nbo_air',lounge:'nbo_air',duty:'nbo_air',
   qcheckin:'nbo_dep',nsec:'nbo_dep',gate:'nbo_dep',qplane:'nbo_dep',dimmig:'doh_arr',dbag:'doh_arr',dsim:'doh_arr',dride:'doh_arr',
   calley:'doh_city',chotel:'doh_city',csouq:'doh_city',crest:'doh_city',ccorn:'doh_city',cbreak:'doh_hotel_am',
   dcounter:'doh_dep',dsouth:'doh_dep',dtrain:'doh_dep',dnorth:'doh_dep',dgate:'doh_dep'};
- var MODEGRP={hdep:{tour:'hnd_dep'},arr:{tour:'nbo_arr',doha:'doh_arr'},air:{tour:'nbo_air'},dep:{tour:'nbo_dep',doha:'doh_dep'},city:{doha:'doh_city'},sage:{tour:'hnd'}};
+ var MODEGRP={hdep:{tour:'hnd_dep'},arr:{tour:'nbo_arr',doha:'doh_arr'},stay:{tour:['nbo_market','nbo_safari']},air:{tour:'nbo_air'},dep:{tour:'nbo_dep',doha:'doh_dep'},city:{doha:'doh_city'},sage:{tour:'hnd'}};
  /* お金の1行(場面の台詞に出る値段。円に直すレートは架空で固定)。タクシーとメトロは台詞に値段がないので、架空の値段 */
- var MONEY={nbo_sim1:['sim',1000,'KES'],nbo_taxi1:['taxi',3000,'KES'],nbo_java1:['coffee',800,'KES'],nbo_duty1:['duty',24,'USD'],
+ var MONEY={nbo_sim1:['sim',1000,'KES'],nbo_taxi1:['taxi',3000,'KES'],nbo_java1:['coffee',800,'KES'],nbo_market:['gift',1500,'KES'],nbo_duty1:['duty',24,'USD'],
   doh_sim1:['sim',30,'QAR'],doh_taxi:['taxi',55,'QAR'],doh_metro:['metro',6,'QAR'],doh_city_t1:['tea',2,'QAR'],doh_city_s1:['gift',10,'QAR'],
   doh_city_s3:['gift',22,'QAR'],doh_city_r3:['dinner',80,'QAR'],doh_city_c2:['boat',50,'QAR']};
  var PICK={doh_taxi:'taxi',doh_metro:'metro'};
@@ -1514,7 +1515,7 @@ var TRIP=(function(){
     別切符: 券の区間のうち sep の区間(oneworld のリマ⇄クスコ)をちぎったとき、1回ずつ記録帳に載る。手数料: 場面が TRIP.addFee で載せる(いまそれを使う場面はまだない) */
  var SEPTICKET=['sep',95,'USD'];
  /* 場面の絵の名前 → 写真の見た目(場面の絵が使えないページ=世界マップで、控えの写真に使う) */
- var THEME={checkinT:'air',immigH:'air',hgateOW:'air',hgateST:'air',cabinT:'cabin',tdesk:'desk',sage:'desk',javaK:'air',artK:'air',lounge:'lng',duty:'air',gate:'air',sim:'air',taxi:'street',checkinQ:'air',cabinQ:'cabin',
+ var THEME={checkinT:'air',immigH:'air',hgateOW:'air',hgateST:'air',cabinT:'cabin',tdesk:'desk',sage:'desk',javaK:'air',artK:'air',safariK:'street',marketK:'souq',lounge:'lng',duty:'air',gate:'air',sim:'air',taxi:'street',checkinQ:'air',cabinQ:'cabin',
   dimmig:'dair',dbag:'dair',dsim:'dair',dtaxi:'street',dmetro:'dair',dcheck:'dair',dsouth:'dair',dtrain:'dair',dorch:'dair',dlng:'lng',dgate:'dair',dcabin:'cabin',
   calley:'souq',chotel:'hotel',csouq:'souq',crest:'souq',cbreak:'hotel',ccorn:'sea',night:'night',nap:'night'};
 
@@ -1525,6 +1526,7 @@ var TRIP=(function(){
  var HOUR={
   hcheckin:21,hsec:22,hexit:22,hgate:23,hboard:23,hplane:0, /* 羽田の出発(深夜便。物語の時刻で、実在の便の時刻ではない) */
   immig:9,bag:9,sim:10,taxi:10,                       /* ナイロビ到着(台本: Good morning) */
+  market:11,safari:8,                                  /* ナイロビの滞在(058): 市場=昼前・サファリ=朝(背景は昼の絵。時刻は台本のあいさつに使う) */
   java:12,art:13,lounge:14,duty:15,                    /* ナイロビの空港(昼すぎ) */
   qcheckin:16,nsec:17,gate:18,qplane:19,               /* ナイロビ出発(台本: 午後〜Good evening)。夕方の便 */
   dimmig:22,dbag:22,dsim:22,dride:22,                  /* ドーハ到着(台本: Good evening。ナイロビから約5時間) */
@@ -1679,7 +1681,7 @@ var TRIP=(function(){
   if(!openable(td)&&!(td===1&&s.day===0))return null;
   var r=rowOf(td);return {td:td,day:s.day+1,en:'Day '+(s.day+1)+'. '+r[4],rest:r[2]==='rest',note:r[2]==='rest'&&has(NOTICES,s.tk+td)?NOTICES[s.tk+td]:'',sparta:isSparta(td),fly:legsOnDay(td)}}
  function legsOnDay(td){var s=S(),o=[],i;for(i=0;i<s.legs.length;i++)if(legInfo(i).td===td&&!s.legs[i].l)o.push(i);return o}
- function openMorning(){var m=morningInfo();if(!m)return null;var s=S();s.day=m.day;s.td=m.td;s.ph='day';s.cur={led:[],pick:[]};fillD();save();syncUI();return m}
+ function openMorning(){var m=morningInfo();if(!m)return null;var s=S();s.day=m.day;s.td=m.td;s.ph='day';s.cur={led:[],pick:[]};fillD();save();syncUI();try{var tm=todayMode();if(tm&&hooks.mode)hooks.mode(tm)}catch(e){}return m}
  function nightInfo(){
   var s=S();if(s.ph!=='night'&&!(s.ph==='day'&&(dayDone(s.td)||isRest(s.td))))return null;
   if(s.ph==='day'){s.ph='night';s.nph=pickPhoto(s.td);save();syncUI()}
@@ -1706,8 +1708,12 @@ var TRIP=(function(){
   var td=groupTd(g);if(!td)return true;
   return td>s.td||(td===s.td&&s.ph==='morning')}
  function lockedPlace(id){var g=PLACEGRP[id];return g?lockedGroup(g):false}
- function lockedMode(mode){var s=S();if(!s.tk)return false;var m=MODEGRP[mode];var g=m&&m[PAGE];return g?lockedGroup(g):false}
- function modeHidden(mode){var s=S();if(!s.tk)return false;var m=MODEGRP[mode],g=m&&m[PAGE];return !!g&&!groupTd(g)}
+ /* タブの鍵: タブに場面のまとまりが1つ(文字列)でも、いくつか(配列。058「滞在」タブは市場とサファリ)でも。配列のときは、全部がまだ開かない間だけ閉じる */
+ function modeGroups(mode){var m=MODEGRP[mode],g=m&&m[PAGE];return g?(typeof g==='string'?[g]:g):[]}
+ function lockedMode(mode){var s=S();if(!s.tk)return false;var gs=modeGroups(mode),i;if(!gs.length)return false;for(i=0;i<gs.length;i++)if(!lockedGroup(gs[i]))return false;return true}
+ function modeHidden(mode){var s=S();if(!s.tk)return false;var gs=modeGroups(mode),i;if(!gs.length)return false;for(i=0;i<gs.length;i++)if(groupTd(gs[i]))return false;return true}
+ /* 朝の1枚を開いた日に、その日のまとまりがあるタブへ移る(058)。ページが hooks.mode を持つときだけ。見つからなければ何もしない */
+ function todayMode(){var s=S(),gs=groupsOf(s.td),k,i;if(!gs.length)return null;for(k in MODEGRP)for(i=0;i<gs.length;i++)if(modeGroups(k).indexOf(gs[i])>=0)return k;return null}
 
  /* ====================== 画面(ほかの画面の上に重ねる1枚) ====================== */
  var CSS='.trip-ov{position:fixed;inset:0;z-index:2000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;box-sizing:border-box;background:#0d1226;color:#f4f1e8;font-family:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN",system-ui,sans-serif;text-align:center;cursor:pointer;overflow:auto}'
@@ -1939,7 +1945,7 @@ var TRIP=(function(){
 
 try{window.TRIP=TRIP}catch(e){}
 
-TRIP.setPage('tour');TRIP.hooks.say=function(t){try{setMsgInstant(t,'LULU')}catch(e){}};TRIP.hooks.at=function(){try{return G.at}catch(e){return null}};TRIP.hooks.sparta=function(){try{if(G.view==='map')startCamp()}catch(e){}};TRIP.hooks.ui=function(){try{var b=document.getElementById('boothBtn');if(b)b.hidden=TRIP.restToday()}catch(e){}};
+TRIP.setPage('tour');TRIP.hooks.say=function(t){try{setMsgInstant(t,'LULU')}catch(e){}};TRIP.hooks.at=function(){try{return G.at}catch(e){return null}};TRIP.hooks.sparta=function(){try{if(G.view==='map')startCamp()}catch(e){}};TRIP.hooks.ui=function(){try{var b=document.getElementById('boothBtn');if(b)b.hidden=TRIP.restToday()}catch(e){}};TRIP.hooks.mode=function(k){try{if(k==='stay'&&typeof MODES!=='undefined'&&MODES.stay&&MODE!==k)setMode(k)}catch(e){}};   /* 058: 滞在の日(市場・サファリ)の朝の1枚を開いたら、「滞在」タブへ移る。ほかの日は今までどおり(タブは自分で選ぶ) */
 function storeSave(){try{localStorage.setItem(SAVEKEY,JSON.stringify(save))}catch(e){}}
 /* 世界マップへ「クリア」を伝える: 6つの場所を、それぞれ1回以上あそんだら */
 function worldMark(k){try{var w=JSON.parse(localStorage.getItem('kanpe-world-v1')||'null');if(!w||typeof w!=='object')w={v:1,at:'haneda',seen:{haneda:1},cleared:{haneda:1}};w.seen=w.seen&&typeof w.seen==='object'?w.seen:{};w.cleared=w.cleared&&typeof w.cleared==='object'?w.cleared:{};w.seen[k]=1;w.cleared[k]=1;localStorage.setItem('kanpe-world-v1',JSON.stringify(w))}catch(e){}}
@@ -2002,7 +2008,7 @@ function drawMapBg(){
  if(!cv2){cv2=document.createElement('canvas');cv2.id='mapbg';cv2.style.cssText='position:absolute;left:0;top:0;width:100%;height:100%;image-rendering:pixelated;z-index:0;pointer-events:none';mapEl.insertBefore(cv2,mapEl.firstChild)}
  var W2=mapEl.clientWidth,H2=mapEl.clientHeight;if(!W2||!H2)return;
  var U=4,cw=Math.ceil(W2/U),ch=Math.ceil(H2/U);cv2.width=cw;cv2.height=ch;var g=cv2.getContext('2d');
- var cty=MODE==='city',pal3={air:['#efe6d2','#e3d7bc','#c9a05a'],arr:['#dfe9f0','#cfdbe6','#8aa0b8'],city:['#ead2a0','#dcc08a','#a07838'],dep:['#e9e2f2','#d9d0e8','#8a7ac0'],sage:['#e4dff2','#d3cbe8','#8a7ac0'],hdep:['#dfe6f2','#cdd7ea','#8a98c0']}[MODE];g.fillStyle=pal3[0];g.fillRect(0,0,cw,ch);
+ var cty=MODE==='city',pal3={air:['#efe6d2','#e3d7bc','#c9a05a'],arr:['#dfe9f0','#cfdbe6','#8aa0b8'],city:['#ead2a0','#dcc08a','#a07838'],dep:['#e9e2f2','#d9d0e8','#8a7ac0'],sage:['#e4dff2','#d3cbe8','#8a7ac0'],hdep:['#dfe6f2','#cdd7ea','#8a98c0'],stay:['#efe4c4','#e2d3a6','#c9a05a']}[MODE];g.fillStyle=pal3[0];g.fillRect(0,0,cw,ch);
  g.fillStyle=pal3[1];for(var x=0;x<cw;x+=12)g.fillRect(x,0,1,ch);for(var y=0;y<ch;y+=12)g.fillRect(0,y,cw,1);
  g.fillStyle=pal3[2];for(var k=1;k<=3;k++)g.fillRect(0,Math.round(ch*k/4),cw,2);
  if(cty){g.fillStyle='#e8f0f4';g.fillRect(0,ch-8,cw,8);g.fillStyle='#9ad0e4';g.fillRect(0,ch-6,cw,6);return}
@@ -3783,7 +3789,7 @@ function paSay(text,rate,pitch,done){
       即答の線は WB(fastFrac)の1か所。時間切れ(LIMIT をこえても選ばない)は裏で記録するだけで、物語は止めない。
    2. 夢(dreamStart): 寝る場面(夜の1枚のあと)で、持ち越し(save.missed)の語が上位5語まで夢の会話に出る。3択にしない。
       自然に通じたら(発音が7割以上で、その語が言えていたら)持ち越しから外れる。通じなかった語は残す(会話は止めない)。 */
-var DREAMBANK={"latte": ["Welcome to the Cloud Café. What can I make for you?", "雲のカフェへようこそ。何をお作りしましょう。", "A *latte*, *please*.", "ラテをお願いします。"], "iced": ["It is a warm night on the moon. Would you like it iced?", "月の夜はあたたかいね。氷入りにしますか。", "*Yes*, *iced*, *please*.", "はい、アイスでお願いします。"], "slice": ["The star oven just finished. Would you like a slice?", "星のオーブンが焼きあがったよ。ひと切れどう？", "*Yes*, a *slice*, *please*.", "はい、ひと切れお願いします。"], "carrot cake": ["Tonight we have moon cheese and carrot cake. Which one?", "今夜は、月のチーズとキャロットケーキがあるよ。どっち？", "*Carrot* *cake*, *please*.", "キャロットケーキをお願いします。"], "shillings": ["That is eight hundred shillings. Or one good dream.", "800シリング。それか、いい夢をひとつ。", "*Here* are *eight* *hundred* *shillings*.", "800シリングです、どうぞ。"]},DREAMFB=["A word is floating by. Can you catch it?", "ひとつ、ことばがふわふわ浮いているよ。つかまえられる？"];
+var DREAMBANK={"latte": ["Welcome to the Cloud Café. What can I make for you?", "雲のカフェへようこそ。何をお作りしましょう。", "A *latte*, *please*.", "ラテをお願いします。"], "iced": ["It is a warm night on the moon. Would you like it iced?", "月の夜はあたたかいね。氷入りにしますか。", "*Yes*, *iced*, *please*.", "はい、アイスでお願いします。"], "slice": ["The star oven just finished. Would you like a slice?", "星のオーブンが焼きあがったよ。ひと切れどう？", "*Yes*, a *slice*, *please*.", "はい、ひと切れお願いします。"], "carrot cake": ["Tonight we have moon cheese and carrot cake. Which one?", "今夜は、月のチーズとキャロットケーキがあるよ。どっち？", "*Carrot* *cake*, *please*.", "キャロットケーキをお願いします。"], "shillings": ["That is eight hundred shillings. Or one good dream.", "800シリング。それか、いい夢をひとつ。", "*Here* are *eight* *hundred* *shillings*.", "800シリングです、どうぞ。"], "giraffe": ["A very tall guest is drinking tea on the cloud. Can you see the giraffe?", "とても背の高いお客さんが、雲の上でお茶を飲んでいるよ。キリンが見えるかな。", "*Yes*, *I* *see* the *giraffe*.", "はい、キリンが見えます。"], "zebra": ["The zebra is crossing the cloud road. Every stripe is different.", "シマウマが雲の道をわたっているよ。しまは、ぜんぶちがうんだ。", "*I* *see* the *zebra*.", "シマウマが見えます。"], "rhino": ["Shh. A rhino is sleeping on the moon. Please speak quietly.", "しーっ。サイが月の上で眠っているよ。静かに話してね。", "*I* *see* the *rhino*. *I* *will* be *quiet*.", "サイが見えます。静かにしますね。"], "lion": ["A lion is sleeping under the star tree. He sleeps all day.", "ライオンが星の木の下で眠っているよ。1日じゅう寝ているんだ。", "*I* *see* the *lion*.", "ライオンが見えます。"], "ostrich": ["Look! The ostrich is running across the sky. It is very fast.", "見て！ダチョウが空を走っているよ。とても速いね。", "The *ostrich* is so *fast*!", "ダチョウはとても速い！"], "cloth": ["Welcome to the Cloud Market. Do you like this cloth?", "雲のマーケットへようこそ。この布は気に入った？", "*Yes*, *I* *like* the *cloth*.", "はい、この布が好きです。"], "mask": ["This mask is smiling at you. Can you see it?", "このお面、きみに笑いかけているよ。見えるかな。", "*Yes*, *I* *see* the *mask*.", "はい、お面が見えます。"], "basket": ["A basket full of stars. Would you like one?", "星がいっぱいのかごだよ。ひとつどう？", "*Yes*, a *basket*, *please*.", "はい、かごをください。"], "price": ["The price tonight is one good dream.", "今夜の値段は、いい夢をひとつ。", "That is a *good* *price*.", "いい値段ですね。"], "cheaper": ["Cheaper? Tonight the stars are free.", "もっと安く？今夜は星はただだよ。", "*Can* *you* *make* it *cheaper*?", "もう少し安くなりますか。"]},DREAMFB=["A word is floating by. Can you catch it?", "ひとつ、ことばがふわふわ浮いているよ。つかまえられる？"];
 function forkWord(S,w){var ws=(S&&S.words)||[];for(var i=0;i<ws.length;i++)if(ws[i][0]===w)return ws[i];return [w,'','']}
 function forkNote(T,why,ms){var S=G.scene;((T.fork&&T.fork.tw)||[]).forEach(function(w){noteWord(forkWord(S,w),why,ms)})}
 function forkOpts(T){
