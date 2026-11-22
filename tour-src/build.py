@@ -33,6 +33,7 @@ for x in data.D:
             if 'cueBy' in p: yl['cueBy'] = dict((k, {'y': v[0], 'jp': v[1]}) for k, v in p['cueBy'].items())
             if 'diag' in p: yl['diag'] = p['diag']
             if 'fork' in p: yl['fork'] = p['fork']   # 分かれ目(タスク053): 選ぶまでの時間を測る語
+            if 'cards' in p: yl['cards'] = 1   # 日本語の単語カードで選ぶ分かれ目(タスク061)
             if 'rep' in p: yl['rep'] = {'n': p['rep'][0], 'jp': p['rep'][1]}
             lines.append(nl); lines.append(yl)
         else:
@@ -50,6 +51,7 @@ for x in data.D:
             if x.get(k) is not None: dl[x['id']][k] = x[k]
     if x.get('kind'): dl[x['id']]['kind'] = x['kind']
     if x.get('conv'): dl[x['id']]['conv'] = 1   # 会話に溶かした場面(タスク053): Word Battle と Meaning! を出さない
+    if x.get('flow2'): dl[x['id']]['flow2'] = 1   # 新しい会話の流れ(タスク061): おてほんボタンなし・自動おてほん・発音の数値なし・日本語カード・支払いの演出
     if x.get('keep'): dl[x['id']]['keep'] = x['keep']   # 秘密イベントの下地(タスク043): この場面を遊び終えたらルルが拾い物をする(画面には出さない)
 # ---------- 持ち越し(005案B): 相手のセリフの差しかえ。種の場面(save.seen)を遊んでいたときだけ返る ----------
 import event_data, window_data, doha_data
@@ -484,7 +486,7 @@ def record(label, memo=False):
 # 分かれ目(opts)・相手の言い分け(by)・持ち越しの差しかえ(vr)・あとの一言(rep)・自動で始まる場面(auto)・単語バトルに入らない場面(win/ev)
 SHARED = [
  ("if(n.n&&L[i+1]&&L[i+1].y){T.push({npc:n.n,npcJp:n.jp,cue:L[i+1].y,cueJp:L[i+1].jp});i+=2}",
-  "if(n.n&&L[i+1]&&L[i+1].y!==undefined){var Y=L[i+1];T.push({npc:n.n,npcJp:n.jp,cue:Y.y,cueJp:Y.jp,by:n.by,vr:n.vr,cueBy:Y.cueBy,opts:Y.opts,diag:Y.diag,rep:Y.rep,route:n.route,fork:Y.fork,dw:n.dw});i+=2}"),
+  "if(n.n&&L[i+1]&&L[i+1].y!==undefined){var Y=L[i+1];T.push({npc:n.n,npcJp:n.jp,cue:Y.y,cueJp:Y.jp,by:n.by,vr:n.vr,cueBy:Y.cueBy,opts:Y.opts,diag:Y.diag,rep:Y.rep,route:n.route,fork:Y.fork,cards:Y.cards,dw:n.dw});i+=2}"),
  (" clearPanel();G.phase='npc';var S=G.scene,T=S.turns[G.ti];\n if(T.ctx)applyCtx(T.ctx);",
   " clearPanel();G.phase='npc';var S=G.scene,T=S.turns[G.ti];\n"
   " if(T.vr&&!T.vd){T.vd=1;for(var vi=0;vi<T.vr.length;vi++){var vv=T.vr[vi];if(window.__CHK||save.seen[vv.s]>0){T.npc=vv.n;T.npcJp=vv.jp;if(vv.y){T.cue=vv.y;T.cueJp=vv.yjp}break}}}\n"
@@ -493,13 +495,24 @@ SHARED = [
   " if(T.dw&&!T.dts)T.dts=Date.now();\n"
   " if(T.ctx)applyCtx(T.ctx);"),
  ("var T=G.scene.turns[G.ti],toks=parseCue(T.cue);clearInterval(G.typeTimer);msgText.textContent=T.npc;",
-  "var T=G.scene.turns[G.ti];if(T.opts&&!T.pk){(T.fork?forkOpts:((G.scene.d.ev||typeof winOpts!=='function')?evOpts:winOpts))(T);return}var toks=parseCue(T.cue);clearInterval(G.typeTimer);msgText.textContent=T.npc;"),
+  "var T=G.scene.turns[G.ti];if(T.opts&&!T.pk){(T.cards?cardsOpts:T.fork?forkOpts:((G.scene.d.ev||typeof winOpts!=='function')?evOpts:winOpts))(T);return}var toks=parseCue(T.cue);clearInterval(G.typeTimer);msgText.textContent=T.npc;"),
  ("function advance(){\n",
-  "function advance(){\n if(!G.camp){var D0=G.scene.turns[G.ti];if(D0&&D0.rep&&!D0.repd){D0.repd=1;G.phase='rep';setMsg(D0.rep.n,D0.rep.who||whoNow());spSay=true;(paRep(G.scene,D0.rep)?paSay:say)(D0.rep.n,.95,G.scene.pitch,gd(function(){spSay=false;later(450,advance)}));return}}\n"),
+  "function advance(){\n if(!G.camp){var D0=G.scene.turns[G.ti];if(D0&&D0.rep&&!D0.repd){D0.repd=1;G.phase='rep';setMsg(D0.rep.n,D0.rep.who||whoNow());spSay=true;(paRep(G.scene,D0.rep)?paSay:say)(D0.rep.n,.95,G.scene.pitch,gd(function(){spSay=false;later(450,advance)}));return}\n"
+  " if(D0&&D0.pay&&!D0.payd){D0.payd=1;payStart(D0.pay,advance);return}}\n"),
  ("G.phase='pass';G.tries=0;var th=", "G.phase='pass';G.tries=0;dreamPass();var th="),
- ("G.tries++;\n if(G.tries>=3){G.phase='assist'", "G.tries++;\n if(dreamGiveUp())return;\n if(G.tries>=3){G.phase='assist'"),
+ ("G.tries++;\n if(G.tries>=3){G.phase='assist'", "G.tries++;\n if(dreamGiveUp())return;\n if(f2Fail())return;\n if(G.tries>=3){G.phase='assist'"),
  ("setMsgInstant('Clear!  ぜんぶ いえた！',whoNow());later(2000,startWords)",
   "var W0=G.scene.d&&(G.scene.d.win||G.scene.d.ev||G.scene.d.conv);setMsgInstant(G.scene.d.dream?'Good night.':W0?'Clear!':'Clear!  ぜんぶ いえた！',whoNow());later(W0?1300:2000,W0?finishScene:startWords)"),
+ ("if(!G.scene||G.phase==='idle'||G.phase==='words'||G.phase==='reveal'||G.phase==='inter'||G.phase==='hub')return;",
+  "if(!G.scene||G.phase==='idle'||G.phase==='words'||G.phase==='reveal'||G.phase==='inter'||G.phase==='hub'||G.phase==='sample'||G.phase==='pay')return;"),
+ # 新しい会話の流れ(タスク061): この場面(d.flow2)だけ、おてほんボタンを置かず、発音の数値・判定の文字を出さない。他の場面は今のまま
+ ("row.appendChild(demo);\n demo.addEventListener('click',", "if(!f2())row.appendChild(demo);\n demo.addEventListener('click',"),
+ ("stat.className='stat ok';stat.textContent=(res.okN===res.n?'Nice!  ':'')+cnt;onPass();return}\n  stat.className='stat ng';stat.textContent=cnt+'  7割未満';onFail()}",
+  "stat.className='stat ok';stat.textContent=f2()?'':(res.okN===res.n?'Nice!  ':'')+cnt;onPass();return}\n  stat.className='stat ng';stat.textContent=f2()?'':cnt+'  7割未満';onFail()}"),
+ ("stat.textContent='Too short';onFail()", "stat.textContent=f2()?'':'Too short';onFail()"),
+ ("stat.textContent='Too long';onFail()", "stat.textContent=f2()?'':'Too long';onFail()"),
+ ("stat.className='stat ok';stat.textContent='Nice!';onPass()}}", "stat.className='stat ok';stat.textContent=f2()?'':'Nice!';onPass()}}"),
+ ("drawFront();if(A0&&A0.fg)A0.fg(p0,S0)}", "drawFront();payFg();if(A0&&A0.fg)A0.fg(p0,S0)}"),
  (" setMsgInstant(S.d.intro||S.pl.tip[0],'');$m('tapHint').textContent='';\n var b=el('button','btn go','GO！');",
   " setMsgInstant(S.d.intro||S.pl.tip[0],'');$m('tapHint').textContent='';\n if(S.d.auto){if(S.d.fx)evFx(S.d.fx);later(700,function(){playInter(-1,npcTurn)});return}\n var b=el('button','btn go','GO！');"),
 ]
@@ -568,6 +581,7 @@ function paSay(text,rate,pitch,done){
 """
 import conv_data
 EVJS += _rd('conv.js').replace('DREAMBANK_JSON', json.dumps(dict((k, [v[0], v[1], window_data.star(v[2]), v[3]]) for k, v in conv_data.DREAM.items()), ensure_ascii=False)).replace('DREAMFB_JSON', json.dumps(conv_data.FALLBACK, ensure_ascii=False))
+EVJS += _rd('cards.js')   # 新しい会話の流れ(タスク061): 日本語カード・見本の音声先出し・自動おてほん・支払いの演出
 EVJS = EVJS.replace("||[])[1]||'';", "||[])[1]||(window.__CHK?'off':'');", 1).replace('EVSLOTS_JSON', json.dumps(event_data.SLOTS + doha_data.SLOTS, ensure_ascii=False)).replace('\\\\w', '\\w')
 
 def ev_patches(o):
@@ -709,7 +723,7 @@ o = rep(o, "function storeSave(){", "var TOUR_FRESH=(function(){try{return local
 # ---- CAアナウンス・イベント(タスク048): ナイロビ(tour/)だけ ----
 # 設定の注意書き(声の扱い)と、マイク画面のカンペの見た目。終わりの場面(o_pre のあと)には入れない
 o = rep(o, SNOTE_NEW, SNOTE_TOUR)
-o = rep(o, ".cue .heard.live{color:#8a7b55}", ".cue .heard.live{color:#8a7b55}\n" + _rd('pa.css'))
+o = rep(o, ".cue .heard.live{color:#8a7b55}", ".cue .heard.live{color:#8a7b55}\n" + _rd('pa.css') + _rd('cards.css'))
 # 羽田の機内の会話が終わったとき、ほかの出来事より先に差しこむ(最初の長距離便で1回)
 o = rep(o, "if(evGate('after',S.pl.id,function(){G.scene=S;finishScene()}))return}",
         "if(window.PA&&PA.gate(S,function(){G.scene=S;finishScene()}))return;if(evGate('after',S.pl.id,function(){G.scene=S;finishScene()}))return}")

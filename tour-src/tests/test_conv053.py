@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """タスク053 の動作確認(ヘッドレス)。使い方: python3 tour-src/tests/test_conv053.py
 A. 手順0: 語ごとの記録(即答/遅い/間違い/時間切れ・ms)と選別(即答=卒業・それ以外=持ち越し・理由つき・上限16)。即答の線は WB.fastFrac の1か所。画面(Word Battle)は今のまま
-B. 手順2〜3: 試行の場面 nbo_java1(会話に溶かす)。Word Battle も Meaning! も出ない／分かれ目で英語の返事を選んで声に出す／選び方で相手の反応が変わる／
-   選ぶまでの時間が語ごとに記録される／間違い・時間切れでも物語は進み、場面の完了(save.seen)とマップへの戻りは今までどおり／日本語・○×・点数が画面に出ない
+B. 手順2〜3: 試行の場面 nbo_java1(会話に溶かす。タスク061で新しい流れに作り替え済み: 日本語カードで選ぶのは1回)。Word Battle も Meaning! も出ない／選び方で相手の反応が変わる／
+   選ぶまでの時間が語ごとに記録される／時間切れでも物語は進み、場面の完了(save.seen)とマップへの戻りは今までどおり／点数が画面に出ない
 C. 手順1: 夢(夜の1枚のあと)。持ち越しの上位5語が夢の会話に出る(3択にしない)。通じた語は持ち越しから外れ、通じなかった語は残る。夢のあとは次の朝の1枚へ
 マイクの実機・音・見え方は確認できない(このテストの音声認識は、カンペの文をそのまま返す偽物)。"""
 import os, sys, json
@@ -81,33 +81,34 @@ with sync_playwright() as pw:
     # ---------------- B. 試行の場面 nbo_java1 ----------------
     q = seed(ctx, 'kanpe-tour-save-v1', {'seen': {}, 'ticket': 'ow'}, tseed('ow', 6, 6, 'day')); q.route('**/tour/index.html', hooked)
     q.goto(base + '/tour/index.html'); q.wait_for_timeout(1800); q.evaluate(POLL)
-    def run_java(pick1, wait1, pick2, wait2):
+    # タスク061: nbo_java1 は新しい流れ(日本語カードで選ぶのは1回だけ)に作り替えた。裏の計測と持ち越しは同じ仕組み。詳しい確認は test_flow061.py
+    def run_java(pick, wait):
         q.evaluate("()=>{var T=__T;T.save.missed=[];T.save.wrec={};T.save.seen={};window.__ph.clear();window.__txt.length=0;T.startVid(T.PBY.java,'nbo_java1',null)}")
-        q.wait_for_timeout(500); q.click('.btn.go'); forks = 0; t_end = 0
-        for step in range(60):
+        q.wait_for_timeout(500); q.click('.btn.go'); forks = 0
+        for step in range(120):
             q.wait_for_timeout(250)
-            n = q.evaluate("()=>document.querySelectorAll('.dq').length")
+            n = q.evaluate("()=>document.querySelectorAll('.jcard').length")
             if n:
-                forks += 1; w = wait1 if forks == 1 else wait2; pk = pick1 if forks == 1 else pick2
-                q.wait_for_timeout(w); q.evaluate("(i)=>{document.querySelectorAll('.dq')[i].click()}", pk)
+                forks += 1; q.wait_for_timeout(wait); q.evaluate("(i)=>{document.querySelectorAll('.jcard')[i].click()}", pick)
             if q.evaluate("()=>__T.G.view") == 'map': break
         return forks
-    f = run_java(0, 0, 0, 3200)   # 即答(アイス)・3.2秒のあと カード → 遅い
+    f = run_java(0, 0)   # すぐ カード → 即答
     s = q.evaluate("()=>({w:__T.save.wrec,m:__T.save.missed,seen:__T.save.seen,view:__T.G.view,ph:Array.from(window.__ph)})"); why = dict((m[0], m[3]) for m in s['m']); print('  run1', json.dumps(s['w'])[:300], why, s['ph'])
-    chk('B1 分かれ目は2か所', f == 2, f)
-    chk('B2 Word Battle も Meaning! も出ない(phase に words/reveal なし・選択肢画面・日本語の答え合わせなし)', 'words' not in s['ph'] and 'reveal' not in s['ph'] and 'CHOICES' not in s['ph'] and 'REVEAL' not in s['ph'], s['ph'])
+    chk('B1 選ぶのは1場面に1回(日本語カード。タスク061)', f == 1, f)
+    chk('B2 Word Battle も Meaning! も出ない(phase に words/reveal なし・3択の選択肢画面なし)', 'words' not in s['ph'] and 'reveal' not in s['ph'] and 'CHOICES' not in s['ph'] and 'REVEAL' not in s['ph'], s['ph'])
     chk('B3 会話が終わるとマップへ戻り、場面の完了(save.seen)が +1', s['view'] == 'map' and s['seen'].get('nbo_java1') == 1, (s['view'], s['seen']))
-    chk('B4 即答(iced・slice)は卒業: 持ち越しに入らず記録 fast', s['w'].get('iced', {}).get('o') == 'fast' and s['w'].get('slice', {}).get('o') == 'fast' and 'iced' not in why and 'slice' not in why, s['w'].get('iced'))
+    chk('B4 すぐ押すと shillings は即答(fast)で卒業。持ち越しに入らない', s['w'].get('shillings', {}).get('o') == 'fast' and 'shillings' not in why, s['w'])
+    f = run_java(0, 3200)   # 3.2秒のあと カード → 遅い
+    s = q.evaluate("()=>({w:__T.save.wrec,m:__T.save.missed,seen:__T.save.seen,view:__T.G.view})"); why = dict((m[0], m[3]) for m in s['m'])
     chk('B5 3.2秒で選ぶと「遅い」→持ち越し(shillings)・ms が記録される', why.get('shillings') == '遅い' and 3000 < s['w']['shillings']['ms'] < 5000, s['w'].get('shillings'))
     txt = q.evaluate("()=>window.__txt.join('\\n')"); import re
-    dq = [t[3:] for t in txt.split('\n') if t.startswith('DQ:')]
-    chk('B6 選択肢は英語だけ(日本語なし)。「復習」「テスト」「間違い」「Word Battle」「Meaning」も出ない', dq and not re.search(JP, ' '.join(dq)) and not any(w in txt for w in ['復習', 'テスト', 'Word Battle', 'Meaning!', '間違い', '点']), set(dq))
-    chk('B7 選んだ返事で相手の反応が変わる(アイス→"iced latte"・カード→"Card is fine")', 'An iced latte' in txt and 'Of course. Card' in txt)
-    f = run_java(2, 0, 2, 5600)   # 聞き違えた返事(スケート)→間違い、2つ目は時間切れのあとシャツ
-    s = q.evaluate("()=>({w:__T.save.wrec,m:__T.save.missed,seen:__T.save.seen,view:__T.G.view})"); why = dict((m[0], m[3]) for m in s['m']); print('  run2', json.dumps(s['w'])[:300], why)
+    chk('B6 画面に「復習」「テスト」「間違い」「Word Battle」「Meaning」「点」が出ない(日本語は選ぶカードの単語だけ)', not any(w in txt for w in ['復習', 'テスト', 'Word Battle', 'Meaning!', '間違い', '点']), '')
+    chk('B7 選んだ方法で相手の反応が変わる(カード→"Card is fine")', 'Of course. Card' in txt)
+    f = run_java(1, 5600)   # 時間切れのあと 現金
+    s = q.evaluate("()=>({w:__T.save.wrec,m:__T.save.missed,seen:__T.save.seen,view:__T.G.view})"); why = dict((m[0], m[3]) for m in s['m'])
     txt = q.evaluate("()=>window.__txt.join('\\n')")
-    chk('B8 ちぐはぐな返事(スケート)は「間違い」になり、相手が聞き返して物語は進む', why.get('iced') == '間違い' and why.get('slice') == '間違い' and 'Skate? Ha!' in txt and s['view'] == 'map' and s['seen'].get('nbo_java1') == 1, (why, s['view']))
-    chk('B9 制限時間をこえて選ぶと「時間切れ」(ms=制限時間)・物語は進む(シャツ → 聞き返し)', why.get('shillings') == '時間切れ' and s['w']['shillings']['ms'] == 5000 and 'A shirt? No, no!' in txt, why.get('shillings'))
+    chk('B8 現金を選ぶと、相手の反応は "Cash is fine"', 'Cash is fine' in txt)
+    chk('B9 制限時間をこえて選ぶと「時間切れ」(ms=制限時間)・物語は進んで終わる', why.get('shillings') == '時間切れ' and s['w']['shillings']['ms'] == 5000 and s['view'] == 'map' and s['seen'].get('nbo_java1') == 1, (why.get('shillings'), s['view']))
     # 場面のスイッチ: conv のない場面(nbo_java2)は今までどおり Word Battle が出る
     q.evaluate("()=>{var T=__T;T.save.missed=[];T.save.wrec={};window.__ph.clear();T.startVid(T.PBY.java,'nbo_java2',null)}"); q.wait_for_timeout(400); q.click('.btn.go')
     for i in range(60):

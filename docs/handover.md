@@ -133,3 +133,9 @@
 - SIM（art id `simshop`）・タクシー（`nairobi` の差し替え）に新しい背景。回転台とOPEN看板の strip アニメは汎用部品 `artStrips`（`art.js`。`strips:[{img,x,y,n,fw,fh,step}]`）。SIMとタクシーに旅行者2人ずつ。
 - 新しい場所「ホテルの部屋」`hroom`（`nbo_room`。読み上げ＋表示だけ・v 空・完了条件に入らない）。tour だけ `lockedPlace` を「場面の数が空の場所は飛ばして次を開く」に補正。TV画面の矩形は `ART.nroom.tv` に記録（未使用）。
 - 詳細・数値・未確認は `docs/pm/deliverables/051-nairobi-arrival-backgrounds-report-v1.md`。確認は `tour-src/tests/test_arrival051.py`。
+
+## 今回（11/22）タスク061でやったこと（カフェ試作 nbo_java1 の新しい会話の流れ）
+- この場面だけ（`d.flow2=1`）：店員が英語 → 日本語の単語カードで1回選ぶ（カード払い／現金／M-Pesa）→ 見本の英語が音声だけ → カンペ → 間違えたら自動おてほん→言い直し（おてほんボタンなし）→ 発音の数値なし（店員の反応で返す）→ 支払いの演出（払ってコーヒーとケーキが出る）。M-Pesa は「What is M-Pesa?」と聞いて、短い説明のあと支払い。
+- 実装：`tour-src/cards.js`・`cards.css`（新規）、`data.py` の nbo_java1、`build.py` の SHARED。確認は `python3 tour-src/tests/test_flow061.py`（30項目）と `test_conv053.py`。報告と「クロが決めたこと」は `docs/pm/deliverables/061-cafe-flow-impl-report-v1.md`。
+- 裏の反応時間→持ち越し→夢（053）は継続（shillings だけ。iced・slice の計測は選択がなくなったため外れた）。ルルの代行回数・ポイント・スパルタ教室は未決定のため入れていない（詰んだときは既存ヘルプ）。
+- 未確認：実機のマイク・声・見え方。参考にしたURL：なし（新しい外部URLは使っていない）。

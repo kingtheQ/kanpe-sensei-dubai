@@ -103,29 +103,29 @@ d('nbo_taxi2','ライドシェアの運転手','taxi','driver','Uber アプリ�
 [("passenger","乗客"),("suitcase","スーツケース"),("heavy","重い"),("air conditioner","エアコン"),("ride","乗ること")])
 
 # ---- 空港: ナイロビ ----
-# タスク053(案2: 会話に溶かす): Word Battle と Meaning! をなくし、会話の中の2か所を「▶で英語の返事を選んで声に出す」分かれ目にした(conv=1)。
-# 分かれ目は fork(tw=その一言に入っている今日の語)。選ぶまでの時間は裏で測る(ok=1 が通じた返事・無印は聞き違えた人が選ぶ返事)。点数・○×は出さない
+# タスク061(新しい会話の流れ・この場面だけ。flow2=1 がスイッチ): 店員が英語で話す → 選ぶのは1場面に1回だけ(支払い。日本語の短い単語カード)
+#   → カードをタップしたら見本の英語が音声だけで流れる(文字なし) → カンペ(文字)が出て声に出す → 間違えたらボタンなしで自動おてほん→言い直し
+#   → 発音の数値は出さず、通じたかは店員の反応で返す → 支払いは目に見える形で返す(払って、コーヒーとケーキが出てくる)。
+#   M-Pesa は「知らないカード」: タップしても分からないまま進ませず、プレイヤーが「What is M-Pesa?」と聞く → 短い説明 → 支払い(then)。
+# 裏の反応時間(カードを出してからタップするまで)の測定と持ち越し→夢(053)は見えない形で続く。fork=その一言に入っている今日の語。
+# 前の版(053)にあった「ホットかアイスか」の分かれ目は、1場面1回の決まりでなくした(会話の流れの中の「アイスにしますか」に変更)。
 d('nbo_java1','Java Houseの店員','cafeK','cafe_staff','Java House に入った。コーヒーのいい香り。',[
 ("Jambo! Welcome to Java House. What can I get you?","ジャンボ！Java Houseへようこそ。ご注文は？","*I'd* *like* *a* *latte*, *please*.","ラテをお願いします。"),
-W.OT("Sure. Hot or iced? And a slice of cake with it?","かしこまりました。ホットですか、アイスですか。ケーキもひと切れいかがですか。",[
-    W.O('ice',"Iced, please. And a slice of cake.","アイスで。それとケーキをひと切れ。",ok=1,
-        rep=("An iced latte. Nice on a warm day.","アイスラテ。暑い日にいいですね。")),
-    W.O('hot',"Hot, please. And a slice of cake.","ホットで。それとケーキをひと切れ。",ok=1,
-        rep=("One hot latte. Coming right up.","ホットラテをひとつ。すぐお持ちします。")),
-    W.O('off',"No, thanks. I do not skate.","いいえ。スケートはしません。",
-        rep=("Skate? Ha! I meant ice in your coffee. And a slice of cake.","スケート？ははは。コーヒーの氷のことですよ。それと、ケーキをひと切れ。"))],
-    fork={'tw':['iced','slice']}),
+("Sure. Would you like it iced? And a slice of cake with it?","かしこまりました。氷を入れますか。ケーキもひと切れいかがですか。","*Yes*, *iced*, *please*. *And* *a* *slice* *of* *cake*.","はい、アイスで。それとケーキをひと切れ。"),
 ("We have chocolate and carrot cake. Which one?","チョコレートとキャロットのケーキがあります。どちらにしますか。","*Carrot* *cake*, *please*.","キャロットケーキをお願いします。"),
-W.OT("Okay. That is eight hundred shillings.","はい。800シリングです。",[
-    W.O('card',"Can I pay by card?","カードで払えますか。",ok=1,
+W.OT("Okay. That is eight hundred shillings. How would you like to pay?","はい。800シリングです。お支払いはどうされますか。",[
+    W.O('card',"Can I pay by card?","カードで払えますか。",card='カード払い',pay='card',
         rep=("Of course. Card is fine.","もちろん。カードで大丈夫です。")),
-    W.O('cash',"Okay. I will pay in cash.","わかりました。現金で払います。",ok=1,
+    W.O('cash',"Okay. I will pay in cash.","わかりました。現金で払います。",card='現金',pay='cash',
         rep=("Thank you. Cash is fine, too.","ありがとうございます。現金も大丈夫ですよ。")),
-    W.O('off',"A shirt? I do not need a shirt.","シャツ？シャツはいりません。",
-        rep=("A shirt? No, no! Shillings, our money. Eight hundred. Card or cash is fine.","シャツ？いえいえ！シリング、このお金です。800です。カードでも現金でも大丈夫ですよ。"))],
-    fork={'tw':['shillings']}),
+    W.O('mpesa',"What is M-Pesa?","M-Pesaって何ですか。",card='M-Pesa',pay='mpesa',
+        then=dict(n="It is money on your phone. Everyone in Kenya uses it. Would you like to pay with it?",
+                  jp="携帯の中のお金です。ケニアではみんな使っています。それで払いますか。",
+                  y=W.star("Yes, I will pay with M-Pesa."), yjp="はい、M-Pesaで払います。",
+                  rep={'n': "Great. Just tap your phone here.", 'jp': "いいですね。ここにスマホをかざしてください。"}))],
+    cards=1, fork={'tw':['shillings']}),
 ("Here you go. Enjoy!","どうぞ。ごゆっくり。","*Thank* *you*. *Asante*!","ありがとう。アサンテ！")],
-[("latte","ラテ"),("iced","冷たい・氷入りの"),("slice","ひと切れ"),("carrot cake","キャロットケーキ"),("shillings","シリング(ケニアのお金)")],conv=1)
+[("latte","ラテ"),("iced","冷たい・氷入りの"),("slice","ひと切れ"),("carrot cake","キャロットケーキ"),("shillings","シリング(ケニアのお金)")],conv=1,flow2=1)
 d('nbo_java2','となりのお客さん','cafeK','cafe_staff2','店は混んでいる。隣のお客さんが話しかけてきた。',[
 ("Excuse me. Is this seat free?","すみません。この席は空いていますか。","*Yes*, *it* *is*. *Please* *sit* *down*.","はい、空いています。どうぞ座ってください。"),
 ("Thank you. Are you traveling?","ありがとう。旅行中ですか。","*Yes*. *We* *are* *traveling* *around* *the* *world*.","はい。世界一周をしています。"),
