@@ -80,6 +80,11 @@ ARR = [
  place('hsong', 'ホテルのロビー', 'hotel', 24, 84, '🏨', ['Villa Rosa Kempinski', '夜のロビーで、歌を聴く'], [], listen='nbo_song'),
 # ホテルの部屋(タスク051): 到着の夜、部屋で休む場面。hsong と同じホテル。v は空 = 到着の完了条件・場面の数・保存の記録(save.seen)に入らない(任意・休憩)。hsong の次に開く(下の lockedPlace の補正)
  place('hroom', 'ホテルの部屋', 'hotel', 48, 88, '🛏️', ['Villa Rosa Kempinski', '部屋で休む'], [], rest='nbo_room')]
+# ナイロビの滞在(観光。タスク058): サファリ・マサイマーケット。滞在3日の3日目(市場)・4日目(サファリ)。trip.js の ROWS / GROUPS で日に置く。タブは「滞在」。
+# どちらも nbo_ の場面で conv=1(053の分かれ目の型)。空港の完了条件(PLACES_AIR)には入らない(世界マップのクリアの印は今までどおり空港の場所だけ)
+STAY = [
+ place('market', 'マサイマーケット', 'souk', 66, 60, '🧺', ['Maasai Market', '布・かご・お面。値段は架空'], ['nbo_market']),
+ place('safari', 'サファリ', 'safari', 30, 28, '🦒', ['Nairobi National Park', 'ガイドと動物を見る'], ['nbo_safari'])]
 AIR = [
  place('java', 'Java House', 'cafe', 22, 14, '☕', ['Java House', 'ラテとケーキ・値段は架空'], ['nbo_java1', 'nbo_java2']),
  place('art', 'Artcaffe', 'cafe', 70, 32, '🥐', ['Artcaffe', 'パンとジュース・値段は架空'], ['nbo_art1', 'nbo_art2']),
@@ -102,7 +107,7 @@ HDEP = [
        tkv={'ow': ['hnd_board_ow'], 'star': ['hnd_board_star']}),
  place('hplane', '機内(深夜便)', 'atop', 74, 90, '✈️', ['機内', '終わるとナイロビへ飛ぶ'], ['hnd_plane_ow', 'hnd_plane_star'], seq=1,
        tkv={'ow': ['hnd_plane_ow'], 'star': ['hnd_plane_star']})]
-TOUR_IDS = [i for p in HDEP + ARR + AIR + NDEP for i in p['v']]
+TOUR_IDS = [i for p in HDEP + ARR + STAY + AIR + NDEP for i in p['v']]
 DARR = [
  place('dimmig', '入国審査', 'info', 76, 18, '🛂', ['入国審査(Passport Control)', '滞在日数・次の航空券・ホテル'], ['doh_immig1', 'doh_immig2']),
  place('dbag', '手荷物受け取り', 'hall', 28, 38, '🧳', ['バゲージクレーム', 'ベルト・カート・そっくりなスーツケース'], ['doh_bag1', 'doh_bag2']),
@@ -137,6 +142,9 @@ SP.officer2={pitch:1.15,m:[[trav({hair:'long'}),P(4,{o:'#2b3a5a',p:'#2b2b33',h:'
 SP.bag_staff={pitch:1,m:[[trav({}),P(5,{o:'#f2b705',p:'#2a2a33',h:'#241a14'})]]};
 /* 荷物受け取りの旅行者(タスク046)。見た目は d_metrop(リュックの旅行者)と同じ系統。声は pitch 1.0(成人・中性的。係員 bag_staff2=1.1・雨もりの旅行者 ev_wet=.95・ルル=1.35と被らない) */
 SP.traveler={pitch:1,m:[[trav({}),P(2,{o:'#3a5a8a',p:'#2a2a33',h:'#14141a',pack:1})]]};
+/* ナイロビの滞在(タスク058): サファリのガイド(声 pitch .9)とマサイマーケットの店の人(pitch 1.05)。絵は素材(t-safari-front / t-maasai-front)、ここはコードのドット絵(絵が読めないときの保険と声の高さ) */
+SP.safari_guide={pitch:.9,m:[[trav({hair:'cap'}),P(5,{o:'#8a6a3a',p:'#4a3a2a',h:'#241a14'})]]};
+SP.market_vendor={pitch:1.05,m:[[trav({hair:'long'}),P(1,{o:'#c8182a',p:'#2a2a33',h:'#241a14'})]]};
 SP.bag_staff2={pitch:1.1,m:[[trav({hair:'long'}),P(4,{o:'#f2b705',p:'#2a2a33',h:'#241a14'})]]};
 SP.sim_staff={pitch:1.1,m:[[trav({hair:'long'}),P(4,{o:'#43b02a',p:'#2a2a33',h:'#241a14'})]]};
 SP.sim_staff2={pitch:.95,m:[[trav({}),P(5,{o:'#43b02a',p:'#2a2a33',h:'#241a14'})]]};
@@ -322,6 +330,15 @@ BGS.ccorn=function(){var n=dohNight();dohSky(n);
  R(n?'#6a6a7a':'#e2d6bc',0,88,VW,62);R(n?'#8a8a9a':'#f4ead0',0,88,VW,3);for(var x=0;x<VW;x+=30)R(n?'#5a5a6a':'#cfc2a4',x,88,1,62)};
 """
 BGN = r"""
+/* ナイロビの滞在(タスク58): 新しい絵(art.js の nsafari / nmarket)が読めないときと、アルバムの写真に使う、今までのドット絵 */
+BGS.safariK=function(){grad(0,60,'#86b9e2','#d6e6ee',10);R('#8a9ab0',60,34,8,26);R('#8a9ab0',72,38,6,22);R('#8a9ab0',84,30,8,30);R('#8a9ab0',96,40,6,20);R('#8a9ab0',110,36,8,24);
+ R('#d6b66a',0,60,VW,90);R('#c8a85a',0,84,VW,2);R('#b07a50',0,120,VW,14);
+ for(var i=0;i<5;i++){var x=24+i*62;R('#6a4a2a',x+6,70,2,8);R('#4a7a3a',x,66,14,4)}
+ R('#e8e0c8',150,78,14,10);R('#4a4a52',152,80,2,8);R('#4a4a52',160,80,2,8);R('#d9a050',200,70,3,18);R('#d9a050',194,70,16,3);R('#9a8a7a',250,86,18,9)};
+BGS.marketK=function(){grad(0,60,'#a7cdee','#d6e6f2',10);R('#7e8aa0',40,20,14,30);R('#7e8aa0',200,14,16,36);R('#6a788e',250,22,12,28);
+ R('#6a6a68',0,60,VW,90);R('#c8782a',34,40,70,8);R('#8a5a3a',36,60,66,22);R('#143fb0',110,36,100,8);R('#c8182a',116,36,16,8);R('#c8182a',150,36,16,8);R('#8a5a3a',112,62,96,24);
+ R('#c8182a',140,48,22,16);R('#c8182a',222,38,70,8);R('#f2c200',230,38,12,8);R('#6a4a2a',224,48,66,30);
+ R('#2a5aa0',22,100,80,30);R('#d7b26a',120,98,90,32);R('#9a2a2a',226,100,70,30)};
 /* 羽田の出発(タスク043)。出発ゲートは 新しい絵(art.js の hgate)。絵が読めなかったときだけ、今までの ゲートの ドット絵に戻る */
 BGS.immigH=function(){BGS.immig()};
 BGS.hgateOW=function(){BGS.gate()};
@@ -361,14 +378,15 @@ for(var _k in TOURDLG)DLG[_k]=TOURDLG[_k];
 %(diag)s
 %(ev)s
 %(win)s
-var PLACES_SAGE=%(sage)s,PLACES_HDEP=%(hdep)s,PLACES_NARR=%(arr)s,PLACES_NAIR=%(air)s,PLACES_NDEP=%(dep)s;
+var PLACES_SAGE=%(sage)s,PLACES_HDEP=%(hdep)s,PLACES_NARR=%(arr)s,PLACES_NSTAY=%(stay)s,PLACES_NAIR=%(air)s,PLACES_NDEP=%(dep)s;
 PLACES_AIR=PLACES_NAIR;
-PLACES_SAGE.concat(PLACES_HDEP,PLACES_NARR,PLACES_NAIR,PLACES_NDEP).forEach(function(p){PBY[p.id]=p});
+PLACES_SAGE.concat(PLACES_HDEP,PLACES_NARR,PLACES_NSTAY,PLACES_NAIR,PLACES_NDEP).forEach(function(p){PBY[p.id]=p});
 var TOUR_IDS=%(ids)s;
 function hdepOn(){try{return !!save.ticket&&TRIP.departPending()}catch(e){return false}}   /* 1日目の羽田の出発をあそぶ時(券を買った・まだ羽田) */
 MODES={sage:{p:PLACES_SAGE,b:'🧙 賢者',h:'達人賢者の広間<small>世界一周のはじまり</small>',snd:'sage'},
  hdep:{p:PLACES_HDEP,b:'🛫 羽田',h:'羽田から出発<small>チェックインから機内まで・深夜便</small>',snd:'nbo'},
  arr:{p:PLACES_NARR,b:'🛬 到着',h:'ナイロビに到着<small>ジョモ・ケニヤッタ国際空港</small>',snd:'nbo'},
+ stay:{p:PLACES_NSTAY,b:'🦒 滞在',h:'ナイロビの滞在<small>マサイマーケットとサファリ</small>',snd:'safari'},
  air:{p:PLACES_NAIR,b:'✈ 空港',h:'ナイロビの空港<small>出発までの時間</small>',snd:'nbo'},
  dep:{p:PLACES_NDEP,b:'🛫 出発',h:'ナイロビから出発<small>チェックインから機内まで</small>',snd:'nbo'}};
 """
@@ -453,7 +471,7 @@ assert SNOTE_TOUR != SNOTE_NEW
 def trip_patches(o, page):
     """タスク030: 旅の骨組み(DAY・券の束・記録)を、場面のあと・場所の鍵・タブの鍵につなぐ"""
     tj = _rd('trip.js')
-    o = rep(o, "function storeSave(){", tj + "\nTRIP.setPage('" + page + "');TRIP.hooks.say=function(t){try{setMsgInstant(t,'LULU')}catch(e){}};TRIP.hooks.at=function(){try{return G.at}catch(e){return null}};TRIP.hooks.sparta=function(){try{if(G.view==='map')startCamp()}catch(e){}};TRIP.hooks.ui=function(){try{var b=document.getElementById('boothBtn');if(b)b.hidden=TRIP.restToday()}catch(e){}};\nfunction storeSave(){")
+    o = rep(o, "function storeSave(){", tj + "\nTRIP.setPage('" + page + "');TRIP.hooks.say=function(t){try{setMsgInstant(t,'LULU')}catch(e){}};TRIP.hooks.at=function(){try{return G.at}catch(e){return null}};TRIP.hooks.sparta=function(){try{if(G.view==='map')startCamp()}catch(e){}};TRIP.hooks.ui=function(){try{var b=document.getElementById('boothBtn');if(b)b.hidden=TRIP.restToday()}catch(e){}};TRIP.hooks.mode=function(k){try{if(k==='stay'&&typeof MODES!=='undefined'&&MODES.stay&&MODE!==k)setMode(k)}catch(e){}};   /* 058: 滞在の日(市場・サファリ)の朝の1枚を開いたら、「滞在」タブへ移る。ほかの日は今までどおり(タブは自分で選ぶ) */\nfunction storeSave(){")
     # 場面の昼夜は 旅の中の現地時刻(タスク032 / 020-3)。nightNow(音)と dohNight(ドーハの外の絵)の「いまの時」を TRIP.hourNow に通す。旅の外は本当の時計のまま
     o, n = re.subn(r"var h=\+new Intl\.DateTimeFormat\('en-GB',\{timeZone:'([A-Za-z/_]+)',hour:'2-digit',hourCycle:'h23'\}\)\.format\(new Date\(\)\);",
                    lambda m: "var h=TRIP.hourNow('" + m.group(1) + "');", o)
@@ -639,9 +657,9 @@ def art_js(base, sel): return _rd('art.js').replace("/*ARTBASE*/", base).replace
 
 # ---------- ナイロビ(tour/index.html) ----------
 dn = dict(sub('sage_')); dn.update(sub('ticket_')); dn.update(sub('win_')); dn.update(sub('nbo_')); dn.update(sub('hnd_'))
-main = MAIN % dict(dlg=J(dn), sp=SPJS + SPW, bg=BGJS + BGN, world=WORLDJS, voice=VOICEJS, diag=DIAGJS, ev=EVJS, win=WINJS, sage=J(SAGE), arr=J(ARR), air=J(AIR), dep=J(NDEP), hdep=J(HDEP), ids=J(TOUR_IDS))
+main = MAIN % dict(dlg=J(dn), sp=SPJS + SPW, bg=BGJS + BGN, world=WORLDJS, voice=VOICEJS, diag=DIAGJS, ev=EVJS, win=WINJS, sage=J(SAGE), arr=J(ARR), stay=J(STAY), air=J(AIR), dep=J(NDEP), hdep=J(HDEP), ids=J(TOUR_IDS))
 main += _rd('check.js').replace('__OTHER_HREF__', 'doha/?check=1').replace('__OTHER_LABEL__', 'ドーハ')
-main += art_js('assets/art/', "function artIdFor(S){var g=S&&S.d&&S.d.bg,h=S&&S.hub&&S.ctx&&S.ctx.bg,v=String(S&&S.vid||''),k=/2$/.test(v)?'2':'1';if(/^nbo_/.test(v)){if(g==='checkinQ')return'ncheckin'+k;if(g==='security')return'nsec'+k;if(g==='duty')return'nduty'+k;if(g==='lounge')return'nlounge'+k;if(g==='gate')return'ngate'+k}if(/^hnd_ev_ca_/.test(v))return 'cabinseat';if(/^hnd_ev_meal_/.test(v))return 'cabinmeal';return g==='nlobby'?'nlobby':g==='nroom'?'nroom':g==='sim'?'simshop':(g==='sage'||h==='sage')?'sage':((g==='tdesk'||g==='rtmap')?'ticket':(g==='taxi'?'nairobi':(g==='immig'?'immig':(g==='baggage'?'bagclaim':(g==='hgateOW'?'hgate_ow':(g==='hgateST'?'hgate_st':null))))))}")   # ナイロビ出発まわり(タスク054: bg が checkinQ/security/duty/lounge/gate で vid が nbo_ のとき。羽田・ドーハの同名の bg は対象外。末尾の 2 で2つ目の配置)・羽田の出発ゲート(タスク043。券で絵が出し分け)・賢者の広間(sage_1〜3の会話・賢者のメニュー)・チケット売り場(窓口の全場面 ticket_*・win_*。bg が tdesk か rtmap。タスク041)・ナイロビ到着(タクシー乗り場)・入国審査・手荷物受け取り(bg が baggage。ナイロビだけ。タスク045)
+main += art_js('assets/art/', "function artIdFor(S){var g=S&&S.d&&S.d.bg,h=S&&S.hub&&S.ctx&&S.ctx.bg,v=String(S&&S.vid||''),k=/2$/.test(v)?'2':'1';if(/^nbo_/.test(v)){if(g==='checkinQ')return'ncheckin'+k;if(g==='security')return'nsec'+k;if(g==='duty')return'nduty'+k;if(g==='lounge')return'nlounge'+k;if(g==='gate')return'ngate'+k}if(/^hnd_ev_ca_/.test(v))return 'cabinseat';if(/^hnd_ev_meal_/.test(v))return 'cabinmeal';return g==='safariK'?'nsafari':g==='marketK'?'nmarket':g==='nlobby'?'nlobby':g==='nroom'?'nroom':g==='sim'?'simshop':(g==='sage'||h==='sage')?'sage':((g==='tdesk'||g==='rtmap')?'ticket':(g==='taxi'?'nairobi':(g==='immig'?'immig':(g==='baggage'?'bagclaim':(g==='hgateOW'?'hgate_ow':(g==='hgateST'?'hgate_st':null))))))}")   # ナイロビ出発まわり(タスク054: bg が checkinQ/security/duty/lounge/gate で vid が nbo_ のとき。羽田・ドーハの同名の bg は対象外。末尾の 2 で2つ目の配置)・羽田の出発ゲート(タスク043。券で絵が出し分け)・賢者の広間(sage_1〜3の会話・賢者のメニュー)・チケット売り場(窓口の全場面 ticket_*・win_*。bg が tdesk か rtmap。タスク041)・ナイロビ到着(タクシー乗り場)・入国審査・手荷物受け取り(bg が baggage。ナイロビだけ。タスク045)
 main += chant_js('assets/song/') + song_js() + pa_js()   # 宣言文ソング(タスク049): テーマ(ホテルのロビーの歌手イベント)。チャントはタイトルの曲(タスク050)で再生は chant.js だけ。ナイロビ(tour/)だけ
 o = ev_patches(common(src, 'Africa/Nairobi'))
 o = rep(o, "(S.d.inter||[]).forEach(function(n){if(n.set&&n.set.gold)save.gold=1});storeSave();worldSync();",
@@ -704,7 +722,7 @@ o = rep(o, "function pickV(pl){\n var ids=pl.v,min=1e9;", "function pickV(pl){\n
 # 羽田の出発のタブ: 券を買って、まだ羽田にいるあいだだけ出す。最初の画面も、そのあいだは羽田の出発
 # 券を買ったあとは 賢者のタブを出さない(賢者と窓口は 出発前の場面)
 o = rep(o, "b.classList.toggle('on',b.dataset.m===MODE)});", "b.classList.toggle('on',b.dataset.m===MODE);if(b.dataset.m==='sage')b.hidden=!!save.ticket&&!window.__CHK;if(b.dataset.m==='hdep')b.hidden=!hdepOn()&&!window.__CHK});")
-o = rep(o, "dep:['#e9e2f2','#d9d0e8','#8a7ac0']}[MODE]", "dep:['#e9e2f2','#d9d0e8','#8a7ac0'],sage:['#e4dff2','#d3cbe8','#8a7ac0'],hdep:['#dfe6f2','#cdd7ea','#8a98c0']}[MODE]")
+o = rep(o, "dep:['#e9e2f2','#d9d0e8','#8a7ac0']}[MODE]", "dep:['#e9e2f2','#d9d0e8','#8a7ac0'],sage:['#e4dff2','#d3cbe8','#8a7ac0'],hdep:['#dfe6f2','#cdd7ea','#8a98c0'],stay:['#efe4c4','#e2d3a6','#c9a05a']}[MODE]")   # 058: 滞在タブの地図の色(明るい砂色。暗くしない)
 o = rep(o, "g.fillStyle='#143fb0';g.fillRect(0,0,5,ch);g.fillRect(cw-5,0,5,ch)", "g.fillStyle='#2f7a4a';g.fillRect(0,0,5,ch);g.fillRect(cw-5,0,5,ch)")
 o_pre = o   # 終わりの場面の土台(エンジンの部品はナイロビと同じ)
 # ---- 宣言文ソング(タスク049): ナイロビ(tour/)だけ。終わりの場面・ドーハには入れない ----

@@ -124,6 +124,18 @@ ART.ngate1={bg:'nairobi-gate-v1.png',mode:'wide',dep:{lulu:{n:TLU,x:700,by:940},
 ART.ngate2={bg:'nairobi-gate-v1.png',mode:'wide',dep:{lulu:{n:TLU,x:700,by:940},king:{n:TKG,x:800,by:940},clerk:{x:1290,top:480,clip:660},
  npcS:{gate_agent:'o-front-woman-blonde-suit',gate_agent2:'tk-clerk'},bubble:{x:1290,y:470},fx:GATEFX,
  people:[{n:'t2-maasai-back',x:140,by:950},{n:'t2-man-dashiki-back',x:1440,by:950}]}};
+/* ナイロビの滞在(タスク058): サファリ(nbo_safari)とマサイマーケット(nbo_market)。背景は人なし・動物なし・布なし(1536×960 フルブリード)。配置の正本は同梱プレビュー(docs/materials/058/*-preview.png)。
+   ルル(左)とキング(右)は広間と同じ後ろ姿(hall-lulu-back x=716・hall-king-back x=800、足もと y=884)。プレビューの画素と一致するまで測った位置(最大一致 100%)。
+   fx の fauna=動物の別素材(透過PNG)。x=足もとの中心、by=足もとの高さ。影はプレビューと同じ(背景の色を 0.75 倍にする楕円・12行・幅=sw・中心 sx)。
+   時間だけで小さく揺れる(足と影は動かず、上半身だけ)。奥の動物から順に描く。ガイド・店の人は素材の旅行者(t-safari-front / t-maasai-front)で、話すとき「…」を出す。
+   cloths=マーケットの中央の屋台に吊るした布。2コマ(112×168)をゆっくり切り替えて、布が風にゆれる。 */
+var FAUNA=function(n,x,by,sw,per,amp,sx){return {k:'fauna',img:'nairobi-safari-'+n+'.png',x:x,by:by,sw:sw,sx:sx,per:per,amp:amp}};
+ART.nsafari={bg:'nairobi-safari-v1.png',mode:'wide',dep:{shF:1,lulu:{n:'hall-lulu-back',x:716,by:884},king:{n:'hall-king-back',x:800,by:884},
+ npcS:{safari_guide:{n:'t-safari-front',x:1000,by:850,sw:79}},
+ fx:[FAUNA('giraffe',1090,660,178,.6,3,1060),FAUNA('ostrich',590,690,129,1.3,3),FAUNA('zebra',380,700,233,.9,3),FAUNA('gazelle',830,730,149,1.1,3),FAUNA('rhino',1250,730,237,.45,2),FAUNA('lion',250,760,237,.5,2)]}};
+ART.nmarket={bg:'nairobi-market-v1.png',mode:'wide',dep:{shF:'rgba(3,10,21,.4)',lulu:{n:'hall-lulu-back',x:716,by:884},king:{n:'hall-king-back',x:800,by:884},
+ npcS:{market_vendor:{n:'t-maasai-front',x:900,by:596,sw:79}},
+ fx:[{k:'strip',img:'nairobi-market-cloths-strip.png',x:704,y:326,fw:112,fh:168,n:2,every:1.4}]}};
 /*ARTSEL*/
 function artImg(n){var i=ARTI[n];if(!i){i=ARTI[n]=new Image();i.onerror=function(){i.bad=1};i.src=ARTBASE+n}return i}
 function artShow(on){if(ARTSHOW===on)return;ARTSHOW=on;cv.hidden=!!on;cvA.hidden=!on}
@@ -255,6 +267,8 @@ function artBelt(cf,exi,te,S){var B=cf.belt,bi=artImg(B.bags),isl=artImg(B.isl),
 /* 場面の人(タスク047)。人は「いる」だけ(会話・採点の対象にしない)。足と影は動かさず、腰から上だけ小さく揺れる(037)。縮小は素材づくりの段階(NEAREST)で済んでいて、ここでは拡大縮小しない。
    影: 正本プレビューの楕円(幅 sw の9行。縦の半径は約4画素)。色 rgba(68,70,82,.62)(床で(196,202,210)→(117,121,131)、ベルトの縁で(128,136,148)→(90,95,107)。正本と同じ) */
 var ARTSHK=[.835,.899,.949,.975,1,.975,.949,.899,.835];
+/* 058: 素材パックのプレビューと同じ影(12行の楕円。shF が色の文字列ならその色、1なら黒の29%)。dep に shF:1 を付けた場面のルル・キングだけ */
+function artShadowF(cx,top,sw,col){ca.fillStyle=typeof col==='string'?col:'rgba(0,0,0,.29)';for(var fr=0;fr<12;fr++){var fv=sw*Math.sqrt(1-((fr-5.5)/6)*((fr-5.5)/6));ca.fillRect(Math.round(cx-fv/2),top+fr,Math.round(fv),1)}}
 function artShadowP(cx,by,sw){ca.fillStyle='rgba(68,70,82,.62)';for(var r=0;r<9;r++){var w=Math.round(sw*ARTSHK[r]);ca.fillRect(Math.round(cx-w/2),by-1+r-4,w,1)}}
 function artSwayD(ph,per){return Math.floor(t*(per||1.1)+(ph||0))%2?3:0}
 /* 荷物受け取りの旅行者。ベルトの右端の横。絵が読めないときは SP.traveler(コードで描いたドット絵)で同じ高さに描く */
@@ -363,6 +377,10 @@ function artFx(f,te,bg){var im=f.img?artImg(f.img):null,i,k;
  if(im&&(im.bad||!artOKimg(im)))return;
  if(f.k==='still'){ca.drawImage(im,f.x,f.y)}
  else if(f.k==='strip'){var fr=Math.floor((t+(f.ph||0))/f.every)%f.n;ca.drawImage(im,fr*f.fw,0,f.fw,f.fh,f.x,f.y,f.fw,f.fh)}
+ else if(f.k==='fauna'){   /* 動物(タスク058): 影(背景を0.75倍に。12行の楕円)→ 上半身だけ小さく揺れる動物。per=周期の秒数・amp=揺れの画素 */
+  var fw=im.naturalWidth,fA=(f.sw||fw)/2,fcx=f.sx!=null?f.sx:f.x,fr,fv;ca.fillStyle='rgba(0,0,0,.25)';
+  for(fr=0;fr<12;fr++){fv=2*fA*Math.sqrt(1-((fr-5.5)/6)*((fr-5.5)/6));ca.fillRect(Math.round(fcx-fv/2),f.by-8+fr,Math.round(fv),1)}
+  artSway(im,f.x,f.by,Math.floor(t*f.per+(f.x%7)*.31)%2?f.amp:0)}
  else if(f.k==='clock'){var cn=Math.floor(t/f.every);for(i=0;i<f.c.length;i++){var fc=(cn+(f.off[i]||0))%f.n;ca.drawImage(im,fc*f.fw,0,f.fw,f.fh,f.c[i][0]-f.fw/2,f.c[i][1]-f.fh/2,f.fw,f.fh)}}
  else if(f.k==='shuttle'){   /* ベルトの上の荷物1個。左のカウンターの奥から出て右のカウンターの奥へ消え、wait 秒あいてまた出てくる */
   var W=f.x1-f.x0+f.w,mv=W/f.v,u=(te%(mv+f.wait))*f.v;if(u>W)return;
@@ -391,10 +409,10 @@ function artDep(cf,exi,S,te){
    if(q.after){var ai=artImg(q.after.img);if(artOKimg(ai))ca.drawImage(ai,q.after.x,q.after.y)}
    if(spSay&&speaker&&(q.spk||(sv&&sv.p&&sv.p===q.id))){artBubble(q.x+Math.round(im.naturalWidth*.3),q.by-im.naturalHeight-18);said=true}}})});
  var lu=D.lulu&&exi[D.lulu.n],kg=D.king&&exi[D.king.n],ld=Math.floor(t*1.1+.5)%2?3:0,kd=Math.floor(t*1.1)%2?3:0;
- if(lu&&OUT.lvis)L.push({by:D.lulu.by,f:function(){artShadow(D.lulu.x,D.lulu.by,56);artSway(lu,D.lulu.x,D.lulu.by,ld);
+ if(lu&&OUT.lvis)L.push({by:D.lulu.by,f:function(){if(D.shF)artShadowF(D.lulu.x,D.lulu.by-7,84,D.shF);else artShadow(D.lulu.x,D.lulu.by,56);artSway(lu,D.lulu.x,D.lulu.by,ld);
   if(luTalk&&spSay)artBubble(D.lulu.x+20,D.lulu.by-lu.naturalHeight-26);
   if(luHelp){ca.fillStyle='#e8452c';ca.font='800 26px sans-serif';ca.textAlign='center';ca.textBaseline='middle';ca.fillText('♪',D.lulu.x+Math.round(lu.naturalWidth*.5),D.lulu.by-lu.naturalHeight-12)}}});
- if(kg&&OUT.hvis)L.push({by:D.king.by,f:function(){artShadow(D.king.x,D.king.by,70);artSway(kg,D.king.x,D.king.by,kd)}});
+ if(kg&&OUT.hvis)L.push({by:D.king.by,f:function(){if(D.shF)artShadowF(D.king.x,D.king.by-7,84,D.shF);else artShadow(D.king.x,D.king.by,70);artSway(kg,D.king.x,D.king.by,kd)}});
  L.sort(function(a,b){return a.by-b.by});for(i=0;i<L.length;i++)L[i].f();
  if(spSay&&speaker&&!speaker.ghost&&!said&&D.bubble)artBubble(D.bubble.x,D.bubble.y)}   /* 絵に出ない相手(ghost=電話の声・アナウンス)には「…」を出さない。立つ人・係員・座る人が話し相手のとき、その人の上に出す */
 /* 背景に重ねる小さな動き(タスク051)。strips=[{img,x,y,n,fw,fh,step}]。NEARESTの粒のまま(拡大縮小しない)。会話の進み方にはかかわらず、時間だけで切り替わる */

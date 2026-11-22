@@ -18,6 +18,27 @@ DREAM = {
                     "Carrot cake, please.", "キャロットケーキをお願いします。"),
     'shillings': ("That is eight hundred shillings. Or one good dream.", "800シリング。それか、いい夢をひとつ。",
                   "Here are eight hundred shillings.", "800シリングです、どうぞ。"),
+    # サファリ (nbo_safari) とマサイマーケット (nbo_market)(タスク058)
+    'giraffe': ("A very tall guest is drinking tea on the cloud. Can you see the giraffe?", "とても背の高いお客さんが、雲の上でお茶を飲んでいるよ。キリンが見えるかな。",
+                "Yes, I see the giraffe.", "はい、キリンが見えます。"),
+    'zebra': ("The zebra is crossing the cloud road. Every stripe is different.", "シマウマが雲の道をわたっているよ。しまは、ぜんぶちがうんだ。",
+              "I see the zebra.", "シマウマが見えます。"),
+    'rhino': ("Shh. A rhino is sleeping on the moon. Please speak quietly.", "しーっ。サイが月の上で眠っているよ。静かに話してね。",
+              "I see the rhino. I will be quiet.", "サイが見えます。静かにしますね。"),
+    'lion': ("A lion is sleeping under the star tree. He sleeps all day.", "ライオンが星の木の下で眠っているよ。1日じゅう寝ているんだ。",
+             "I see the lion.", "ライオンが見えます。"),
+    'ostrich': ("Look! The ostrich is running across the sky. It is very fast.", "見て！ダチョウが空を走っているよ。とても速いね。",
+                "The ostrich is so fast!", "ダチョウはとても速い！"),
+    'cloth': ("Welcome to the Cloud Market. Do you like this cloth?", "雲のマーケットへようこそ。この布は気に入った？",
+              "Yes, I like the cloth.", "はい、この布が好きです。"),
+    'mask': ("This mask is smiling at you. Can you see it?", "このお面、きみに笑いかけているよ。見えるかな。",
+             "Yes, I see the mask.", "はい、お面が見えます。"),
+    'basket': ("A basket full of stars. Would you like one?", "星がいっぱいのかごだよ。ひとつどう？",
+               "Yes, a basket, please.", "はい、かごをください。"),
+    'price': ("The price tonight is one good dream.", "今夜の値段は、いい夢をひとつ。",
+              "That is a good price.", "いい値段ですね。"),
+    'cheaper': ("Cheaper? Tonight the stars are free.", "もっと安く？今夜は星はただだよ。",
+                "Can you make it cheaper?", "もう少し安くなりますか。"),
 }
 # 台本のない語(まだ夢の台本を書いていない語)用のひとこと
 FALLBACK = ("A word is floating by. Can you catch it?", "ひとつ、ことばがふわふわ浮いているよ。つかまえられる？")
