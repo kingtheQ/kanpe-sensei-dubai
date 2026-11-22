@@ -109,5 +109,19 @@
    if(!f.pa2&&cur){meal();return true}   /* 声は録れたのに食事の場面の前でページが切れたとき(再読みこみ)の続き */
   }catch(e){}
   return false}
- window.PA={gate:gate,pre:pre,discard:discard,supported:supported,has:function(){return !!cur}};
+ /* ---- 点検モード(?check=1)専用の入口(タスク062)。通常の出方(gate)は変えない。window.__CHK のときだけ動く ----
+     from='ca': CA場面 → マイク画面 → 食事の場面(自分の声) まで通し / from='meal': 食事の場面だけ(声が残っていれば再生)。
+     行き先は券(save.ticket)で決まる(oneworld=Doha / Star=Istanbul)。fired.pa1/pa2 は見ず・書かない(何度でも試せる)。
+     声は check_shim.js により専用のDB名(chk1:…)に入る。終わりは地図へ戻る */
+ function chk(pl,k,from){
+  if(!window.__CHK||!pl)return false;
+  k=(k==='star')?'star':'ow';var caId='hnd_ev_ca_'+k,mealId='hnd_ev_meal_'+k;
+  if(!DLG[caId]||!DLG[mealId]||!DATA[k])return false;
+  function back(){showMap()}
+  function meal(){G.evCont=function(){discard();back()};startVid(pl,mealId,'ev')}
+  if(from==='meal'){meal();return true}
+  discard();
+  G.evCont=function(){rec(G.scene,function(ok){if(ok&&cur)meal();else{discard();back()}})};
+  startVid(pl,caId,'ev');return true}
+ window.PA={gate:gate,pre:pre,discard:discard,supported:supported,chk:chk,has:function(){return !!cur}};
 })();
