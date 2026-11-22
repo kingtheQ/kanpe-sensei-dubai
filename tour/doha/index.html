@@ -4120,6 +4120,11 @@ var ART={
     秘密イベント(ルルの拾い物)は、この場面を遊び終えたとき 保存の keep に入るだけで、絵にも画面にも何も出さない(予告しない) */
  hgate_ow:{bg:'haneda-departure-gate-v2-ow.png',mode:'wide',hall:{lulu:{n:'hall-lulu-back',x:690,by:884},king:{n:'hall-king-back',x:760,by:884},bubble:{x:250,y:552}}},
  hgate_st:{bg:'haneda-departure-gate-v2-star.png',mode:'wide',hall:{lulu:{n:'hall-lulu-back',x:690,by:884},king:{n:'hall-king-back',x:760,by:884},bubble:{x:250,y:552}}},
+ /* 羽田のチェックイン・Turkish(タスク055): 人なしの背景(1536×960)。係員(tk-clerk-star)はカウンター3番の前に全身で立つ(足もと y=700)。ベルトの荷物は別素材で、係員の右どなりのベルト(x1132〜1234・面 y=606)の上を横へ動く(背景に焼き込まない)。
+    ルル(左)とキング(右)は室内の大きさの後ろ姿(tk-)。足もと y=884。影は同梱プレビューと同じ(shF:1)。oneworld 側(checkinQ)は対象外 */
+ hcheckin_st:{bg:'haneda-turkish-checkin-v1.png',mode:'wide',dep:{shF:1,lulu:{n:'tk-lulu-back',x:716,by:884},king:{n:'tk-king-back',x:800,by:884},
+  npcS:{tk_checkin:{n:'tk-clerk-star',x:1024,by:700,sw:150}},bubble:{x:1024,y:400},
+  fx:[{k:'shuttle',img:'haneda-checkin-belt-bag.png',x0:1132,x1:1234,w:80,h:96,by:606,v:20,wait:2}]}},
  /* ナイロビの手荷物受け取り(タスク045): 人なしの背景(主ベルトは荷物も中央の島も描かない版)に、荷物6個が楕円の経路を1周 period 秒でまわる。
     ベルトの形(中心 cx,cy・経路の半径 rx,ry)は素材の絵(768×480)の半分の大きさの座標で書く。荷物は 2倍の NEAREST の粒のまま、2画素単位で動く。
     描く順: 奥の半分(sin<0)の荷物 → 中央の島 → 手前の半分の荷物 → ふたり。荷物は奥ほど小さく暗い(絵の段階 lv=13 を sin で引く)。手前では左→右、奥では右→左。
