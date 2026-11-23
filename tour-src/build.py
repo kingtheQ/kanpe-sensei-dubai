@@ -107,6 +107,10 @@ HDEP = [
        tkv={'ow': ['hnd_board_ow'], 'star': ['hnd_board_star']}),
  place('hplane', '機内(深夜便)', 'atop', 74, 90, '✈️', ['機内', '終わるとナイロビへ飛ぶ'], ['hnd_plane_ow', 'hnd_plane_star'], seq=1,
        tkv={'ow': ['hnd_plane_ow'], 'star': ['hnd_plane_star']})]
+# 28日目の羽田に戻った場面(タスク059): 持ち主に落とし物を返す。keep.hnd1 のあるセーブだけに出る(trip.js の GCOND)。
+# 場所は1つ(hreturn)。v は場面の記録(save.seen)に使うが、TOUR_IDS(「かいわ n / 全部」の数え)には入れない = 出ない人の分母を変えないため
+HRET = [
+ place('hreturn', '出発ゲート', 'hall', 50, 50, '🚪', ['羽田空港 出発ゲート', 'もどってきた羽田'], ['hnd_return'])]
 TOUR_IDS = [i for p in HDEP + ARR + STAY + AIR + NDEP for i in p['v']]
 DARR = [
  place('dimmig', '入国審査', 'info', 76, 18, '🛂', ['入国審査(Passport Control)', '滞在日数・次の航空券・ホテル'], ['doh_immig1', 'doh_immig2']),
@@ -378,13 +382,15 @@ for(var _k in TOURDLG)DLG[_k]=TOURDLG[_k];
 %(diag)s
 %(ev)s
 %(win)s
-var PLACES_SAGE=%(sage)s,PLACES_HDEP=%(hdep)s,PLACES_NARR=%(arr)s,PLACES_NSTAY=%(stay)s,PLACES_NAIR=%(air)s,PLACES_NDEP=%(dep)s;
+var PLACES_SAGE=%(sage)s,PLACES_HDEP=%(hdep)s,PLACES_HRET=%(hret)s,PLACES_NARR=%(arr)s,PLACES_NSTAY=%(stay)s,PLACES_NAIR=%(air)s,PLACES_NDEP=%(dep)s;
 PLACES_AIR=PLACES_NAIR;
-PLACES_SAGE.concat(PLACES_HDEP,PLACES_NARR,PLACES_NSTAY,PLACES_NAIR,PLACES_NDEP).forEach(function(p){PBY[p.id]=p});
+PLACES_SAGE.concat(PLACES_HDEP,PLACES_HRET,PLACES_NARR,PLACES_NSTAY,PLACES_NAIR,PLACES_NDEP).forEach(function(p){PBY[p.id]=p});
 var TOUR_IDS=%(ids)s;
-function hdepOn(){try{return !!save.ticket&&TRIP.departPending()}catch(e){return false}}   /* 1日目の羽田の出発をあそぶ時(券を買った・まだ羽田) */
+function hdepOn(){try{return !!save.ticket&&TRIP.departPending()}catch(e){return false}}
+function hretOn(){try{return !!save.ticket&&TRIP.retToday()}catch(e){return false}}   /* 28日目の羽田(059): 落とし物を返す日をあそぶ時 */   /* 1日目の羽田の出発をあそぶ時(券を買った・まだ羽田) */
 MODES={sage:{p:PLACES_SAGE,b:'🧙 賢者',h:'達人賢者の広間<small>世界一周のはじまり</small>',snd:'sage'},
  hdep:{p:PLACES_HDEP,b:'🛫 羽田',h:'羽田から出発<small>チェックインから機内まで・深夜便</small>',snd:'nbo'},
+ hret:{p:PLACES_HRET,b:'🛬 羽田',h:'羽田に帰ってきた<small>おかえりなさい</small>',snd:'nbo'},
  arr:{p:PLACES_NARR,b:'🛬 到着',h:'ナイロビに到着<small>ジョモ・ケニヤッタ国際空港</small>',snd:'nbo'},
  stay:{p:PLACES_NSTAY,b:'🦒 滞在',h:'ナイロビの滞在<small>マサイマーケットとサファリ</small>',snd:'safari'},
  air:{p:PLACES_NAIR,b:'✈ 空港',h:'ナイロビの空港<small>出発までの時間</small>',snd:'nbo'},
@@ -471,7 +477,7 @@ assert SNOTE_TOUR != SNOTE_NEW
 def trip_patches(o, page):
     """タスク030: 旅の骨組み(DAY・券の束・記録)を、場面のあと・場所の鍵・タブの鍵につなぐ"""
     tj = _rd('trip.js')
-    o = rep(o, "function storeSave(){", tj + "\nTRIP.setPage('" + page + "');TRIP.hooks.say=function(t){try{setMsgInstant(t,'LULU')}catch(e){}};TRIP.hooks.at=function(){try{return G.at}catch(e){return null}};TRIP.hooks.sparta=function(){try{if(G.view==='map')startCamp()}catch(e){}};TRIP.hooks.ui=function(){try{var b=document.getElementById('boothBtn');if(b)b.hidden=TRIP.restToday()}catch(e){}};TRIP.hooks.mode=function(k){try{if(k==='stay'&&typeof MODES!=='undefined'&&MODES.stay&&MODE!==k)setMode(k)}catch(e){}};   /* 058: 滞在の日(市場・サファリ)の朝の1枚を開いたら、「滞在」タブへ移る。ほかの日は今までどおり(タブは自分で選ぶ) */\nfunction storeSave(){")
+    o = rep(o, "function storeSave(){", tj + "\nTRIP.setPage('" + page + "');TRIP.hooks.say=function(t){try{setMsgInstant(t,'LULU')}catch(e){}};TRIP.hooks.at=function(){try{return G.at}catch(e){return null}};TRIP.hooks.sparta=function(){try{if(G.view==='map')startCamp()}catch(e){}};TRIP.hooks.ui=function(){try{var b=document.getElementById('boothBtn');if(b)b.hidden=TRIP.restToday()}catch(e){}};TRIP.hooks.mode=function(k){try{if((k==='stay'||k==='hret')&&typeof MODES!=='undefined'&&MODES.stay&&MODE!==k)setMode(k)}catch(e){}};   /* 058: 滞在の日(市場・サファリ)の朝の1枚を開いたら、「滞在」タブへ移る。ほかの日は今までどおり(タブは自分で選ぶ) */\nfunction storeSave(){")
     # 場面の昼夜は 旅の中の現地時刻(タスク032 / 020-3)。nightNow(音)と dohNight(ドーハの外の絵)の「いまの時」を TRIP.hourNow に通す。旅の外は本当の時計のまま
     o, n = re.subn(r"var h=\+new Intl\.DateTimeFormat\('en-GB',\{timeZone:'([A-Za-z/_]+)',hour:'2-digit',hourCycle:'h23'\}\)\.format\(new Date\(\)\);",
                    lambda m: "var h=TRIP.hourNow('" + m.group(1) + "');", o)
@@ -499,7 +505,7 @@ REC = "b.appendChild(s4);\n $m('setView').hidden=false;"
 def record(label, memo=False):
     mm = ("var mq=memoLoad();if(mq.length)s5.appendChild(el('div','tt','つぎの たびの メモ：'+mq.join(', ')));" if memo else '')
     return ("b.appendChild(s4);voiceSetSection(b);\n var s5=sSec('ルルの カバンの きろくちょう');s5.appendChild(el('div','tt','えらんだ チケット：'+(save.ticket==='star'?'Star Alliance':save.ticket==='ow'?'oneworld':'まだ えらんでいない')));"
-            "if(save.keep&&save.keep.hnd1)s5.appendChild(el('div','tt','ひろった もの：ちいさな わすれもの'));var dn=0;TOUR_IDS.forEach(function(k){if(save.seen[k]>0)dn++});s5.appendChild(el('div','tt','" + label + "の かいわ：'+dn+' / '+TOUR_IDS.length));" + mm + "b.appendChild(s5);\n $m('setView').hidden=false;")
+            "if(save.keep&&save.keep.hnd1)s5.appendChild(el('div','tt',(save.seen&&save.seen.hnd_return>0?'かえした':'ひろった')+' もの：ちいさな わすれもの'));var dn=0;TOUR_IDS.forEach(function(k){if(save.seen[k]>0)dn++});s5.appendChild(el('div','tt','" + label + "の かいわ：'+dn+' / '+TOUR_IDS.length));" + mm + "b.appendChild(s5);\n $m('setView').hidden=false;")
 # ---- 場面の部品(ナイロビ・ドーハ共通) ----
 # 分かれ目(opts)・相手の言い分け(by)・持ち越しの差しかえ(vr)・あとの一言(rep)・自動で始まる場面(auto)・単語バトルに入らない場面(win/ev)
 SHARED = [
@@ -657,7 +663,7 @@ def art_js(base, sel): return _rd('art.js').replace("/*ARTBASE*/", base).replace
 
 # ---------- ナイロビ(tour/index.html) ----------
 dn = dict(sub('sage_')); dn.update(sub('ticket_')); dn.update(sub('win_')); dn.update(sub('nbo_')); dn.update(sub('hnd_'))
-main = MAIN % dict(dlg=J(dn), sp=SPJS + SPW, bg=BGJS + BGN, world=WORLDJS, voice=VOICEJS, diag=DIAGJS, ev=EVJS, win=WINJS, sage=J(SAGE), arr=J(ARR), stay=J(STAY), air=J(AIR), dep=J(NDEP), hdep=J(HDEP), ids=J(TOUR_IDS))
+main = MAIN % dict(dlg=J(dn), sp=SPJS + SPW, bg=BGJS + BGN, world=WORLDJS, voice=VOICEJS, diag=DIAGJS, ev=EVJS, win=WINJS, sage=J(SAGE), arr=J(ARR), stay=J(STAY), air=J(AIR), dep=J(NDEP), hdep=J(HDEP), hret=J(HRET), ids=J(TOUR_IDS))
 main += _rd('check.js').replace('__OTHER_HREF__', 'doha/?check=1').replace('__OTHER_LABEL__', 'ドーハ')
 main += art_js('assets/art/', "function artIdFor(S){var g=S&&S.d&&S.d.bg,h=S&&S.hub&&S.ctx&&S.ctx.bg,v=String(S&&S.vid||''),k=/2$/.test(v)?'2':'1';if(/^nbo_/.test(v)){if(g==='checkinQ')return'ncheckin'+k;if(g==='security')return'nsec'+k;if(g==='duty')return'nduty'+k;if(g==='lounge')return'nlounge'+k;if(g==='gate')return'ngate'+k}if(/^hnd_/.test(v)&&g==='checkinT')return'hcheckin_st';if(/^hnd_ev_ca_/.test(v))return 'cabinseat';if(/^hnd_ev_meal_/.test(v))return 'cabinmeal';return g==='nsong'?'nsong':g==='safariK'?'nsafari':g==='marketK'?'nmarket':g==='nlobby'?'nlobby':g==='nroom'?'nroom':g==='sim'?'simshop':(g==='sage'||h==='sage')?'sage':((g==='tdesk'||g==='rtmap')?'ticket':(g==='taxi'?'nairobi':(g==='immig'?'immig':(g==='baggage'?'bagclaim':(g==='hgateOW'?'hgate_ow':(g==='hgateST'?'hgate_st':null))))))}")   # ナイロビ出発まわり(タスク054: bg が checkinQ/security/duty/lounge/gate で vid が nbo_ のとき。羽田・ドーハの同名の bg は対象外。末尾の 2 で2つ目の配置)・羽田の出発ゲート(タスク043。券で絵が出し分け)・賢者の広間(sage_1〜3の会話・賢者のメニュー)・チケット売り場(窓口の全場面 ticket_*・win_*。bg が tdesk か rtmap。タスク041)・ナイロビ到着(タクシー乗り場)・入国審査・手荷物受け取り(bg が baggage。ナイロビだけ。タスク045)
 main += chant_js('assets/song/') + song_js() + pa_js()   # 宣言文ソング(タスク049): テーマ(ホテルのロビーの歌手イベント)。チャントはタイトルの曲(タスク050)で再生は chant.js だけ。ナイロビ(tour/)だけ
@@ -721,8 +727,8 @@ o = rep(o, "PLACES.forEach(function(p){p.v.forEach(function(v){if(save.seen[v])d
 o = rep(o, "function pickV(pl){\n var ids=pl.v,min=1e9;", "function pickV(pl){\n var ids=(pl.tkv&&pl.tkv[save.ticket])||pl.v,min=1e9;")
 # 羽田の出発のタブ: 券を買って、まだ羽田にいるあいだだけ出す。最初の画面も、そのあいだは羽田の出発
 # 券を買ったあとは 賢者のタブを出さない(賢者と窓口は 出発前の場面)
-o = rep(o, "b.classList.toggle('on',b.dataset.m===MODE)});", "b.classList.toggle('on',b.dataset.m===MODE);if(b.dataset.m==='sage')b.hidden=!!save.ticket&&!window.__CHK;if(b.dataset.m==='hdep')b.hidden=!hdepOn()&&!window.__CHK});")
-o = rep(o, "dep:['#e9e2f2','#d9d0e8','#8a7ac0']}[MODE]", "dep:['#e9e2f2','#d9d0e8','#8a7ac0'],sage:['#e4dff2','#d3cbe8','#8a7ac0'],hdep:['#dfe6f2','#cdd7ea','#8a98c0'],stay:['#efe4c4','#e2d3a6','#c9a05a']}[MODE]")   # 058: 滞在タブの地図の色(明るい砂色。暗くしない)
+o = rep(o, "b.classList.toggle('on',b.dataset.m===MODE)});", "b.classList.toggle('on',b.dataset.m===MODE);if(b.dataset.m==='sage')b.hidden=!!save.ticket&&!window.__CHK;if(b.dataset.m==='hdep')b.hidden=!hdepOn()&&!window.__CHK;if(b.dataset.m==='hret')b.hidden=!hretOn()&&!window.__CHK});")
+o = rep(o, "dep:['#e9e2f2','#d9d0e8','#8a7ac0']}[MODE]", "dep:['#e9e2f2','#d9d0e8','#8a7ac0'],sage:['#e4dff2','#d3cbe8','#8a7ac0'],hdep:['#dfe6f2','#cdd7ea','#8a98c0'],hret:['#dfe6f2','#cdd7ea','#8a98c0'],stay:['#efe4c4','#e2d3a6','#c9a05a']}[MODE]")   # 058: 滞在タブの地図の色(明るい砂色。暗くしない)
 o = rep(o, "g.fillStyle='#143fb0';g.fillRect(0,0,5,ch);g.fillRect(cw-5,0,5,ch)", "g.fillStyle='#2f7a4a';g.fillRect(0,0,5,ch);g.fillRect(cw-5,0,5,ch)")
 # タスク055: 賢者モードのマップだけ実画の背景(sage-map-bg-v1.png 960×1536)。要素いっぱいに引き伸ばす(100%×100%。cover は使わない=ノード位置とカームゾーンがずれるため)。他モードの描画は変えない。読めないときは今までの描画
 o = rep(o, "function drawMapBg(){\n var cv2=", "function sageMapBg(cv){var im=window.__SMI;if(!im){im=window.__SMI=new Image();im.onerror=function(){im.bad=1};im.onload=function(){if(G.view==='map'&&MODE==='sage')drawMapBg()};im.src=ARTBASE+'sage-map-bg-v1.png'}if(im.bad||!im.complete||!im.naturalWidth)return false;cv.style.background=\"url('\"+ARTBASE+\"sage-map-bg-v1.png') 0 0/100% 100% no-repeat\";return true}\nfunction drawMapBg(){\n var cv2=")
@@ -762,7 +768,7 @@ o = rep(o, "else if(k==='sparkle'){tone(1568", "else if(k==='pachime'){chime(t0,
 # 便が終わる(ナイロビへ・ドーハへ飛ぶ)とき、声を消す
 o = rep(o, "if(S.pl.id==='qplane'){worldAt('nairobi');", "if(S.pl.id==='qplane'){if(window.PA)PA.discard();worldAt('nairobi');")
 o = rep(o, "if(S.pl.id==='hplane'){worldAt('haneda');", "if(S.pl.id==='hplane'){if(window.PA)PA.discard();worldAt('haneda');")
-o = rep(o, "setMode('arr');\nvar phoQ", main + "\nsetMode(save.ticket?(hdepOn()?'hdep':'arr'):'sage');\n"
+o = rep(o, "setMode('arr');\nvar phoQ", main + "\nsetMode(save.ticket?(hdepOn()?'hdep':(hretOn()?'hret':'arr')):'sage');\n"
         "if(/[?&]pho=/.test(location.search)||window.__CHK){}else {CHANT.resume(TOUR_FRESH&&!save.ticket);TRIP.enter(function(){if(TOUR_FRESH&&!save.ticket){enterHub(PBY.sage);runStory('sage_1')}},'tour')}\nvar phoQ")
 o = rep(o, '<head>', '<head><script>' + _rd('check_shim.js') + '</script>')   # タスク056: ?check=1 のときだけ効く(専用の記録)
 os.makedirs(os.path.join(ROOT, 'tour'), exist_ok=True)

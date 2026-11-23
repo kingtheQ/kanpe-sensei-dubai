@@ -5,6 +5,9 @@
 #   便の時刻・便名は物語の中の架空(実在の便の時刻ではない。作る直前に公式で確認する)。会話に「復習」「テスト」の言葉は使わない。
 # 秘密イベントの下地: hnd_gate_ow / hnd_gate_star は keep='hnd1' を持つ。この場面を最後まで遊ぶと、ルルが小さな忘れ物を拾ってカバンに入る
 #   (保存は既存の kanpe-tour-save-v1 の keep。画面では予告せず、設定のルルのカバンの記録帳に静かに載るだけ)。回収の場面(帰国の羽田)はまだない。
+from window_data import star, O, OT
+
+
 def add(D):
     def d(id, who, bg, sp, intro, pairs, words, **kw):
         D.append(dict(id=id, who=who, bg=bg, sp=sp, intro=intro, pairs=pairs, words=words, **kw))
@@ -90,3 +93,41 @@ def add(D):
         ("Of course. It is a night flight, so we will turn the lights down.", "もちろんです。夜の便ですので、ライトを少し暗くしますね。", "*That* *sounds* *nice*. *Good* *night*.", "いいですね。おやすみなさい。"),
         ("Good night. Sleep well. We will land in Istanbul in the morning.", "おやすみなさい。ぐっすりどうぞ。イスタンブールには朝に着きます。", "*Thank* *you*. *See* *you* *in* *Istanbul*!", "ありがとう。イスタンブールで会いましょう！")],
         [("aboard", "搭乗して"), ("overhead bin", "頭上の荷物入れ"), ("blanket", "毛布"), ("night flight", "夜の便"), ("land", "着陸する")])
+
+    # ---- 28日目 羽田に戻った場面: 初日に拾った落とし物(木のおもちゃの飛行機)を持ち主に返す(タスク059・oneworld の28日目だけ) ----
+    # 出る条件: 保存の keep.hnd1(1日目の出発ゲートで拾った)があるセーブだけ。ない人には、この場面もタブも出ない。
+    # 新しい保存キーは作らない。場面を遊ぶと save.seen['hnd_return'] が立つだけ(既存の記録)。keep.hnd1 はそのまま残し、カバンの記録帳の1行がここで「かえした」に変わる。
+    # 背景は既存の出発ゲート(hgateOW)。人の絵は出さない(声だけ。出発ゲートの場面と同じ)。会話の型は 053 の「分かれ目」(conv=1): 画面は英語だけ・日本語訳は出さない。
+    # ok なしの返事 = 聞き違えた人の返事(相手が言い直してくれる。物語は止まらない)。個人名なし・実在の店名なし。
+    d('hnd_return', '落とし物の持ち主', 'hgateOW', 'gate_agent2', 'ひさしぶりの羽田。出発ゲートの前で、ひとりの男の人が、足もとを見ながらゆっくり歩いている。', [
+        ("Excuse me, I am sorry to bother you. A month ago, I lost a small toy at this gate.",
+         "すみません、お邪魔してごめんなさい。1か月前、このゲートで小さなおもちゃをなくしたんです。",
+         star("A toy? What kind of toy is it?"), "おもちゃ？どんなおもちゃですか。"),
+        OT("It is a wooden airplane with a blue tail. My son loves it. He asks about it every day.",
+           "青い尾翼の、木の飛行機です。息子が大好きで、毎日それのことを聞くんです。", [
+            O('plane', "A wooden airplane? I think we found it!", "木の飛行機？それ、見つけたと思います！", ok=1,
+              rep=("You found it? Oh, that is wonderful news!", "見つけた？ああ、すばらしい知らせです！")),
+            O('plain', "A wooden plain? What is a plain?", "木の平原？平原って何ですか。",
+              rep=("Not a plain. An airplane! It has two wings and it flies in the sky.",
+                   "平原ではなく、飛行機です！翼が2つあって、空を飛びます。")),
+            O('blue', "A blue tail? Wait, I think my friend has it.", "青い尾翼？待って、友だちが持っていると思います。", ok=1,
+              rep=("Your friend has it? Please, where is it?", "友だちが持っている？お願いです、どこですか。"))],
+           fork={'tw': ['airplane']}),
+        ("Please, may I see it? I only want to know if it is the same one.",
+         "見せてもらえませんか。同じものか、確かめたいだけなんです。",
+         star("Yes. Lulu found it at this gate. She kept it safe in her bag."), "はい。ルルがこのゲートで拾いました。ずっとカバンの中で大切に持っていました。"),
+        OT("It is the same one! It traveled around the world with you. How can I thank you?",
+           "同じものです！あなたたちと世界をひとまわりしたんですね。どうお礼をしたらいいでしょう。", [
+            O('home', "No thanks. I am just happy it is home.", "お礼はいりません。帰ってこられて、うれしいだけです。", ok=1,
+              rep=("You are very kind. My son will be so happy.", "とても親切な方ですね。息子がどんなに喜ぶでしょう。")),
+            O('tank', "A tank? I do not need a tank.", "戦車？戦車はいりません。",
+              rep=("Ha ha, not a tank! Thank you. T, H, A, N, K. It means I am very grateful.",
+                   "あはは、戦車ではなく！サンキューです。T・H・A・N・K。とても感謝している、という意味です。")),
+            O('son', "Please give it to your son. Thank you for waiting.", "息子さんにわたしてあげてください。待っていてくれて、ありがとう。", ok=1,
+              rep=("I will. He will take it to bed tonight, I am sure.", "そうします。今夜はきっと、ベッドに持っていきますよ。"))],
+           fork={'tw': ['thank']}),
+        ("Welcome home, travelers. Please take care on your way. I hope you had a wonderful trip.",
+         "おかえりなさい、旅人さん。気をつけて帰ってくださいね。すばらしい旅だったのならいいのですが。",
+         star("Thank you. It was the best trip. Goodbye!"), "ありがとう。最高の旅でした。さようなら！"),
+    ],
+        [("airplane", "飛行機"), ("wooden", "木の"), ("toy", "おもちゃ"), ("lost", "なくした"), ("thank", "感謝する")], conv=1)
