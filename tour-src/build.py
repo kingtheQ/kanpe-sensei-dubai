@@ -781,7 +781,7 @@ dd = sub('doh_')
 BGD_T = rep(BGD, "var h=+new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Qatar',hour:'2-digit',hourCycle:'h23'}).format(new Date());", "var h=TRIP.hourNow('Asia/Qatar');")
 main = MAIN_DOH % dict(dlg=J(dd), sp=SPD, bg=BGD_T, world=WORLDJS, voice=VOICEJS, ev=EVJS, arr=J(DARR), city=J(DCITY), dep=J(DDEP), ids=J(DOH_IDS))
 main += _rd('check.js').replace('__OTHER_HREF__', '../?check=1').replace('__OTHER_LABEL__', 'ナイロビ')
-main += art_js('../assets/art/', "function artIdFor(S){return S&&S.vid==='doh_city_h1'?'hotel':null}")   # ホテルのフロント
+main += art_js('../assets/art/', "function artIdFor(S){var v=S&&S.vid;return v==='doh_city_h1'?'hotel':(v==='doh_city_c1'||v==='doh_city_c2'||v==='doh_city_c3'||v==='doh_ev_j_ask')?'dcorn':null}")   # ホテルのフロント / コルニーシュ(タスク070)
 o = ev_patches(common(src, 'Asia/Qatar'))
 for _a, _b in SHARED: o = rep(o, _a, _b)
 o = rep(o, " if(!G.camp)addHelp(T)}", " if(!G.camp&&!G.scene.d.nohelp)addHelp(T)}")

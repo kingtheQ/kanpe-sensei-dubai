@@ -215,7 +215,7 @@ with sync_playwright() as pw:
     ctx.close()
     # ---------------- (9) ドーハ側・049/050 は変わらない ----------------
     dh = open(os.path.join(ROOT, 'tour/doha/index.html'), encoding='utf-8').read()
-    chk("ドーハ側の artIdFor は今までどおり(doh_city_h1 のホテルのフロントだけ)", "function artIdFor(S){return S&&S.vid==='doh_city_h1'?'hotel':null}" in dh and 'simshop' not in dh.split("function artIdFor(S){return S&&S.vid==='doh_city_h1'")[1][:80])
+    chk("ドーハ側の artIdFor は ホテルのフロント(doh_city_h1)と、070 のコルニーシュ4場面(dcorn)だけ。SIMの店などナイロビの絵は入らない", "function artIdFor(S){var v=S&&S.vid;return v==='doh_city_h1'?'hotel':(v==='doh_city_c1'||v==='doh_city_c2'||v==='doh_city_c3'||v==='doh_ev_j_ask')?'dcorn':null}" in dh and 'simshop' not in dh.split("function artIdFor(S){var v=S&&S.vid;return v==='doh_city_h1'")[1][:200])
     th = open(os.path.join(ROOT, 'tour/index.html'), encoding='utf-8').read()
     chk("ナイロビ側の artIdFor に sim→simshop・nroom→nroom が足された(nlobby・taxi などは残る)", "g==='nroom'?'nroom':g==='sim'?'simshop'" in th and "g==='nlobby'?'nlobby'" in th and "(g==='taxi'?'nairobi'" in th)
     chk('049 の歌手の場面データ(SONGSC)・チャントは変わらない(nbo_song・nlobby が残る)', "'id': 'nbo_song'" in open(os.path.join(ROOT, 'tour-src/song_data.py'), encoding='utf-8').read().replace('"', "'") and 'nlobby:{bg:' in th)

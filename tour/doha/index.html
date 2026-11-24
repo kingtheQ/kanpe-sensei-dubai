@@ -4099,6 +4099,12 @@ var ART={
     tv=壁のTV画面の矩形(1536×960座標)。今回は何も映さない。将来の映画場面のために名前つきで記録しておく */
  nroom:{bg:'nairobi-hotel-room-v1.png',mode:'wide',hall:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884}},tv:{x:1120,y:216,w:344,h:176}},
  hotel:{bg:'hotel-front.png',mode:'room',base:895,lulu:250,king:450,suit:560,npc:{x:1290,px:15,top:262,clip:412},fx:'hotel',npcS:{c_front:'o-front-woman-blonde-suit'}},
+ /* ドーハのコルニーシュ(タスク070): 朝・人なしの背景(1536×960)。絵に文字は一切なし。対象は bg ccorn の4場面(doh_city_c1/c2/c3・doh_ev_j_ask。結びは doha 側 artIdFor だけ)。
+    ふたりは右の端から歩いて入り、ルル x=1060・キング x=1180(足もと y=884)で止まる(dir:-1)。スーツケースは左どなり。相手は左の広い舗道(ベンチの手前)。
+    strips=別素材(背景には舟もきらめきも描いていない): ダウ舟(その場で2コマ揺れる。船体は手すり y=516 より上の水面)・水面のきらめき(4コマ)。
+    実画が表示される間は、コード描画(BGS.ccorn)の舟・波は出ない(実画が読めないときだけ、そちらに落ちる) */
+ dcorn:{bg:'doha-corniche-v1.png',mode:'wide',base:884,dir:-1,lulu:1060,king:1180,suit:960,npc:{x:800,px:9,slide:1},fx:'',
+  strips:[{img:'doha-corniche-sparkle-strip.png',x:0,y:372,n:4,fw:1536,fh:192,step:.5},{img:'doha-corniche-dhow-strip.png',x:700,y:258,n:2,fw:512,fh:256,step:.8}]},
  /* 賢者の広間(タスク040): 人なしの背景をフルブリード。賢者は壇上の中央(大人の高さ136px)、ルル(左)とキング(右)は絨毯の上に後ろ姿で寄って立つ(広い場面の大きさ)。
     globe=背景の球の位置(球の外わく 312..473×356..517)に、球だけ8コマ(96px。2倍=192px)を重ね、period秒で1回転。人は足と影を固定し、上半身だけ小さく揺れる(タスク037) */
  sage:{bg:'sage-hall-bg-clean.png',mode:'wide',hall:{sage:{n:'hall-sage',x:768,by:684},lulu:{n:'hall-lulu-back',x:733,by:905},king:{n:'hall-king-back',x:803,by:905},
@@ -4222,7 +4228,7 @@ ART.nsafari={bg:'nairobi-safari-v1.png',mode:'wide',dep:{shF:1,lulu:{n:'hall-lul
 ART.nmarket={bg:'nairobi-market-v1.png',mode:'wide',dep:{shF:'rgba(3,10,21,.4)',lulu:{n:'hall-lulu-back',x:716,by:884},king:{n:'hall-king-back',x:800,by:884},
  npcS:{market_vendor:{n:'t-maasai-front',x:900,by:596,sw:79}},
  fx:[{k:'strip',img:'nairobi-market-cloths-strip.png',x:704,y:326,fw:112,fh:168,n:2,every:1.4}]}};
-function artIdFor(S){return S&&S.vid==='doh_city_h1'?'hotel':null}
+function artIdFor(S){var v=S&&S.vid;return v==='doh_city_h1'?'hotel':(v==='doh_city_c1'||v==='doh_city_c2'||v==='doh_city_c3'||v==='doh_ev_j_ask')?'dcorn':null}
 function artImg(n){var i=ARTI[n];if(!i){i=ARTI[n]=new Image();i.onerror=function(){i.bad=1};i.src=ARTBASE+n}return i}
 function artShow(on){if(ARTSHOW===on)return;ARTSHOW=on;cv.hidden=!!on;cvA.hidden=!on}
 function artR(col,x,y,w,h){ca.fillStyle=col;ca.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h))}
