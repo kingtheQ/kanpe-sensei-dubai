@@ -144,7 +144,7 @@ with sync_playwright() as pw:
         chk('ゲート %s: FIDSが(1184,356)に静止・窓の外の飛行機が左へ秒速8pxでゆっくり動く(式と一致)・柱の手前に出ない' % v, okp and pil and len(set(dxs)) >= 3 and dxs == sorted(dxs, reverse=True), dxs)
     # (7)(8) 配置: 立つ旅行者2〜3人・端・重ならない・カウンターより下を描かない
     cfgs = p.evaluate("()=>{var o={};for(var k in __T.ART){if(__T.ART[k].dep)o[k]=__T.ART[k].dep}return o}")
-    cfgs = dict((k, v) for k, v in cfgs.items() if k not in ('nmarket', 'nsafari', 'hcheckin_st'))   # タスク058: 滞在の観光2場面は出発まわりではない。タスク055: 羽田のターキッシュのチェックイン(hcheckin_st)もナイロビではない
+    cfgs = dict((k, v) for k, v in cfgs.items() if k not in ('nmarket', 'nsafari', 'hcheckin_st', 'hcheckin_ow', 'hsec', 'hcabin_ow', 'hcabin_st'))   # タスク067: 羽田の残りの出発・機内の実画(hcheckin_ow/hsec/hcabin_ow/hcabin_st)もナイロビではない。タスク058: 滞在の観光2場面は出発まわりではない。タスク055: 羽田のターキッシュのチェックイン(hcheckin_st)もナイロビではない
     chk('出発まわりの art 設定が10個(ncheckin/nsec/nduty/nlounge/ngate × 2)', sorted(cfgs) == sorted(a + b for a in ('ncheckin', 'nsec', 'nduty', 'nlounge', 'ngate') for b in '12'), sorted(cfgs))
     def rect(n, x, by): w, h = isz(n + '.png'); return (x - w * .3, by - h, x + w * .3, by)
     def hit(a, b, m=0): return not (a[2] + m <= b[0] or b[2] + m <= a[0] or a[3] + m <= b[1] or b[3] + m <= a[1])
@@ -180,9 +180,9 @@ with sync_playwright() as pw:
     ctx3 = br.new_context(viewport={'width': 390, 'height': 780}); ctx3.add_init_script(INIT)
     q = ctx3.new_page(); q.route('**/tour/index.html', hooked); q.goto(base + '/tour/index.html'); q.wait_for_timeout(1500)
     R = q.evaluate("()=>{var f=__T.artIdFor,o={};[['hnd_checkin_ow','checkinQ'],['hnd_sec','security'],['hnd_gate_ow','hgateOW'],['doh_x','checkinQ'],['doh_y','gate'],['nbo_plane1','cabinQ'],['nbo_plane2','cabinQ'],['nbo_java1','cafe'],['nbo_art1','cafe'],['nbo_song','nlobby'],['nbo_sim1','sim'],['nbo_immig1','immig'],['nbo_bag1','baggage'],['nbo_taxi1','taxi']].forEach(function(a){o[a[0]+'/'+a[1]]=f({vid:a[0],d:{bg:a[1]}})});return o}")
-    exp = {'hnd_checkin_ow/checkinQ': None, 'hnd_sec/security': None, 'hnd_gate_ow/hgateOW': 'hgate_ow', 'doh_x/checkinQ': None, 'doh_y/gate': None, 'nbo_plane1/cabinQ': None, 'nbo_plane2/cabinQ': None,
+    exp = {'hnd_checkin_ow/checkinQ': 'hcheckin_ow', 'hnd_sec/security': 'hsec', 'hnd_gate_ow/hgateOW': 'hgate_ow', 'doh_x/checkinQ': None, 'doh_y/gate': None, 'nbo_plane1/cabinQ': None, 'nbo_plane2/cabinQ': None,
            'nbo_java1/cafe': None, 'nbo_art1/cafe': None, 'nbo_song/nlobby': 'nlobby', 'nbo_sim1/sim': 'simshop', 'nbo_immig1/immig': 'immig', 'nbo_bag1/baggage': 'bagclaim', 'nbo_taxi1/taxi': 'nairobi'}
-    chk('対応: 羽田(checkinQ/security)・ドーハ側の同名bg・機内・カフェ・歌手・SIM・入国・荷物・タクシーは、これまでどおり', R == exp, {k: v for k, v in R.items() if exp[k] != v})
+    chk('対応: 羽田の checkinQ/security は067で実画(hcheckin_ow/hsec)・ドーハ側の同名bg・ナイロビの機内・カフェ・歌手・SIM・入国・荷物・タクシーは、これまでどおり', R == exp, {k: v for k, v in R.items() if exp[k] != v})
     ctx3.close()
     p3 = br.new_context(viewport={'width': 390, 'height': 780}); p3.add_init_script(INIT)
     d = p3.new_page(); d.route('**/tour/doha/index.html', hooked); d.goto(base + '/tour/doha/index.html'); d.wait_for_timeout(1200)

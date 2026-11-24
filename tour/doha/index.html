@@ -4132,6 +4132,26 @@ var ART={
  hcheckin_st:{bg:'haneda-turkish-checkin-v1.png',mode:'wide',dep:{shF:1,lulu:{n:'tk-lulu-back',x:716,by:884},king:{n:'tk-king-back',x:800,by:884},
   npcS:{tk_checkin:{n:'tk-clerk-star',x:1024,by:700,sw:150}},bubble:{x:1024,y:400},
   fx:[{k:'shuttle',img:'haneda-checkin-belt-bag.png',x0:1132,x1:1234,w:80,h:96,by:606,v:20,wait:2}]}},
+ /* 羽田の出発・残り5場面(タスク067)。結びは本編側の artIdFor だけ(ドーハ側ビルドには入れない)。配置の正本=素材パックの配置プレビュー。背景はどれも人なし(1536×960)。
+    hcheckin_ow=Qatar側のチェックイン(bg checkinQ・vid が hnd_ のときだけ。ナイロビの checkinQ は ncheckin のまま)。055 のターキッシュ側と対の形(係員は紺スーツ tk-clerk・足もと y=700。ベルトの荷物は別素材)。 */
+ hcheckin_ow:{bg:'haneda-checkin-qatar-v1.png',mode:'wide',dep:{shF:1,lulu:{n:'tk-lulu-back',x:716,by:884},king:{n:'tk-king-back',x:800,by:884},
+  npcS:{qr_checkin:{n:'tk-clerk',x:1024,by:700,sw:150}},bubble:{x:1024,y:400},
+  fx:[{k:'shuttle',img:'haneda-checkin-qatar-belt-bag.png',x0:1132,x1:1234,w:80,h:96,by:606,v:20,wait:2}]}},
+ /* 保安検査(bg security・vid が hnd_ のときだけ。ナイロビの nsec とは別の絵)。係員 sec_n1 は右端のゲート(アーチ)の横(o2-front-officer-blue=×2・足もと y=892)。トレイは別素材(strips)をベルトの上に重ねる(底がベルト面 y=636) */
+ hsec:{bg:'haneda-security-v1.png',mode:'wide',strips:[{img:'haneda-security-trays-strip.png',x:0,y:504,n:4,fw:1536,fh:144,step:1}],
+  dep:{lulu:{n:'hall-lulu-back',x:690,by:884},king:{n:'hall-king-back',x:774,by:884},npcS:{sec_n1:{n:'o2-front-officer-blue',x:1330,by:892,sw:130}},bubble:{x:1330,y:560}}},
+ /* 出国審査(bg immigH・vid が hnd_ のときだけ)。窓口は3つ(中心 x=320/768/1216・ガラス帯 y380〜600・カウンター上端 y=600)。係官は中央の窓口の中に頭と肩だけ(top=482・clip=600。入国審査 immig と同じ booths の作法。絵はプレビューから切り出した hexit-officer=幅97。既存の o2-front-officer-blue は110幅で合わない)。
+    青いスーツケースも既存の artSuit(四角い箱)ではなく、プレビューの絵(hexit-suitcase。suitImg)。
+    ふたりは中央の窓口の前に正面の立ち姿(歩いて入らない: dist を極小にして止まった状態から)。青いスーツケースはキングの右 x=862。表示灯は別素材(strips・1秒ごと) */
+ hexit:{bg:'haneda-exit-immigration-v1.png',mode:'wide',base:812,dist:.001,lulu:662,king:760,suit:862,suitImg:{n:'hexit-suitcase',x:862},
+  strips:[{img:'haneda-exit-lights-strip.png',x:0,y:300,n:2,fw:1536,fh:64,step:1}],
+  booths:[{n:'hexit-officer',x:768,top:482,clip:600,lead:1}]},
+ /* 機内の会話場面(bg cabinQ=えんじ色の座席 / cabinT=赤いヘッドレスト・vid が hnd_plane_ のときだけ。048 の cabinseat・機内食 cabinmeal とは別の絵)。
+    客室乗務員は ca-front を高さ274にした絵(npc/ca-front-274。頭105px＝この場面のキングの頭100pxの1.05倍)で通路に立つ(中心 x=1000・足もと y=896)。座席の画面と読書灯の明滅は別素材(全面・2社共通) */
+ hcabin_ow:{bg:'haneda-cabin-qatar-v1.png',mode:'wide',strips:[{img:'haneda-cabin-lights-strip.png',x:0,y:0,n:2,fw:1536,fh:960,step:1}],
+  dep:{lulu:{n:'tk-lulu-back',x:596,by:896},king:{n:'tk-king-back',x:712,by:896},npcS:{qr_crew:{n:'ca-front-274',x:1000,by:896,sw:150}},bubble:{x:1000,y:610}}},
+ hcabin_st:{bg:'haneda-cabin-turkish-v1.png',mode:'wide',strips:[{img:'haneda-cabin-lights-strip.png',x:0,y:0,n:2,fw:1536,fh:960,step:1}],
+  dep:{lulu:{n:'tk-lulu-back',x:596,by:896},king:{n:'tk-king-back',x:712,by:896},npcS:{tk_crew:{n:'ca-front-274',x:1000,by:896,sw:150}},bubble:{x:1000,y:610}}},
  /* ナイロビの手荷物受け取り(タスク045): 人なしの背景(主ベルトは荷物も中央の島も描かない版)に、荷物6個が楕円の経路を1周 period 秒でまわる。
     ベルトの形(中心 cx,cy・経路の半径 rx,ry)は素材の絵(768×480)の半分の大きさの座標で書く。荷物は 2倍の NEAREST の粒のまま、2画素単位で動く。
     描く順: 奥の半分(sin<0)の荷物 → 中央の島 → 手前の半分の荷物 → ふたり。荷物は奥ほど小さく暗い(絵の段階 lv=13 を sin で引く)。手前では左→右、奥では右→左。
@@ -4309,7 +4329,7 @@ function ARTframe(S,A0,dt){
  (cf.crowd||[]).forEach(function(c,ci){L.push({by:c[2],f:function(){var img=exi['w-'+c[0]],bw=img.naturalWidth,
    o=c[3]==='walk'?(Math.floor(t*3.2+ci*.4)%2?-3:0):(Math.floor(t*1.1+ci*.53)%2?-2:0);
    artShadow(c[1],c[2],bw*.42,.3);artSpr(img,c[1],c[2]+o,false)}})});
- L.push({by:B,f:function(){artSuit(cf.suit-dir*sh,B,room)}});
+ L.push({by:B,f:function(){if(cf.suitImg){var si=exi[cf.suitImg.n];ca.drawImage(si,Math.round(cf.suitImg.x-si.naturalWidth/2),B-si.naturalHeight)}else artSuit(cf.suit-dir*sh,B,room)}});
  if(OUT.lvis)L.push({by:B,f:function(){var ly=0,limg;
   if(walking){var lf=Math.floor(te/.2)%4;limg=im[['lulu-walk-a','lulu-walk-b','lulu-walk-c','lulu-walk-b'][lf]];ly=lf%2?-BOB:0}
   else{limg=im['lulu-idle'];ly=Math.floor(t*1.6+.5)%2?-BOB:0}
@@ -4506,7 +4526,7 @@ function artStrips(list){for(var i=0;i<(list||[]).length;i++){var q=list[i],im=a
 function artOKimg(i){return i.complete&&i.naturalWidth>0}
 /* この場面が使う人物の絵の名前(npc/ の中)。ひとつでも読めなければ、場面全体が今までの描画に戻る */
 function artExtra(cf){var a=[],i;if(cf.seat&&cf.seat.ca)a.push(cf.seat.ca.n);if(cf.hall)['sage','lulu','king'].forEach(function(k){if(cf.hall[k])a.push(cf.hall[k].n)});if(cf.tk)['clerk','clerkS','lulu','king'].forEach(function(k){if(cf.tk[k])a.push(cf.tk[k].n)});(cf.crowd||[]).forEach(function(c){a.push('w-'+c[0])});
- (cf.booths||[]).forEach(function(b){a.push(b.n);if(b.sw)a.push(b.sw)});(cf.people||[]).forEach(function(q){a.push(q.n)});
+ (cf.booths||[]).forEach(function(b){a.push(b.n);if(b.sw)a.push(b.sw)});if(cf.suitImg)a.push(cf.suitImg.n);(cf.people||[]).forEach(function(q){a.push(q.n)});
  if(cf.npcS)for(var k in cf.npcS)a.push(cf.npcS[k]);if(cf.dep)a=a.concat(artDepNames(cf.dep));return a}
 function artSpKey(){if(!speaker)return null;for(var k in SP)if(SP[k]===speaker)return k;return null}
 /* ============================================================
