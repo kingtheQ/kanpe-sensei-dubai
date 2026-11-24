@@ -192,3 +192,11 @@
 - 会話：先生と5往復（挨拶→飲み物の注文→ミルクの確認→ひとこと雑談→おわり）。日本語の訳は台本にも画面にもない（`words=[]`・`conv=1`＝Word Battle と Meaning! は出ない）。実在の店名・メニュー名なし。自由会話AIなし。
 - 確認：`EIKAI_PREVIEW=<teacher-cafe-preview.png> python3 tour-src/tests/test_eikaiwa068.py`（30項目）。報告は `docs/pm/deliverables/068-eikaiwa-cafe-report-v1.md`。`test_departure054.py` の出発まわりの絞り込みに `eikai` を足した。
 - 未確認：実機のマイク・声・見え方。並び（キング左・ルル右）は同梱プレビューのとおりで、`docs/rules.md` の「ルルが左・キングが右」とは逆（PM確認待ち）。参考にしたURL：なし（新しい外部URLは使っていない）。
+
+## 今回（11/24）タスク074でやったこと（タイトルの3モード・失敗ルール統一・オープニングの語り）
+- モード：`PREF.mode`（`kd_prefs_v1` の数値キー。0＝カンペ／1＝耳学＆カンペ／2＝耳学）。出し分けは土台 `dubai/index.html` の `npcHide()`（相手の台詞の文字）・`cueBlind(T)`（自分のカンペ）・`npcMsg()`・`showCue()`（耳学で見本の自動再生）。`tour-src/build.py` の生成で tour／doha／rovaniemi／ending 全ページに入る。台本データは変更なし。
+- 失敗ルール：`onFail()`→`failDemo()`（自動おてほん）→3回目 `autoRescue()`（ルルが代行・save.help は減らさない・noteWeak）。`luSayCue()` は手動ヘルプ `useHelp()` と共通。強化合宿（G.camp）だけ従来の assist。061 専用だった `f2Fail`（cards.js）は全場面共通の onFail に統合して削除。
+- 数字のスコア（「3/5語 60%」など）は `hideNum()` で強化合宿以外は出さない。
+- world：タイトルのコマンド窓にモード選択（`#mSel`）と「せつめいを きく」（`#cNarr`）。「はじめから」→語り（`playOpeningNarration`）→語り終えたら（または「すすむ」）tour/ へ。チャントは `CHANT.narr()` で語りのあいだ一時停止。
+- 確認：`python3 tour-src/tests/test_modes074.py`。チェックモード（?check=1）の保存は専用の名前 `chk1:kd_prefs_v1` になる（タイトルで選んだモードはチェックモードへ引き継がない。チェックモードの設定から3モードを確認できる）。
+- 未確認：実機の日本語読み上げの声質、実マイクでの3モードの流れ（耳学モードの「お手本→マイク」）。

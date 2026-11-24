@@ -128,6 +128,14 @@ button{font:inherit;color:inherit;cursor:pointer}
 .copt:hover .cur,.copt:focus-visible .cur{visibility:visible}
 .copt:focus-visible{outline:2px solid #ffc72c;outline-offset:-2px}
 .copt[aria-disabled="true"]{color:#5b6690}
+.msec{border-top:2px solid #2a3358;margin-top:6px;padding-top:4px}
+.mopt{background:none;border:0;text-align:left;width:100%;min-height:52px;padding:4px 6px 4px 32px;position:relative;color:#fff;display:flex;align-items:center;font:inherit}
+.mopt .cur{position:absolute;left:8px;font-size:16px;visibility:hidden;color:#ffc72c}
+.mopt b{display:block;font-size:19px;font-weight:800}
+.mopt small{display:block;font-size:12px;color:#9aa6c4;margin-top:1px}
+.mopt[aria-checked="true"] .cur{visibility:visible}
+.mopt[aria-checked="true"] b{color:#ffc72c}
+.mopt:focus-visible{outline:2px solid #ffc72c;outline-offset:-2px}
 .ask{font-size:16px;line-height:1.7;padding:6px 6px 4px;word-break:keep-all;overflow-wrap:anywhere}
 .row2{display:flex;gap:6px}
 .row2 .copt{flex:1;justify-content:center;padding-left:6px}
@@ -167,6 +175,17 @@ button{font:inherit;color:inherit;cursor:pointer}
    <div class="cinfo" id="cInfo" hidden></div>
    <button type="button" class="copt" id="cNew"><span class="cur">▶</span>はじめから</button>
    <button type="button" class="copt" id="cCont"><span class="cur">▶</span>つづきから</button>
+   <button type="button" class="copt" id="cNarr"><span class="cur">▶</span>せつめいを きく</button>
+   <div class="msec" id="mSel" role="radiogroup" aria-label="あそびかた">
+    <div class="cinfo">あそびかた</div>
+    <button type="button" class="mopt" role="radio" data-m="0"><span class="cur">▶</span><span><b>カンペモード</b><small>文字のカンペを見て言う</small></span></button>
+    <button type="button" class="mopt" role="radio" data-m="1"><span class="cur">▶</span><span><b>耳学＆カンペモード</b><small>相手は音だけ。自分の答えはカンペあり</small></span></button>
+    <button type="button" class="mopt" role="radio" data-m="2"><span class="cur">▶</span><span><b>耳学モード</b><small>全部、音だけ。耳と口だけで旅する</small></span></button>
+   </div>
+  </div>
+  <div class="cmdwin" id="cmdNarr" hidden>
+   <div class="cinfo" aria-hidden="true">🔊</div>
+   <button type="button" class="copt" id="cGo"><span class="cur">▶</span>すすむ</button>
   </div>
   <div class="cmdwin" id="cmdAsk" hidden>
    <div class="ask">せかいマップと せかいいっしゅうの きろくを けして、はじめます。いいですか？</div>
@@ -821,7 +840,7 @@ try{window.TRIP=TRIP}catch(e){}
    ============================================================ */
 var CHANT=(function(){
  var BASE='../tour/assets/song/',FILE='song-chant.mp3',VOL=.2,KEY='kw-chant',WIN=15000;
- var st={el:null,ac:null,loop:0,done:0,armed:0,evs:['pointerup','touchend','click','keydown'],hook:null};
+ var st={el:null,ac:null,loop:0,done:0,armed:0,narr:0,evs:['pointerup','touchend','click','keydown'],hook:null};
  function sndOn(){try{return localStorage.getItem('kd_snd')!=='off'}catch(e){return true}}
  function ios(){try{return /iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)}catch(x){return false}}
  function hook(k){try{if(st.hook&&st.hook[k])st.hook[k]()}catch(x){}}
@@ -832,7 +851,7 @@ var CHANT=(function(){
   if(e)hook('off')}
  /* 鳴らす。すでに鳴っていれば何もしない。必ずユーザー操作の中から呼ぶ(鳴らせなければ、そっと諦める) */
  function start(at,loop,blocked){
-  if(st.el||st.done||!sndOn())return false;
+  if(st.el||st.done||st.narr||!sndOn())return false;
   var e=new Audio(BASE+FILE);e.preload='auto';e.loop=!!loop;e.volume=VOL;st.el=e;st.loop=loop?1:0;
   if(at>0){try{e.currentTime=at}catch(x){}}
   /* iPhone / iPad(Safari)は audio.volume が効かないので、Web Audio のゲインを通す */
@@ -847,7 +866,7 @@ var CHANT=(function(){
  function stop(){st.done=1;unbind();try{sessionStorage.removeItem(KEY)}catch(x){}clean()}
  /* マイクで聞いているあいだ・タブが見えないあいだ・音オフのあいだは止め、戻ったら続きから */
  function sync(){var e=st.el;if(!e)return;
-  var hold=(typeof ambDuck!=='undefined'&&ambDuck)||document.hidden||!sndOn();
+  var hold=(typeof ambDuck!=='undefined'&&ambDuck)||document.hidden||!sndOn()||st.narr;
   if(hold){if(!e.paused){try{e.pause()}catch(x){}}}
   else if(e.paused&&!e.ended){var p;try{p=e.play()}catch(x){}if(p&&p.catch)p.catch(function(){})}}
  document.addEventListener('visibilitychange',sync);
@@ -875,7 +894,9 @@ var CHANT=(function(){
    function off(){['pointerup','touchend','click','keydown'].forEach(function(n){document.removeEventListener(n,again,true)})}
    ['pointerup','touchend','click','keydown'].forEach(function(n){document.addEventListener(n,again,true)})}
  }
- return {start:start,stop:stop,sync:sync,arm:arm,leave:leave,resume:resume,has:function(){return !!st.el},
+ /* オープニングの語り(タスク074)のあいだは一時停止し、終わったら続きから(タイトルにいる間だけ。止まったあとは再開しない) */
+ function narr(on){st.narr=on?1:0;sync()}
+ return {start:start,stop:stop,sync:sync,narr:narr,arm:arm,leave:leave,resume:resume,has:function(){return !!st.el},
   playing:function(){return !!(st.el&&!st.el.paused&&!st.el.ended)},set hook(h){st.hook=h},get hook(){return st.hook}}
 })();
 window.CHANT=CHANT;
@@ -1066,7 +1087,7 @@ function renderMap(){
 }
 
 /* ---------- 画面の切りかえ ---------- */
-function show(id){['sTitle','sMap','sSet','sGate','sFlight'].forEach(function(k){$(k).hidden=(k!==id)});window.scrollTo(0,0);if(id!=='sGate')gateOff();if(id==='sMap')mapMusicOn();else mapMusicOff();titleCtl(id==='sTitle');if(id==='sTitle')CHANT.arm();else CHANT.leave()}   /* タイトルのチャント(タスク050): タイトルに出たら最初のタッチを待つ・離れたら止める */
+function show(id){['sTitle','sMap','sSet','sGate','sFlight'].forEach(function(k){$(k).hidden=(k!==id)});window.scrollTo(0,0);if(id!=='sGate')gateOff();if(id==='sMap')mapMusicOn();else mapMusicOff();titleCtl(id==='sTitle');if(id==='sTitle')CHANT.arm();else{CHANT.leave();stopOpeningNarration()}}   /* タイトルのチャント(タスク050): タイトルに出たら最初のタッチを待つ・離れたら止める */
 
 /* ---------- 搭乗ゲート ---------- */
 var GATE_EN='Where would you like to fly next?';
@@ -1461,23 +1482,62 @@ function tone(f,t0,d,type,vol){var a=AC;if(!a)return;var o=a.createOscillator(),
 function jingle(){if(!ac())return;[[523.25,0],[659.25,.12],[783.99,.24],[1046.5,.36]].forEach(function(n){tone(n[0],n[1],.22,'square',.04)});[523.25,783.99,1046.5].forEach(function(f){tone(f,.36,.8,'triangle',.045)})}
 function blip(){if(!ac())return;tone(880,0,.08,'square',.035);tone(1318.5,.06,.1,'square',.035)}
 
+/* ---------- 3つのモード(タスク074): 保存は既存の kd_prefs_v1 の中の数値キー mode だけ(0=カンペ 1=耳学＆カンペ 2=耳学)。他のキーは触らない ---------- */
+var PREFKEY='kd_prefs_v1';
+function modeLoad(){try{var p=JSON.parse(localStorage.getItem(PREFKEY)||'null');var m=(p&&typeof p==='object')?p.mode:0;return (m===1||m===2)?m:0}catch(e){return 0}}
+function modeSave(m){var p=null;try{p=JSON.parse(localStorage.getItem(PREFKEY)||'null')}catch(e){}
+ if(!p||typeof p!=='object'||Array.isArray(p))p={};p.mode=m;try{localStorage.setItem(PREFKEY,JSON.stringify(p))}catch(e){}}
+function modeShow(){var m=modeLoad();[].forEach.call(document.querySelectorAll('#mSel .mopt'),function(b){b.setAttribute('aria-checked',+b.getAttribute('data-m')===m?'true':'false')})}
+[].forEach.call(document.querySelectorAll('#mSel .mopt'),function(b){b.addEventListener('click',function(){blip();modeSave(+b.getAttribute('data-m'));modeShow()})});
+modeShow();
+
+/* ---------- オープニングの語り(タスク074): ゲームの説明は文字で出さず、日本語の音声ナレーションで語る ----------
+   文案はキングの下書きが正本(句読点の調整のみ可)。文案はこの定数1か所、再生は playOpeningNarration() 1つ。
+   あとでキング本人の録音に差し替えるときは、OPENING_NARRATION_AUDIO に音声ファイルのURLを入れるだけ(空のあいだはブラウザ読み上げ speechSynthesis・ja-JP)。 */
+var OPENING_NARRATION='ようこそ！空港えいご物語へ！これからあなたはキングとして、相棒のルルと一緒に世界一周の旅に出ます。ルルはあなたをサポートしてくれる。キングとして大きな声で口の筋肉を鍛える、その耳で音を聞いて相手のリズムを体感してください。ただそれだけ。楽しんでいってらっしゃい！';
+var OPENING_NARRATION_AUDIO='';
+var NARR={tok:0,on:false,au:null};
+/* 語りを流す。終わったら(または止めたら)チャントを元の扱いに戻す。done は最後まで語り終えたときだけ呼ぶ */
+function playOpeningNarration(done){
+ stopOpeningNarration();var my=++NARR.tok;NARR.on=true;try{CHANT.narr(true)}catch(e){}
+ var fired=false,guard=0;
+ function fin(){if(fired||my!==NARR.tok)return;fired=true;clearTimeout(guard);NARR.on=false;NARR.au=null;if(done){done();return}   /* 語りのあとゲームへ進むときは、チャントを一時停止のまま渡す(ページが変わり、tour/ が続きから鳴らす) */
+  try{CHANT.narr(false)}catch(e){}}
+ guard=setTimeout(fin,OPENING_NARRATION.length*230+4000);   /* 声が使えない端末でも止まらない保険 */
+ if(OPENING_NARRATION_AUDIO){try{var a=new Audio(OPENING_NARRATION_AUDIO);NARR.au=a;a.onended=fin;a.onerror=fin;var pr=a.play();if(pr&&pr.catch)pr.catch(fin)}catch(e){fin()}return}
+ try{var ss=window.speechSynthesis;if(!ss||typeof SpeechSynthesisUtterance==='undefined'){fin();return}
+  ss.cancel();var u=new SpeechSynthesisUtterance(OPENING_NARRATION);u.lang='ja-JP';u.rate=.95;u.pitch=1;u.volume=1;
+  try{var vs=ss.getVoices()||[];for(var i=0;i<vs.length;i++){if(/^ja/i.test(vs[i].lang)){u.voice=vs[i];break}}}catch(e){}
+  u.onend=fin;u.onerror=fin;ss.speak(u)}catch(e){fin()}}
+/* 止める(画面を離れる・ページを離れる・ゲームを始める)。done は呼ばない */
+function stopOpeningNarration(){
+ var was=NARR.on;NARR.tok++;NARR.on=false;
+ if(NARR.au){try{NARR.au.onended=null;NARR.au.onerror=null;NARR.au.pause()}catch(e){}NARR.au=null}
+ try{if('speechSynthesis' in window)speechSynthesis.cancel()}catch(e){}
+ if(was){try{CHANT.narr(false)}catch(e){}}}
+window.addEventListener('pagehide',stopOpeningNarration);
+
 /* ---------- はじめから / つづきから ---------- */
 function hasSave(s){return s.at!=='haneda'||Object.keys(s.cleared).length>1||Object.keys(s.seen).length>1}
-function enterTour(){location.href='../tour/'}
+function enterTour(){stopOpeningNarration();location.href='../tour/'}
+/* 「はじめから」: 語りを流して、語り終えたら(または「すすむ」で)世界一周編へ。語りの途中で始めても、語りは止まって場面の音声とぶつからない */
+function beginNew(){$('cmdMain').hidden=true;$('cmdAsk').hidden=true;$('cmdNarr').hidden=false;$('cGo').focus({preventScroll:true});playOpeningNarration(enterTour)}
 function enterMap(){try{sessionStorage.setItem('kw-started',String(Date.now()))}catch(e){}renderMap();show('sMap')}
 function openCmd(){
  S=load();var hs=hasSave(S);
  var info=$('cInfo');info.hidden=!hs;
  if(hs)info.textContent=(TRIP.inTrip()?'区間　'+TRIP.landed()+' / '+TRIP.total():'スタンプ　'+TRIP.stamps())+'　いま '+AP[S.at].n;
  var cc=$('cCont');cc.setAttribute('aria-disabled',hs?'false':'true');
- $('cmdMain').hidden=false;$('cmdAsk').hidden=true;$('cmd').hidden=false;$('startBtn').hidden=true;
+ modeShow();$('cmdNarr').hidden=true;$('cmdMain').hidden=false;$('cmdAsk').hidden=true;$('cmd').hidden=false;$('startBtn').hidden=true;
  (hs?cc:$('cNew')).focus({preventScroll:true})}
 $('startBtn').addEventListener('click',function(){jingle();openCmd()});
 function hasTour(){try{return localStorage.getItem('kanpe-tour-save-v1')!==null}catch(e){return false}}
-$('cNew').addEventListener('click',function(){blip();S=load();if(hasSave(S)||hasTour()){$('cmdMain').hidden=true;$('cmdAsk').hidden=false;$('cNo').focus({preventScroll:true})}else enterTour()});
+$('cNew').addEventListener('click',function(){blip();S=load();if(hasSave(S)||hasTour()){$('cmdMain').hidden=true;$('cmdAsk').hidden=false;$('cNo').focus({preventScroll:true})}else beginNew()});
 $('cCont').addEventListener('click',function(){if($('cCont').getAttribute('aria-disabled')==='true')return;blip();enterMap()});
+$('cNarr').addEventListener('click',function(){blip();playOpeningNarration()});
+$('cGo').addEventListener('click',function(){blip();enterTour()});
 $('cNo').addEventListener('click',function(){blip();$('cmdAsk').hidden=true;$('cmdMain').hidden=false;$('cNew').focus({preventScroll:true})});
-$('cYes').addEventListener('click',function(){blip();try{localStorage.removeItem(KEY)}catch(e){}try{localStorage.removeItem('kanpe-tour-save-v1')}catch(e){}TRIP.reset();enterTour()});  /* 世界一周編の記録も消す(タスク022)。旅のメモ kanpe-tour-memo-v1 と 声の記録 kanpe-voice-v1 は残す */
+$('cYes').addEventListener('click',function(){blip();try{localStorage.removeItem(KEY)}catch(e){}try{localStorage.removeItem('kanpe-tour-save-v1')}catch(e){}TRIP.reset();beginNew()});  /* 世界一周編の記録も消す(タスク022)。旅のメモ kanpe-tour-memo-v1 と 声の記録 kanpe-voice-v1 は残す */
 window.addEventListener('pageshow',function(e){cancelAnimationFrame(flyTimer);if(e.persisted){renderMap();show('sMap')}});
 renderMap();
 var skipTitle=/(^|[?&])map=1(&|$)/.test(location.search);

@@ -217,6 +217,8 @@ body{margin:0;box-sizing:border-box;background:var(--bg);color:var(--line);font-
 .tgl::after{content:'';position:absolute;top:2px;left:2px;width:24px;height:24px;border-radius:12px;background:var(--line)}
 .tgl[aria-pressed=true]{background:var(--gold)}.tgl[aria-pressed=true]::after{left:auto;right:2px;background:var(--win)}
 .sseg{display:flex;gap:8px}
+.sseg.col{flex-direction:column}
+.cue.blind{justify-content:center;align-items:center}.cue.blind .w{display:none}.cue.blind .lab{position:static;font-size:30px;letter-spacing:0}
 .sseg button{flex:1;min-height:44px;font:inherit;font-size:15px;font-weight:800;color:var(--line);background:var(--win);border:2px solid var(--line);border-radius:10px;cursor:pointer}
 .sseg button[aria-pressed=true]{color:var(--ink);background:var(--gold);border-color:var(--gold)}
 .snote{flex:none;font-size:11px;font-weight:500;line-height:1.6;color:var(--mute)}
@@ -2088,6 +2090,13 @@ function startScene(){
  if(S.d.auto){if(S.d.fx)evFx(S.d.fx);var go0=function(){playInter(-1,npcTurn)};if(S.d.pre==='own'&&window.PA)PA.pre(S,go0);else later(700,go0);return}
  var b=el('button','btn go','GO！');b.type='button';panel.appendChild(b);setTimeout(function(){if(b.isConnected)b.classList.add('shake')},3000);
  b.addEventListener('click',function(){if(window.__songGo)window.__songGo(S);if(S.d.story)playInter(-1,npcTurn);else npcTurn()})}
+/* ---------- 3つのモード(タスク074): 会話の文字の出し方だけを変える。台本データは3モード共通 ----------
+   PREF.mode 0=カンペ(現行) / 1=耳学＆カンペ(相手の台詞の文字を出さない) / 2=耳学(自分のカンペも出さず、お手本が先に流れる)
+   対象外: 宣言・読み返しの診断ターン(T.diag)、強化合宿(G.camp)。単語パート・場面の導入文は npcTurn/showCue を通らない */
+function npcHide(){if(!(PREF.mode>=1)||G.camp||!G.scene)return false;var T=G.scene.turns&&G.scene.turns[G.ti];return !(T&&T.diag)}
+function cueBlind(T){return PREF.mode===2&&!G.camp&&!(T&&T.diag)}
+function npcMsg(text,w){if(npcHide()){clearInterval(G.typeTimer);who.textContent=w||'';msgText.textContent='';return}setMsg(text,w)}
+function hideNum(){return !G.camp}   /* 数字のスコア・失敗回数は出さない(タスク074)。強化合宿だけ従来どおり */
 function npcTurn(){
  clearPanel();G.phase='npc';var S=G.scene,T=S.turns[G.ti];
  if(T.vr&&!T.vd){T.vd=1;for(var vi=0;vi<T.vr.length;vi++){var vv=T.vr[vi];if(window.__CHK||save.seen[vv.s]>0){T.npc=vv.n;T.npcJp=vv.jp;if(vv.y){T.cue=vv.y;T.cueJp=vv.yjp}break}}}
@@ -2096,7 +2105,7 @@ function npcTurn(){
  if(T.dw&&!T.dts)T.dts=Date.now();
  if(T.ctx)applyCtx(T.ctx);
  who.textContent=T.ctx?T.ctx.who:S.d.who;
- msgText.textContent='';typeText(T.npc);
+ msgText.textContent='';if(!npcHide())typeText(T.npc);
  spSay=true;panel.appendChild(el('div','stat',''));
  (paTurn(S,T)?paSay:say)(T.npc,.95,S.pitch,gd(function(){spSay=false;if(G.phase==='npc')later(250,showCue)}))}
 $m('msg').addEventListener('click',function(){if(!G.scene||G.phase==='idle'||G.phase==='words'||G.phase==='reveal'||G.phase==='inter'||G.phase==='hub'||G.phase==='sample'||G.phase==='pay')return;var T=G.scene.turns[G.ti];if(T){spSay=true;(paTurn(G.scene,T)?paSay:say)(T.npc,.95,G.scene.pitch,gd(function(){spSay=false}))}});
@@ -2108,15 +2117,18 @@ function fitCue(card){
   var cr=card.getBoundingClientRect(),av=cr.height-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom);return (bot-top)>av}
  for(var i=0;i<20&&over()&&k>.45;i++){k-=.05;ws.forEach(function(w,j){w.style.fontSize=(base[j]*k).toFixed(1)+'px'})}}
 function showCue(){
- G.cueSil=PREF.silent;G.phase='cue';clearPanel();var T=G.scene.turns[G.ti];if(T.opts&&!T.pk){(T.cards?cardsOpts:T.fork?forkOpts:((G.scene.d.ev||typeof winOpts!=='function')?evOpts:winOpts))(T);return}var toks=parseCue(T.cue);clearInterval(G.typeTimer);msgText.textContent=T.npc;
- var card=el('div','cue'+(T.diag?' diag':''));card.appendChild(el('span','lab','カンペ'));
- var spans=toks.map(function(k){var s=el('span','w'+(k.s?' s':''),k.txt);card.appendChild(s);return s});
+ G.cueSil=PREF.silent;G.cueMode=PREF.mode;G.phase='cue';clearPanel();var T=G.scene.turns[G.ti];if(T.opts&&!T.pk){(T.cards?cardsOpts:T.fork?forkOpts:((G.scene.d.ev||typeof winOpts!=='function')?evOpts:winOpts))(T);return}var toks=parseCue(T.cue);clearInterval(G.typeTimer);msgText.textContent=npcHide()?'':T.npc;
+ var blind=cueBlind(T),card=el('div','cue'+(blind?' blind':'')+(T.diag?' diag':''));card.appendChild(el('span','lab',blind?'🎤':'カンペ'));
+ var spans=toks.map(function(k){var s=el('span','w'+(k.s?' s':''),blind?'':k.txt);card.appendChild(s);return s});
  panel.appendChild(card);var stat=el('div','stat','');card.appendChild(stat);
- var row=el('div','row cuerow');var demo=el('button','btn sub','おてほん');demo.type='button';if(!f2())row.appendChild(demo);
- demo.addEventListener('click',function(){var sd=G.sid;if(G.mute)G.mute();say(cueText(T.cue),.8,1,function(){later(400,function(){if(G.sid===sd&&G.kick)G.kick()})})});
+ var row=el('div','row cuerow');var demo=el('button','btn sub',blind?'🔊':'おてほん');demo.type='button';demo.setAttribute('aria-label','おてほん');
+ function playDemo(){var sd=G.sid;if(G.mute)G.mute();say(cueText(T.cue),.8,1,function(){later(400,function(){if(G.sid===sd&&G.kick)G.kick()})})}
+ if(!f2()||blind)row.appendChild(demo);
+ demo.addEventListener('click',playDemo);
  var act=el('button','btn','🎤 もういちど');act.type='button';row.appendChild(act);panel.appendChild(row);fitCue(card);requestAnimationFrame(function(){fitCue(card)});
  setupAction(act,stat,toks,spans,T);
- if(SR&&!PREF.silent)later(500,function(){if(G.kick)G.kick()});
+ if(blind&&!(typeof f2==='function'&&f2()&&T.pk))later(400,playDemo);   /* 耳学モード: 自分の番の冒頭でお手本が自動で流れ、流れ終わったらマイクが開く(音声を先に流した場面の直後は重ねない) */
+ else if(SR&&!PREF.silent)later(500,function(){if(G.kick)G.kick()});
  if(!G.camp&&!T.diag&&!G.scene.d.nohelp)addHelp(T)}
 /* ---------- 発音チェック: 目標の文と「聞こえた文字」を単語ごとに比べる ---------- */
 var ONES=['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
@@ -2188,9 +2200,9 @@ function plogLoad(){try{var a=JSON.parse(localStorage.getItem(PLOG)||'[]');retur
 function plogAdd(r){var a=plogLoad();a.push(r);if(a.length>600)a=a.slice(-600);try{localStorage.setItem(PLOG,JSON.stringify(a))}catch(e){}}
 function missKey(s){return String(s).replace(/[^A-Za-z']/g,'').toLowerCase()}
 function renderEval(card,spans,toks,res,heardEl){
- card.classList.add('ev');
+ card.classList.add('ev');var bl=card.classList.contains('blind');
  res.words.forEach(function(w,i){
-  var s=spans[i],txt=toks[i].txt;s.textContent='';s.classList.remove('on','bad');
+  if(bl)return;var s=spans[i],txt=toks[i].txt;s.textContent='';s.classList.remove('on','bad');
   if(w.ok){s.textContent=txt;return}
   if(w.k==='tail'){
    var good='',badp='',punct='',cnt=0;
@@ -2211,7 +2223,7 @@ function setupAction(act,stat,toks,spans,T){
  function alive(){return G.sid===sid&&G.view==='scene'}
  function label(){return IDLE}
  function setIdle(){listening=false;act.classList.remove('down');act.textContent=label()}
- function resetCard(){card.classList.remove('ev');spans.forEach(function(s,i){s.classList.remove('on','bad');s.textContent=toks[i].txt})}
+ function resetCard(){card.classList.remove('ev');var bl=card.classList.contains('blind');spans.forEach(function(s,i){s.classList.remove('on','bad');s.textContent=bl?'':toks[i].txt})}
  function blocked(msg){/* マイクが使えない: 長押し(時間)判定にもどす */
   listening=false;var a2=act.cloneNode(false);a2.className='btn';a2.textContent=IDLE;act.parentNode.replaceChild(a2,act);
   setupActionTimer(a2,stat,toks,spans,T);stat.className='stat ng';stat.textContent=msg+'。長押しにもどします'}
@@ -2226,8 +2238,8 @@ function setupAction(act,stat,toks,spans,T){
   noHear=0;
   var pct=Math.round(res.ratio*100),cnt=res.okN+'/'+res.n+'語 '+pct+'%';
   /* 7割以上でOK(グアム編と同じ)。赤い語は記録に入り、羽田の発音教室で練習する */
-  if(res.ratio>=0.7){stat.className='stat ok';stat.textContent=f2()?'':(res.okN===res.n?'Nice!  ':'')+cnt;onPass();return}
-  stat.className='stat ng';stat.textContent=f2()?'':cnt+'  7割未満';onFail()}
+  if(res.ratio>=0.7){stat.className='stat ok';stat.textContent=f2()?'':(res.okN===res.n?'Nice!  ':'')+(hideNum()?'':cnt);onPass();return}
+  stat.className='stat ng';stat.textContent=f2()?'':hideNum()?'':cnt+'  7割未満';onFail()}
  function start(){
   stopSay();resetCard();heardEl.className='heard live';heardEl.textContent='…';stat.className='stat';stat.textContent='';
   var r;try{r=new SR()}catch(e){blocked('マイクが使えません');return}
@@ -2376,18 +2388,30 @@ function onFail(){
  var Td=G.scene&&G.scene.turns[G.ti];if(Td&&Td.diag){diagDone();return}
  Snd.jingle('buzz');A_shake();G.tries++;
  if(dreamGiveUp())return;
- if(f2Fail())return;
- if(G.tries>=3){G.phase='assist';var T=G.scene.turns[G.ti];noteWeak(T);setMsgInstant('Listen, then try again.',whoNow());say(cueText(T.cue),.6,1,gd(function(){G.tries=0;later(300,function(){var st=panel.querySelector('.stat');if(st){st.className='stat';st.textContent=''}})}));return}
- G.phase='retry';var line=RETRY[Math.min(G.tries-1,RETRY.length-1)];setMsg(line,whoNow());say(line,.9,G.scene.pitch,gd(function(){later(400,function(){if(G.kick)G.kick()})}))}
+ if(G.tries>=3){if(G.camp){G.phase='assist';var T=G.scene.turns[G.ti];noteWeak(T);setMsgInstant('Listen, then try again.',whoNow());say(cueText(T.cue),.6,1,gd(function(){G.tries=0;later(300,function(){var st=panel.querySelector('.stat');if(st){st.className='stat';st.textContent=''}})}));return}autoRescue();return}
+ G.phase='retry';var line=RETRY[Math.min(G.tries-1,RETRY.length-1)];npcMsg(line,whoNow());say(line,.9,G.scene.pitch,gd(function(){later(G.camp?400:300,function(){if(G.camp){if(G.kick)G.kick();return}failDemo()})}))}
+/* 失敗ルール(タスク074・全モード共通): 失敗→相手の聞き返し→おてほんが自動で流れて言い直し(ボタンなし)→3回目の失敗でルルが代わりに言って物語が進む。
+   自動救済は save.help を減らさない。救済された文も noteWeak で弱点メモに残る。数字のスコア・失敗回数は出さない。強化合宿(G.camp)だけ従来の流れ */
+function failDemo(){var T=G.scene&&G.scene.turns[G.ti];if(G.phase!=='retry'||!T)return;if(G.mute)G.mute();say(cueText(T.cue),.8,1,gd(function(){later(400,function(){if(G.phase==='retry'&&G.kick)G.kick()})}))}
+function autoRescue(){
+ var T=G.scene.turns[G.ti];G.phase='help';G.tries=0;noteWeak(T);
+ G.sid++;clearTimers();stopSay();
+ Array.prototype.forEach.call(panel.querySelectorAll('button'),function(b){b.disabled=true});
+ var st=panel.querySelector('.stat');if(st){st.className='stat';st.textContent=''}
+ luSayCue(T)}
+/* るるが かわりに 言う(手動ヘルプ useHelp と自動救済 autoRescue で共通)。耳学モードでは文字を出さず、声だけで進む */
+function luSayCue(T){
+ later(450,function(){if(cueBlind(T)){clearInterval(G.typeTimer);who.textContent='Lulu';msgText.textContent=''}else setMsgInstant(cueText(T.cue),'Lulu');luHelp=true;spSay=false;var t0=Date.now();
+  say(cueText(T.cue),.85,1.75,gd(function(){later(Math.max(500,1800-(Date.now()-t0)),function(){luHelp=false;later(450,advance)})}))})}
 function A_shake(){var a=$m('app');a.classList.remove('shake');void a.offsetWidth;a.classList.add('shake')}
 function advance(){
- if(!G.camp){var D0=G.scene.turns[G.ti];if(D0&&D0.rep&&!D0.repd){D0.repd=1;G.phase='rep';setMsg(D0.rep.n,D0.rep.who||whoNow());spSay=true;(paRep(G.scene,D0.rep)?paSay:say)(D0.rep.n,.95,G.scene.pitch,gd(function(){spSay=false;later(450,advance)}));return}
+ if(!G.camp){var D0=G.scene.turns[G.ti];if(D0&&D0.rep&&!D0.repd){D0.repd=1;G.phase='rep';npcMsg(D0.rep.n,D0.rep.who||whoNow());spSay=true;(paRep(G.scene,D0.rep)?paSay:say)(D0.rep.n,.95,G.scene.pitch,gd(function(){spSay=false;later(450,advance)}));return}
  if(D0&&D0.pay&&!D0.payd){D0.payd=1;payStart(D0.pay,advance);return}}
  if(G.camp){var done=G.scene.turns[G.ti];save.weak=save.weak.filter(function(w){return w.c!==done.cue});storeSave();G.ti++;if(G.ti>=G.scene.turns.length)campDone();else npcTurn();return}
  G.ti++;playInter(G.ti-1,function(){if(G.ti>=G.scene.turns.length){G.phase='clear';Snd.jingle('clear');var W0=G.scene.d&&(G.scene.d.win||G.scene.d.ev||G.scene.d.conv);setMsgInstant(G.scene.d.dream?'Good night.':W0?'Clear!':'Clear!  ぜんぶ いえた！',whoNow());later(W0?1300:2000,W0?finishScene:startWords)}else npcTurn()})}
 function onPass(){
  var Td=G.scene&&G.scene.turns[G.ti];if(Td&&Td.diag){diagDone();return}
- Snd.jingle('pass');G.phase='pass';G.tries=0;dreamPass();var th=THANKS[Math.floor(Math.random()*THANKS.length)];setMsg(th,whoNow());spSay=true;
+ Snd.jingle('pass');G.phase='pass';G.tries=0;dreamPass();var th=THANKS[Math.floor(Math.random()*THANKS.length)];npcMsg(th,whoNow());spSay=true;
  say(th,1,G.scene.pitch,gd(function(){spSay=false;later(350,advance)}))}
 
 /* ---------- ヘルプ(るるが かわりに 発音)と 強化合宿(グアム編と同じ仕組み) ---------- */
@@ -2404,8 +2428,7 @@ function useHelp(T){
  Array.prototype.forEach.call(panel.querySelectorAll('button'),function(b){b.disabled=true});
  var hb=panel.querySelector('.btn.help');if(hb)hb.textContent=save.help>0?'ヘルプ\u3000残り'+save.help+'回':'ヘルプ\u3000つかいきった';
  var st=panel.querySelector('.stat');if(st){st.className='stat';st.textContent='るるが かわりに いうよ(ヘルプ のこり '+save.help+'回)'}
- later(450,function(){setMsgInstant(cueText(T.cue),'Lulu');luHelp=true;spSay=false;var t0=Date.now();
-  say(cueText(T.cue),.85,1.75,gd(function(){later(Math.max(500,1800-(Date.now()-t0)),function(){luHelp=false;later(450,advance)})}))})}
+ G.tries=0;luSayCue(T)}
 function startCampCore(){
  var S0=G.scene,cur=S0.turns[G.ti],list=save.weak.slice();if(!list.length&&cur)list=[{c:cur.cue,j:cur.cueJp||''}];
  G.sid++;clearTimers();stopSay();luHelp=false;
@@ -2422,8 +2445,9 @@ function campDone(){
  showCue();var st=panel.querySelector('.stat');if(st){st.className='stat ok';st.textContent='強化合宿おわり！ ヘルプが '+HELPMAX+'回 ふっかつ'}}
 
 /* ---------- せってい(どのページからでも ひらける) ---------- */
-var PREF={bgm:70,beat:80,voice:100,rate:1,silent:0,big:0,pitch:1.6},PREFKEY='kd_prefs_v1';
+var PREF={bgm:70,beat:80,voice:100,rate:1,silent:0,big:0,pitch:1.6,mode:0},PREFKEY='kd_prefs_v1';   /* mode(タスク074): 0=カンペ(既定) 1=耳学＆カンペ 2=耳学 */
 try{var p0=JSON.parse(localStorage.getItem(PREFKEY)||'null');if(p0&&typeof p0==='object')Object.keys(PREF).forEach(function(k){if(typeof p0[k]==='number'&&isFinite(p0[k]))PREF[k]=p0[k]})}catch(e){}
+if(PREF.mode!==1&&PREF.mode!==2)PREF.mode=0;
 function prefSave(){try{localStorage.setItem(PREFKEY,JSON.stringify(PREF))}catch(e){}}
 function prefApply(){Snd.setBgm(PREF.bgm);Snd.setBeat(PREF.beat);document.body.classList.toggle('big',!!PREF.big)}
 var SETICON='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f4f1e8" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="2.4" fill="#05070f"/><circle cx="15" cy="12" r="2.4" fill="#05070f"/><circle cx="8" cy="17" r="2.4" fill="#05070f"/></svg>';
@@ -2437,9 +2461,13 @@ function sSlider(t,key){var l=el('label','srow');l.appendChild(document.createTe
  i.addEventListener('input',function(){PREF[key]=+i.value;prefApply();prefSave()});l.appendChild(i);return l}
 function sSeg(items,key){var d=el('div','sseg'),bs=[];items.forEach(function(it){var b=el('button',null,it[0]);b.type='button';bs.push([b,it[1]]);b.addEventListener('click',function(){PREF[key]=it[1];prefSave();prefApply();sync()});d.appendChild(b)});
  function sync(){bs.forEach(function(x){x[0].setAttribute('aria-pressed',PREF[key]===x[1]?'true':'false')})}sync();return d}
+/* モード名と1行の説明(タイトル画面 world/index.html と同じ文言) */
+var MODES74=[['カンペモード','文字のカンペを見て言う'],['耳学＆カンペモード','相手は音だけ。自分の答えはカンペあり'],['耳学モード','全部、音だけ。耳と口だけで旅する']];
 function openSettings(){
  $m('setCtx').textContent='いま ひらいている ところ：'+viewName()+' ・ もどると つづきから';
  var b=$m('setBody');b.textContent='';
+ var s0=sSec('あそびかた'),mg=sSeg(MODES74.map(function(m,i){return [m[0],i]}),'mode'),md=el('div','dd','');mg.classList.add('col');s0.appendChild(mg);s0.appendChild(md);b.appendChild(s0);
+ function mdSync(){md.textContent=MODES74[PREF.mode]?MODES74[PREF.mode][1]:''}mdSync();[].forEach.call(mg.querySelectorAll('button'),function(x){x.addEventListener('click',mdSync)});
  var s1=sSec('こえ');s1.appendChild(sToggle('こえを ださない モード','マイクを つかわず、ボタンで すすむ。電車や お店の中でも あそべる','silent'));b.appendChild(s1);
  var s2=sSec('おんりょう');s2.appendChild(sSlider('おんがく(BGM・まちの おと)','bgm'));s2.appendChild(sSlider('リズムの おと(強化合宿)','beat'));s2.appendChild(sSlider('ルル・あいての こえ','voice'));b.appendChild(s2);
  var s3=sSec('よみあげ');s3.appendChild(el('div','tt','よみあげの はやさ'));s3.appendChild(sSeg([['ゆっくり',.75],['ふつう',1],['はやい',1.2]],'rate'));s3.appendChild(el('div','tt','ルルの こえの たかさ'));s3.appendChild(sSeg([['ふつう',1.2],['かわいい',1.6],['もっと',2]],'pitch'));b.appendChild(s3);
@@ -2447,7 +2475,7 @@ function openSettings(){
  var s5=sSec('ルルの カバンの きろくちょう');s5.appendChild(el('div','tt','えらんだ チケット：'+(save.ticket==='star'?'Star Alliance':save.ticket==='ow'?'oneworld':'まだ えらんでいない')));if(save.keep&&save.keep.hnd1)s5.appendChild(el('div','tt',(save.seen&&save.seen.hnd_return>0?'かえした':'ひろった')+' もの：ちいさな わすれもの'));var dn=0;TOUR_IDS.forEach(function(k){if(save.seen[k]>0)dn++});s5.appendChild(el('div','tt','ナイロビの かいわ：'+dn+' / '+TOUR_IDS.length));var mq=memoLoad();if(mq.length)s5.appendChild(el('div','tt','つぎの たびの メモ：'+mq.join(', ')));b.appendChild(s5);
  $m('setView').hidden=false;$m('setBack').focus()}
 function closeSettings(){$m('setView').hidden=true;
- if(G.view==='scene'&&G.scene&&!G.scene.hub&&G.cueSil!==undefined&&G.cueSil!==PREF.silent&&(G.phase==='cue'||G.phase==='retry'||G.phase==='assist')){G.sid++;clearTimers();stopSay();showCue()}}
+ if(G.view==='scene'&&G.scene&&!G.scene.hub&&G.cueSil!==undefined&&(G.cueSil!==PREF.silent||G.cueMode!==PREF.mode)&&(G.phase==='cue'||G.phase==='retry'||G.phase==='assist')){G.sid++;clearTimers();stopSay();showCue()}}
 $m('setBack').addEventListener('click',closeSettings);
 (function(){var mb=document.querySelector('#mapView .mapbar>div'),sb=$m('sndBtn');if(mb&&sb)mb.insertBefore(mkSetBtn(),sb);
  var bm=document.querySelector('#boothView .mapbar');if(bm){var bw=mkWorldBtn();bm.insertBefore(bw,$m('boothBack'));bm.insertBefore(mkSetBtn(),$m('boothBack'))}
@@ -3889,7 +3917,7 @@ function evFinish(S){
  save.seen[S.vid]=(save.seen[S.vid]||0)+1;storeSave();
  var c=G.evCont;G.evCont=null;if(c)c();else showMap()}
 function evOpts(T){
- G.phase='opts';clearPanel();clearInterval(G.typeTimer);msgText.textContent=T.npc;var S=G.scene,sid=G.sid;
+ G.phase='opts';clearPanel();clearInterval(G.typeTimer);msgText.textContent=npcHide()?'':T.npc;var S=G.scene,sid=G.sid;
  var box=el('div','dqbox'),bs=[];
  T.opts.forEach(function(o){var b=el('button','dq');b.type='button';b.appendChild(el('span','cur','▶'));b.appendChild(el('span','',cueText(o.y)));
   b.addEventListener('click',function(){evPick(T,o)});box.appendChild(b);bs.push(b)});
@@ -3932,7 +3960,7 @@ var DREAMBANK={"latte": ["Welcome to the Cloud Café. What can I make for you?",
 function forkWord(S,w){var ws=(S&&S.words)||[];for(var i=0;i<ws.length;i++)if(ws[i][0]===w)return ws[i];return [w,'','']}
 function forkNote(T,why,ms){var S=G.scene;((T.fork&&T.fork.tw)||[]).forEach(function(w){noteWord(forkWord(S,w),why,ms)})}
 function forkOpts(T){
- G.phase='opts';clearPanel();clearInterval(G.typeTimer);msgText.textContent=T.npc;var S=G.scene,sid=G.sid;
+ G.phase='opts';clearPanel();clearInterval(G.typeTimer);msgText.textContent=npcHide()?'':T.npc;var S=G.scene,sid=G.sid;
  var box=el('div','dqbox'),bs=[],t0=performance.now();
  T.opts.forEach(function(o){var b=el('button','dq');b.type='button';b.appendChild(el('span','cur','▶'));b.appendChild(el('span','',cueText(o.y)));
   b.addEventListener('click',function(){forkPick(T,o,performance.now()-t0)});box.appendChild(b);bs.push(b)});
@@ -3996,7 +4024,7 @@ if(typeof CT!=='undefined'){CT.mpesa=['m','pesa'];CT.empesa=['m','pesa']}   /* �
 var CARDICO={card:'💳',cash:'💵',mpesa:'📱'};
 /* ---- 1. 日本語の単語カード(選ぶのは1場面に1回)。読み上げない。出た時からタップまでの時間を裏で測る ---- */
 function cardsOpts(T){
- G.phase='opts';clearPanel();clearInterval(G.typeTimer);msgText.textContent=T.npc;var sid=G.sid;
+ G.phase='opts';clearPanel();clearInterval(G.typeTimer);msgText.textContent=npcHide()?'':T.npc;var sid=G.sid;
  var box=el('div','jcards'),t0=performance.now();
  T.opts.forEach(function(o){var b=el('button','jcard');b.type='button';b.setAttribute('data-pay',o.pay||'');
   b.appendChild(el('span','ico',CARDICO[o.pay]||''));b.appendChild(el('span','lb',o.card));
@@ -4019,15 +4047,7 @@ function sampleThenCue(T){
  function go(){if(fired||G.sid!==sid||G.phase!=='sample')return;fired=true;later(350,function(){if(G.phase==='sample')showCue()})}
  say(cueText(T.cue),.9,1,gd(go));
  later(cueText(T.cue).length*85+2600,go)}   /* 声が使えない環境でも止まらない保険 */
-/* ---- 3. 間違えたら、ボタンなしで自動でおてほんが流れ、そのまま聞き取りにもどる。通じたかは店員の反応(聞き返し)で返す ---- */
-function f2Fail(){
- if(!f2())return false;var S=G.scene,T=S.turns[G.ti];if(!T)return false;
- var n=G.tries;if(n>=3){noteWeak(T);G.tries=0}
- G.phase='retry';var line=RETRY[Math.min(Math.max(n,1)-1,RETRY.length-1)];setMsg(line,whoNow());
- say(line,.9,S.pitch,gd(function(){later(300,function(){
-  if(G.phase!=='retry')return;if(G.mute)G.mute();
-  say(cueText(T.cue),.8,1,gd(function(){later(400,function(){if(G.phase==='retry'&&G.kick)G.kick()})}))})}));
- return true}
+/* ---- 3. 間違えたとき(自動おてほん→3回目はルルが代行)は、全場面共通の onFail(土台・タスク074)が受け持つ。この場面だけの失敗の流れは持たない ---- */
 /* ---- 4. 支払いの結果を目に見える形で返す: 選んだ方法で払い(カード・現金・スマホ)、コーヒーとケーキが出てくる ---- */
 var PAYFX=null;
 function payStart(kind,done){
@@ -4119,7 +4139,7 @@ function winDeclPrep(){
 
 /* 分かれ目(▶): 英文だけを出して読み上げる。選んだ文をそのまま言う */
 function winOpts(T){
- G.phase='opts';clearPanel();clearInterval(G.typeTimer);msgText.textContent=T.npc;var S=G.scene,sid=G.sid;
+ G.phase='opts';clearPanel();clearInterval(G.typeTimer);msgText.textContent=npcHide()?'':T.npc;var S=G.scene,sid=G.sid;
  var box=el('div','dqbox'),bs=[];
  T.opts.forEach(function(o){var b=el('button','dq');b.type='button';b.appendChild(el('span','cur','▶'));b.appendChild(el('span','',cueText(o.y)));
   b.addEventListener('click',function(){pickOpt(T,o)});box.appendChild(b);bs.push(b)});
@@ -4854,7 +4874,7 @@ document.addEventListener('visibilitychange',ambApply);
    ============================================================ */
 var CHANT=(function(){
  var BASE='assets/song/',FILE='song-chant.mp3',VOL=.2,KEY='kw-chant',WIN=15000;
- var st={el:null,ac:null,loop:0,done:0,armed:0,evs:['pointerup','touchend','click','keydown'],hook:null};
+ var st={el:null,ac:null,loop:0,done:0,armed:0,narr:0,evs:['pointerup','touchend','click','keydown'],hook:null};
  function sndOn(){try{return localStorage.getItem('kd_snd')!=='off'}catch(e){return true}}
  function ios(){try{return /iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)}catch(x){return false}}
  function hook(k){try{if(st.hook&&st.hook[k])st.hook[k]()}catch(x){}}
@@ -4865,7 +4885,7 @@ var CHANT=(function(){
   if(e)hook('off')}
  /* 鳴らす。すでに鳴っていれば何もしない。必ずユーザー操作の中から呼ぶ(鳴らせなければ、そっと諦める) */
  function start(at,loop,blocked){
-  if(st.el||st.done||!sndOn())return false;
+  if(st.el||st.done||st.narr||!sndOn())return false;
   var e=new Audio(BASE+FILE);e.preload='auto';e.loop=!!loop;e.volume=VOL;st.el=e;st.loop=loop?1:0;
   if(at>0){try{e.currentTime=at}catch(x){}}
   /* iPhone / iPad(Safari)は audio.volume が効かないので、Web Audio のゲインを通す */
@@ -4880,7 +4900,7 @@ var CHANT=(function(){
  function stop(){st.done=1;unbind();try{sessionStorage.removeItem(KEY)}catch(x){}clean()}
  /* マイクで聞いているあいだ・タブが見えないあいだ・音オフのあいだは止め、戻ったら続きから */
  function sync(){var e=st.el;if(!e)return;
-  var hold=(typeof ambDuck!=='undefined'&&ambDuck)||document.hidden||!sndOn();
+  var hold=(typeof ambDuck!=='undefined'&&ambDuck)||document.hidden||!sndOn()||st.narr;
   if(hold){if(!e.paused){try{e.pause()}catch(x){}}}
   else if(e.paused&&!e.ended){var p;try{p=e.play()}catch(x){}if(p&&p.catch)p.catch(function(){})}}
  document.addEventListener('visibilitychange',sync);
@@ -4908,7 +4928,9 @@ var CHANT=(function(){
    function off(){['pointerup','touchend','click','keydown'].forEach(function(n){document.removeEventListener(n,again,true)})}
    ['pointerup','touchend','click','keydown'].forEach(function(n){document.addEventListener(n,again,true)})}
  }
- return {start:start,stop:stop,sync:sync,arm:arm,leave:leave,resume:resume,has:function(){return !!st.el},
+ /* オープニングの語り(タスク074)のあいだは一時停止し、終わったら続きから(タイトルにいる間だけ。止まったあとは再開しない) */
+ function narr(on){st.narr=on?1:0;sync()}
+ return {start:start,stop:stop,sync:sync,narr:narr,arm:arm,leave:leave,resume:resume,has:function(){return !!st.el},
   playing:function(){return !!(st.el&&!st.el.paused&&!st.el.ended)},set hook(h){st.hook=h},get hook(){return st.hook}}
 })();
 window.CHANT=CHANT;

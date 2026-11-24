@@ -169,8 +169,9 @@ with sync_playwright() as pw:
         return q.evaluate("()=>({view:__T.G.view,srn:window.__srn,errs:window.__perr})"), helped
     fs, _ = run_fail(2, False)
     chk('6h 聞き取りに2回失敗しても、3回目に通れば会話は最後まで進んでマップへ戻る', fs['view'] == 'map' and fs['srn'] >= 7 and not fs['errs'], fs)
-    fs, helped = run_fail(3, True)
-    chk('6i 3回失敗すると「ヘルプ」が出て、押すとルルが代わりに言って、最後まで進んでマップへ戻る(今までのヘルプのまま)', helped and fs['view'] == 'map' and not fs['errs'], (helped, fs))
+    # タスク074: 3回失敗すると、ヘルプを押さなくてもルルが代わりに言って進む(自動救済・全モード共通)。ヘルプ回数は減らない
+    fs, helped = run_fail(3, False)
+    chk('6i 3回失敗すると、ボタンを押さなくてもルルが代わりに言って、最後まで進んでマップへ戻る(タスク074の自動救済)', fs['view'] == 'map' and not fs['errs'], (helped, fs))
     br.close()
 print('\n%s  (NG %d件)' % ('すべて OK' if not bad else '失敗あり', len(bad)))
 if bad: print(bad); sys.exit(1)

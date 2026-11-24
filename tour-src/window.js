@@ -46,7 +46,7 @@ function winDeclPrep(){
 
 /* 分かれ目(▶): 英文だけを出して読み上げる。選んだ文をそのまま言う */
 function winOpts(T){
- G.phase='opts';clearPanel();clearInterval(G.typeTimer);msgText.textContent=T.npc;var S=G.scene,sid=G.sid;
+ G.phase='opts';clearPanel();clearInterval(G.typeTimer);msgText.textContent=npcHide()?'':T.npc;var S=G.scene,sid=G.sid;
  var box=el('div','dqbox'),bs=[];
  T.opts.forEach(function(o){var b=el('button','dq');b.type='button';b.appendChild(el('span','cur','▶'));b.appendChild(el('span','',cueText(o.y)));
   b.addEventListener('click',function(){pickOpt(T,o)});box.appendChild(b);bs.push(b)});

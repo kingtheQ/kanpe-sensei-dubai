@@ -9,7 +9,7 @@ if(typeof CT!=='undefined'){CT.mpesa=['m','pesa'];CT.empesa=['m','pesa']}   /* �
 var CARDICO={card:'💳',cash:'💵',mpesa:'📱'};
 /* ---- 1. 日本語の単語カード(選ぶのは1場面に1回)。読み上げない。出た時からタップまでの時間を裏で測る ---- */
 function cardsOpts(T){
- G.phase='opts';clearPanel();clearInterval(G.typeTimer);msgText.textContent=T.npc;var sid=G.sid;
+ G.phase='opts';clearPanel();clearInterval(G.typeTimer);msgText.textContent=npcHide()?'':T.npc;var sid=G.sid;
  var box=el('div','jcards'),t0=performance.now();
  T.opts.forEach(function(o){var b=el('button','jcard');b.type='button';b.setAttribute('data-pay',o.pay||'');
   b.appendChild(el('span','ico',CARDICO[o.pay]||''));b.appendChild(el('span','lb',o.card));
@@ -32,15 +32,7 @@ function sampleThenCue(T){
  function go(){if(fired||G.sid!==sid||G.phase!=='sample')return;fired=true;later(350,function(){if(G.phase==='sample')showCue()})}
  say(cueText(T.cue),.9,1,gd(go));
  later(cueText(T.cue).length*85+2600,go)}   /* 声が使えない環境でも止まらない保険 */
-/* ---- 3. 間違えたら、ボタンなしで自動でおてほんが流れ、そのまま聞き取りにもどる。通じたかは店員の反応(聞き返し)で返す ---- */
-function f2Fail(){
- if(!f2())return false;var S=G.scene,T=S.turns[G.ti];if(!T)return false;
- var n=G.tries;if(n>=3){noteWeak(T);G.tries=0}
- G.phase='retry';var line=RETRY[Math.min(Math.max(n,1)-1,RETRY.length-1)];setMsg(line,whoNow());
- say(line,.9,S.pitch,gd(function(){later(300,function(){
-  if(G.phase!=='retry')return;if(G.mute)G.mute();
-  say(cueText(T.cue),.8,1,gd(function(){later(400,function(){if(G.phase==='retry'&&G.kick)G.kick()})}))})}));
- return true}
+/* ---- 3. 間違えたとき(自動おてほん→3回目はルルが代行)は、全場面共通の onFail(土台・タスク074)が受け持つ。この場面だけの失敗の流れは持たない ---- */
 /* ---- 4. 支払いの結果を目に見える形で返す: 選んだ方法で払い(カード・現金・スマホ)、コーヒーとケーキが出てくる ---- */
 var PAYFX=null;
 function payStart(kind,done){

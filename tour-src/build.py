@@ -602,21 +602,21 @@ SHARED = [
   " if(T.route!=null){S.rf=S.rn||0;S.rn=T.route;S.rt=t}\n"
   " if(T.dw&&!T.dts)T.dts=Date.now();\n"
   " if(T.ctx)applyCtx(T.ctx);"),
- ("var T=G.scene.turns[G.ti],toks=parseCue(T.cue);clearInterval(G.typeTimer);msgText.textContent=T.npc;",
-  "var T=G.scene.turns[G.ti];if(T.opts&&!T.pk){(T.cards?cardsOpts:T.fork?forkOpts:((G.scene.d.ev||typeof winOpts!=='function')?evOpts:winOpts))(T);return}var toks=parseCue(T.cue);clearInterval(G.typeTimer);msgText.textContent=T.npc;"),
+ ("var T=G.scene.turns[G.ti],toks=parseCue(T.cue);clearInterval(G.typeTimer);msgText.textContent=npcHide()?'':T.npc;",
+  "var T=G.scene.turns[G.ti];if(T.opts&&!T.pk){(T.cards?cardsOpts:T.fork?forkOpts:((G.scene.d.ev||typeof winOpts!=='function')?evOpts:winOpts))(T);return}var toks=parseCue(T.cue);clearInterval(G.typeTimer);msgText.textContent=npcHide()?'':T.npc;"),
  ("function advance(){\n",
-  "function advance(){\n if(!G.camp){var D0=G.scene.turns[G.ti];if(D0&&D0.rep&&!D0.repd){D0.repd=1;G.phase='rep';setMsg(D0.rep.n,D0.rep.who||whoNow());spSay=true;(paRep(G.scene,D0.rep)?paSay:say)(D0.rep.n,.95,G.scene.pitch,gd(function(){spSay=false;later(450,advance)}));return}\n"
+  "function advance(){\n if(!G.camp){var D0=G.scene.turns[G.ti];if(D0&&D0.rep&&!D0.repd){D0.repd=1;G.phase='rep';npcMsg(D0.rep.n,D0.rep.who||whoNow());spSay=true;(paRep(G.scene,D0.rep)?paSay:say)(D0.rep.n,.95,G.scene.pitch,gd(function(){spSay=false;later(450,advance)}));return}\n"
   " if(D0&&D0.pay&&!D0.payd){D0.payd=1;payStart(D0.pay,advance);return}}\n"),
  ("G.phase='pass';G.tries=0;var th=", "G.phase='pass';G.tries=0;dreamPass();var th="),
- ("G.tries++;\n if(G.tries>=3){G.phase='assist'", "G.tries++;\n if(dreamGiveUp())return;\n if(f2Fail())return;\n if(G.tries>=3){G.phase='assist'"),
+ ("G.tries++;\n if(G.tries>=3){if(G.camp){G.phase='assist'", "G.tries++;\n if(dreamGiveUp())return;\n if(G.tries>=3){if(G.camp){G.phase='assist'"),
  ("setMsgInstant('Clear!  ぜんぶ いえた！',whoNow());later(2000,startWords)",
   "var W0=G.scene.d&&(G.scene.d.win||G.scene.d.ev||G.scene.d.conv);setMsgInstant(G.scene.d.dream?'Good night.':W0?'Clear!':'Clear!  ぜんぶ いえた！',whoNow());later(W0?1300:2000,W0?finishScene:startWords)"),
  ("if(!G.scene||G.phase==='idle'||G.phase==='words'||G.phase==='reveal'||G.phase==='inter'||G.phase==='hub')return;",
   "if(!G.scene||G.phase==='idle'||G.phase==='words'||G.phase==='reveal'||G.phase==='inter'||G.phase==='hub'||G.phase==='sample'||G.phase==='pay')return;"),
  # 新しい会話の流れ(タスク061): この場面(d.flow2)だけ、おてほんボタンを置かず、発音の数値・判定の文字を出さない。他の場面は今のまま
- ("row.appendChild(demo);\n demo.addEventListener('click',", "if(!f2())row.appendChild(demo);\n demo.addEventListener('click',"),
- ("stat.className='stat ok';stat.textContent=(res.okN===res.n?'Nice!  ':'')+cnt;onPass();return}\n  stat.className='stat ng';stat.textContent=cnt+'  7割未満';onFail()}",
-  "stat.className='stat ok';stat.textContent=f2()?'':(res.okN===res.n?'Nice!  ':'')+cnt;onPass();return}\n  stat.className='stat ng';stat.textContent=f2()?'':cnt+'  7割未満';onFail()}"),
+ ("row.appendChild(demo);\n demo.addEventListener('click',", "if(!f2()||blind)row.appendChild(demo);\n demo.addEventListener('click',"),
+ ("stat.className='stat ok';stat.textContent=(res.okN===res.n?'Nice!  ':'')+(hideNum()?'':cnt);onPass();return}\n  stat.className='stat ng';stat.textContent=hideNum()?'':cnt+'  7割未満';onFail()}",
+  "stat.className='stat ok';stat.textContent=f2()?'':(res.okN===res.n?'Nice!  ':'')+(hideNum()?'':cnt);onPass();return}\n  stat.className='stat ng';stat.textContent=f2()?'':hideNum()?'':cnt+'  7割未満';onFail()}"),
  ("stat.textContent='Too short';onFail()", "stat.textContent=f2()?'':'Too short';onFail()"),
  ("stat.textContent='Too long';onFail()", "stat.textContent=f2()?'':'Too long';onFail()"),
  ("stat.className='stat ok';stat.textContent='Nice!';onPass()}}", "stat.className='stat ok';stat.textContent=f2()?'':'Nice!';onPass()}}"),
@@ -653,7 +653,7 @@ function evFinish(S){
  save.seen[S.vid]=(save.seen[S.vid]||0)+1;storeSave();
  var c=G.evCont;G.evCont=null;if(c)c();else showMap()}
 function evOpts(T){
- G.phase='opts';clearPanel();clearInterval(G.typeTimer);msgText.textContent=T.npc;var S=G.scene,sid=G.sid;
+ G.phase='opts';clearPanel();clearInterval(G.typeTimer);msgText.textContent=npcHide()?'':T.npc;var S=G.scene,sid=G.sid;
  var box=el('div','dqbox'),bs=[];
  T.opts.forEach(function(o){var b=el('button','dq');b.type='button';b.appendChild(el('span','cur','▶'));b.appendChild(el('span','',cueText(o.y)));
   b.addEventListener('click',function(){evPick(T,o)});box.appendChild(b);bs.push(b)});
@@ -766,8 +766,7 @@ o = rep(o, "  if(/^[0-9]+$/.test(p)){var nw=numWords(parseInt(p,10));",
         "  var om=/^([0-9]+)(st|nd|rd|th)$/.exec(p);if(om&&ORD[+om[1]]){out=out.concat(ORD[+om[1]].split(' '));return}\n"
         "  if(/^[0-9]+$/.test(p)){var nw=numWords(parseInt(p,10));")
 for _a, _b in SHARED: o = rep(o, _a, _b)   # 場面の部品(窓口・割りこみ・持ち越しで共有。ドーハ版にも同じものを入れる)
-o = rep(o, "var card=el('div','cue');card.appendChild(el('span','lab','カンペ'));",
-        "var card=el('div','cue'+(T.diag?' diag':''));card.appendChild(el('span','lab','カンペ'));")
+o = rep(o, "card=el('div','cue'+(blind?' blind':''));", "card=el('div','cue'+(blind?' blind':'')+(T.diag?' diag':''));")
 o = rep(o, " if(!G.camp)addHelp(T)}", " if(!G.camp&&!T.diag&&!G.scene.d.nohelp)addHelp(T)}")
 o = rep(o, " G.mute=null;var card=spans.length?spans[0].parentNode:null;",
         " G.mute=null;var card=spans.length?spans[0].parentNode:null;\n if(T.diag&&!PREF.silent&&card){var AZ=(T.diag==='decl'||T.diag==='decl_end'||T.diag==='readback')&&voiceAzureOn();if(AZ||SR){(AZ?setupDiagAz:setupDiag)(act,stat,toks,spans,T,card);return}}")

@@ -9,7 +9,7 @@
    ============================================================ */
 var CHANT=(function(){
  var BASE='/*CHANTBASE*/',FILE='song-chant.mp3',VOL=.2,KEY='kw-chant',WIN=15000;
- var st={el:null,ac:null,loop:0,done:0,armed:0,evs:['pointerup','touchend','click','keydown'],hook:null};
+ var st={el:null,ac:null,loop:0,done:0,armed:0,narr:0,evs:['pointerup','touchend','click','keydown'],hook:null};
  function sndOn(){try{return localStorage.getItem('kd_snd')!=='off'}catch(e){return true}}
  function ios(){try{return /iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)}catch(x){return false}}
  function hook(k){try{if(st.hook&&st.hook[k])st.hook[k]()}catch(x){}}
@@ -20,7 +20,7 @@ var CHANT=(function(){
   if(e)hook('off')}
  /* 鳴らす。すでに鳴っていれば何もしない。必ずユーザー操作の中から呼ぶ(鳴らせなければ、そっと諦める) */
  function start(at,loop,blocked){
-  if(st.el||st.done||!sndOn())return false;
+  if(st.el||st.done||st.narr||!sndOn())return false;
   var e=new Audio(BASE+FILE);e.preload='auto';e.loop=!!loop;e.volume=VOL;st.el=e;st.loop=loop?1:0;
   if(at>0){try{e.currentTime=at}catch(x){}}
   /* iPhone / iPad(Safari)は audio.volume が効かないので、Web Audio のゲインを通す */
@@ -35,7 +35,7 @@ var CHANT=(function(){
  function stop(){st.done=1;unbind();try{sessionStorage.removeItem(KEY)}catch(x){}clean()}
  /* マイクで聞いているあいだ・タブが見えないあいだ・音オフのあいだは止め、戻ったら続きから */
  function sync(){var e=st.el;if(!e)return;
-  var hold=(typeof ambDuck!=='undefined'&&ambDuck)||document.hidden||!sndOn();
+  var hold=(typeof ambDuck!=='undefined'&&ambDuck)||document.hidden||!sndOn()||st.narr;
   if(hold){if(!e.paused){try{e.pause()}catch(x){}}}
   else if(e.paused&&!e.ended){var p;try{p=e.play()}catch(x){}if(p&&p.catch)p.catch(function(){})}}
  document.addEventListener('visibilitychange',sync);
@@ -63,7 +63,9 @@ var CHANT=(function(){
    function off(){['pointerup','touchend','click','keydown'].forEach(function(n){document.removeEventListener(n,again,true)})}
    ['pointerup','touchend','click','keydown'].forEach(function(n){document.addEventListener(n,again,true)})}
  }
- return {start:start,stop:stop,sync:sync,arm:arm,leave:leave,resume:resume,has:function(){return !!st.el},
+ /* オープニングの語り(タスク074)のあいだは一時停止し、終わったら続きから(タイトルにいる間だけ。止まったあとは再開しない) */
+ function narr(on){st.narr=on?1:0;sync()}
+ return {start:start,stop:stop,sync:sync,narr:narr,arm:arm,leave:leave,resume:resume,has:function(){return !!st.el},
   playing:function(){return !!(st.el&&!st.el.paused&&!st.el.ended)},set hook(h){st.hook=h},get hook(){return st.hook}}
 })();
 window.CHANT=CHANT;

@@ -8,7 +8,7 @@ var DREAMBANK=DREAMBANK_JSON,DREAMFB=DREAMFB_JSON;
 function forkWord(S,w){var ws=(S&&S.words)||[];for(var i=0;i<ws.length;i++)if(ws[i][0]===w)return ws[i];return [w,'','']}
 function forkNote(T,why,ms){var S=G.scene;((T.fork&&T.fork.tw)||[]).forEach(function(w){noteWord(forkWord(S,w),why,ms)})}
 function forkOpts(T){
- G.phase='opts';clearPanel();clearInterval(G.typeTimer);msgText.textContent=T.npc;var S=G.scene,sid=G.sid;
+ G.phase='opts';clearPanel();clearInterval(G.typeTimer);msgText.textContent=npcHide()?'':T.npc;var S=G.scene,sid=G.sid;
  var box=el('div','dqbox'),bs=[],t0=performance.now();
  T.opts.forEach(function(o){var b=el('button','dq');b.type='button';b.appendChild(el('span','cur','▶'));b.appendChild(el('span','',cueText(o.y)));
   b.addEventListener('click',function(){forkPick(T,o,performance.now()-t0)});box.appendChild(b);bs.push(b)});

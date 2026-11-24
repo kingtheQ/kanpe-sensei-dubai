@@ -144,7 +144,8 @@ with sync_playwright() as pw:
         if q.evaluate("()=>__T.G.phase") == 'cue': break
     q.wait_for_timeout(1600)
     s = q.evaluate("()=>({btn:Array.from(window.__btn),pan:window.__pan.join('\\n')})")
-    chk('G1 nbo_java2(新しい流れではない場面)は、おてほんボタンも発音の数値(語数・%)も今までどおり出る', 'おてほん' in ' '.join(s['btn']) and re.search(r'\d+/\d+語', s['pan']) is not None, (s['btn'], re.findall(r'\d+/\d+語[^\n]{0,12}', s['pan'])[:1]))
+    # タスク074: 数字のスコア(語数・%)は全場面で出さない(キング決定)。おてほんボタンは新しい流れではない場面に今までどおり残る
+    chk('G1 nbo_java2(新しい流れではない場面)は、おてほんボタンが今までどおり出る。発音の数値(語数・%)は出ない(タスク074で全場面共通になった)', 'おてほん' in ' '.join(s['btn']) and re.search(r'\d+/\d+語', s['pan']) is None, (s['btn'], re.findall(r'\d+/\d+語[^\n]{0,12}', s['pan'])[:1]))
     for i in range(150):
         q.wait_for_timeout(200)
         if 'words' in q.evaluate("()=>window.__ph"): break
