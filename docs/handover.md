@@ -171,3 +171,9 @@
 ## 今回（11/24）タスク065でやったこと（ロヴァニエミ到着まわり）
 - 新しい到着のまとまり `rvn_arr`（入国審査・手荷物・到着ロビー・無料Wi-Fi・バス乗り場 × 各2場面）と新ページ `tour/rovaniemi/`。台詞は `tour-src/rvn_data.py`、場所・背景・音は `build.py`、旅程は `trip.js`（10日目・両ルート）。到着ロビーだけ実画＋オーロラstrip（`art.js` の `rvnlobby`）。
 - 詳細・数値・要確認（指示書が見当たらない／oneworldの入国審査／23時／Wi-Fi名が公式で未確認／バス8番の扱い／tour/assets未公開）は `docs/pm/deliverables/065-rovaniemi-arrival-report-v1.md`。確認は `tour-src/tests/test_arrival065.py`。
+
+## 今回（11/24）タスク066でやったこと（ロビーを通常版に・ショータイムはプールサイド）
+- ホテルのロビー（`hsong`）は受付スタッフの案内の3択（ショータイム／プール／Balcony Bar。英文だけ）。ショータイムを選ぶと別場面のプールサイド（背景 `npool`）で歌う（歌手は高さ250）。ロビーの真ん中で歌う060の形は廃止（素材と `nsong` 設定は残置）。
+- プールサイドの照明ストリップは、テーマ曲が鳴っているあいだは曲の再生位置の拍（`song_data.py` の `beats`）に合わせて点滅、鳴っていないときはゆっくり明滅。
+- 指示書 066-lobby-showtime.md は届いていなかったため、案内の英文・「プール」「Balcony Bar」の動き（スタッフの一言→選択にもどる）・場面idは私が決めた。詳細・数字は `docs/pm/deliverables/066-lobby-showtime-report-v1.md`。実機（音・見え方）は未確認。
+- 参考にしたURL：なし。
