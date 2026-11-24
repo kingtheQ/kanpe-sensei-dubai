@@ -10,6 +10,14 @@ var ARTI={},ARTFAIL={},ARTSHOW=0,AW=1536,AH=960;
 /* 場面の置き場。mode: wide=ワイド(人物は小さめ、キング124px) / room=室内(背景も人物も2倍、キング248px)
    base=足もとの高さ、lulu/king/suit=立つ位置(ルルが左・キングが右。グアムと同じ)、npc=相手(いつもの顔のドット)の位置と大きさ */
 var ART={
+ /* ナイロビの英会話カフェ(タスク068・試作): 人なしの背景(1536×960)。チェックモード(?check=1)からだけ入る。先生(キング制作)は中央の丸テーブルの奥席に座る(素材 teacher-sit-front.png の ×0.791・NEAREST。アフロ幅156px=キングのキャップ幅118pxの1.32倍。
+    座席の基準 中心 x=800・底辺 y=706)。下半身はテーブルの天板で隠れる(y=648より下は描かない=同梱プレビューと同じ画素)。キング(左・x=672)とルル(右・x=928.5)は手前の席に後ろ姿(hall-*-back を 148×248・129×200 に拡大。足もと y=932。影なし。= 同梱プレビューの画素。※並びはプレビューどおりで、docs/rules.md の「ルルが左・キングが右」とは逆)。
+    strips: 湯気(全面・4コマ・ゆっくり。over=カップはテーブルの手前にあるので人物の手前に重ねる)・ペンダントランプ(全面・4コマ・ゆるやかな明滅)・窓の外を通る人の影((996,172)・4コマ・ゆっくり)。背景に焼き込まない別素材 */
+ eikai:{bg:'nairobi-eikaiwa-cafe-v1.png',mode:'wide',
+  strips:[{img:'nairobi-eikaiwa-cafe-lamps-strip.png',x:0,y:0,n:4,fw:1536,fh:960,step:.7},{img:'nairobi-eikaiwa-cafe-window-strip.png',x:996,y:172,n:4,fw:200,fh:320,step:1.6},
+   {img:'nairobi-eikaiwa-cafe-steam-strip.png',x:0,y:0,n:4,fw:1536,fh:960,step:.9,over:1}],
+  dep:{lulu:{n:'hall-lulu-back',x:928,by:932,w:129,h:200},king:{n:'hall-king-back',x:672,by:932,w:148,h:248},
+   people:[{n:'@teacher-sit-front',x:800,by:706,z:.791,clipY:648,sit:1,spk:1}],bubble:{x:800,y:400}}},
  /* ナイロビのタクシー乗り場(タスク051): 朝の屋外。人なしの背景(1536×960。黄色の公式タクシーが並ぶ到着カーブ)。歩道(y≥775)に立つ。fx は無し(昼の絵なので、夜の星・ガラスのきらめきは出さない)。
     people=縁石の手前の歩道の右はし(係員・ふたりの動線と重ねない)。*/
  nairobi:{bg:'nairobi-taxi-v1.png',mode:'wide',base:926,lulu:300,king:470,suit:575,npc:{x:1060,px:9,slide:1},fx:'',npcS:{taxi_staff:'w-front-man-dashiki',driver:'w-front-man-suit-1'},
@@ -253,7 +261,7 @@ function ARTframe(S,A0,dt){
  for(var i=0;i<names.length;i++){im[names[i]]=artImg(m+'-'+names[i]+'.png');if(!artOKimg(im[names[i]]))ok=false}
  if(bg.bad){ARTFAIL[id]=1;artShow(0);return false}
  for(var j=0;j<names.length;j++)if(im[names[j]].bad){ARTFAIL[id]=1;artShow(0);return false}
- var ex=artExtra(cf),exi={};for(var e=0;e<ex.length;e++){var xi=artImg('npc/'+ex[e]+'.png');if(xi.bad){ARTFAIL[id]=1;artShow(0);return false}if(!artOKimg(xi))ok=false;exi[ex[e]]=xi}
+ var ex=artExtra(cf),exi={};for(var e=0;e<ex.length;e++){var xi=artImg(artNpcSrc(ex[e]));if(xi.bad){ARTFAIL[id]=1;artShow(0);return false}if(!artOKimg(xi))ok=false;exi[ex[e]]=xi}
  if(cf.dep){var dfi=artDepImgs(cf.dep);for(var dk=0;dk<dfi.length;dk++){var dim=artImg(dfi[dk]);if(!dim.bad&&!artOKimg(dim))ok=false}}   /* 出発まわり(054): 動く別素材が読めないときは、その動きだけ描かない(場面は出す)。読み込み中は暗い板 */
  if(cf.belt){var bt=[artImg(cf.belt.isl),artImg(cf.belt.bags)];for(var bi=0;bi<2;bi++){if(bt[bi].bad){ARTFAIL[id]=1;artShow(0);return false}if(!artOKimg(bt[bi]))ok=false}
   if(cf.trav){var ti=artImg('npc/'+cf.trav.n+'.png');if(!ti.bad&&!artOKimg(ti))ok=false}}   /* 旅行者の絵だけは、読めなくても場面は出す(フォールバックで描く) */
@@ -397,6 +405,13 @@ function artStage(H,exi){var L=[],sg=H.singer,fi=exi[sg.f],ai=exi[sg.a],bi=exi[s
  if(OUT.lvis&&lu&&!lu.bad)L.push({by:H.lulu.by,f:function(){artShadow(H.lulu.x,H.lulu.by,H.lulu.rx||29);artSway(lu,H.lulu.x,H.lulu.by,ld);if(luTalk&&spSay)artBubble(H.lulu.x+(H.lulu.bx||20),H.lulu.by-lu.naturalHeight-26)}});
  if(OUT.hvis&&kg&&!kg.bad)L.push({by:H.king.by,f:function(){artShadow(H.king.x,H.king.by,H.king.rx||36);artSway(kg,H.king.x,H.king.by,kd)}});
  L.sort(function(a,b){return a.by-b.by});for(i=0;i<L.length;i++)L[i].f()}
+/* 大きさを指定して描く artSway(タスク068。同梱プレビューの大きさに合わせる。NEAREST)。dw×dh=描く大きさ(素材を一様に拡大)、clipY=これより下(画面の y)は描かない(テーブルの天板で下半身が隠れる)。
+   揺れていないコマ(d=0)は1回で描く(同梱プレビューと同じ画素になる)。上半身は d 画素ふくらむ(artSway と同じ)。 */
+function artSwayZ(img,cx,by,d,dw,dh,clipY){var w=img.naturalWidth,h=img.naturalHeight,x=Math.round(cx-dw/2),y=by-dh;
+ ca.save();if(clipY){ca.beginPath();ca.rect(0,0,AW,clipY);ca.clip()}
+ if(!d)ca.drawImage(img,x,y,dw,dh);
+ else{var sc=Math.round(h*.58),dc=Math.round(dh*sc/h);ca.drawImage(img,0,0,w,sc,x,y-d,dw,dc+d);ca.drawImage(img,0,sc,w,h-sc,x,y+dc,dw,dh-dc)}
+ ca.restore()}
 function artHall(H,exi){var g=H.globe,gi=g&&artImg(g.img);
  if(g&&artOKimg(gi)){var f=Math.floor(t/(g.period/g.n))%g.n;ca.drawImage(gi,f*g.fw,0,g.fw,g.fw,g.x,g.y,g.fw*g.z,g.fw*g.z)}   /* 球だけ回す(NEAREST。ぼかさない) */
  var sg=H.sage&&exi[H.sage.n],lu=exi[H.lulu.n],kg=exi[H.king.n],sd=Math.floor(t*.8)%2?3:0,ld=Math.floor(t*1.1+.5)%2?3:0,kd=Math.floor(t*1.1)%2?3:0;
@@ -508,20 +523,27 @@ function artDep(cf,exi,S,te){
  /* 人: 座る人・立つ旅行者(話し相手が立つ人{n,x,by,sw}なら、それもここに入る) */
  var ppl=(D.people||[]).slice();if(sv&&typeof sv==='object'&&sv.n)ppl.push({n:sv.n,x:sv.x,by:sv.by,sw:sv.sw,spk:1});
  ppl.forEach(function(q,qi){var im=exi[q.n];if(!im||im.bad||!artOKimg(im))return;
-  L.push({by:q.by,f:function(){if(!q.sit)artShadowP(q.x,q.by,q.sw||Math.round(im.naturalWidth*1.15));artSway(im,q.x,q.by,artSwayD(qi*.37+.2,1));
+  L.push({by:q.by,f:function(){if(!q.sit)artShadowP(q.x,q.by,q.sw||Math.round(im.naturalWidth*1.15));
+   if(q.z)artSwayZ(im,q.x,q.by,artSwayD(qi*.37+.2,1),Math.round(im.naturalWidth*q.z),Math.round(im.naturalHeight*q.z),q.clipY);else artSway(im,q.x,q.by,artSwayD(qi*.37+.2,1));
    if(q.after){var ai=artImg(q.after.img);if(artOKimg(ai))ca.drawImage(ai,q.after.x,q.after.y)}
-   if(spSay&&speaker&&(q.spk||(sv&&sv.p&&sv.p===q.id))){artBubble(q.x+Math.round(im.naturalWidth*.3),q.by-im.naturalHeight-18);said=true}}})});
+   if(spSay&&speaker&&(q.spk||(sv&&sv.p&&sv.p===q.id))){artBubble(q.x+Math.round(im.naturalWidth*(q.z||1)*.3),q.by-Math.round(im.naturalHeight*(q.z||1))-18);said=true}}})});
  var lu=D.lulu&&exi[D.lulu.n],kg=D.king&&exi[D.king.n],ld=Math.floor(t*1.1+.5)%2?3:0,kd=Math.floor(t*1.1)%2?3:0;
- if(lu&&OUT.lvis)L.push({by:D.lulu.by,f:function(){if(D.shF)artShadowF(D.lulu.x,D.lulu.by-7,84,D.shF);else artShadow(D.lulu.x,D.lulu.by,56);artSway(lu,D.lulu.x,D.lulu.by,ld);
+ if(lu&&OUT.lvis)L.push({by:D.lulu.by,f:function(){if(D.lulu.h){artSwayZ(lu,D.lulu.x,D.lulu.by,ld,D.lulu.w,D.lulu.h);   /* 大きさ指定の後ろ姿(068): 影は描かない(同梱プレビューと同じ) */
+   if(luTalk&&spSay)artBubble(D.lulu.x+20,D.lulu.by-D.lulu.h-26);return}
+  if(D.shF)artShadowF(D.lulu.x,D.lulu.by-7,84,D.shF);else artShadow(D.lulu.x,D.lulu.by,56);artSway(lu,D.lulu.x,D.lulu.by,ld);
   if(luTalk&&spSay)artBubble(D.lulu.x+20,D.lulu.by-lu.naturalHeight-26);
   if(luHelp){ca.fillStyle='#e8452c';ca.font='800 26px sans-serif';ca.textAlign='center';ca.textBaseline='middle';ca.fillText('♪',D.lulu.x+Math.round(lu.naturalWidth*.5),D.lulu.by-lu.naturalHeight-12)}}});
- if(kg&&OUT.hvis)L.push({by:D.king.by,f:function(){if(D.shF)artShadowF(D.king.x,D.king.by-7,84,D.shF);else artShadow(D.king.x,D.king.by,70);artSway(kg,D.king.x,D.king.by,kd)}});
+ if(kg&&OUT.hvis)L.push({by:D.king.by,f:function(){if(D.king.h){artSwayZ(kg,D.king.x,D.king.by,kd,D.king.w,D.king.h);return}
+  if(D.shF)artShadowF(D.king.x,D.king.by-7,84,D.shF);else artShadow(D.king.x,D.king.by,70);artSway(kg,D.king.x,D.king.by,kd)}});
  L.sort(function(a,b){return a.by-b.by});for(i=0;i<L.length;i++)L[i].f();
+ artStrips(cf.strips,1);
  if(spSay&&speaker&&!speaker.ghost&&!said&&D.bubble)artBubble(D.bubble.x,D.bubble.y)}   /* 絵に出ない相手(ghost=電話の声・アナウンス)には「…」を出さない。立つ人・係員・座る人が話し相手のとき、その人の上に出す */
 /* 背景に重ねる小さな動き(タスク051)。strips=[{img,x,y,n,fw,fh,step}]。NEARESTの粒のまま(拡大縮小しない)。会話の進み方にはかかわらず、時間だけで切り替わる */
-function artStrips(list){for(var i=0;i<(list||[]).length;i++){var q=list[i],im=artImg(q.img);if(im.bad||!artOKimg(im))continue;var f=Math.floor(t/q.step)%q.n;
+function artStrips(list,over){for(var i=0;i<(list||[]).length;i++){var q=list[i],im=artImg(q.img);if(!!q.over!==!!over||im.bad||!artOKimg(im))continue;var f=Math.floor(t/q.step)%q.n;
   if(q.sync==='beat'&&typeof songBeatN==='function'){var bn=songBeatN();if(bn>=0)f=bn%q.n}   /* タスク066: テーマ曲が鳴っているあいだは、曲の再生位置の拍に合わせて切りかえる(鳴っていないときは、ゆっくりの時間切りかえ) */
   ca.drawImage(im,f*q.fw,0,q.fw,q.fh,q.x,q.y,q.fw,q.fh)}}
+/* 人物の絵の置き場: ふつうは npc/ の中。'@' で始まる名前は art/ の直下(先生の素材。タスク068) */
+function artNpcSrc(n){return n.charAt(0)==='@'?n.slice(1)+'.png':'npc/'+n+'.png'}
 function artOKimg(i){return i.complete&&i.naturalWidth>0}
 /* この場面が使う人物の絵の名前(npc/ の中)。ひとつでも読めなければ、場面全体が今までの描画に戻る */
 function artExtra(cf){var a=[],i;if(cf.seat&&cf.seat.ca)a.push(cf.seat.ca.n);if(cf.hall)['sage','lulu','king'].forEach(function(k){if(cf.hall[k])a.push(cf.hall[k].n)});if(cf.hall&&cf.hall.clerk)a.push(cf.hall.clerk.n);if(cf.stage){var sg=cf.stage.singer;[sg.f,sg.a,sg.b,cf.stage.lulu.n,cf.stage.king.n].forEach(function(n){a.push(n)});(cf.stage.people||[]).forEach(function(q){a.push(q.n)})}if(cf.tk)['clerk','clerkS','lulu','king'].forEach(function(k){if(cf.tk[k])a.push(cf.tk[k].n)});(cf.crowd||[]).forEach(function(c){a.push('w-'+c[0])});

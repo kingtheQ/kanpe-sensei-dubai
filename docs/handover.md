@@ -184,3 +184,11 @@
 - プールサイドの照明ストリップは、テーマ曲が鳴っているあいだは曲の再生位置の拍（`song_data.py` の `beats`）に合わせて点滅、鳴っていないときはゆっくり明滅。
 - 指示書 066-lobby-showtime.md は届いていなかったため、案内の英文・「プール」「Balcony Bar」の動き（スタッフの一言→選択にもどる）・場面idは私が決めた。詳細・数字は `docs/pm/deliverables/066-lobby-showtime-report-v1.md`。実機（音・見え方）は未確認。
 - 参考にしたURL：なし。
+
+## 今回（11/24）タスク068でやったこと（ナイロビの英会話カフェ・予行練習の試作）
+- 新場面 `nbo_eikaiwa1`（場所 `eikai`・art id `eikai`）。**チェックモード（`?check=1`）の一覧からだけ入る**。通常は「☕ 英会話」のタブも隠れ、`TOUR_IDS`・到着/空港の完了条件・旅の骨組み（`trip.js`）・セーブの進行に入らない。本編のどこに置くか（お試し券をもらう導入など）はキングが後日決める。`nbo_java` は無変更。
+- 絵：背景 `nairobi-eikaiwa-cafe-v1.png`＋別素材3点（ランプ／窓の外の影／湯気。`strips`）。先生（キング制作）は素材の ×0.791（160×285・アフロ幅156px）、中心 x=800・底辺 y=706、**y=648 より下は描かない**（天板で下半身が隠れる）。キング（左）・ルル（右）は `hall-*-back` を 148×248／129×200 に拡大（足もと y=932・影なし）。先生の素材9点（ポーズ8＋宝箱アイコン）は `tour/assets/art/` に入れた（将来の場面用）。
+- 実装：`tour-src/art.js`（ART `eikai`、`artSwayZ`＝大きさ指定の揺れ描き、`artNpcSrc`＝名前が `@` で始まる絵は art/ 直下から読む、strips の `over:1`＝人物より手前）、`build.py`（`EIKAI`・MODES `eikai`・`BGS.eikaiK`・`SP.eikai_teacher`）、`tour-src/eikaiwa_data.py`（会話。新規）。
+- 会話：先生と5往復（挨拶→飲み物の注文→ミルクの確認→ひとこと雑談→おわり）。日本語の訳は台本にも画面にもない（`words=[]`・`conv=1`＝Word Battle と Meaning! は出ない）。実在の店名・メニュー名なし。自由会話AIなし。
+- 確認：`EIKAI_PREVIEW=<teacher-cafe-preview.png> python3 tour-src/tests/test_eikaiwa068.py`（30項目）。報告は `docs/pm/deliverables/068-eikaiwa-cafe-report-v1.md`。`test_departure054.py` の出発まわりの絞り込みに `eikai` を足した。
+- 未確認：実機のマイク・声・見え方。並び（キング左・ルル右）は同梱プレビューのとおりで、`docs/rules.md` の「ルルが左・キングが右」とは逆（PM確認待ち）。参考にしたURL：なし（新しい外部URLは使っていない）。

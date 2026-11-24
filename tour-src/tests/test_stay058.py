@@ -57,7 +57,7 @@ with sync_playwright() as pw:
       o.owg=[3,4,5,6].map(function(d){return T.ROWS.ow[d-1][5].join('+')});o.stg=[3,4,5,6].map(function(d){return T.ROWS.star[d-1][5].join('+')});
       o.nx=[2,3,4,5].map(function(d){return T.nextTd(d)});o.air=__T.PLACES_AIR.map(function(p){return p.id});
       o.rowtxt=[T.ROWS.ow[2][4],T.ROWS.ow[3][4]];return o}""")
-    chk('A1 「滞在」タブが 到着→滞在→空港 の順(059で hret=28日目の羽田 が hdep の次に入った)', r['stay'] == ['sage', 'hdep', 'hret', 'arr', 'stay', 'air', 'dep'], r['stay'])
+    chk('A1 「滞在」タブが 到着→滞在→空港 の順(059で hret=28日目の羽田 が hdep の次に入った。068の eikai は末尾のチェックモード専用タブなので除く)', [m for m in r['stay'] if m != 'eikai'] == ['sage', 'hdep', 'hret', 'arr', 'stay', 'air', 'dep'], r['stay'])
     chk('A2 滞在タブの場所は サファリ・マサイマーケット(場面は各1本)', sorted(x[0] for x in r['sp']) == ['market', 'safari'] and sorted(x[1] for x in r['sp']) == ['nbo_market', 'nbo_safari'], r['sp'])
     chk('A3 oneworld: 3日目=市場・4日目=サファリ・5日目=休養(場面なし)・6日目=空港', r['owg'] == ['nbo_market', 'nbo_safari', '', 'nbo_air+nbo_dep+doh_arr'], r['owg'])
     chk('A4 スター: 4日目=市場+サファリ(3日目は到着の夜)・5日目=休養・6日目=空港', r['stg'] == ['nbo_arr', 'nbo_market+nbo_safari', '', 'nbo_air'], r['stg'])

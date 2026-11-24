@@ -2021,7 +2021,7 @@ function drawMapBg(){
  var W2=mapEl.clientWidth,H2=mapEl.clientHeight;if(!W2||!H2)return;
  var U=4,cw=Math.ceil(W2/U),ch=Math.ceil(H2/U);cv2.width=cw;cv2.height=ch;var g=cv2.getContext('2d');
  if(MODE==='sage'&&sageMapBg(cv2))return;cv2.style.background='';
- var cty=MODE==='city',pal3={air:['#efe6d2','#e3d7bc','#c9a05a'],arr:['#dfe9f0','#cfdbe6','#8aa0b8'],city:['#ead2a0','#dcc08a','#a07838'],dep:['#e9e2f2','#d9d0e8','#8a7ac0'],sage:['#e4dff2','#d3cbe8','#8a7ac0'],hdep:['#dfe6f2','#cdd7ea','#8a98c0'],hret:['#dfe6f2','#cdd7ea','#8a98c0'],stay:['#efe4c4','#e2d3a6','#c9a05a']}[MODE];g.fillStyle=pal3[0];g.fillRect(0,0,cw,ch);
+ var cty=MODE==='city',pal3={air:['#efe6d2','#e3d7bc','#c9a05a'],arr:['#dfe9f0','#cfdbe6','#8aa0b8'],city:['#ead2a0','#dcc08a','#a07838'],dep:['#e9e2f2','#d9d0e8','#8a7ac0'],sage:['#e4dff2','#d3cbe8','#8a7ac0'],hdep:['#dfe6f2','#cdd7ea','#8a98c0'],hret:['#dfe6f2','#cdd7ea','#8a98c0'],stay:['#efe4c4','#e2d3a6','#c9a05a'],eikai:['#efe4c4','#e2d3a6','#c9a05a']}[MODE];g.fillStyle=pal3[0];g.fillRect(0,0,cw,ch);
  g.fillStyle=pal3[1];for(var x=0;x<cw;x+=12)g.fillRect(x,0,1,ch);for(var y=0;y<ch;y+=12)g.fillRect(0,y,cw,1);
  g.fillStyle=pal3[2];for(var k=1;k<=3;k++)g.fillRect(0,Math.round(ch*k/4),cw,2);
  if(cty){g.fillStyle='#e8f0f4';g.fillRect(0,ch-8,cw,8);g.fillStyle='#9ad0e4';g.fillRect(0,ch-6,cw,6);return}
@@ -3425,7 +3425,7 @@ var MODES={arr:{p:PLACES_ARR,b:'🛬 到着',h:'ドバイに到着<small>入国�
  dep:{p:PLACES_DEP,b:'🛫 出発',h:'ドバイから出発<small>チェックインから機内まで</small>',snd:'map'}};
 function refreshCityBtn(){
  var bar=$m('modeBar');if(!bar.childNodes.length){Object.keys(MODES).forEach(function(k){var b=el('button','mbtn',MODES[k].b);b.type='button';b.dataset.m=k;b.addEventListener('click',function(){if(G.view==='map'&&MODE!==k&&!window.__CHK&&TRIP.lockedMode(k)){try{Snd.jingle('buzz')}catch(e){}return}if(G.view==='map'&&MODE!==k){if(k!=='sage'&&!save.ticket&&!window.__CHK){setMode('sage');G.at='ticket';placeWalkers('ticket',true);return}setMode(k)}});bar.appendChild(b)})}
- bar.querySelectorAll('.mbtn').forEach(function(b){b.classList.toggle('on',b.dataset.m===MODE);if(b.dataset.m==='sage')b.hidden=!!save.ticket&&!window.__CHK;if(b.dataset.m==='hdep')b.hidden=!hdepOn()&&!window.__CHK;if(b.dataset.m==='hret')b.hidden=!hretOn()&&!window.__CHK});
+ bar.querySelectorAll('.mbtn').forEach(function(b){b.classList.toggle('on',b.dataset.m===MODE);if(b.dataset.m==='sage')b.hidden=!!save.ticket&&!window.__CHK;if(b.dataset.m==='hdep')b.hidden=!hdepOn()&&!window.__CHK;if(b.dataset.m==='hret')b.hidden=!hretOn()&&!window.__CHK;if(b.dataset.m==='eikai')b.hidden=!window.__CHK});
  var h=document.querySelector('#mapView .mapbar h1');if(h)h.innerHTML=MODES[MODE].h;
  mapEl.classList.toggle('dense',MODE==='city')}
 function setMode(m){

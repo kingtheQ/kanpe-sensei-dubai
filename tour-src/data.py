@@ -322,3 +322,7 @@ stay_data.add(D)
 # ---- ロヴァニエミの到着まわり(タスク065): 入国審査・手荷物・到着ロビー・無料Wi-Fi・バス乗り場。会話は 053 の分かれ目の型 ----
 import rvn_data
 rvn_data.add(D)
+
+# ---- 英会話カフェ(タスク068・試作): ナイロビの小さな英会話カフェで先生と予行練習。チェックモードからだけ入る ----
+import eikaiwa_data
+eikaiwa_data.add(D)
