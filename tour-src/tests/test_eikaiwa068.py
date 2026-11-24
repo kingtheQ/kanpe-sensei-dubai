@@ -82,7 +82,7 @@ with sync_playwright() as pw:
     chk('2c 通常: 本編の場面の数え(TOUR_IDS)に nbo_eikaiwa1 は入らない・場所 eikai は到着/空港/出発の場所一覧にない', pn.evaluate("()=>{var T=__T;var ids=T.TOUR_IDS.indexOf('nbo_eikaiwa1')<0;var inAny=['arr','stay','air','dep','hdep','hret','sage'].some(function(k){return T.MODES[k].p.some(function(p){return p.id==='eikai'||(p.v||[]).indexOf('nbo_eikaiwa1')>=0})});return ids&&!inAny}"))
     cur = pn.evaluate("()=>({old:Object.keys(__T.ART).filter(function(k){return k!=='eikai'}).map(function(k){return k+':'+JSON.stringify(__T.ART[k])}),dl:['nbo_java1','nbo_java2','nbo_art1','nbo_bag1','nbo_sim1','nbo_taxi1','nbo_lounge1','nbo_room'].map(function(v){return v+':'+JSON.stringify(__T.DLG[v]||null)})})")
     ph = br.new_context().new_page(); ph.route('**/tour/index.html*', hooked_head); ph.goto(base + '/tour/index.html'); ph.wait_for_timeout(1500)
-    old = ph.evaluate("()=>({old:Object.keys(__T.ART).map(function(k){return k+':'+JSON.stringify(__T.ART[k])}),dl:['nbo_java1','nbo_java2','nbo_art1','nbo_bag1','nbo_sim1','nbo_taxi1','nbo_lounge1','nbo_room'].map(function(v){return v+':'+JSON.stringify(__T.DLG[v]||null)})})")
+    old = ph.evaluate("()=>({old:Object.keys(__T.ART).filter(function(k){return k!=='eikai'}).map(function(k){return k+':'+JSON.stringify(__T.ART[k])}),dl:['nbo_java1','nbo_java2','nbo_art1','nbo_bag1','nbo_sim1','nbo_taxi1','nbo_lounge1','nbo_room'].map(function(v){return v+':'+JSON.stringify(__T.DLG[v]||null)})})")
     chk('2d 既存の ART(%d項目)の中身が変更前(HEAD)と同じ' % len(old['old']), cur['old'] == old['old'])
     chk('2e 既存の場面(nbo_java1/2・art1・bag1・sim1・taxi1・lounge1・room)の台本が変更前と同じ', cur['dl'] == old['dl'])
     # ---------- (3) チェックモード ----------
@@ -138,12 +138,11 @@ with sync_playwright() as pw:
     chk('6a 台本: 5往復・実在の店名なし・日本語の訳なし(jp は全部空)・単語の日本語の意味もなし(words 空)', nturn == 5 and all((l.get('jp') or '') == '' for l in dl['lines']) and dl['words'] == [] and dl.get('conv') == 1 and not JPRE.search(' '.join((l.get('n') or l.get('y') or '') for l in dl['lines'])), nturn)
     p2.evaluate("()=>document.getElementById('chkBtn').click()"); p2.wait_for_timeout(150)
     p2.evaluate("()=>{[].filter.call(document.querySelectorAll('#chkPan button'),function(b){return b.textContent==='nbo_eikaiwa1'})[0].click()}"); p2.wait_for_timeout(600)
+    p2.evaluate("()=>{window.__bub=false;setInterval(function(){try{if(window.__bub||!__T.spSay)return;var d=document.getElementById('sceneA').getContext('2d').getImageData(836,400,34,24).data,n=0;for(var i=0;i<d.length;i+=4)if(d[i]===244&&d[i+1]===241&&d[i+2]===232)n++;if(n>100)window.__bub=true}catch(e){}},16)}")
     p2.click('.btn.go'); bub = 0; bubble_seen = False
     for i in range(900):
         p2.wait_for_timeout(50)
         if p2.evaluate("()=>__T.G.view") == 'map': break
-        if not bubble_seen and p2.evaluate("()=>__T.spSay"):   # 先生が話している最中: 頭の上(848,403 付近)に「…」の吹き出し(#f4f1e8)
-            a = snap(p2); reg = a[400:424, 836:870]; bubble_seen = bool(((reg == [244, 241, 232]).all(axis=2)).sum() > 100)
     st = p2.evaluate("()=>({view:__T.G.view,ph:window.__ph,txt:window.__txt,sp:window.__sp,errs:window.__perr,seen:__T.save.seen})")
     npc = [l['n'] for l in dl['lines'] if l.get('n')]; cues = [re.sub(r'\*', '', l['y']) for l in dl['lines'] if l.get('y')]
     alltxt = ' '.join(st['txt'])
@@ -155,7 +154,7 @@ with sync_playwright() as pw:
     chk('6f 画面に「勉強・テスト・測定・復習・採点・練習」の言葉が出ない', not any(w in alltxt for w in FORBID), [w for w in FORBID if w in alltxt])
     jp_screen = sorted(set(JPRE.findall(' '.join(re.sub(r'\|.*', '', t) for t in st['txt']))))
     chk('6g 先生と自分の台詞の表示に、日本語の訳が付かない(メッセージ欄に日本語の文字がない。場面の説明文を除く)', not [t for t in st['txt'] if JPRE.search(t.split('|')[0]) and not t.split('|')[0].startswith('ナイロビの小さな')], jp_screen)
-    chk('7 先生が話しているあいだ、頭の上に「…」の吹き出しが出る', bubble_seen)
+    chk('7 先生が話しているあいだ、頭の上に「…」の吹き出しが出る', p2.evaluate('()=>window.__bub'))
     # 聞き取りに失敗したときの流れは既存の場面のまま: 2回失敗→3回目に通れば進む。3回失敗すると「ヘルプ」(ルルが代わりに言う)が出て、押すと進む
     def run_fail(nbad, use_help):
         q = mk(); q.goto(base + '/tour/index.html?check=1'); q.wait_for_timeout(1500); q.mouse.click(215, 450); q.wait_for_timeout(600)
