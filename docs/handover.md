@@ -179,6 +179,12 @@
 - 新しい到着のまとまり `rvn_arr`（入国審査・手荷物・到着ロビー・無料Wi-Fi・バス乗り場 × 各2場面）と新ページ `tour/rovaniemi/`。台詞は `tour-src/rvn_data.py`、場所・背景・音は `build.py`、旅程は `trip.js`（10日目・両ルート）。到着ロビーだけ実画＋オーロラstrip（`art.js` の `rvnlobby`）。
 - 詳細・数値・要確認（指示書が見当たらない／oneworldの入国審査／23時／Wi-Fi名が公式で未確認／バス8番の扱い／tour/assets未公開）は `docs/pm/deliverables/065-rovaniemi-arrival-report-v1.md`。確認は `tour-src/tests/test_arrival065.py`。
 
+## 今回（11/24）タスク072でやったこと（ロヴァニエミ第2弾：滞在＋出発）
+- 新しいまとまり `rvn_stay`（村の広場・郵便局・サンタ・トナカイ×各2）と `rvn_night`（ホテルのオーロラ待ち×2）と `rvn_dep`（チェックイン・保安・ギフトショップ Napapiirin Lahja・Ahkio・ゲート×各2）。両ルート11日目に滞在、oneworld12日目に夜、出発は oneworld13日目・Star12日目。`rvn_night` はStarの旅程に入らずチェックモードから入る。計20場面。台詞は `tour-src/rvn_stay_data.py`、場所・背景は `build.py`、旅程は `trip.js`。
+- 実画は村の広場（`ART.rvillage`＝オーロラ・煙・きらめき）と郵便局（`ART.rpostoffice`＝炎）だけ。ほかはコード描画（実画は後続タスクで差し替え）。トナカイは静止のドット絵を背景のコード描画の中に描いた（別素材なし）。ホテルのオーロラ strip は出していない。
+- 詳細・全文・数値・PMへの確認事項は `docs/pm/deliverables/072-rovaniemi-stay-departure-report-v1.md`。確認は `tour-src/tests/test_rovaniemi072.py`（194項目）。
+- 未確認：実機のマイク・声・音・見え方。参考にしたURL：新しい外部URLなし。
+
 ## 今回（11/24）タスク066でやったこと（ロビーを通常版に・ショータイムはプールサイド）
 - ホテルのロビー（`hsong`）は受付スタッフの案内の3択（ショータイム／プール／Balcony Bar。英文だけ）。ショータイムを選ぶと別場面のプールサイド（背景 `npool`）で歌う（歌手は高さ250）。ロビーの真ん中で歌う060の形は廃止（素材と `nsong` 設定は残置）。
 - プールサイドの照明ストリップは、テーマ曲が鳴っているあいだは曲の再生位置の拍（`song_data.py` の `beats`）に合わせて点滅、鳴っていないときはゆっくり明滅。

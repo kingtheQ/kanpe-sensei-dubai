@@ -151,7 +151,21 @@ RARR = [
  place('rlobby', '到着ロビー', 'hall', 26, 50, '🌌', ['到着ロビー', '床に光の線・北極圏ライン'], ['rvn_lobby1', 'rvn_lobby2']),
  place('rwifi', '無料Wi-Fi', 'info', 72, 66, '📶', ['Rovaniemi Airport Free Wi-Fi', 'ネットにつなぐ'], ['rvn_wifi1', 'rvn_wifi2']),
  place('rbus', 'バス乗り場', 'hall', 28, 84, '🚌', ['バス乗り場', 'サンタクロース村へ・8番かAirport Express'], ['rvn_bus1', 'rvn_bus2'])]
-RVN_IDS = [i for p in RARR for i in p['v']]
+# ロヴァニエミの滞在・夜・出発(タスク072)。座標は到着(RARR)と同じジグザグ(x=24〜28/72, y=14〜84)で、同じ画面の中では重ならない。並びは動線順。
+# 村の広場・郵便局だけ実画(art.js の rvillage / rpostoffice)。ほかはコード描画(BGS)。村のカフェの場面は作らない。
+RSTAY = [
+ place('rvil', '村の広場', 'hall', 24, 14, '🎄', ['サンタクロース村の広場', '北極圏のラインをまたぐ'], ['rvn_village1', 'rvn_village2']),
+ place('rpost', '郵便局', 'info', 72, 32, '✉️', ['サンタクロース村の郵便局', 'はがきと特別な消印'], ['rvn_post1', 'rvn_post2']),
+ place('rsanta', 'サンタに会う', 'hotel', 26, 50, '🎅', ['サンタクロース・オフィス', '毎日会える・入場無料'], ['rvn_santa1', 'rvn_santa2']),
+ place('rrein', 'トナカイ', 'beach', 72, 66, '🦌', ['トナカイにあいにいく', '雪の道とそり'], ['rvn_reindeer1', 'rvn_reindeer2']),
+ place('rhotel', 'ホテルの夜', 'hotel', 28, 84, '🌌', ['ホテル(夜)', 'オーロラを待つ。出るとは限らない'], ['rvn_hotel1', 'rvn_hotel2'])]
+RDEP = [
+ place('rchk', 'チェックイン', 'hall', 24, 14, '🧳', ['チェックイン', '新しい広い出発ホール'], ['rvn_checkin1', 'rvn_checkin2']),
+ place('rsec', '保安検査', 'info', 72, 32, '🛃', ['保安検査', 'トレイとコートとベルト'], ['rvn_sec1', 'rvn_sec2']),
+ place('rshop', 'ギフトショップ', 'souk', 26, 50, '🎁', ['Napapiirin Lahja', '検査の前にも後にもある'], ['rvn_shop1', 'rvn_shop2']),
+ place('rahk', 'Ahkio', 'cafe', 72, 66, '🍲', ['Ahkio Kitchen and Bar', '検査のあと・サーモンスープとトナカイバーガー'], ['rvn_ahkio1', 'rvn_ahkio2']),
+ place('rgate', 'ゲート', 'hall', 28, 84, '🛫', ['出発ゲート', '雪の窓の前で'], ['rvn_gate1', 'rvn_gate2'])]
+RVN_IDS = [i for p in RARR + RSTAY + RDEP for i in p['v']]
 
 SPJS = r"""
 SP.sage={pitch:.8,m:[[trav({}),P(4,{o:'#5a3a8a',p:'#3a2a5a',h:'#d9d4c6'})]]};
@@ -448,6 +462,25 @@ SP.r_info={pitch:1.08,m:[[trav({hair:'long'}),P(4,{o:'#1f5a8a',p:'#2a2a33',h:'#a
 SP.r_wifi={pitch:.93,m:[[trav({}),P(1,{o:'#7a3b8a',p:'#44464f',h:'#14141a',pack:1})]]};
 SP.r_stop={pitch:1.05,m:[[trav({hair:'curly'}),P(3,{o:'#d06a2a',p:'#2a2a33',h:'#5a3a24'})]]};
 SP.r_driver={pitch:.9,m:[[trav({hair:'cap'}),P(5,{o:'#1b2a55',p:'#14141a',h:'#241a14'})]]};
+SP.r_vguide={pitch:1.1,m:[[trav({hair:'long'}),P(4,{o:'#a02a2a',p:'#2a2a33',h:'#c9a45a'})]]};
+SP.r_vwoman={pitch:1.14,m:[[trav({hair:'curly'}),P(3,{o:'#2a5a8a',p:'#3a3a48',h:'#5a3a24'})]]};
+SP.r_postclerk={pitch:.92,m:[[trav({hair:'cap'}),P(2,{o:'#c8182a',p:'#2a2a33',h:'#d9d4c6'})]]};
+SP.r_poststand={pitch:1.0,m:[[trav({}),P(1,{o:'#5a6a3a',p:'#44464f',h:'#241a14'})]]};
+SP.r_santa={pitch:.72,m:[[trav({hair:'cap'}),P(4,{o:'#c0182a',p:'#8a1020',h:'#f2f0ea'})]]};
+SP.r_herder={pitch:.88,m:[[trav({hair:'cap'}),P(3,{o:'#2a5a8a',p:'#7a2a2a',h:'#3b2a1f'})]]};
+SP.r_family={pitch:1.06,m:[[trav({hair:'long'}),P(2,{o:'#d06a2a',p:'#2a3350',h:'#a07a4a',pack:1})]]};
+SP.r_hfront={pitch:1.08,m:[[trav({hair:'long'}),P(5,{o:'#2b3a5a',p:'#2b2b33',h:'#241a14'})]]};
+SP.r_nguest={pitch:.96,m:[[trav({}),P(1,{o:'#7a3b8a',p:'#44464f',h:'#5a3a24'})]]};
+SP.r_ck1={pitch:1.12,m:[[trav({hair:'long'}),P(5,{o:'#1b3a6a',p:'#2a2a33',h:'#c9a45a'})]]};
+SP.r_ck2={pitch:.9,m:[[trav({hair:'cap'}),P(5,{o:'#1b3a6a',p:'#2a2a33',h:'#241a14'})]]};
+SP.r_sec1={pitch:.95,m:[[trav({hair:'cap'}),P(4,{o:'#3a4a5a',p:'#2b2b33',h:'#5a3a24'})]]};
+SP.r_sec2={pitch:1.1,m:[[trav({hair:'long'}),P(2,{o:'#3a4a5a',p:'#2b2b33',h:'#a07a4a'})]]};
+SP.r_shop1={pitch:1.16,m:[[trav({hair:'curly'}),P(1,{o:'#2d6a6a',p:'#2a2a33',h:'#5a3a24'})]]};
+SP.r_shop2={pitch:.9,m:[[trav({}),P(3,{o:'#7a4a2a',p:'#2a2a33',h:'#d9d4c6'})]]};
+SP.r_waiter1={pitch:.98,m:[[trav({hair:'cap'}),P(4,{o:'#e8e4d8',p:'#2a2a33',h:'#241a14'})]]};
+SP.r_diner={pitch:.86,m:[[trav({}),P(2,{o:'#4a5a3a',p:'#3a3a48',h:'#c9a45a',pack:1})]]};
+SP.r_gate1={pitch:1.05,m:[[trav({hair:'long'}),P(5,{o:'#1b3a6a',p:'#2a2a33',h:'#241a14'})]]};
+SP.r_gate2={pitch:.93,m:[[trav({hair:'cap'}),P(5,{o:'#1b3a6a',p:'#2a2a33',h:'#5a3a24'})]]};
 """
 # 背景: 夜の群青・雪の青白・灯りの橙。オーロラの緑は 到着ロビーの実画(art.js の rvnlobby)にだけ出る。
 # 看板の文言は確認済みのものだけ(ロビー: ROVANIEMI / Arrivals / Welcome to Rovaniemi Airport、Wi-Fi名、バスの 8 と AIRPORT EXPRESS)。それ以外の文字は置かない。
@@ -481,6 +514,59 @@ BGS.rbus=function(){grad(0,70,'#06122e','#1a3358',10);for(var i=0;i<22;i++)R('#e
  R('#f2c200',120,52,150,34);R('#1b2a55',120,74,150,12);R('#9fd0f0',130,58,22,12);R('#9fd0f0',158,58,22,12);R('#9fd0f0',186,58,22,12);R('#9fd0f0',214,58,22,12);
  T('AIRPORT EXPRESS',195,80,6.5,'#fff');R('#14141a',140,84,14,10);R('#14141a',236,84,14,10);R('#ffe9a8',264,66,6,6);
  R('#ffe9a8',20,86,2,2);rSnow(0,98)};
+/* ---- 072: 滞在・夜・出発(コード描画。広場と郵便局の実画が読めないときの代わりも兼ねる)。文字は確認済みの名前だけ ---- */
+function rOut(){grad(0,64,'#9fb8d8','#dfe9f4',10);R('#e8f0fa',0,64,VW,86);R('#d3deee',0,92,VW,1);R('#c3d2e6',0,118,VW,1)}
+function rPine(x,y,h){R('#4a3626',x+2,y+h-4,2,4);for(var i=0;i<3;i++){var w=6+i*3;R('#1d4a3a',x+3-w/2,y+i*(h-6)/3,w,(h-6)/3+2);R('#eaf2fa',x+3-w/2,y+i*(h-6)/3,w,1)}}
+function rLog(x,y,w,h,rc){R('#7a4a2a',x,y,w,h);for(var i=2;i<h;i+=4)R('#5e3820',x,y+i,w,1);R(rc||'#eaf2fa',x-1,y-3,w+2,4)}
+BGS.rvil=function(){rOut();rPine(8,34,34);rPine(30,40,28);rPine(292,32,36);rPine(272,42,26);
+ R('#9a2a2a',60,46,40,22);R('#eaf2fa',58,43,44,4);R('#ffd98a',70,54,6,6);R('#ffd98a',84,54,6,6);
+ R('#b8a58a',124,16,22,56);R('#8a7a5a',124,16,22,3);R('#c0392b',120,10,30,8);R('#eaf2fa',120,8,30,3);R('#ffd98a',130,30,5,6);
+ rLog(168,48,70,26);R('#ffd98a',180,56,6,6);R('#ffd98a',200,56,6,6);R('#2a1a10',218,58,8,16);
+ R('#d8a53a',0,96,VW,3);R('#7a3b8a',0,120,VW,3);R('#e8f0fa',0,124,VW,26);R('#4a8ad0',0,108,VW,2);rSnow(0,98)};
+BGS.rpost=function(){R('#6a4a2a',0,0,VW,98);for(var y=6;y<98;y+=8)R('#53381e',0,y,VW,1);R('#4a3626',0,0,VW,8);
+ R('#33241a',150,22,70,50);R('#c9a03a',150,22,70,2);R('#ffd98a',160,34,20,24);R('#ffd36a',166,40,8,14);R('#e0561a',168,44,4,10);
+ R('#8a6a3a',20,52,70,5);R('#8a6a3a',26,57,4,40);R('#8a6a3a',80,57,4,40);R('#e8e4d8',34,46,22,6);
+ R('#2a1a10',270,30,34,40);R('#c0392b',270,30,34,4);R('#e8e4d8',278,40,18,12);
+ R('#8a867e',0,98,VW,52);for(var x=0;x<VW;x+=24)R('#76726a',x,98,1,52);R('#f2c200',292,100,16,22);R('#c9a000',292,112,16,2);rSnow(0,0)};
+BGS.rsanta=function(){R('#5a3a24',0,0,VW,98);for(var y=6;y<98;y+=8)R('#46301c',0,y,VW,1);R('#3a2616',0,0,VW,8);
+ R('#143a30',120,18,80,40);R('#c9a03a',120,18,80,2);R('#c9a03a',120,56,80,2);for(var i=0;i<5;i++){R('#c0392b',130+i*14,30+(i%2)*4,6,6);R('#1d6a3a',134+i*14,28,3,3)}
+ R('#2a1a10',10,24,26,50);R('#8a1020',14,28,18,40);R('#ffd36a',20,44,6,6);
+ R('#7a4a2a',236,50,60,48);R('#9a6a3a',236,50,60,4);R('#c0392b',250,34,22,16);R('#eaf2fa',250,32,22,4);
+ R('#8a6a3a',0,98,VW,52);for(var x=0;x<VW;x+=28)R('#76582c',x,98,1,52);R('#8a1020',100,112,120,30);R('#c9a03a',100,112,120,2)};
+BGS.rrein=function(){rOut();rPine(14,28,40);rPine(40,36,30);rPine(284,30,40);rPine(262,38,30);
+ R('#7a4a2a',96,60,6,38);R('#7a4a2a',124,60,6,38);R('#7a4a2a',152,60,6,38);R('#7a4a2a',96,64,110,3);R('#7a4a2a',96,76,110,3);R('#7a4a2a',200,60,6,38);
+ R('#e8f0fa',0,96,VW,54);R('#d3deee',0,92,VW,1);R('#c3d2e6',0,118,VW,1);R('#c3d2e6',0,132,VW,1);
+ /* トナカイ(静止のドット絵。素材がないため動かない。柵の向こう、ふたりと話し相手のあいだ) */
+ var rx=128;R('#8a6a4a',rx,66,26,14);R('#eaf2fa',rx+2,64,22,3);R('#a98a66',rx+4,70,18,5);R('#6e5238',rx+3,80,3,14);R('#6e5238',rx+9,80,3,14);R('#6e5238',rx+17,80,3,14);R('#6e5238',rx+23,80,3,14);
+ R('#8a6a4a',rx+24,58,7,12);R('#8a6a4a',rx+28,58,8,7);R('#14141a',rx+33,60,2,2);R('#c0392b',rx+35,63,2,2);
+ R('#d9d4c6',rx+26,48,2,10);R('#d9d4c6',rx+22,48,5,2);R('#d9d4c6',rx+30,46,2,12);R('#d9d4c6',rx+30,46,6,2);R('#d9d4c6',rx+34,50,2,6);
+ rSnow(0,98)};
+BGS.rhotel=function(){R('#0b1a3a',0,0,VW,98);for(var i=0;i<30;i++)R('#e8f0fa',(i*43)%VW,2+(i*17)%52,1,1);R(Math.floor(t*2)%2?'#f4f8ff':'#cdd8ea',(t*3)%VW,10,1,1);
+ R('#d8e4f2',0,60,VW,38);R('#9ab0cc',0,60,VW,2);for(var x=0;x<VW;x+=40){R('#17343a',x+6,48,6,14);R('#17343a',x+7,43,4,6)}
+ R('#4a3626',0,0,VW,6);R('#33241a',0,6,VW,2);R('#2a1a10',2,10,8,88);R('#2a1a10',VW-10,10,8,88);R('#2a1a10',2,10,VW-4,3);R('#2a1a10',2,95,VW-4,3);R('#2a1a10',VW/2-1,10,3,88);
+ R('#6a4a2a',0,98,VW,52);for(var x=0;x<VW;x+=24)R('#53381e',x,98,1,52);R('#8a1020',90,114,140,26);R('#c9a03a',90,114,140,2);
+ R('#ffd98a',20,76,2,2);R('#ffd98a',290,76,2,2)};
+function rHall(){R('#d2d8e2',0,0,VW,98);R('#c9d2e0',0,0,VW,5);R('#4a3626',0,5,VW,4);for(var x=10;x<VW;x+=46)R('#ffd98a',x,6,5,2);rFloor()}
+BGS.rchk=function(){rHall();R('#8a867e',0,98,VW,52);
+ for(var i=0;i<3;i++){var x=14+i*100;R('#e8e4d8',x,56,72,28);R('#9a947f',x,56,72,3);R('#143a5a',x+10,32,52,18);R('#6a8ab0',x+14,36,44,2);R('#6a8ab0',x+14,42,30,2);R('#2a2a33',x,84,72,14)}
+ R('#2a2a33',0,98,VW,4);R('#4a4a56',0,102,VW,2)};
+BGS.rsec=function(){rHall();
+ R('#3a4a5a',20,50,90,40);R('#2a3a4a',20,50,90,4);R('#14141a',40,64,50,22);R('#9fd0f0',44,68,42,10);
+ R('#8a8a96',130,70,170,5);for(var i=0;i<6;i++)R('#c9d2e0',140+i*26,64,20,6);R('#14141a',130,76,170,4);
+ R('#5a7a9a',250,24,48,26);R('#cdd8e8',252,26,44,22);R('#2a6a4a',262,34,24,8)};
+BGS.rshop=function(){rHall();
+ R('#143a30',10,20,300,14);T('Napapiirin Lahja',160,27,9,'#ffd36a');
+ R('#8a6a3a',10,50,60,6);R('#8a6a3a',14,56,4,42);R('#8a6a3a',62,56,4,42);R('#c0392b',18,40,8,10);R('#e8e4d8',32,42,8,8);R('#2f5bb0',46,40,8,10);R('#d9a441',58,43,8,7);
+ R('#8a6a3a',250,50,60,6);R('#8a6a3a',254,56,4,42);R('#8a6a3a',302,56,4,42);R('#7a4a2a',258,38,10,12);R('#c0392b',274,42,8,8);R('#e8e4d8',288,40,8,10);
+ R('#e8e4d8',104,64,8,34);R('#cdd8e8',104,64,8,3)};
+BGS.rahk=function(){rHall();R('#143a30',90,16,140,14);T('Ahkio',160,23,9,'#ffd36a');
+ R('#7a4a2a',20,48,70,50);R('#9a6a3a',20,48,70,4);R('#e8e4d8',30,38,12,10);R('#d9a441',54,40,10,8);R('#c0392b',72,38,10,10);
+ for(var i=0;i<3;i++){var x=116+i*58;R('#8a6a3a',x,70,36,4);R('#6a4a2a',x+4,74,4,24);R('#6a4a2a',x+28,74,4,24);R('#e8e4d8',x+10,64,8,6);R('#d9a441',x+20,66,6,4)}
+ R('#5a7a9a',240,26,60,34);R('#cdd8e8',242,28,56,30)};
+BGS.rgate=function(){airWall('#d6dce8');R('#4a3626',0,5,VW,4);R('#8fb0d8',60,16,240,58);R('#dfe9f4',60,52,240,22);R('#c3d2e6',60,64,240,2);R('#3a4a5a',58,14,244,3);R('#3a4a5a',58,72,244,3);
+ for(var x=0;x<VW;x+=60)R('#3a4a5a',60+x,14,3,60);for(var i=0;i<18;i++)R('#fff',60+(i*47)%240,16+((i*29+Math.floor(t*6))%52),1,1);
+ R('#17343a',200,44,8,14);R('#17343a',201,38,6,8);R('#17343a',232,46,8,14);R('#17343a',233,40,6,8);
+ floorAir('#9a96a4','#86828e');for(var k=0;k<3;k++){R('#5a6a8a',12+k*34,86,22,6);R('#5a6a8a',12+k*34,92,3,6);R('#5a6a8a',31+k*34,92,3,6)}};
 """
 MAIN_RVN = r"""
 /* ===== 世界一周編: ロヴァニエミ(到着まわり。タスク065) ===== */
@@ -491,11 +577,13 @@ for(var _k in TOURDLG)DLG[_k]=TOURDLG[_k];
 %(world)s
 %(voice)s
 %(ev)s
-var PLACES_RARR=%(arr)s;
-PLACES_AIR=PLACES_RARR;   /* 世界マップのクリアの印: 到着の場所を全部(各1つ以上)あそんだら。滞在・出発はまだ作っていない(第2弾以降) */
-PLACES_RARR.forEach(function(p){PBY[p.id]=p});
+var PLACES_RARR=%(arr)s,PLACES_RSTAY=%(stay)s,PLACES_RDEP=%(dep)s;
+PLACES_AIR=PLACES_RARR;   /* 世界マップのクリアの印: 到着の場所を全部(各1つ以上)あそんだら(072でも変えない。滞在・出発の印は今後の検討) */
+PLACES_RARR.concat(PLACES_RSTAY,PLACES_RDEP).forEach(function(p){PBY[p.id]=p});
 var TOUR_IDS=%(ids)s;
-MODES={arr:{p:PLACES_RARR,b:'🛬 到着',h:'ロヴァニエミに到着<small>ロヴァニエミ空港</small>',snd:'rvn'}};
+MODES={arr:{p:PLACES_RARR,b:'🛬 到着',h:'ロヴァニエミに到着<small>ロヴァニエミ空港</small>',snd:'rvn'},
+ stay:{p:PLACES_RSTAY,b:'🎅 滞在',h:'ロヴァニエミの滞在<small>サンタクロース村とホテルの夜</small>',snd:'rvn'},
+ dep:{p:PLACES_RDEP,b:'🛫 出発',h:'ロヴァニエミから出発<small>チェックインからゲートまで</small>',snd:'rvn'}};
 worldAt('rovaniemi');
 """
 
@@ -908,9 +996,9 @@ print('missing IPA:', missing)
 
 # ---------- ロヴァニエミ(tour/rovaniemi/index.html。タスク065) ----------
 dr = sub('rvn_')
-main = MAIN_RVN % dict(dlg=J(dr), sp=SPR, bg=BGR, world=WORLDJS, voice=VOICEJS, ev=EVJS, arr=J(RARR), ids=J(RVN_IDS))
+main = MAIN_RVN % dict(dlg=J(dr), sp=SPR, bg=BGR, world=WORLDJS, voice=VOICEJS, ev=EVJS, arr=J(RARR), stay=J(RSTAY), dep=J(RDEP), ids=J(RVN_IDS))
 main += _rd('check.js').replace('__OTHER_HREF__', '../doha/?check=1').replace('__OTHER_LABEL__', 'ドーハ')
-main += art_js('../assets/art/', "function artIdFor(S){var v=String(S&&S.vid||'');return /^rvn_lobby[12]$/.test(v)?'rvnlobby':null}")   # 到着ロビーだけ実画(rovaniemi-arrivals-v1.png＋オーロラ strip)
+main += art_js('../assets/art/', "function artIdFor(S){var v=String(S&&S.vid||'');return /^rvn_lobby[12]$/.test(v)?'rvnlobby':/^rvn_village[12]$/.test(v)?'rvillage':/^rvn_post[12]$/.test(v)?'rpostoffice':null}")   # 実画: 到着ロビー(rovaniemi-arrivals-v1.png＋オーロラ strip)・村の広場(072。オーロラ・煙・きらめき)・郵便局(072。暖炉の炎)。ほかはコード描画
 o = ev_patches(common(src, 'Europe/Helsinki'))
 for _a, _b in SHARED: o = rep(o, _a, _b)
 o = rep(o, " if(!G.camp)addHelp(T)}", " if(!G.camp&&!G.scene.d.nohelp)addHelp(T)}")
@@ -919,6 +1007,7 @@ o = rep(o, SNOTE_OLD, SNOTE_NEW)
 o = rep(o, ".cue .heard.live{color:#8a7b55}", ".cue .heard.live{color:#8a7b55}\n" + VOICECSS)
 o = rep(o, "'../world/?map=1'", "'../../world/?map=1'", 2)
 o = rep(o, "worldMark('dubai')", "worldMark('rovaniemi')")   # 到着の場所を全部あそんだら印(PLACES_AIR=PLACES_RARR)
+o = rep(o, "dep:['#e9e2f2','#d9d0e8','#8a7ac0']}[MODE]", "dep:['#e9e2f2','#d9d0e8','#8a7ac0'],stay:['#e4eef6','#d3e0ee','#8aa8c8']}[MODE]")   # 滞在タブの地図の色(072。到着・出発は既存の色)
 o = rep(o, "Snd.go(MODE==='city'?'city':'map')", "Snd.go(MODES[MODE].snd)")
 o = rep(o, "if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}showMap()}",
         "if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}showMap();/*RVN_END*/}")
