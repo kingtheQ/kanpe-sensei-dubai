@@ -185,6 +185,14 @@ ART.nmarket={bg:'nairobi-market-v1.png',mode:'wide',dep:{shF:'rgba(3,10,21,.4)',
 ART.rvnlobby={bg:'rovaniemi-arrivals-v1.png',mode:'wide',strips:[{img:'rovaniemi-aurora-strip.png',x:80,y:128,n:4,fw:1376,fh:172,step:1.2}],
  dep:{shF:'rgba(3,10,21,.4)',lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},
   npcS:{r_greeter:{n:'t-backpacker-front',x:1010,by:890,sw:79},r_local:{n:'w-front-man-suit-1',x:1010,by:890,sw:70}}}};
+/* ドーハ・スークの実画(タスク071): 人なしの背景(1536×960。文字は一切なし)。人物は mode:'wide' の前向きのキング・ルル(足もとの位置は同梱プレビューが正本)。相手(c_tea・c_man など)は今までのドット絵のまま、場面の既存の仕組みで出す。
+   ルルがいない場面(doh_city_t3)は、人物の出し分け(OUT.lvis)が今までどおり働く。絵の側でルルを常時描くことはしない。スーツケースは、プレビューに無いので出さない(nosuit)。
+   dalley=スークの路地(夜): doh_city_t1/t2/t3 と割りこみ doh_ev_h_prayer。ランタンの明滅(1秒)と吊り布の揺れ(0.8秒)は全面ストリップ(1536×960・(0,0))。ルル x=700・キング x=806・足もと y=856
+   dsouq=スークの広場(昼): doh_city_s1/s2/s3 は店の会話だが「店先の広場」として広場の絵で統一(PM判断)。屋台の日よけ布(0.8秒・(0,452)・1536×176)と空の小鳥(0.4秒・(0,36)・1536×120。その場の羽ばたきだけ)。ルル x=660・キング x=770・足もと y=836 */
+ART.dalley={bg:'doha-souq-alley-v1.png',mode:'wide',base:856,lulu:700,king:806,suit:0,nosuit:1,npc:{x:228,px:9},fx:'',
+ strips:[{img:'doha-souq-alley-lanterns-strip.png',x:0,y:0,n:2,fw:1536,fh:960,step:1},{img:'doha-souq-alley-cloth-strip.png',x:0,y:0,n:2,fw:1536,fh:960,step:.8}]};
+ART.dsouq={bg:'doha-souq-square-v1.png',mode:'wide',base:836,lulu:660,king:770,suit:0,nosuit:1,npc:{x:980,px:9},fx:'',
+ strips:[{img:'doha-souq-square-cloth-strip.png',x:0,y:452,n:2,fw:1536,fh:176,step:.8},{img:'doha-souq-square-birds-strip.png',x:0,y:36,n:2,fw:1536,fh:120,step:.4}]};
 /*ARTSEL*/
 function artImg(n){var i=ARTI[n];if(!i){i=ARTI[n]=new Image();i.onerror=function(){i.bad=1};i.src=ARTBASE+n}return i}
 function artShow(on){if(ARTSHOW===on)return;ARTSHOW=on;cv.hidden=!!on;cvA.hidden=!on}
@@ -278,7 +286,7 @@ function ARTframe(S,A0,dt){
  (cf.crowd||[]).forEach(function(c,ci){L.push({by:c[2],f:function(){var img=exi['w-'+c[0]],bw=img.naturalWidth,
    o=c[3]==='walk'?(Math.floor(t*3.2+ci*.4)%2?-3:0):(Math.floor(t*1.1+ci*.53)%2?-2:0);
    artShadow(c[1],c[2],bw*.42,.3);artSpr(img,c[1],c[2]+o,false)}})});
- L.push({by:B,f:function(){artSuit(cf.suit-dir*sh,B,room)}});
+ if(!cf.nosuit)L.push({by:B,f:function(){artSuit(cf.suit-dir*sh,B,room)}});
  if(OUT.lvis)L.push({by:B,f:function(){var ly=0,limg;
   if(walking){var lf=Math.floor(te/.2)%4;limg=im[['lulu-walk-a','lulu-walk-b','lulu-walk-c','lulu-walk-b'][lf]];ly=lf%2?-BOB:0}
   else{limg=im['lulu-idle'];ly=Math.floor(t*1.6+.5)%2?-BOB:0}
