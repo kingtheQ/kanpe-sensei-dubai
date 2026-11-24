@@ -110,3 +110,9 @@
 - データとプライバシー：https://learn.microsoft.com/legal/cognitive-services/speech-service/speech-to-text/data-privacy-security
 - 料金：https://azure.microsoft.com/en-us/pricing/details/speech/
 - Web Speech API：https://developer.mozilla.org/docs/Web/API/Web_Speech_API/Using_the_Web_Speech_API
+
+## タスク065（ロヴァニエミ到着、2026-11-24確認）
+- Finavia ロヴァニエミ空港の天窓と北極圏ライン: https://finavia.fi/sv/node/3012 ／ https://www.finavia.fi/sv/node/4402
+- Finavia 空港バス(Airport Express): https://finavia.fi/en/airports/rovaniemi/parking-access/public-transport
+- サンタクロース村 移動(8番・Airport Express の運行期間): https://santaclausvillage.info/info-and-tips/getting-here-and-moving-around/ ／ https://santaclausvillage.info/services/santas-express-airport-bus-rovaniemi/
+- Finavia Wi-Fi(他空港の名前の形式): https://www.finavia.fi/en/airports/oulu/services/oulu-airport-free-wi-fi

@@ -160,3 +160,7 @@
 - 実装：`tour-src/cards.js`・`cards.css`（新規）、`data.py` の nbo_java1、`build.py` の SHARED。確認は `python3 tour-src/tests/test_flow061.py`（30項目）と `test_conv053.py`。報告と「クロが決めたこと」は `docs/pm/deliverables/061-cafe-flow-impl-report-v1.md`。
 - 裏の反応時間→持ち越し→夢（053）は継続（shillings だけ。iced・slice の計測は選択がなくなったため外れた）。ルルの代行回数・ポイント・スパルタ教室は未決定のため入れていない（詰んだときは既存ヘルプ）。
 - 未確認：実機のマイク・声・見え方。参考にしたURL：なし（新しい外部URLは使っていない）。
+
+## 今回（11/24）タスク065でやったこと（ロヴァニエミ到着まわり）
+- 新しい到着のまとまり `rvn_arr`（入国審査・手荷物・到着ロビー・無料Wi-Fi・バス乗り場 × 各2場面）と新ページ `tour/rovaniemi/`。台詞は `tour-src/rvn_data.py`、場所・背景・音は `build.py`、旅程は `trip.js`（10日目・両ルート）。到着ロビーだけ実画＋オーロラstrip（`art.js` の `rvnlobby`）。
+- 詳細・数値・要確認（指示書が見当たらない／oneworldの入国審査／23時／Wi-Fi名が公式で未確認／バス8番の扱い／tour/assets未公開）は `docs/pm/deliverables/065-rovaniemi-arrival-report-v1.md`。確認は `tour-src/tests/test_arrival065.py`。

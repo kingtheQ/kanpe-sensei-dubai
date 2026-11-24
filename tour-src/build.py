@@ -137,6 +137,16 @@ DCITY = [
  place('ccorn', 'コルニーシュ', 'beach', 60, 72, '⛵', ['コルニーシュ(湾ぞいの遊歩道)', '写真・木の舟・学生。値段は架空'], ['doh_city_c1', 'doh_city_c2', 'doh_city_c3'])]
 DOH_IDS = [i for p in DARR + DCITY + DDEP for i in p['v']]
 
+# ロヴァニエミの到着まわり(タスク065): 5場所×2場面。場所は上から順に開く(trip.js の lockedPlace)。到着ロビーだけ実画(art.js の rvnlobby)。
+# 場所の説明(tip)・名前は日本語(今までと同じ)。看板・店名・料金は確認できたものだけ(rvn_data.py の冒頭)。
+RARR = [
+ place('rimmig', '入国審査', 'info', 24, 14, '🛂', ['入国審査', '口数の少ない係官と、パスポート'], ['rvn_immig1', 'rvn_immig2']),
+ place('rbag', '手荷物受け取り', 'hall', 72, 32, '🧳', ['バゲージクレーム', '雪の国の荷物とコート'], ['rvn_bag1', 'rvn_bag2']),
+ place('rlobby', '到着ロビー', 'hall', 26, 50, '🌌', ['到着ロビー', '床に光の線・北極圏ライン'], ['rvn_lobby1', 'rvn_lobby2']),
+ place('rwifi', '無料Wi-Fi', 'info', 72, 66, '📶', ['Rovaniemi Airport Free Wi-Fi', 'ネットにつなぐ'], ['rvn_wifi1', 'rvn_wifi2']),
+ place('rbus', 'バス乗り場', 'hall', 28, 84, '🚌', ['バス乗り場', 'サンタクロース村へ・8番かAirport Express'], ['rvn_bus1', 'rvn_bus2'])]
+RVN_IDS = [i for p in RARR for i in p['v']]
+
 SPJS = r"""
 SP.sage={pitch:.8,m:[[trav({}),P(4,{o:'#5a3a8a',p:'#3a2a5a',h:'#d9d4c6'})]]};
 SP.desk_star={pitch:1.2,m:[[trav({hair:'long'}),P(1,{o:'#c8182a',p:'#2a2a33',h:'#241a14'})]]};
@@ -413,6 +423,70 @@ MODES={arr:{p:PLACES_DARR,b:'🛬 到着',h:'ドーハに到着<small>ハマド�
  city:{p:PLACES_DCITY,b:'🏙 市内',h:'ドーハの街<small>スーク・ワキーフとコルニーシュ・1泊</small>',snd:'dohc'},
  dep:{p:PLACES_DDEP,b:'🛫 出発',h:'ドーハから出発<small>カウンターからヘルシンキ行きの機内まで</small>',snd:'doh'}};
 worldAt('doha');
+"""
+
+# ---------- ロヴァニエミ(タスク065)の話者・背景・ページの枠 ----------
+# 話者: 口数の少ない北の人たち。厚いコート・帽子の色ちがい(服装だけで悪役にしない)。声の高さは ナイロビ・ドーハの係員と かぶらないようにずらす
+SPR = r"""
+SP.r_officer={pitch:.88,m:[[trav({hair:'cap'}),P(5,{o:'#2b3a5a',p:'#2b2b33',h:'#241a14'})]]};
+SP.r_officer2={pitch:1.12,m:[[trav({hair:'long'}),P(4,{o:'#2b3a5a',p:'#2b2b33',h:'#c9a45a'})]]};
+SP.r_bag={pitch:.97,m:[[trav({}),P(5,{o:'#e0a21a',p:'#2a2a33',h:'#3b2a1f'})]]};
+SP.r_skier={pitch:1.02,m:[[trav({hair:'cap'}),P(2,{o:'#c0392b',p:'#2a3350',h:'#c9a45a',pack:1})]]};
+SP.r_greeter={pitch:1.18,m:[[trav({hair:'long'}),P(4,{o:'#2d6a6a',p:'#2a2a33',h:'#241a14'})]]};
+SP.r_local={pitch:.82,m:[[trav({hair:'cap'}),P(3,{o:'#4a5a3a',p:'#3a3a48',h:'#d9d4c6'})]]};
+SP.r_info={pitch:1.08,m:[[trav({hair:'long'}),P(4,{o:'#1f5a8a',p:'#2a2a33',h:'#a07a4a'})]]};
+SP.r_wifi={pitch:.93,m:[[trav({}),P(1,{o:'#7a3b8a',p:'#44464f',h:'#14141a',pack:1})]]};
+SP.r_stop={pitch:1.05,m:[[trav({hair:'curly'}),P(3,{o:'#d06a2a',p:'#2a2a33',h:'#5a3a24'})]]};
+SP.r_driver={pitch:.9,m:[[trav({hair:'cap'}),P(5,{o:'#1b2a55',p:'#14141a',h:'#241a14'})]]};
+"""
+# 背景: 夜の群青・雪の青白・灯りの橙。オーロラの緑は 到着ロビーの実画(art.js の rvnlobby)にだけ出る。
+# 看板の文言は確認済みのものだけ(ロビー: ROVANIEMI / Arrivals / Welcome to Rovaniemi Airport、Wi-Fi名、バスの 8 と AIRPORT EXPRESS)。それ以外の文字は置かない。
+BGR = r"""
+function rSnow(y0,h){for(var i=0;i<28;i++){var x=(i*37+Math.floor(t*(3+i%4)))%VW,y=y0+((i*23+Math.floor(t*(9+i%3*4)))%h);R(i%5?'#e8f0fa':'#fff',x,y,1,1)}}
+function rRoof(){R('#4a3626',0,0,VW,8);R('#33241a',0,8,VW,2);for(var x=10;x<VW;x+=46)R('#ffd98a',x,4,5,2)}
+function rFloor(){R('#8a867e',0,98,VW,52);for(var x=0;x<VW;x+=32)R('#76726a',x,98,1,52);for(var y=112;y<150;y+=14)R('#76726a',0,y,VW,1)}
+BGS.rimmig=function(){R('#cdd3de',0,10,VW,88);rRoof();rFloor();
+ for(var i=0;i<3;i++){var x=22+i*100;R('#d9dde6',x,40,80,48);R('#8fb0c8',x+2,42,76,32);R('#5a4a3a',x,74,80,24);R('#c9a03a',x,74,80,2);R(Math.floor(t*2+i)%2?'#3ad36a':'#2a8a4a',x+34,34,10,4)}
+ R('#2f4a7a',0,124,VW,2);R('#2f4a7a',0,136,VW,1)};
+BGS.rbag=function(){R('#c7cfda',0,10,VW,88);rRoof();rFloor();
+ R('#1c2a44',20,24,86,34);R('#3a4a6a',20,24,86,2);R('#e8f0fa',34,34,58,2);R('#e8f0fa',34,42,40,2);R('#e8f0fa',34,50,50,2);
+ R('#2a2a33',0,76,VW,22);R('#4a4a56',0,76,VW,3);var cl=['#2f5bb0','#c0392b','#2f5bb0','#2d8f8a','#d9a441'];
+ for(var i=0;i<5;i++){var x=((t*22+i*72)%390)-30;R(cl[i],x,64,26,14);R('#3a3a46',x+10,60,6,4);if(i===0||i===2){R('#f2c200',x+11,58,4,3)}}
+ R('#a0a0aa',0,96,VW,3);R('#e8eef6',200,100,28,10);R('#b7c5d8',200,108,28,3)};
+BGS.rlobby=function(){R('#0b1a3a',0,10,VW,50);for(var i=0;i<18;i++)R('#e8f0fa',(i*53)%VW,12+(i*29)%40,1,1);
+ R('#1d6a5a',20,24,280,8);R('#2f8a6a',60,30,200,5);R('#3a3a7a',20,20,280,4);R('#cdd8e8',0,52,VW,10);rRoof();
+ for(var x=30;x<VW;x+=40){R('#1a3a3a',x,44,6,12);R('#1a3a3a',x+1,40,4,6);R('#eaf2fa',x+1,40,4,1)}
+ R('#6a4a2a',0,62,VW,8);T('ROVANIEMI',200,66,6,'#f4e8c8');R('#143a30',22,64,50,6);T('Arrivals',50,67,5,'#fff');
+ rFloor();for(var k=0;k<5;k++)R(k%2?'#d7ecf2':'#b8d4dc',112+k*12,100+k*10,4,10);R('#e8f0fa',96,98,8,52);
+ R('#143a30',226,84,56,34);R('#9a2a2a',226,84,56,4);T('Welcome to',254,95,4.5,'#fff');T('Rovaniemi',254,103,5.5,'#fff');T('Airport',254,111,5.5,'#fff')};
+BGS.rwifi=function(){R('#d2d8e2',0,10,VW,88);rRoof();rFloor();
+ R('#143a5a',60,22,200,40);R('#e8f0fa',60,22,200,2);T('Rovaniemi Airport',160,34,8,'#fff');T('Free Wi-Fi',160,48,11,'#ffd36a');
+ for(var a=0;a<3;a++){R('#ffd36a',150+a*4-8,70-a*6,16-a*8+8,2)}
+ R('#e8e4d8',30,72,60,26);R('#9a947f',30,72,60,3);R('#14141a',52,62,16,10);R('#2a6a9a',54,64,12,6);
+ R('#8a6a3a',230,84,60,8);R('#8a6a3a',236,92,4,8);R('#8a6a3a',280,92,4,8)};
+BGS.rbus=function(){grad(0,70,'#06122e','#1a3358',10);for(var i=0;i<22;i++)R('#e8f0fa',(i*47)%VW,(i*31)%56,1,1);
+ R('#2a4a6a',0,56,VW,14);for(var x=6;x<VW;x+=22){R('#17343a',x,48,6,14);R('#17343a',x+1,43,4,6);R('#eaf2fa',x+1,43,4,1)}
+ R('#d8e4f2',0,70,VW,80);R('#c3d2e6',0,92,VW,2);R('#9ab0cc',0,118,VW,1);
+ R('#3a4a5a',20,36,4,50);R('#e8f0fa',8,26,28,20);R('#143a5a',10,28,24,16);T('8',22,37,16,'#ffd36a');
+ R('#f2c200',120,52,150,34);R('#1b2a55',120,74,150,12);R('#9fd0f0',130,58,22,12);R('#9fd0f0',158,58,22,12);R('#9fd0f0',186,58,22,12);R('#9fd0f0',214,58,22,12);
+ T('AIRPORT EXPRESS',195,80,6.5,'#fff');R('#14141a',140,84,14,10);R('#14141a',236,84,14,10);R('#ffe9a8',264,66,6,6);
+ R('#ffe9a8',20,86,2,2);rSnow(0,98)};
+"""
+MAIN_RVN = r"""
+/* ===== 世界一周編: ロヴァニエミ(到着まわり。タスク065) ===== */
+var TOURDLG=%(dlg)s;
+for(var _k in TOURDLG)DLG[_k]=TOURDLG[_k];
+%(sp)s
+%(bg)s
+%(world)s
+%(voice)s
+%(ev)s
+var PLACES_RARR=%(arr)s;
+PLACES_AIR=PLACES_RARR;   /* 世界マップのクリアの印: 到着の場所を全部(各1つ以上)あそんだら。滞在・出発はまだ作っていない(第2弾以降) */
+PLACES_RARR.forEach(function(p){PBY[p.id]=p});
+var TOUR_IDS=%(ids)s;
+MODES={arr:{p:PLACES_RARR,b:'🛬 到着',h:'ロヴァニエミに到着<small>ロヴァニエミ空港</small>',snd:'rvn'}};
+worldAt('rovaniemi');
 """
 
 # ---------- 窓口の地図(線を引く): 多角形から 92x16 の陸地ビットマップを作る ----------
@@ -821,6 +895,38 @@ os.makedirs(os.path.join(ROOT, 'tour', 'doha'), exist_ok=True)
 open(os.path.join(ROOT, 'tour', 'doha', 'index.html'), 'w', encoding='utf-8').write(o)
 print('doha built', len(o), 'bytes; dialogues', len(dd), 'words', sum(len(v['words']) for v in dd.values()))
 print('missing IPA:', missing)
+
+# ---------- ロヴァニエミ(tour/rovaniemi/index.html。タスク065) ----------
+dr = sub('rvn_')
+main = MAIN_RVN % dict(dlg=J(dr), sp=SPR, bg=BGR, world=WORLDJS, voice=VOICEJS, ev=EVJS, arr=J(RARR), ids=J(RVN_IDS))
+main += _rd('check.js').replace('__OTHER_HREF__', '../doha/?check=1').replace('__OTHER_LABEL__', 'ドーハ')
+main += art_js('../assets/art/', "function artIdFor(S){var v=String(S&&S.vid||'');return /^rvn_lobby[12]$/.test(v)?'rvnlobby':null}")   # 到着ロビーだけ実画(rovaniemi-arrivals-v1.png＋オーロラ strip)
+o = ev_patches(common(src, 'Europe/Helsinki'))
+for _a, _b in SHARED: o = rep(o, _a, _b)
+o = rep(o, " if(!G.camp)addHelp(T)}", " if(!G.camp&&!G.scene.d.nohelp)addHelp(T)}")
+o = rep(o, '<title>カンペ先生 ドバイ編</title>', '<title>空港えいご物語 世界一周編 ロヴァニエミ</title>')
+o = rep(o, SNOTE_OLD, SNOTE_NEW)
+o = rep(o, ".cue .heard.live{color:#8a7b55}", ".cue .heard.live{color:#8a7b55}\n" + VOICECSS)
+o = rep(o, "'../world/?map=1'", "'../../world/?map=1'", 2)
+o = rep(o, "worldMark('dubai')", "worldMark('rovaniemi')")   # 到着の場所を全部あそんだら印(PLACES_AIR=PLACES_RARR)
+o = rep(o, "Snd.go(MODE==='city'?'city':'map')", "Snd.go(MODES[MODE].snd)")
+o = rep(o, "if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}showMap()}",
+        "if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}showMap();/*RVN_END*/}")
+# 音: 基本は静か(低い風だけ)。やわらかい弦(カンテレ風)を、ときどき1音。シャカシャカした高い音は使わない
+o = rep(o, KBASE, KBASE +
+        "K.rvn={bpm:function(){return 54},amb:function(){loopNoise(220,.5,.010,.06,.005,'lowpass')},"
+        "st:function(s,t,e){var KR=[60,62,65,67,69,67,65,62];if(s%8===0)pluck(hz(KR[(s>>3)%8]),t,e*4,ngt?.05:.07);"
+        "if(s%32===0)tone(hz(36),t,e*28,'sine',.05,.6)}};")
+o = rep(o, REC, record('ロヴァニエミの'))
+o = trip_patches(o, 'rovaniemi')
+o = rep(o, "showMap();/*RVN_END*/}", "showMap()})}")
+o = rep(o, "g.fillStyle='#143fb0';g.fillRect(0,0,5,ch);g.fillRect(cw-5,0,5,ch)", "g.fillStyle='#2a5a8a';g.fillRect(0,0,5,ch);g.fillRect(cw-5,0,5,ch)")
+o = rep(o, "setMode('arr');\nvar phoQ", main + "\nsetMode('arr');if(!/[?&]pho=/.test(location.search)&&!window.__CHK)TRIP.enter(function(){},'rovaniemi');\nvar phoQ")
+o = rep(o, '<head>', '<head><script>' + _rd('check_shim.js') + '</script>')   # タスク056
+os.makedirs(os.path.join(ROOT, 'tour', 'rovaniemi'), exist_ok=True)
+open(os.path.join(ROOT, 'tour', 'rovaniemi', 'index.html'), 'w', encoding='utf-8').write(o)
+print('rovaniemi built', len(o), 'bytes; dialogues', len(dr), 'words', sum(len(v['words']) for v in dr.values()))
+print('missing IPA (all):', missing)
 
 # ---------- 終わりの場面(tour/ending/index.html): 旅の一か月後のリビングで、アルバムの白いページを埋める ----------
 import window_data

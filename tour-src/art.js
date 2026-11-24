@@ -154,6 +154,12 @@ ART.nsafari={bg:'nairobi-safari-v1.png',mode:'wide',dep:{shF:1,lulu:{n:'hall-lul
 ART.nmarket={bg:'nairobi-market-v1.png',mode:'wide',dep:{shF:'rgba(3,10,21,.4)',lulu:{n:'hall-lulu-back',x:716,by:884},king:{n:'hall-king-back',x:800,by:884},
  npcS:{market_vendor:{n:'t-maasai-front',x:900,by:596,sw:79}},
  fx:[{k:'strip',img:'nairobi-market-cloths-strip.png',x:704,y:326,fw:112,fh:168,n:2,every:1.4}]}};
+/* ロヴァニエミの到着ロビー(タスク065): 人なしの背景(1536×960。天窓の光が床に描く北極圏ラインが主役)に、オーロラの別素材(4コマ。1コマ1376×172)を左上(80,128)=窓帯の空の部分に重ねる。
+   ふたりは後ろ姿で足もと y=884(ルルが左 x=700・キングが右 x=836。ラインの手前。配置の正本は同梱の rovaniemi-arrivals-preview.png)。
+   話し相手(rvn_lobby1/2)は、ふたりの右(トロリーとウェルカム看板のあいだの床)に立つ。キャンバスの上から2番目の重ね(背景→オーロラ→人)。 */
+ART.rvnlobby={bg:'rovaniemi-arrivals-v1.png',mode:'wide',strips:[{img:'rovaniemi-aurora-strip.png',x:80,y:128,n:4,fw:1376,fh:172,step:1.2}],
+ dep:{shF:'rgba(3,10,21,.4)',lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},
+  npcS:{r_greeter:{n:'t-backpacker-front',x:1010,by:890,sw:79},r_local:{n:'w-front-man-suit-1',x:1010,by:890,sw:70}}}};
 /*ARTSEL*/
 function artImg(n){var i=ARTI[n];if(!i){i=ARTI[n]=new Image();i.onerror=function(){i.bad=1};i.src=ARTBASE+n}return i}
 function artShow(on){if(ARTSHOW===on)return;ARTSHOW=on;cv.hidden=!!on;cvA.hidden=!on}
@@ -458,10 +464,10 @@ var AMB={
  sea:{src:'',vol:.10,note:'海ぞい: 波'}};
 /* 場面の音の名前(場所の snd) → カテゴリ */
 var AMBSND={info:'airport',hall:'airport',tdesk:'airport',map:'airport',nbo:'airport',doh:'airport',cafe:'cafe',costa:'cafe',mall:'cafe',s34:'cafe',
- ahlan:'lounge',hotel:'hotel',room:'hotel',home:'hotel',sage:'hotel',vault:'hotel',mosque:'hotel',atop:'cabin',souk:'street',city:'street',dohc:'street',
+ rvn:'airport',ahlan:'lounge',hotel:'hotel',room:'hotel',home:'hotel',sage:'hotel',vault:'hotel',mosque:'hotel',atop:'cabin',souk:'street',city:'street',dohc:'street',
  beach:'sea',marina:'sea',fountain:'outdoor',safari:'outdoor'};
 /* 背景の名前 → カテゴリ(場所の音と食いちがうとき、こちらが先) */
-var AMBBG={taxi:'outdoor',dtaxi:'outdoor',cabinQ:'cabin',cabin:'cabin',chotel:'hotel',cbreak:'hotel'};
+var AMBBG={taxi:'outdoor',dtaxi:'outdoor',rbus:'outdoor',cabinQ:'cabin',cabin:'cabin',chotel:'hotel',cbreak:'hotel'};
 var ambEl=null,ambCat=null,ambDuck=false;
 function ambOn(){try{return localStorage.getItem('kd_snd')!=='off'}catch(e){return true}}
 function ambApply(){var c=ambCat&&AMB[ambCat];
