@@ -2,7 +2,7 @@
    宣言文ソングの組み込み(タスク049)。ナイロビ(tour/)だけに入る。art.js のあと・エンジンと同じ場所に置かれる。
    - 掛け声チャント版(song-chant.mp3 / 51秒)=タイトル(スタート)画面の曲(タスク050で賢者の広間から移した)。再生は chant.js の1か所だけ(world/ のタイトルで開始・ループ、
      tour/ では続きから)。ここ(song.js)はテーマ曲の再生と、チャントとの背景音の受け渡し・マイク中の一時停止の連動・最初の会話が始まったらチャントを止める呼び出しだけを持つ。
-   - メインテーマ(song-theme.mp3 / 1分15秒)=ホテルのロビーの「聴く」イベント(場所 hsong)専用。ほかの場面・タイトル・メニューでは流さない。
+   - メインテーマ(song-theme.mp3 / 1分15秒)=ホテルの「聴く」イベント(場所 hsong のロビーの案内で「ショータイム」を選ぶと、別場面のプールサイドで歌う。タスク066)専用。ほかの場面・タイトル・メニューでは流さない。
      発音の課題・採点・単語バトルはない。曲の途中でも出口ボタンでマップに戻れ、戻ったら止まる。
    - 再生はユーザーの操作(GOボタン・つぎへ)のあとだけ始める(自動再生の制限)。鳴らせなかったときは、曲なしで先へ進める。
    - 保存データ(kanpe-tour-save-v1 など)には何も書かない。再生の状態はこのファイルの変数だけ。
@@ -15,6 +15,7 @@ var ROOMSC=/*ROOMDATA*/null;   /* ホテルの部屋(タスク051) */
 var SONG={el:null,key:null,ac:null,gn:null,want:null};
 SP.singer={pitch:1.1,m:[[HJ,P(2,{x:'#2d8f8a',o:'#e0b040'})]]};   /* 絵が読めなかったときの、いつものドット */
 BGS.nlobby=BGS.lobby;   /* 背景の絵が読めなかったときの、いつものドットのロビー */
+BGS.npool=BGS.lobby;    /* プールサイド(タスク066)の背景が読めなかったときも、いつものドットのロビー */
 BGS.nsong=BGS.lobby;    /* 歌場面版の背景(タスク060)が読めなかったときも、いつものドットのロビー */
 /* 曲が鳴っているあいだは、場面の背景の音楽(Snd.go)を止めて重ならないようにする。曲が止まったら、いまの場面の音楽に戻す */
 var SONGSNDGO=Snd.go;
@@ -55,6 +56,16 @@ function songWatch(){
 window.__songWatch=songWatch;setInterval(songWatch,250);
 /* ---- チャントは、最初の会話が始まった(「GO！」でたがいの会話に入る)ときに止める。そのあとは再開しない。始めるのは chant.js だけ(タスク050) ---- */
 window.__songGo=function(S){CHANT.stop()};
+/* ---- 曲の拍(タスク066): テーマ曲が鳴っているあいだ、曲の再生位置(currentTime)までの拍の数を返す(鳴っていなければ -1)。プールサイドの照明・歌手の絵の切りかえが使う ---- */
+function songBeatN(){
+ if(!songPlaying())return -1;var B=SONGSC&&SONGSC.beats;if(!B||!B.length)return -1;
+ var ct=SONG.el.currentTime,lo=0,hi=B.length;while(lo<hi){var m=(lo+hi)>>1;if(B[m]<=ct)lo=m+1;else hi=m}return lo}
+/* ---- ホテルのロビー・通常版(タスク066): 受付のスタッフの案内の3択。ショータイム→プールサイドの歌場面。プール・Balcony Bar→スタッフの一言(英文だけ・読み上げ)を出して、選択にもどる ---- */
+window.__lobbyPick=function(vid){
+ var pl=G.scene&&G.scene.pl;if(!pl||pl.id!=='hsong'||!SONGSC||!SONGSC.lobby)return false;
+ if(vid==='nbo_show'){songListen(pl);return true}
+ var en=SONGSC.lobby[vid];if(!en)return false;
+ hubMenu('main');stopSay();speaker=null;msgText.textContent=en;say(en,.9,1);return true};
 /* ---- ホテルのロビーの「聴く」イベント ---- */
 function songListen(pl){
  var d=SONGSC;

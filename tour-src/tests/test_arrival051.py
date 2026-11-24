@@ -217,7 +217,7 @@ with sync_playwright() as pw:
     dh = open(os.path.join(ROOT, 'tour/doha/index.html'), encoding='utf-8').read()
     chk("ドーハ側の artIdFor は ホテルのフロント(doh_city_h1)・070 のコルニーシュ4場面(dcorn)・064 の入国審査(dimmig)だけ。SIMの店などナイロビの絵は入らない", "if(/^doh_/.test(v)&&g==='dimmig')return v==='doh_immig2'?'dimmig2':'dimmig';return v==='doh_city_h1'?'hotel':(v==='doh_city_c1'||v==='doh_city_c2'||v==='doh_city_c3'||v==='doh_ev_j_ask')?'dcorn':null}" in dh and 'simshop' not in dh.split("function artIdFor(S){")[1][:420])
     th = open(os.path.join(ROOT, 'tour/index.html'), encoding='utf-8').read()
-    chk("ナイロビ側の artIdFor に sim→simshop・nroom→nroom が足された(nlobby・taxi などは残る)", "g==='nroom'?'nroom':g==='sim'?'simshop'" in th and "g==='nlobby'?'nlobby'" in th and "(g==='taxi'?'nairobi'" in th)
+    chk("ナイロビ側の artIdFor に sim→simshop・nroom→nroom が足された(nlobby・taxi などは残る)", "g==='nroom'?'nroom':g==='sim'?'simshop'" in th and "(h==='nlobby'||g==='nlobby')?'nlobby'" in th and "(g==='taxi'?'nairobi'" in th)
     chk('049 の歌手の場面データ(SONGSC)・チャントは変わらない(nbo_song・nlobby が残る)', "'id': 'nbo_song'" in open(os.path.join(ROOT, 'tour-src/song_data.py'), encoding='utf-8').read().replace('"', "'") and 'nlobby:{bg:' in th)
     br.close()
 print('\n失敗:', bad if bad else 'なし'); sys.exit(1 if bad else 0)

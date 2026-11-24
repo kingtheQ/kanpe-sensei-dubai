@@ -76,8 +76,9 @@ ARR = [
  place('bag', '手荷物受け取り', 'hall', 70, 36, '🧳', ['バゲージクレーム', 'スーツケース・レジ袋'], ['nbo_bag1', 'nbo_bag2']),
  place('sim', 'Safaricom SIM', 'info', 24, 58, '📱', ['Safaricom', 'SIMの登録とデータ'], ['nbo_sim1', 'nbo_sim2']),
  place('taxi', 'タクシー・Uber', 'hall', 70, 82, '🚕', ['タクシー乗り場とライドシェア', '市内へ・料金は架空'], ['nbo_taxi1', 'nbo_taxi2']),
-# ホテルのロビーの歌手(タスク049): 聴くだけの場面。v は空 = 到着の完了条件・場面の数・保存の記録(save.seen)に入らない(任意)。到着の場所を上から順に開く決まりで、タクシーのあとに開く
- place('hsong', 'ホテルのロビー', 'hotel', 24, 84, '🏨', ['Villa Rosa Kempinski', '夜のロビーで、歌を聴く'], [], listen='nbo_song'),
+# ホテルのロビー(タスク066: 通常版=スタッフの案内の3択 hub。ショータイムを選ぶとプールサイドの歌場面 nbo_song へ。049/060では歌場面そのものだった): 聴くだけの場面。v は空 = 到着の完了条件・場面の数・保存の記録(save.seen)に入らない(任意)。到着の場所を上から順に開く決まりで、タクシーのあとに開く
+ place('hsong', 'ホテルのロビー', 'hotel', 24, 84, '🏨', ['Villa Rosa Kempinski', 'スタッフの案内で、ショータイムへ'], [],
+       hub=True, hubBg='nlobby', hubHero='blue', hubEn=song_data.LOBBY_HUB['en'], hubMsg=song_data.LOBBY_HUB['msg'], menu=song_data.LOBBY_HUB['menu']),
 # ホテルの部屋(タスク051): 到着の夜、部屋で休む場面。hsong と同じホテル。v は空 = 到着の完了条件・場面の数・保存の記録(save.seen)に入らない(任意・休憩)。hsong の次に開く(下の lockedPlace の補正)
  place('hroom', 'ホテルの部屋', 'hotel', 48, 88, '🛏️', ['Villa Rosa Kempinski', '部屋で休む'], [], rest='nbo_room')]
 # ナイロビの滞在(観光。タスク058): サファリ・マサイマーケット。滞在3日の3日目(市場)・4日目(サファリ)。trip.js の ROWS / GROUPS で日に置く。タブは「滞在」。
@@ -727,7 +728,7 @@ FULLBLEED_CSS = (
  "#scene{aspect-ratio:320/150;image-rendering:pixelated}#sceneA{aspect-ratio:1536/960}\n"
  "#sceneView .stage #exitBtn,#sceneView .stage #tip,#sceneView .stage .setbtn{top:calc(6px + env(safe-area-inset-top,0px))}")
 def song_js():
-    sc = dict(song_data.SONG_SCENE); sc['listen'] = 1
+    sc = dict(song_data.SONG_SCENE); sc['listen'] = 1; sc['lobby'] = song_data.LOBBY_HUB['lines']
     rm = dict(song_data.ROOM_SCENE); rm['rest'] = 1   # ホテルの部屋(タスク051)
     return _rd('song.js').replace('/*SONGDATA*/null', J(sc)).replace('/*ROOMDATA*/null', J(rm))
 def pa_js():   # CAアナウンス・イベント(タスク048): ナイロビ(tour/)だけ。声は端末の中だけ(外へ送るコードなし)
@@ -739,7 +740,7 @@ def art_js(base, sel): return _rd('art.js').replace("/*ARTBASE*/", base).replace
 dn = dict(sub('sage_')); dn.update(sub('ticket_')); dn.update(sub('win_')); dn.update(sub('nbo_')); dn.update(sub('hnd_'))
 main = MAIN % dict(dlg=J(dn), sp=SPJS + SPW, bg=BGJS + BGN, world=WORLDJS, voice=VOICEJS, diag=DIAGJS, ev=EVJS, win=WINJS, sage=J(SAGE), arr=J(ARR), stay=J(STAY), air=J(AIR), dep=J(NDEP), hdep=J(HDEP), hret=J(HRET), ids=J(TOUR_IDS))
 main += _rd('check.js').replace('__OTHER_HREF__', 'doha/?check=1').replace('__OTHER_LABEL__', 'ドーハ')
-main += art_js('assets/art/', "function artIdFor(S){var g=S&&S.d&&S.d.bg,h=S&&S.hub&&S.ctx&&S.ctx.bg,v=String(S&&S.vid||''),k=/2$/.test(v)?'2':'1';if(/^nbo_/.test(v)){if(g==='checkinQ')return'ncheckin'+k;if(g==='security')return'nsec'+k;if(g==='duty')return'nduty'+k;if(g==='lounge')return'nlounge'+k;if(g==='gate')return'ngate'+k}if(/^hnd_/.test(v)&&g==='checkinT')return'hcheckin_st';if(/^doh_/.test(v)&&g==='dimmig')return v==='doh_immig2'?'dimmig2':'dimmig';if(/^hnd_ev_ca_/.test(v))return 'cabinseat';if(/^hnd_ev_meal_/.test(v))return 'cabinmeal';return g==='nsong'?'nsong':g==='safariK'?'nsafari':g==='marketK'?'nmarket':g==='nlobby'?'nlobby':g==='nroom'?'nroom':g==='sim'?'simshop':(g==='sage'||h==='sage')?'sage':((g==='tdesk'||g==='rtmap')?'ticket':(g==='taxi'?'nairobi':(g==='immig'?'immig':(g==='baggage'?'bagclaim':(g==='hgateOW'?'hgate_ow':(g==='hgateST'?'hgate_st':null))))))}")   # ナイロビ出発まわり(タスク054: bg が checkinQ/security/duty/lounge/gate で vid が nbo_ のとき。羽田・ドーハの同名の bg は対象外。末尾の 2 で2つ目の配置)・羽田の出発ゲート(タスク043。券で絵が出し分け)・賢者の広間(sage_1〜3の会話・賢者のメニュー)・チケット売り場(窓口の全場面 ticket_*・win_*。bg が tdesk か rtmap。タスク041)・ナイロビ到着(タクシー乗り場)・入国審査・手荷物受け取り(bg が baggage。ナイロビだけ。タスク045)
+main += art_js('assets/art/', "function artIdFor(S){var g=S&&S.d&&S.d.bg,h=S&&S.hub&&S.ctx&&S.ctx.bg,v=String(S&&S.vid||''),k=/2$/.test(v)?'2':'1';if(/^nbo_/.test(v)){if(g==='checkinQ')return'ncheckin'+k;if(g==='security')return'nsec'+k;if(g==='duty')return'nduty'+k;if(g==='lounge')return'nlounge'+k;if(g==='gate')return'ngate'+k}if(/^hnd_/.test(v)&&g==='checkinT')return'hcheckin_st';if(/^doh_/.test(v)&&g==='dimmig')return v==='doh_immig2'?'dimmig2':'dimmig';if(/^hnd_ev_ca_/.test(v))return 'cabinseat';if(/^hnd_ev_meal_/.test(v))return 'cabinmeal';return g==='npool'?'npool':(h==='nlobby'||g==='nlobby')?'nlobby':g==='nsong'?'nsong':g==='safariK'?'nsafari':g==='marketK'?'nmarket':g==='nroom'?'nroom':g==='sim'?'simshop':(g==='sage'||h==='sage')?'sage':((g==='tdesk'||g==='rtmap')?'ticket':(g==='taxi'?'nairobi':(g==='immig'?'immig':(g==='baggage'?'bagclaim':(g==='hgateOW'?'hgate_ow':(g==='hgateST'?'hgate_st':null))))))}")   # ナイロビ出発まわり(タスク054: bg が checkinQ/security/duty/lounge/gate で vid が nbo_ のとき。羽田・ドーハの同名の bg は対象外。末尾の 2 で2つ目の配置)・羽田の出発ゲート(タスク043。券で絵が出し分け)・賢者の広間(sage_1〜3の会話・賢者のメニュー)・チケット売り場(窓口の全場面 ticket_*・win_*。bg が tdesk か rtmap。タスク041)・ナイロビ到着(タクシー乗り場)・入国審査・手荷物受け取り(bg が baggage。ナイロビだけ。タスク045)
 main += chant_js('assets/song/') + song_js() + pa_js()   # 宣言文ソング(タスク049): テーマ(ホテルのロビーの歌手イベント)。チャントはタイトルの曲(タスク050)で再生は chant.js だけ。ナイロビ(tour/)だけ
 o = ev_patches(common(src, 'Africa/Nairobi'))
 o = rep(o, "(S.d.inter||[]).forEach(function(n){if(n.set&&n.set.gold)save.gold=1});storeSave();worldSync();",
@@ -817,6 +818,7 @@ o = rep(o, "#map.dense .node .dots{bottom:-12px}", "#map.dense .node .dots{top:8
 o_pre = o   # 終わりの場面の土台(エンジンの部品はナイロビと同じ)
 # ---- 宣言文ソング(タスク049): ナイロビ(tour/)だけ。終わりの場面・ドーハには入れない ----
 # 場所に入る: ホテルのロビー(listen)は「聴くだけ」の場面へ(出来事の割りこみ・発音の流れは通らない)
+o = rep(o, "function runStory(vid){", "function runStory(vid){if(window.__lobbyPick&&window.__lobbyPick(vid))return;")   # タスク066: ロビーの案内の3択(ショータイム・プール・Balcony Bar)
 o = rep(o, "function enterPlace(id){var pl=PBY[id];if(evGate(", "function enterPlace(id){var pl=PBY[id];if(pl.listen){songListen(pl);return}if(pl.rest){roomRest(pl);return}if(evGate(")
 # 場所を上から順に開く決まり: 場面の数が空の場所(ホテルのロビー・ホテルの部屋。任意)は「遊んだか」の数に入れず、飛ばして次の場所を開く(タスク051)
 o = rep(o, "if(!PLACES[k].v.some(function(v){return save.seen[v]>0}))return true}return false}", "if(PLACES[k].v.length&&!PLACES[k].v.some(function(v){return save.seen[v]>0}))return true}return false}")

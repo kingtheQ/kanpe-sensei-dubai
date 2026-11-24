@@ -62,7 +62,7 @@ with sync_playwright() as pw:
     ids = pg.evaluate("__T.PLACES_NARR.map(function(p){return p.id})")
     chk('到着タブのタクシーのあとにホテルのロビー hsong がある(タスク051でそのあとにホテルの部屋 hroom が増えた)', ids == ['immig', 'bag', 'sim', 'taxi', 'hsong', 'hroom'], ids)
     pl = pg.evaluate("(function(){var p=__T.PBY.hsong;return [p.v.length,p.listen,p.name,p.tip[0]]})()")
-    chk('場面の数は空(完了条件・場面の数に入らない)・実名のホテル名', pl[0] == 0 and pl[1] == 'nbo_song' and pl[3] == 'Villa Rosa Kempinski', pl)
+    chk('場面の数は空(完了条件・場面の数に入らない)・実名のホテル名', pl[0] == 0 and pl[1] is None and pl[3] == 'Villa Rosa Kempinski', pl)
     # 順に開く: 入国審査を遊ぶ前は鍵がかかっている(到着のあと)
     pg.evaluate("(function(){var T=__T;T.save.ticket='ow';T.setMode('arr');T.showMap()})()"); pg.wait_for_timeout(400)
     lk = pg.evaluate("document.querySelector('.node[data-id=hsong]').classList.contains('lock')")
@@ -74,7 +74,7 @@ with sync_playwright() as pw:
     chk('場面の数(TOTALV)は変わらない(ロビーは数に入らない)', pg.evaluate("__T.TOTALV()") == tv0 == 8, [tv0])
     chk('ロビーに「済」の印は出ない(任意の場所)', pg.evaluate("document.querySelector('.node[data-id=hsong]').classList.contains('done')") is False)
     seen0 = pg.evaluate("JSON.stringify(__T.save.seen)")
-    pg.click('.node[data-id=hsong]'); pg.wait_for_timeout(1800)
+    pg.click('.node[data-id=hsong]'); pg.wait_for_timeout(1500); pg.click('button.dq:nth-child(1)'); pg.wait_for_timeout(1800)   # 066: ロビーの案内の1つ目=ショータイム
     sc = pg.evaluate("[__T.G.view,__T.G.phase,__T.G.scene.d.id,!!document.querySelector('.cue'),__T.G.scene.turns.length]")
     chk('歌手の場面に入る(カンペ・会話の型ではない)', sc[0] == 'scene' and sc[2] == 'nbo_song' and sc[3] is False and sc[4] == 0, sc)
     chk('入ってすぐは曲は鳴らない(操作のあとだけ)', plays(pg, 'song-theme') == [])
@@ -97,7 +97,7 @@ with sync_playwright() as pw:
     chk('場面を離れたらテーマが止まる', pg.evaluate("__T.SONG.el") is None and len(pauses(pg, 'song-theme')) >= 1, pauses(pg, 'song-theme'))
     chk('歌手の場面は保存の記録(save.seen)を変えない', pg.evaluate("JSON.stringify(__T.save.seen)") == seen0)
     # もう一度入って、最後まで聴く(終わり近くへ飛ばす)→歌手・ルル・キングのやりとり→マップ
-    pg.click('.node[data-id=hsong]'); pg.wait_for_timeout(1500); pg.click('#songNotice'); pg.wait_for_timeout(400); pg.click('button.btn.go'); pg.wait_for_timeout(1200)
+    pg.click('.node[data-id=hsong]'); pg.wait_for_timeout(1500); pg.click('button.dq:nth-child(1)'); pg.wait_for_timeout(1500); pg.click('#songNotice'); pg.wait_for_timeout(400); pg.click('button.btn.go'); pg.wait_for_timeout(1200)
     chk('もう一度入ると、また最初から聴ける(任意・何度でも)', len(plays(pg, 'song-theme')) == 2)
     pg.evaluate("(function(){var e=__T.SONG.el;e.playbackRate=16})()"); pg.wait_for_timeout(100)   # 16倍速で自然に最後まで鳴らす(試験用の簡易サーバーは途中からの読み込みに対応しないため)
     def waitmsg(k, ms=9000):
@@ -120,7 +120,7 @@ with sync_playwright() as pw:
     pg = newpage(br, INIT + "localStorage.setItem('kd_snd','off');")
     pg.goto(base + '/tour/index.html'); pg.wait_for_timeout(1200); pg.mouse.click(215, 450); pg.wait_for_timeout(800)
     pg.evaluate("(function(){var T=__T;T.save.ticket='ow';['nbo_immig1','nbo_bag1','nbo_sim1','nbo_taxi1'].forEach(function(v){T.save.seen[v]=1});T.setMode('arr');T.showMap()})()"); pg.wait_for_timeout(400)
-    pg.click('.node[data-id=hsong]'); pg.wait_for_timeout(1500); pg.click('#songNotice'); pg.wait_for_timeout(400); pg.click('button.btn.go'); pg.wait_for_timeout(800)
+    pg.click('.node[data-id=hsong]'); pg.wait_for_timeout(1500); pg.click('button.dq:nth-child(1)'); pg.wait_for_timeout(1500); pg.click('#songNotice'); pg.wait_for_timeout(400); pg.click('button.btn.go'); pg.wait_for_timeout(800)
     chk('音オフのときは曲を鳴らさない', plays(pg, 'song-theme') == [])
     chk('音オフでも「つぎへ」で先へ進める(曲なしで詰まらない)', pg.evaluate("!!document.querySelector('.songnext')") is True)
     pg.click('.songnext'); pg.wait_for_timeout(600)
