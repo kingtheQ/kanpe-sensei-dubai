@@ -213,6 +213,14 @@ ART.nmarket={bg:'nairobi-market-v1.png',mode:'wide',dep:{shF:'rgba(3,10,21,.4)',
 ART.rvnlobby={bg:'rovaniemi-arrivals-v1.png',mode:'wide',strips:[{img:'rovaniemi-aurora-strip.png',x:80,y:128,n:4,fw:1376,fh:172,step:1.2}],
  dep:{shF:'rgba(3,10,21,.4)',lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},
   npcS:{r_greeter:{n:'t-backpacker-front',x:1010,by:890,sw:79},r_local:{n:'w-front-man-suit-1',x:1010,by:890,sw:70}}}};
+/* ロヴァニエミの村の広場・郵便局の実画(タスク072): 人なしの背景(1536×960)。ふたりは後ろ姿で足もと y=884(配置の正本は同梱プレビュー rovaniemi-village-preview.png / rovaniemi-postoffice-preview.png)。
+   広場: オーロラ(80,16)・煙(328,136)・雪のきらめき(168,660)。郵便局: 暖炉の炎(132,524)。strip は汎用の仕組み(065 の rvnlobby と同じ)。話し相手は、ふたりの右の床に立つ。画像が読めないときは build.py の BGS.rvil / rpost(コード描画)にもどる。 */
+ART.rvillage={bg:'rovaniemi-village-square-v1.png',mode:'wide',strips:[{img:'rovaniemi-aurora-strip.png',x:80,y:16,n:4,fw:1376,fh:172,step:1.2},{img:'rovaniemi-village-smoke-strip.png',x:328,y:136,n:4,fw:160,fh:120,step:.8},{img:'rovaniemi-village-sparkle-strip.png',x:168,y:660,n:4,fw:1200,fh:240,step:.6}],
+ dep:{shF:'rgba(3,10,21,.4)',lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},
+  npcS:{r_vguide:{n:'o-front-woman-blonde-suit',x:1010,by:890,sw:70},r_vwoman:{n:'t-backpacker-front',x:1010,by:890,sw:79}}}};
+ART.rpostoffice={bg:'rovaniemi-postoffice-v1.png',mode:'wide',strips:[{img:'rovaniemi-postoffice-flames-strip.png',x:132,y:524,n:4,fw:120,fh:148,step:.35}],
+ dep:{shF:'rgba(20,8,2,.35)',lulu:{n:'hall-lulu-back',x:660,by:884},king:{n:'hall-king-back',x:800,by:884},
+  npcS:{r_postclerk:{n:'o-front-woman-blonde-suit',x:980,by:890,sw:70},r_poststand:{n:'w-front-man-suit-1',x:980,by:890,sw:70}}}};
 /* ドーハ・スークの実画(タスク071): 人なしの背景(1536×960。文字は一切なし)。人物は mode:'wide' の前向きのキング・ルル(足もとの位置は同梱プレビューが正本)。相手(c_tea・c_man など)は今までのドット絵のまま、場面の既存の仕組みで出す。
    ルルがいない場面(doh_city_t3)は、人物の出し分け(OUT.lvis)が今までどおり働く。絵の側でルルを常時描くことはしない。スーツケースは、プレビューに無いので出さない(nosuit)。
    dalley=スークの路地(夜): doh_city_t1/t2/t3 と割りこみ doh_ev_h_prayer。ランタンの明滅(1秒)と吊り布の揺れ(0.8秒)は全面ストリップ(1536×960・(0,0))。ルル x=700・キング x=806・足もと y=856

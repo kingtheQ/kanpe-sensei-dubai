@@ -29,7 +29,8 @@ chk('素材 rovaniemi-aurora-strip.png が 5504×172(4コマ×1376×172)', img('
 
 # ---------------- (2) 台本 ----------------
 import data
-SC = [x for x in data.D if x['id'].startswith('rvn_')]
+ARR_IDS = ['rvn_immig1', 'rvn_immig2', 'rvn_bag1', 'rvn_bag2', 'rvn_lobby1', 'rvn_lobby2', 'rvn_wifi1', 'rvn_wifi2', 'rvn_bus1', 'rvn_bus2']
+SC = [x for x in data.D if x['id'] in ARR_IDS]   # 072 で滞在・夜・出発の20本が増えたので、到着の10本だけを対象にする(滞在・夜・出発は test_rovaniemi072.py)
 ids = [x['id'] for x in SC]
 chk('場面は10本(5場所×2)', ids == ['rvn_immig1', 'rvn_immig2', 'rvn_bag1', 'rvn_bag2', 'rvn_lobby1', 'rvn_lobby2', 'rvn_wifi1', 'rvn_wifi2', 'rvn_bus1', 'rvn_bus2'], ids)
 alltext = []
@@ -69,7 +70,7 @@ chk('個人名がない(Mr/Ms/Mrs・名乗り)', not re.search(r'\b(Mr|Ms|Mrs|my
 src = open(os.path.join(ROOT, 'tour-src/build.py'), encoding='utf-8').read()
 bg = src[src.index('BGR = r"""'):src.index('MAIN_RVN = r"""')]
 texts = sorted(set(re.findall(r"T\('([^']+)'", bg)))
-OKT = {'ROVANIEMI', 'Arrivals', 'Welcome to', 'Rovaniemi', 'Airport', 'Rovaniemi Airport', 'Free Wi-Fi', '8', 'AIRPORT EXPRESS'}
+OKT = {'ROVANIEMI', 'Arrivals', 'Welcome to', 'Rovaniemi', 'Airport', 'Rovaniemi Airport', 'Free Wi-Fi', '8', 'AIRPORT EXPRESS', 'Napapiirin Lahja', 'Ahkio'}   # 072 の出発側の確認済みの店名(Finavia 公式)
 chk('背景に描く文字は 確認済みのものだけ(ROVANIEMI / Arrivals / Welcome to Rovaniemi Airport / Wi-Fi名 / 8 / AIRPORT EXPRESS)', set(texts) <= OKT, texts)
 
 # ---------------- ブラウザ ----------------
@@ -117,7 +118,7 @@ with sync_playwright() as pw:
     chk('rvn_arr は5場所×2場面(場所ごとにどちらか1本あそべば終わり)', r['grp'] == [['rvn_immig1', 'rvn_immig2'], ['rvn_bag1', 'rvn_bag2'], ['rvn_lobby1', 'rvn_lobby2'], ['rvn_wifi1', 'rvn_wifi2'], ['rvn_bus1', 'rvn_bus2']])
     chk('場所の並び: 入国審査→手荷物→到着ロビー→無料Wi-Fi→バス乗り場', r['places'] == ['rimmig', 'rbag', 'rlobby', 'rwifi', 'rbus'], r['places'])
     chk('場所の鍵: 入国審査だけ開き、あとは上から順に閉じている', r['lock'] == [False, True, True, True, True], r['lock'])
-    chk('TOUR_IDS は10本(「かいわ n / 10」)', r['tot'] == 10, r['tot'])
+    chk('TOUR_IDS は30本(到着10+滞在・夜・出発20。「かいわ n / 30」)', r['tot'] == 30, r['tot'])
     chk('場所→まとまりの対応(PLACEGRP)が rvn_arr', r['pg'] == 'rvn_arrrvn_arr', r['pg'])
     chk('ページが開く(エラーなし)', pg.evaluate('window.__errs') == [], pg.evaluate('window.__errs'))
     # 1本ずつ遊ぶと、次の場所が開く
