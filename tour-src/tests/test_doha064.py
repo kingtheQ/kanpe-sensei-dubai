@@ -78,6 +78,6 @@ with sync_playwright() as pw:
     ctx = br.new_context(viewport={'width': 430, 'height': 900}); ctx.add_init_script(INIT)
     pg = ctx.new_page(); pg.route('**/tour/index.html', hooked); pg.goto(base + '/tour/index.html'); pg.wait_for_timeout(1000)
     m = pg.evaluate("()=>{var f=__T.artIdFor;return [f({vid:'nbo_immig1',d:{bg:'immig'}}),f({vid:'doh_immig1',d:{bg:'dimmig'}}),f({vid:'doh_immig2',d:{bg:'dimmig'}}),f({vid:'doh_dep_passport',d:{bg:'dimmig'}}),f({vid:'nbo_x',d:{bg:'dimmig'}}),f({vid:'hnd_exit',d:{bg:'immigH'}}),f({vid:'doh_x',d:{bg:'immig'}}),f({vid:'nbo_taxi1',d:{bg:'taxi'}})]}")
-    chk('本編側 artIdFor', m == ['immig', 'dimmig', 'dimmig2', 'dimmig', None, None, 'immig', 'nairobi'], m)
+    chk('本編側 artIdFor', m == ['immig', 'dimmig', 'dimmig2', 'dimmig', None, 'hexit', 'immig', 'nairobi'], m)   # タスク067: 羽田の出国審査(hnd_exit・bg immigH)は実画 hexit に結んだ(ドーハの dimmig・ナイロビの immig は変わらない)
     ctx.close(); br.close()
 print('NG: %d' % len(bad) if bad else 'ALL OK'); sys.exit(1 if bad else 0)
