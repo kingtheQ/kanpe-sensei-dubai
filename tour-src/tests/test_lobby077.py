@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """タスク077 の動作確認(ヘッドレス)。使い方: python3 -I tour-src/tests/test_lobby077.py
 ロビーの3択を行き先につなぐ: (1)プール=実在の場面 nbo_pool1(聞くだけ型・静かなプール npoolq・歌手と観客なし・終わるとマップへ)(2)既存 npool の定義は不変
-(3)バー=枠組みのみ(nbo_bar1・nbar・台本データ・PLACEHOLDER)。素材待ち(BAR_READY=False)の間は一言→メニューに戻り、壊れた場面へは行かない。印を True にすると nbo_bar1 が最後まで動く(枠組みの確認)
+(3)バー=実在の行き先(タスク077b で素材を結んで有効化: BAR_READY=True・nbo_bar1・art nbar は実画・バーテンダーあり・PLACEHOLDER の印なし)。切り替え(barReady)を落とすと一言→メニューに戻る保険は残る(壊れた場面へは行かない)
 (4)メニューは3択+「マップに もどる」の4ボタンのまま (5)チェックモード(?check=1)でもロビーからプール場面まで辿れる (6)保存キー・保存の記録を増やさない
 実機の見え方・読み上げの聞こえ方は確認できない(未確認)。"""
 import os, sys, re, json, base64, io, threading, http.server, socketserver
@@ -24,13 +24,13 @@ chk('プール台本: 日本語は入りの1行だけ(台詞は英語のみ)', a
 B = song_data.BAR_SCENE
 chk('バー場面 nbo_bar1 の定義・台本(指示書077どおり)', B['id'] == 'nbo_bar1' and B['bg'] == 'nbar' and B['intro'] == 'ホテルのバルコニーバル。街の明かりが見える。' and [(l['w'], l['en']) for l in B['lines']] == [('bartender', 'Good evening. What can I get you?'), ('king', 'A mango juice, please.'), ('bartender', 'Here you are. Enjoy the view.'), ('lulu', 'Look at the city lights, King.'), ('king', 'Thank you. What a beautiful night.')])
 chk('バー台本: 値段なし・酒でなくジュース・日本語は入りだけ', all(not re.search(r'\d|\$|KES|beer|wine|cocktail', l['en'], re.I) and JA.search(l['en']) is None for l in B['lines']) and 'juice' in B['lines'][1]['en'])
-chk('バーの切り替えの印は1か所(song_data.BAR_READY)・いまは False(素材待ち)', song_data.BAR_READY is False)
+chk('バーの切り替えの印は1か所(song_data.BAR_READY)・077b で True(有効)', song_data.BAR_READY is True)
 chk('メニューは3択のまま(英文だけ)・行き先の名前も変えていない', [m[0] for m in song_data.LOBBY_HUB['menu']] == ['See the evening show', 'The swimming pool', 'The Balcony Bar'] and [m[1] for m in song_data.LOBBY_HUB['menu']] == ['nbo_show', 'nbo_pool', 'nbo_bbar'])
-chk('スタッフの一言: バーは素材待ちの仮置きとして残る・プールの一言は使わない(場面ができた)', 'nbo_bbar' in song_data.LOBBY_HUB['lines'] and 'nbo_pool' not in song_data.LOBBY_HUB['lines'])
+chk('スタッフの一言: バーは(BAR_READY=False のときの)保険として残る・プールの一言は使わない(場面ができた)', 'nbo_bbar' in song_data.LOBBY_HUB['lines'] and 'nbo_pool' not in song_data.LOBBY_HUB['lines'])
 ar = open(os.path.join(ROOT, 'tour-src/art.js'), encoding='utf-8').read()
 nb = ar[ar.index(' nbar:{'):ar.index('/* 機内の対面アップ(タスク048)')]
-chk('art nbar: 背景は予定名 nairobi-balcony-bar-v1.png・PLACEHOLDER の印・バーテンダー座標は決め打ちしない(null)', "bg:'nairobi-balcony-bar-v1.png'" in nb and 'PLACEHOLDER' in nb and re.search(r'bartender:\{n:null,x:null,top:null,clip:null\}', nb) is not None)
-chk('バーの背景ファイルはまだ存在しない(素材待ち)・リポジトリに仮の絵を置いていない', not os.path.exists(os.path.join(ROOT, 'tour/assets/art/nairobi-balcony-bar-v1.png')))
+chk('art nbar(077b): 背景 nairobi-balcony-bar-v1.png・PLACEHOLDER の印(placeholder:1・コメント)なし・バーテンダーは null でない(tk-bartender)', "bg:'nairobi-balcony-bar-v1.png'" in nb and 'PLACEHOLDER' not in nb and 'placeholder' not in nb and "bartender:{n:'tk-bartender'" in nb and 'n:null' not in nb)
+chk('バーの背景・ストリップ2点・バーテンダーのファイルが存在する(077b)', all(os.path.exists(os.path.join(ROOT, 'tour/assets/art', f)) for f in ('nairobi-balcony-bar-v1.png', 'nairobi-balcony-bar-lights-strip.png', 'nairobi-balcony-bar-curtain-strip.png', 'npc/tk-bartender.png')))
 # ---- 画面で ----
 class Q(socketserver.ThreadingMixIn, http.server.HTTPServer): daemon_threads = True
 def serve(d):
@@ -69,10 +69,11 @@ with sync_playwright() as pw:
     # 既存 npool の定義は不変
     npool = pg.evaluate("JSON.parse(JSON.stringify(__T.ART.npool))")
     chk('既存 npool の定義は変えていない(stage の歌手 x=790・by=734、観客5人、ルル・キング、2ストリップ)', npool['stage']['singer']['x'] == 790 and npool['stage']['singer']['by'] == 734 and len(npool['stage']['people']) == 5 and (npool['stage']['lulu']['x'], npool['stage']['king']['x']) == (712, 838) and len(npool['strips']) == 2 and npool['bg'] == 'nairobi-pool-v2.png')
-    # ---- バー(素材待ち): 一言→メニュー ----
+    # ---- バー(切り替えを落とした保険): 一言→メニュー(本番は BAR_READY=True なので下で実在の場面を確認) ----
+    chk('本番の切り替え(barReady)は有効(077b)', pg.evaluate('__T.SONGSC.barReady') == 1); pg.evaluate('__T.SONGSC.barReady=0')
     pg.click('button.dq:nth-child(3)'); pg.wait_for_timeout(600)
-    chk('バー(素材待ち): スタッフの一言(英文)を表示・読み上げ・メニューに戻る(場面には入らない)', 'Balcony Bar has a lovely view' in msgt(pg) and any('Balcony Bar has a lovely view' in s_ for s_ in pg.evaluate("window.__say")) and nbtn(pg) == 4 and pg.evaluate("[__T.G.view,!!__T.G.scene.hub,__T.G.scene.d.id||null]") == ['scene', True, None])
-    chk('バー(素材待ち): エラーなし・もう一度選んでも同じ(壊れた場面に遷移しない)', (pg.click('button.dq:nth-child(3)'), pg.wait_for_timeout(500))[0] is None and pg.evaluate('window.__errs') == [] and nbtn(pg) == 4 and not pg.evaluate("__T.G.scene.d.id"))
+    chk('バー(保険・barReady=0): スタッフの一言(英文)を表示・読み上げ・メニューに戻る(場面には入らない)', 'Balcony Bar has a lovely view' in msgt(pg) and any('Balcony Bar has a lovely view' in s_ for s_ in pg.evaluate("window.__say")) and nbtn(pg) == 4 and pg.evaluate("[__T.G.view,!!__T.G.scene.hub,__T.G.scene.d.id||null]") == ['scene', True, None])
+    chk('バー(保険・barReady=0): エラーなし・もう一度選んでも同じ(壊れた場面に遷移しない)', (pg.click('button.dq:nth-child(3)'), pg.wait_for_timeout(500))[0] is None and pg.evaluate('window.__errs') == [] and nbtn(pg) == 4 and not pg.evaluate("__T.G.scene.d.id"))
     # ---- プール: 実在の場面 ----
     pg.click('button.dq:nth-child(2)'); pg.wait_for_timeout(900)
     chk('プール: 場面 nbo_pool1 に入る(ロビーの hub のままではない)', pg.evaluate("[__T.G.view,__T.G.scene.d.id,__T.G.scene.d.bg,!!__T.G.scene.hub,__T.G.phase]") == ['scene', 'nbo_pool1', 'npoolq', False, 'listen'], pg.evaluate("[__T.G.scene.d.id,__T.G.scene.hub]"))
@@ -104,13 +105,13 @@ with sync_playwright() as pw:
     pg.click('.node[data-id=hsong]'); pg.wait_for_timeout(1500); pg.click('button.dq:nth-child(1)'); pg.wait_for_timeout(1500)
     chk('ショー(nbo_show)は従来どおり歌場面 nbo_song(npool)へ', pg.evaluate("[__T.G.scene.d.id,__T.artIdFor(__T.G.scene)]") == ['nbo_song', 'npool'])
     pg.click('#exitBtn'); pg.wait_for_timeout(400)
-    # ---- バーの枠組み: 印を True にすると nbo_bar1 が最後まで動く(背景は素材待ちなのでドットのロビーで描く・エラーなし) ----
+    # ---- バー(077b・実在の行き先): ロビーでバーを選ぶと nbo_bar1 が最後まで動く(絵は実画 nbar・エラーなし) ----
     pg.click('.node[data-id=hsong]'); pg.wait_for_timeout(1500); pg.evaluate("__T.SONGSC.barReady=1")
     pg.click('button.dq:nth-child(3)'); pg.wait_for_timeout(800)
-    chk('(枠組みの確認)印を有効にすると、バー → 場面 nbo_bar1(絵 nbar)に入る', pg.evaluate("[__T.G.scene.d.id,__T.artIdFor(__T.G.scene)]") == ['nbo_bar1', 'nbar'] and 'バルコニーバル' in msgt(pg))
+    chk('バー → 場面 nbo_bar1(絵 nbar)に入る', pg.evaluate("[__T.G.scene.d.id,__T.artIdFor(__T.G.scene)]") == ['nbo_bar1', 'nbar'] and 'バルコニーバル' in msgt(pg))
     pg.click('button.btn.go'); pg.wait_for_timeout(500)
-    chk('(枠組みの確認)バーの台詞が順に出て、終わるとマップに戻る', msgt(pg) == 'Good evening. What can I get you?' and wait_map(pg, 20000))
-    chk('(枠組みの確認)エラーなし', pg.evaluate('window.__errs') == [], pg.evaluate('window.__errs'))
+    chk('バーの台詞が順に出て、終わるとマップに戻る', msgt(pg) == 'Good evening. What can I get you?' and wait_map(pg, 20000))
+    chk('バー場面のあとエラーなし', pg.evaluate('window.__errs') == [], pg.evaluate('window.__errs'))
     pg.context.close()
     # ---- チェックモードでもロビー → プール場面まで辿れる ----
     pg = newpage(br); pg.goto(base + '/tour/index.html?check=1'); pg.wait_for_timeout(1500)

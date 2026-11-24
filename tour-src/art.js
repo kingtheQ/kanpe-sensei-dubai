@@ -141,12 +141,15 @@ var ART={
  npoolq:{bg:'nairobi-pool-v2.png',mode:'wide',
   strips:[{img:'nairobi-pool-sparkle-strip-v2.png',x:56,y:484,n:4,fw:1148,fh:206,step:.9},{img:'nairobi-pool-lights-strip.png',x:0,y:0,n:4,fw:1536,fh:960,step:1.6,sync:'beat'}],
   hall:{lulu:{n:'tk-lulu-back',x:712,by:886,rx:60,bx:46},king:{n:'tk-king-back',x:838,by:890,rx:64}}},
- /* バルコニーバル(タスク077): 【枠組みのみ・背景素材待ち】場面 nbo_bar1 用。背景 nairobi-balcony-bar-v1.png(1536×960・人なし)は PM が別途制作して後続パックで届く(動くもの=明滅する照明・揺れる飾りは背景に描き込まず、別ストリップで届く)。
-    ★PLACEHOLDER★ 下の座標(ルル・キング・バーテンダー)は、背景が確定していないため【決め打ちしていない仮の印】。確定は後続の素材結びタスクで、背景の画素から測って行う(song_data.py の BAR_READY を True にするのもそのとき)。
-    バーテンダーの絵も既存NPC素材から選んで確定する(bartender.n は未確定=null)。strips も背景と一緒に届く別ストリップで埋める。BAR_READY が False の間はこの定義は使われない(バーを選ぶとスタッフの一言→メニューに戻る) */
- nbar:{bg:'nairobi-balcony-bar-v1.png',mode:'wide',placeholder:1,strips:[],
-  hall:{lulu:{n:'tk-lulu-back',x:700,by:900,rx:60,bx:46},king:{n:'tk-king-back',x:840,by:900,rx:64}},   /* PLACEHOLDER: ルル・キングの座標も仮(背景ができてから確定) */
-  bartender:{n:null,x:null,top:null,clip:null}},   /* PLACEHOLDER: バーテンダーの絵・座標は背景未確定(後続の素材結びタスクで確定) */
+ /* バルコニーバル(タスク077・077b確定): 場面 nbo_bar1。背景 nairobi-balcony-bar-v1.png(1536×960・人なし・文字なし)。動くものは背景に描き込まず別ストリップ:
+    lights=フェストゥーン・ペンダントの明かりの明滅+窓と星の瞬き(全画面 4コマ・fw1536 fh960・(0,0))／curtain=バーの右の赤いカーテンの揺れ(4コマ・96×490・(1120,88)。背景側には棒だけ)。
+    ルル・キングは室内基準の大きさ指定の後ろ姿(ルル129×200・キング148×248。075 の nroom と同じ「素材を拡大して置く」見え方。影なし=同梱プレビューと同じ画素。足もと ルル y=908・キング y=912)。
+    バーテンダー(tk-bartender 135×278。PM素材 npc-front-man-suit-2 を表示サイズにした同梱ファイルがそのまま正本)はカウンターの向こう: top=350 から clip=500(カウンター上面)まで描き、腰から下は描かない。上半身だけ小さく揺れる。
+    座標はすべて背景の画素から測定済みの確定値(同梱プレビューが配置の正本)。切り替えは song_data.py の BAR_READY の1か所 */
+ nbar:{bg:'nairobi-balcony-bar-v1.png',mode:'wide',
+  strips:[{img:'nairobi-balcony-bar-lights-strip.png',x:0,y:0,n:4,fw:1536,fh:960,step:1.1},{img:'nairobi-balcony-bar-curtain-strip.png',x:1120,y:88,n:4,fw:96,fh:490,step:1.4}],
+  hall:{lulu:{n:'tk-lulu-back',x:712,by:908,w:129,h:200},king:{n:'tk-king-back',x:838,by:912,w:148,h:248}},
+  bartender:{n:'tk-bartender',x:784,top:350,clip:500}},
  /* 機内の対面アップ(タスク048): 1日目の最初の長距離便。CAアナウンス・イベントの2場面。背景は人なし(cabin-close-bg)と、食事のあと(cabin-close-meal。ふたりは絵に描かれている)。
     cabinseat=CAが席に来る場面とマイク画面: キング・ルルは座った上半身。既存の室内の絵(room-king-idle / room-lulu-idle)を、食事の絵(cabin-close-meal)より小さめの 約1.82倍(NEAREST。タスク063: キングの頭がCAの1.2倍以内になるよう2.17から下げた)・頭の中心の横位置はそのまま、テーブルの上端に腰が来る高さ(x,y=左上)で重ね、
       テーブルの上端(clip=585)で切る(テーブルは背景の絵)。CAは正面の絵(npc/ca-front・139×266)を同じ倍率で、右の通路側に立たせる(足もと by)。話しているとき「…」を出す。
@@ -296,7 +299,7 @@ function ARTframe(S,A0,dt){
  if(cf.meal){artMeal(cf.meal);return true}
  if(cf.dep){artDep(cf,exi,S,te);return true}
  if(cf.stage){artStage(cf.stage,exi);return true}
- if(cf.hall){artPeople(cf.people,exi);artHall(cf.hall,exi);return true}
+ if(cf.hall){artPeople(cf.people,exi);if(cf.bartender&&cf.bartender.n&&exi[cf.bartender.n])artClerk(cf.bartender,exi);artHall(cf.hall,exi);return true}   /* バーテンダー(077b)はカウンターの向こう。ルル・キングより先(奥)に描く */
  if(cf.tk){artTicket(cf.tk,exi,S);return true}
  if(cf.fx==='night')artFxNight();else if(cf.fx==='hotel')artFxHotel();
  /* 相手(いつもの顔のドット): 空港では右から入ってくる。カウンターの中は動かず、頭と肩だけ見せる(カウンターの高さで切る) */
@@ -468,9 +471,12 @@ function artHall(H,exi){var g=H.globe,gi=g&&artImg(g.img);
    var nx2=H.sage.x+28+nq*30+Math.round(Math.sin(t*2+nq*2)*8),ny2=H.sage.by-sg.naturalHeight-16-np2*70,nc=nq%2?'♫':'♪';ca.strokeText(nc,nx2,ny2);ca.fillText(nc,nx2,ny2)}ca.globalAlpha=1}}
  else if(H.clerk)artClerk(H.clerk,exi);
  else if(H.bubble&&spSay&&speaker)artBubble(H.bubble.x,H.bubble.y);   /* 相手を絵に出さない場面(羽田のゲート): 声のぬしの場所に「…」 */
- if(OUT.lvis){artShadow(H.lulu.x,H.lulu.by,H.lulu.rx||29);artSway(lu,H.lulu.x,H.lulu.by,ld);
-  if(luTalk&&spSay)artBubble(H.lulu.x+(H.lulu.bx||20),H.lulu.by-lu.naturalHeight-26)}
- if(OUT.hvis){artShadow(H.king.x,H.king.by,H.king.rx||36);artSway(kg,H.king.x,H.king.by,kd)}}
+ if(OUT.lvis){if(H.lulu.h){artSwayZ(lu,H.lulu.x,H.lulu.by,ld,H.lulu.w,H.lulu.h);   /* 大きさ指定の後ろ姿(077b): 影なし・素材を拡大して置く(dep の w/h と同じ作法) */
+   if(luTalk&&spSay)artBubble(H.lulu.x+(H.lulu.bx||20),H.lulu.by-H.lulu.h-26)}
+  else{artShadow(H.lulu.x,H.lulu.by,H.lulu.rx||29);artSway(lu,H.lulu.x,H.lulu.by,ld);
+  if(luTalk&&spSay)artBubble(H.lulu.x+(H.lulu.bx||20),H.lulu.by-lu.naturalHeight-26)}}
+ if(OUT.hvis){if(H.king.h)artSwayZ(kg,H.king.x,H.king.by,kd,H.king.w,H.king.h);
+  else{artShadow(H.king.x,H.king.by,H.king.rx||36);artSway(kg,H.king.x,H.king.by,kd)}}}
 /* チケット売り場を描く(タスク041)。歩かない。足と影は動かさず、上半身だけ小さく揺れる(037)。係員は話しているとき「…」を出す。
    航路の地図(route)は、窓口の「線を引く」会話(bg:'rtmap')のあいだだけ。描けなければ、航路入りの静止画に切りかえる。会話の進み方には一切かかわらない(時間だけで動く) */
 function artTicket(H,exi,S){
@@ -608,7 +614,7 @@ function artStrips(list,over){for(var i=0;i<(list||[]).length;i++){var q=list[i]
 function artNpcSrc(n){return n.charAt(0)==='@'?n.slice(1)+'.png':'npc/'+n+'.png'}
 function artOKimg(i){return i.complete&&i.naturalWidth>0}
 /* この場面が使う人物の絵の名前(npc/ の中)。ひとつでも読めなければ、場面全体が今までの描画に戻る */
-function artExtra(cf){var a=[],i;if(cf.seat&&cf.seat.ca)a.push(cf.seat.ca.n);if(cf.hall)['sage','lulu','king'].forEach(function(k){if(cf.hall[k])a.push(cf.hall[k].n)});if(cf.hall&&cf.hall.clerk)a.push(cf.hall.clerk.n);if(cf.stage){var sg=cf.stage.singer;[sg.f,sg.a,sg.b,cf.stage.lulu.n,cf.stage.king.n].forEach(function(n){a.push(n)});(cf.stage.people||[]).forEach(function(q){a.push(q.n)})}if(cf.tk)['clerk','clerkS','lulu','king'].forEach(function(k){if(cf.tk[k])a.push(cf.tk[k].n)});(cf.crowd||[]).forEach(function(c){a.push('w-'+c[0])});
+function artExtra(cf){var a=[],i;if(cf.seat&&cf.seat.ca)a.push(cf.seat.ca.n);if(cf.hall)['sage','lulu','king'].forEach(function(k){if(cf.hall[k])a.push(cf.hall[k].n)});if(cf.hall&&cf.hall.clerk)a.push(cf.hall.clerk.n);if(cf.bartender&&cf.bartender.n)a.push(cf.bartender.n);if(cf.stage){var sg=cf.stage.singer;[sg.f,sg.a,sg.b,cf.stage.lulu.n,cf.stage.king.n].forEach(function(n){a.push(n)});(cf.stage.people||[]).forEach(function(q){a.push(q.n)})}if(cf.tk)['clerk','clerkS','lulu','king'].forEach(function(k){if(cf.tk[k])a.push(cf.tk[k].n)});(cf.crowd||[]).forEach(function(c){a.push('w-'+c[0])});
  (cf.booths||[]).forEach(function(b){a.push(b.n);if(b.sw)a.push(b.sw)});if(cf.suitImg)a.push(cf.suitImg.n);(cf.people||[]).forEach(function(q){a.push(q.n)});
  if(cf.npcS)for(var k in cf.npcS)a.push(cf.npcS[k]);if(cf.dep)a=a.concat(artDepNames(cf.dep));return a}
 function artSpKey(){if(!speaker)return null;for(var k in SP)if(SP[k]===speaker)return k;return null}

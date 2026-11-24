@@ -2,7 +2,7 @@
 """タスク066 の動作確認(ヘッドレス)。使い方: python3 -I tour-src/tests/test_lobby066.py
 (1)ロビーは通常版: 受付のスタッフが案内する場面(hub)・案内の3択(ショータイム/プール/Balcony Bar)・歌手は出ない
 (2)ショータイムを選ぶと別場面のプールサイド(npool)で歌う。歌手は高さ250・観客・ルル・キングは指示書の座標・描いた絵を配置の正本プレビューと画素で比較
-(1b)タスク077: プールは実在の場面へ・バーは素材待ち(一言→メニュー)
+(1b)タスク077/077b: プールもバーも実在の場面へ
 (3)照明ストリップ: 曲が鳴っているあいだは再生位置の拍に合わせて切りかえ(歌手の絵も)、鳴っていないときはゆっくり明滅
 (4)049の歌・進行(曲→やりとり→マップ)は変わらない
 マイク・実機の音・実機の見え方は確認できない。"""
@@ -76,9 +76,10 @@ with sync_playwright() as pw:
     chk('ロビー: 背景の絵が描かれている(受付まわりの画素の一致 80% 以上)', float((np.abs(a - bgl).sum(2)[0:480] <= 12).mean()) > .8)
     chk('ロビー: 案内の一言を読み上げ・メニュー3つ+もどる', 'Welcome to the Villa Rosa Kempinski. What would you like to see?' in pg.evaluate("window.__say") and pg.evaluate("document.querySelectorAll('button.dq').length") == 4)
     chk('ロビー: 曲は鳴らない・日本語の選択肢なし', plays(pg) == [])
-    # タスク077: バーは素材待ちの間は一言→メニューにもどる(仮置きが残る)。プールは実在の場面 nbo_pool1 へ(詳しくは test_lobby077.py)
-    pg.click('button.dq:nth-child(3)'); pg.wait_for_timeout(500)
-    chk('「The Balcony Bar」(素材待ち): スタッフの一言(英文)・選択にもどる', 'Balcony Bar has a lovely view' in pg.evaluate("document.querySelector('#msg').innerText") and pg.evaluate("document.querySelectorAll('button.dq').length") == 4)
+    # タスク077b: バーも実在の場面 nbo_bar1(絵 nbar)へ(詳しくは test_lobby077.py・test_lobby077b.py)。プールは実在の場面 nbo_pool1 へ(test_lobby077.py)
+    pg.click('button.dq:nth-child(3)'); pg.wait_for_timeout(900)
+    chk('「The Balcony Bar」: 場面 nbo_bar1(バルコニーバル)に入る・絵は nbar', pg.evaluate("[__T.G.view,__T.G.scene.d.id,__T.artIdFor(__T.G.scene)]") == ['scene', 'nbo_bar1', 'nbar'], pg.evaluate("[__T.G.view,__T.G.scene.d.id,__T.artIdFor(__T.G.scene)]"))
+    pg.click('#exitBtn'); pg.wait_for_timeout(500); pg.click('.node[data-id=hsong]'); pg.wait_for_timeout(1500)
     pg.click('button.dq:nth-child(2)'); pg.wait_for_timeout(700)
     chk('「The swimming pool」: 場面 nbo_pool1(静かなプール)に入る・絵は npoolq', pg.evaluate("[__T.G.view,__T.G.scene.d.id,__T.artIdFor(__T.G.scene)]") == ['scene', 'nbo_pool1', 'npoolq'], pg.evaluate("[__T.G.view,__T.G.scene.d.id,__T.artIdFor(__T.G.scene)]"))
     pg.click('#exitBtn'); pg.wait_for_timeout(500); pg.click('.node[data-id=hsong]'); pg.wait_for_timeout(1500)

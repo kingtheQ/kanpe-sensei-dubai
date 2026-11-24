@@ -71,13 +71,13 @@ ROOM_SCENE = {
 
 # ホテルのロビー・通常版(タスク066/077): 受付のスタッフがホテルを案内する場面(hub)。案内の3択 = ショータイム / プール / Balcony Bar。
 # 選択肢と案内の一言は英文だけ(日本語は足さない)。ショータイム → プールサイドの歌場面(nbo_song)。
-# タスク077: プール → 実在の場面 nbo_pool1(下の POOL_SCENE。聞くだけ型)。Balcony Bar → 場面 nbo_bar1(下の BAR_SCENE)は【枠組みのみ・背景素材待ち】。
-#   バーの背景(nairobi-balcony-bar-v1.png)が届くまでは、バーを選ぶとスタッフの一言(下の lines['nbo_bbar'] = 素材待ちの仮置き)を言ってメニューに戻る(壊れた場面には遷移しない)。
+# タスク077: プール → 実在の場面 nbo_pool1(下の POOL_SCENE。聞くだけ型)。Balcony Bar → 場面 nbo_bar1(下の BAR_SCENE)。タスク077b で素材を結び、実在の行き先として有効(BAR_READY=True)。
+#   BAR_READY が False のときだけ、バーを選ぶとスタッフの一言(下の lines['nbo_bbar'] = 仮置き)を言ってメニューに戻る(壊れた場面には遷移しない)。いまは True なので場面 nbo_bar1 へ行く。
 # 実在: Villa Rosa Kempinski(入国審査の会話 nbo_immig2 と同じホテル)。個人名・値段・営業時間など確かめていない事実は入れない。
 #
 # ★★ バーを有効にする切り替えは、この1か所だけ ★★
-#    背景 nairobi-balcony-bar-v1.png と動くものの別ストリップが届き、art.js の ART.nbar のバーテンダー座標(PLACEHOLDER)を確定したら、BAR_READY を True にする(後続の素材結びタスク)。
-BAR_READY = False
+#    背景 nairobi-balcony-bar-v1.png・別ストリップ2点・バーテンダー(tk-bartender)を結び、art.js の ART.nbar を確定した(タスク077b)ので True。
+BAR_READY = True
 
 LOBBY_HUB = {
     'en': 'Welcome to the Villa Rosa Kempinski. What would you like to see?',
@@ -106,8 +106,8 @@ POOL_SCENE = {
     ],
 }
 
-# バルコニーバルの場面の枠組み(タスク077): nbo_bar1。【背景素材待ち】背景 nairobi-balcony-bar-v1.png(1536×960・人なし)はPMが別途制作して後続パックで届く。
-# 台本データと場面の定義だけ先に作ってある。行き先として有効になるのは BAR_READY = True にしたとき(後続の素材結びタスク)。値段は入れない・ジュース類・営業時間など未確認の事実は書かない。
+# バルコニーバルの場面(タスク077で枠組み・077bで素材を結んで有効化): nbo_bar1。背景 nairobi-balcony-bar-v1.png(1536×960・人なし)。
+# 台本は077で確定したまま(077bでは変更しない)。値段は入れない・ジュース類・営業時間など未確認の事実は書かない。
 BAR_SCENE = {
     'id': 'nbo_bar1',
     'who': 'バルコニーバル',
