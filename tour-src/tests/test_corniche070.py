@@ -69,7 +69,9 @@ with sync_playwright() as pw:
     r = pg.evaluate("()=>{var T=window.__T,f=T.artIdFor,o={};['doh_city_c1','doh_city_c2','doh_city_c3','doh_ev_j_ask','doh_city_h1','doh_city_t1','doh_city_s1','doh_city_b1','doh_immig1'].forEach(function(v){o[v]=f({vid:v})});o.none=f(null);return o}")
     chk('ドーハ側 artIdFor: 4場面は dcorn', all(r[v] == 'dcorn' for v in VIDS), {v: r[v] for v in VIDS})
     chk('ドーハ側 artIdFor: doh_city_h1 は hotel のまま', r['doh_city_h1'] == 'hotel', r['doh_city_h1'])
-    chk('ドーハ側 artIdFor: ほかの場面は null', all(r[k] is None for k in r if k not in VIDS + ['doh_city_h1']), {k: r[k] for k in r if k not in VIDS + ['doh_city_h1']})
+    SOUQ = ['doh_city_t1', 'doh_city_s1']   # タスク071 で スークの路地(dalley)・広場(dsouq)に結んだ場面。その結びは test_souq071.py が確かめる
+    chk('ドーハ側 artIdFor: ほかの場面は null(スーク071の2場面は除く)', all(r[k] is None for k in r if k not in VIDS + ['doh_city_h1'] + SOUQ), {k: r[k] for k in r if k not in VIDS + ['doh_city_h1'] + SOUQ})
+    chk('ドーハ側 artIdFor: スーク(071)の t1=dalley・s1=dsouq', (r['doh_city_t1'], r['doh_city_s1']) == ('dalley', 'dsouq'), (r['doh_city_t1'], r['doh_city_s1']))
     cf = pg.evaluate("()=>window.__T.ART.dcorn")
     chk('ART dcorn の置き場', cf['base'] == 884 and cf['lulu'] == 1060 and cf['king'] == 1180 and cf['mode'] == 'wide', {k: cf[k] for k in ('mode', 'base', 'lulu', 'king', 'dir')})
     chk('strips が指定どおり', cf['strips'] == [
