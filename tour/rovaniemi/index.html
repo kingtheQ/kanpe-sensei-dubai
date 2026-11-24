@@ -4229,9 +4229,21 @@ var ART={
     strips: 水面のきらめき(ゆっくり)と、窓・電飾・バーの照明(lights。sync='beat' = 曲が鳴っているあいだは曲の再生位置の拍に合わせて切りかえ、鳴っていないときはゆっくり明滅) */
  npool:{bg:'nairobi-pool-v2.png',mode:'wide',
   strips:[{img:'nairobi-pool-sparkle-strip-v2.png',x:56,y:484,n:4,fw:1148,fh:206,step:.9},{img:'nairobi-pool-lights-strip.png',x:0,y:0,n:4,fw:1536,fh:960,step:1.6,sync:'beat'}],
-  stage:{singer:{f:'s-stand-front',a:'s-stand-sing1',b:'s-stand-sing2',x:790,by:734,notes:1},
+  stage:{spot:1,singer:{f:'s-stand-front',a:'s-stand-sing1',b:'s-stand-sing2',x:790,by:734,notes:1},
    people:[{n:'b-back-maasai',x:1142,by:856,sw:128},{n:'b-back-safari',x:462,by:864,sw:150},{n:'b-back-backpacker',x:1064,by:868,sw:118},{n:'b-back-thobe',x:585,by:900,sw:140},{n:'b-back-dashiki',x:960,by:906,sw:138}],
    lulu:{n:'tk-lulu-back',x:712,by:886,rx:60,bx:46},king:{n:'tk-king-back',x:838,by:890,rx:64}}},
+ /* 静かなプール(タスク077): ロビーの案内「The swimming pool」の行き先 nbo_pool1。背景は同じ(nairobi-pool-v2.png・人なし)・既存の2ストリップも同じ(水面のきらめき/照明)。歌手と観客は置かず、ルルとキングだけ。
+    ふたりの足もとは npool の stage 配置と同じ(ルル x=712・by=886／キング x=838・by=890、後ろ姿)。曲は鳴らないので、照明ストリップ(sync='beat')はゆっくり明滅のまま。
+    既存の npool(ショータイム・歌場面)の定義は変えない(別定義で分ける)。 */
+ npoolq:{bg:'nairobi-pool-v2.png',mode:'wide',
+  strips:[{img:'nairobi-pool-sparkle-strip-v2.png',x:56,y:484,n:4,fw:1148,fh:206,step:.9},{img:'nairobi-pool-lights-strip.png',x:0,y:0,n:4,fw:1536,fh:960,step:1.6,sync:'beat'}],
+  hall:{lulu:{n:'tk-lulu-back',x:712,by:886,rx:60,bx:46},king:{n:'tk-king-back',x:838,by:890,rx:64}}},
+ /* バルコニーバル(タスク077): 【枠組みのみ・背景素材待ち】場面 nbo_bar1 用。背景 nairobi-balcony-bar-v1.png(1536×960・人なし)は PM が別途制作して後続パックで届く(動くもの=明滅する照明・揺れる飾りは背景に描き込まず、別ストリップで届く)。
+    ★PLACEHOLDER★ 下の座標(ルル・キング・バーテンダー)は、背景が確定していないため【決め打ちしていない仮の印】。確定は後続の素材結びタスクで、背景の画素から測って行う(song_data.py の BAR_READY を True にするのもそのとき)。
+    バーテンダーの絵も既存NPC素材から選んで確定する(bartender.n は未確定=null)。strips も背景と一緒に届く別ストリップで埋める。BAR_READY が False の間はこの定義は使われない(バーを選ぶとスタッフの一言→メニューに戻る) */
+ nbar:{bg:'nairobi-balcony-bar-v1.png',mode:'wide',placeholder:1,strips:[],
+  hall:{lulu:{n:'tk-lulu-back',x:700,by:900,rx:60,bx:46},king:{n:'tk-king-back',x:840,by:900,rx:64}},   /* PLACEHOLDER: ルル・キングの座標も仮(背景ができてから確定) */
+  bartender:{n:null,x:null,top:null,clip:null}},   /* PLACEHOLDER: バーテンダーの絵・座標は背景未確定(後続の素材結びタスクで確定) */
  /* 機内の対面アップ(タスク048): 1日目の最初の長距離便。CAアナウンス・イベントの2場面。背景は人なし(cabin-close-bg)と、食事のあと(cabin-close-meal。ふたりは絵に描かれている)。
     cabinseat=CAが席に来る場面とマイク画面: キング・ルルは座った上半身。既存の室内の絵(room-king-idle / room-lulu-idle)を、食事の絵(cabin-close-meal)より小さめの 約1.82倍(NEAREST。タスク063: キングの頭がCAの1.2倍以内になるよう2.17から下げた)・頭の中心の横位置はそのまま、テーブルの上端に腰が来る高さ(x,y=左上)で重ね、
       テーブルの上端(clip=585)で切る(テーブルは背景の絵)。CAは正面の絵(npc/ca-front・139×266)を同じ倍率で、右の通路側に立たせる(足もと by)。話しているとき「…」を出す。
@@ -4499,7 +4511,7 @@ function artClerk(C,exi){var im=exi[C.n];if(!im||im.bad||!artOKimg(im))return;
    歌手: 歌っていない間は正面(f)、テーマ曲が鳴っているあいだは拍ごとに歌う絵(a/b)を切りかえる。♪は歌っているあいだだけ頭の上をのぼる */
 function artStage(H,exi){var L=[],sg=H.singer,fi=exi[sg.f],ai=exi[sg.a],bi=exi[sg.b],i;
  var pl=(typeof songPlaying==='function')&&songPlaying(),bn=pl&&typeof songBeatN==='function'?songBeatN():-1,sim=fi;
- if(pl)sim=(bn>=0?bn:Math.floor(t*2))%2?bi:ai;
+ if(pl)sim=[ai,fi,bi,fi][(bn>=0?bn:Math.floor(t*2))%4];   /* タスク076: 歌っているあいだは拍ごとに [歌う絵1(左向き) → 正面 → 歌う絵2(右向き) → 正面]。足もと・影は固定(037) */
  (H.people||[]).forEach(function(q,qi){var im=exi[q.n];if(!im||im.bad||!artOKimg(im))return;
   L.push({by:q.by,f:function(){artShadowP(q.x,q.by,q.sw||Math.round(im.naturalWidth*1.2));artSway(im,q.x,q.by,artSwayD(qi*.37+.2,1))}})});
  if(sim&&!sim.bad&&artOKimg(sim))L.push({by:sg.by,f:function(){artShadow(sg.x,sg.by,sg.sw||sim.naturalWidth*.6,.45);artSway(sim,sg.x,sg.by,pl?0:(Math.floor(t*.8)%2?3:0));
@@ -4509,7 +4521,33 @@ function artStage(H,exi){var L=[],sg=H.singer,fi=exi[sg.f],ai=exi[sg.a],bi=exi[s
  var lu=exi[H.lulu.n],kg=exi[H.king.n],ld=Math.floor(t*1.1+.5)%2?3:0,kd=Math.floor(t*1.1)%2?3:0;
  if(OUT.lvis&&lu&&!lu.bad)L.push({by:H.lulu.by,f:function(){artShadow(H.lulu.x,H.lulu.by,H.lulu.rx||29);artSway(lu,H.lulu.x,H.lulu.by,ld);if(luTalk&&spSay)artBubble(H.lulu.x+(H.lulu.bx||20),H.lulu.by-lu.naturalHeight-26)}});
  if(OUT.hvis&&kg&&!kg.bad)L.push({by:H.king.by,f:function(){artShadow(H.king.x,H.king.by,H.king.rx||36);artSway(kg,H.king.x,H.king.by,kd)}});
- L.sort(function(a,b){return a.by-b.by});for(i=0;i<L.length;i++)L[i].f()}
+ if(H.spot)artSpot(sg,1);   /* 光の円錐と足もとの光だまり: 人物より先(下)に描く → 観客・ルル・キング・歌手を隠さない */
+ L.sort(function(a,b){return a.by-b.by});for(i=0;i<L.length;i++)L[i].f();
+ if(H.spot)artSpot(sg,2)}   /* キラキラ: 人物の上の空の側にだけ小さく */
+/* ステージ照明(タスク076)。コード描画・単純な半透明図形だけ(shadowBlur・グラデーションは使わない。ドットの粒を潰さない)。曲が鳴っている間だけ強く、鳴っていないときは消える。拍で脈打つ。
+   artSpotK = 光の強さ(0〜1。曲が鳴ると上がり、止まるとなめらかに消える)。part 1 = 光の円錐+足もとの光だまり、part 2 = キラキラ */
+var artSpotK=0,artSpotT0=0;
+function artSpot(sg,part){
+ if(part===1){var dt=Math.min(.1,Math.max(0,t-artSpotT0));artSpotT0=t;var on=(typeof songPlaying==='function')&&songPlaying();artSpotK+=((on?1:0)-artSpotK)*Math.min(1,dt*3);if(artSpotK<.01)artSpotK=0}
+ if(artSpotK<=0)return;
+ var k=artSpotK,pu=(typeof songBeatPulse==='function')?songBeatPulse():0,x=sg.x,by=sg.by;
+ ca.save();
+ if(part===1){
+  /* 円錐: 歌手の上方(y=40・幅±22)から足もと(幅±190)へ。ふたつ重ねて中心を少し濃く。透明度は控えめ(拍で少しだけ強まる) */
+  ca.fillStyle='#ffe3a0';
+  ca.globalAlpha=(.07+.03*pu)*k;ca.beginPath();ca.moveTo(x-22,40);ca.lineTo(x+22,40);ca.lineTo(x+190,by);ca.lineTo(x-190,by);ca.closePath();ca.fill();
+  ca.globalAlpha=(.07+.04*pu)*k;ca.beginPath();ca.moveTo(x-12,40);ca.lineTo(x+12,40);ca.lineTo(x+95,by);ca.lineTo(x-95,by);ca.closePath();ca.fill();
+  /* 足もとの光だまり(楕円・外と内) */
+  ca.globalAlpha=.14*k;ca.beginPath();ca.ellipse(x,by,170,30,0,0,6.2832);ca.fill();
+  ca.globalAlpha=(.12+.06*pu)*k;ca.beginPath();ca.ellipse(x,by,96,17,0,0,6.2832);ca.fill()}
+ else{
+  /* キラキラ: 位置は固定(決め打ちの配列)・星(十字のドット)。瞬き=ゆっくりの位相、脈打ち=拍。観客の頭(y>600)より上の空の側に置く */
+  var S0=[[-300,-210,0],[-210,-90,1.3],[-120,-330,2.1],[-150,-170,.7],[0,-290,3.2],[-250,-60,1.9],[130,-210,4.1],[200,-120,2.6],[290,-260,.4],[340,-80,3.7],[-340,-70,5.0],[250,-70,1.1],[-170,-50,4.4],[40,-340,5.6]];   /* 歌手の体(x±110・y 484〜734)と観客の頭(y>600)には重ならない位置 */
+  ca.fillStyle='#fff3c4';
+  for(var i=0;i<S0.length;i++){var q=S0[i],tw=.5+.5*Math.sin(t*2.4+q[2]*2),a=(.18+.5*tw)*(.4+.6*pu)*k;if(a<.03)continue;
+   var sx=Math.round(x+q[0]),sy=Math.round(by+q[1]-60),r=(i%3===0)?10:6;ca.globalAlpha=Math.min(.7,a);
+   ca.fillRect(sx-1,sy-1,3,3);if(tw>.45||pu>.5){ca.fillRect(sx-r,sy,r*2+1,2);ca.fillRect(sx,sy-r,2,r*2+1)}}}
+ ca.restore()}
 /* 大きさを指定して描く artSway(タスク068。同梱プレビューの大きさに合わせる。NEAREST)。dw×dh=描く大きさ(素材を一様に拡大)、clipY=これより下(画面の y)は描かない(テーブルの天板で下半身が隠れる)。
    揺れていないコマ(d=0)は1回で描く(同梱プレビューと同じ画素になる)。上半身は d 画素ふくらむ(artSway と同じ)。 */
 function artSwayZ(img,cx,by,d,dw,dh,clipY){var w=img.naturalWidth,h=img.naturalHeight,x=Math.round(cx-dw/2),y=by-dh;

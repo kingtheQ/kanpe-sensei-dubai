@@ -206,3 +206,9 @@
 - world：タイトルのコマンド窓にモード選択（`#mSel`）と「せつめいを きく」（`#cNarr`）。「はじめから」→語り（`playOpeningNarration`）→語り終えたら（または「すすむ」）tour/ へ。チャントは `CHANT.narr()` で語りのあいだ一時停止。
 - 確認：`python3 tour-src/tests/test_modes074.py`。チェックモード（?check=1）の保存は専用の名前 `chk1:kd_prefs_v1` になる（タイトルで選んだモードはチェックモードへ引き継がない。チェックモードの設定から3モードを確認できる）。
 - 未確認：実機の日本語読み上げの声質、実マイクでの3モードの流れ（耳学モードの「お手本→マイク」）。
+
+## 今回（11/24）タスク076＋077でやったこと（プールサイドのショータイム格上げ／ロビーの3択を行き先につなぐ・コードのみ）
+- 076：歌手は再生中 [sing1→正面→sing2→正面] を拍ごとに（正面は既存素材 `s-stand-front`・新規素材なし）。GO！のあと呼びかけ "Come on, everybody — sing with me!" を読み上げてから曲。歌詞は `song_data.py` の `SONG_SCENE['lyrics']`（21行・`[開始秒, 行]`）を曲の再生位置に連動して画面下に1行ずつ（英語のみ）。ステージ照明（光の円錐・足もとの光だまり・拍で脈打つキラキラ）は art.js の `artSpot`（`npool` の stage に `spot:1`）。**歌詞タイミングは初版近似・実機調整前提**（直すのは表の秒だけ）。
+- 077：ロビーの「The swimming pool」は実在の場面 `nbo_pool1`（art `npoolq`・ルルとキングだけ・聞くだけ型・終わるとマップへ）。「The Balcony Bar」は枠組みのみ（`nbo_bar1`・art `nbar`＝PLACEHOLDER・台本 `BAR_SCENE`）で**背景素材待ち**。有効化は `song_data.py` の `BAR_READY = True` の1か所だけ（背景 nairobi-balcony-bar-v1.png・別ストリップ・座標確定のあと、後続の素材結びタスクで）。それまでは「スタッフの一言→メニューに戻る」。
+- 確認：`tour-src/tests/test_showtime076.py`・`test_lobby077.py`・更新した `test_lobby066.py`。詳細は docs/pm/DECISIONS.md の 076・077。
+- 未確認：実機の曲と歌詞の同期・照明の見え方・読み上げの聞こえ方・iPhone の自動再生。参考にしたURL：なし。

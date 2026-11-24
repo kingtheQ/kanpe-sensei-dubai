@@ -4419,9 +4419,21 @@ var ART={
     strips: 水面のきらめき(ゆっくり)と、窓・電飾・バーの照明(lights。sync='beat' = 曲が鳴っているあいだは曲の再生位置の拍に合わせて切りかえ、鳴っていないときはゆっくり明滅) */
  npool:{bg:'nairobi-pool-v2.png',mode:'wide',
   strips:[{img:'nairobi-pool-sparkle-strip-v2.png',x:56,y:484,n:4,fw:1148,fh:206,step:.9},{img:'nairobi-pool-lights-strip.png',x:0,y:0,n:4,fw:1536,fh:960,step:1.6,sync:'beat'}],
-  stage:{singer:{f:'s-stand-front',a:'s-stand-sing1',b:'s-stand-sing2',x:790,by:734,notes:1},
+  stage:{spot:1,singer:{f:'s-stand-front',a:'s-stand-sing1',b:'s-stand-sing2',x:790,by:734,notes:1},
    people:[{n:'b-back-maasai',x:1142,by:856,sw:128},{n:'b-back-safari',x:462,by:864,sw:150},{n:'b-back-backpacker',x:1064,by:868,sw:118},{n:'b-back-thobe',x:585,by:900,sw:140},{n:'b-back-dashiki',x:960,by:906,sw:138}],
    lulu:{n:'tk-lulu-back',x:712,by:886,rx:60,bx:46},king:{n:'tk-king-back',x:838,by:890,rx:64}}},
+ /* 静かなプール(タスク077): ロビーの案内「The swimming pool」の行き先 nbo_pool1。背景は同じ(nairobi-pool-v2.png・人なし)・既存の2ストリップも同じ(水面のきらめき/照明)。歌手と観客は置かず、ルルとキングだけ。
+    ふたりの足もとは npool の stage 配置と同じ(ルル x=712・by=886／キング x=838・by=890、後ろ姿)。曲は鳴らないので、照明ストリップ(sync='beat')はゆっくり明滅のまま。
+    既存の npool(ショータイム・歌場面)の定義は変えない(別定義で分ける)。 */
+ npoolq:{bg:'nairobi-pool-v2.png',mode:'wide',
+  strips:[{img:'nairobi-pool-sparkle-strip-v2.png',x:56,y:484,n:4,fw:1148,fh:206,step:.9},{img:'nairobi-pool-lights-strip.png',x:0,y:0,n:4,fw:1536,fh:960,step:1.6,sync:'beat'}],
+  hall:{lulu:{n:'tk-lulu-back',x:712,by:886,rx:60,bx:46},king:{n:'tk-king-back',x:838,by:890,rx:64}}},
+ /* バルコニーバル(タスク077): 【枠組みのみ・背景素材待ち】場面 nbo_bar1 用。背景 nairobi-balcony-bar-v1.png(1536×960・人なし)は PM が別途制作して後続パックで届く(動くもの=明滅する照明・揺れる飾りは背景に描き込まず、別ストリップで届く)。
+    ★PLACEHOLDER★ 下の座標(ルル・キング・バーテンダー)は、背景が確定していないため【決め打ちしていない仮の印】。確定は後続の素材結びタスクで、背景の画素から測って行う(song_data.py の BAR_READY を True にするのもそのとき)。
+    バーテンダーの絵も既存NPC素材から選んで確定する(bartender.n は未確定=null)。strips も背景と一緒に届く別ストリップで埋める。BAR_READY が False の間はこの定義は使われない(バーを選ぶとスタッフの一言→メニューに戻る) */
+ nbar:{bg:'nairobi-balcony-bar-v1.png',mode:'wide',placeholder:1,strips:[],
+  hall:{lulu:{n:'tk-lulu-back',x:700,by:900,rx:60,bx:46},king:{n:'tk-king-back',x:840,by:900,rx:64}},   /* PLACEHOLDER: ルル・キングの座標も仮(背景ができてから確定) */
+  bartender:{n:null,x:null,top:null,clip:null}},   /* PLACEHOLDER: バーテンダーの絵・座標は背景未確定(後続の素材結びタスクで確定) */
  /* 機内の対面アップ(タスク048): 1日目の最初の長距離便。CAアナウンス・イベントの2場面。背景は人なし(cabin-close-bg)と、食事のあと(cabin-close-meal。ふたりは絵に描かれている)。
     cabinseat=CAが席に来る場面とマイク画面: キング・ルルは座った上半身。既存の室内の絵(room-king-idle / room-lulu-idle)を、食事の絵(cabin-close-meal)より小さめの 約1.82倍(NEAREST。タスク063: キングの頭がCAの1.2倍以内になるよう2.17から下げた)・頭の中心の横位置はそのまま、テーブルの上端に腰が来る高さ(x,y=左上)で重ね、
       テーブルの上端(clip=585)で切る(テーブルは背景の絵)。CAは正面の絵(npc/ca-front・139×266)を同じ倍率で、右の通路側に立たせる(足もと by)。話しているとき「…」を出す。
@@ -4516,7 +4528,7 @@ ART.dalley={bg:'doha-souq-alley-v1.png',mode:'wide',base:856,lulu:700,king:806,s
  strips:[{img:'doha-souq-alley-lanterns-strip.png',x:0,y:0,n:2,fw:1536,fh:960,step:1},{img:'doha-souq-alley-cloth-strip.png',x:0,y:0,n:2,fw:1536,fh:960,step:.8}]};
 ART.dsouq={bg:'doha-souq-square-v1.png',mode:'wide',base:836,lulu:660,king:770,suit:0,nosuit:1,npc:{x:980,px:9},fx:'',
  strips:[{img:'doha-souq-square-cloth-strip.png',x:0,y:452,n:2,fw:1536,fh:176,step:.8},{img:'doha-souq-square-birds-strip.png',x:0,y:36,n:2,fw:1536,fh:120,step:.4}]};
-function artIdFor(S){var g=S&&S.d&&S.d.bg,h=S&&S.hub&&S.ctx&&S.ctx.bg,v=String(S&&S.vid||''),k=/2$/.test(v)?'2':'1';if(/^nbo_/.test(v)){if(g==='checkinQ')return'ncheckin'+k;if(g==='security')return'nsec'+k;if(g==='duty')return'nduty'+k;if(g==='lounge')return'nlounge'+k;if(g==='gate')return'ngate'+k}if(/^hnd_/.test(v)){if(g==='checkinT')return'hcheckin_st';if(g==='checkinQ')return'hcheckin_ow';if(g==='security')return'hsec';if(g==='immigH')return'hexit';if(/^hnd_plane_/.test(v)){if(g==='cabinQ')return'hcabin_ow';if(g==='cabinT')return'hcabin_st'}}if(/^doh_/.test(v)&&g==='dimmig')return v==='doh_immig2'?'dimmig2':'dimmig';if(/^hnd_ev_ca_/.test(v))return 'cabinseat';if(/^hnd_ev_meal_/.test(v))return 'cabinmeal';if(g==='eikaiK')return'eikai';return g==='npool'?'npool':(h==='nlobby'||g==='nlobby')?'nlobby':g==='nsong'?'nsong':g==='safariK'?'nsafari':g==='marketK'?'nmarket':g==='nroom'?'nroom':g==='sim'?'simshop':(g==='sage'||h==='sage')?'sage':((g==='tdesk'||g==='rtmap')?'ticket':(g==='taxi'?'nairobi':(g==='immig'?'immig':(g==='baggage'?'bagclaim':(g==='hgateOW'?'hgate_ow':(g==='hgateST'?'hgate_st':null))))))}
+function artIdFor(S){var g=S&&S.d&&S.d.bg,h=S&&S.hub&&S.ctx&&S.ctx.bg,v=String(S&&S.vid||''),k=/2$/.test(v)?'2':'1';if(/^nbo_/.test(v)){if(g==='checkinQ')return'ncheckin'+k;if(g==='security')return'nsec'+k;if(g==='duty')return'nduty'+k;if(g==='lounge')return'nlounge'+k;if(g==='gate')return'ngate'+k}if(/^hnd_/.test(v)){if(g==='checkinT')return'hcheckin_st';if(g==='checkinQ')return'hcheckin_ow';if(g==='security')return'hsec';if(g==='immigH')return'hexit';if(/^hnd_plane_/.test(v)){if(g==='cabinQ')return'hcabin_ow';if(g==='cabinT')return'hcabin_st'}}if(/^doh_/.test(v)&&g==='dimmig')return v==='doh_immig2'?'dimmig2':'dimmig';if(/^hnd_ev_ca_/.test(v))return 'cabinseat';if(/^hnd_ev_meal_/.test(v))return 'cabinmeal';if(g==='eikaiK')return'eikai';return g==='npool'?'npool':g==='npoolq'?'npoolq':g==='nbar'?'nbar':(h==='nlobby'||g==='nlobby')?'nlobby':g==='nsong'?'nsong':g==='safariK'?'nsafari':g==='marketK'?'nmarket':g==='nroom'?'nroom':g==='sim'?'simshop':(g==='sage'||h==='sage')?'sage':((g==='tdesk'||g==='rtmap')?'ticket':(g==='taxi'?'nairobi':(g==='immig'?'immig':(g==='baggage'?'bagclaim':(g==='hgateOW'?'hgate_ow':(g==='hgateST'?'hgate_st':null))))))}
 function artImg(n){var i=ARTI[n];if(!i){i=ARTI[n]=new Image();i.onerror=function(){i.bad=1};i.src=ARTBASE+n}return i}
 function artShow(on){if(ARTSHOW===on)return;ARTSHOW=on;cv.hidden=!!on;cvA.hidden=!on}
 function artR(col,x,y,w,h){ca.fillStyle=col;ca.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h))}
@@ -4689,7 +4701,7 @@ function artClerk(C,exi){var im=exi[C.n];if(!im||im.bad||!artOKimg(im))return;
    歌手: 歌っていない間は正面(f)、テーマ曲が鳴っているあいだは拍ごとに歌う絵(a/b)を切りかえる。♪は歌っているあいだだけ頭の上をのぼる */
 function artStage(H,exi){var L=[],sg=H.singer,fi=exi[sg.f],ai=exi[sg.a],bi=exi[sg.b],i;
  var pl=(typeof songPlaying==='function')&&songPlaying(),bn=pl&&typeof songBeatN==='function'?songBeatN():-1,sim=fi;
- if(pl)sim=(bn>=0?bn:Math.floor(t*2))%2?bi:ai;
+ if(pl)sim=[ai,fi,bi,fi][(bn>=0?bn:Math.floor(t*2))%4];   /* タスク076: 歌っているあいだは拍ごとに [歌う絵1(左向き) → 正面 → 歌う絵2(右向き) → 正面]。足もと・影は固定(037) */
  (H.people||[]).forEach(function(q,qi){var im=exi[q.n];if(!im||im.bad||!artOKimg(im))return;
   L.push({by:q.by,f:function(){artShadowP(q.x,q.by,q.sw||Math.round(im.naturalWidth*1.2));artSway(im,q.x,q.by,artSwayD(qi*.37+.2,1))}})});
  if(sim&&!sim.bad&&artOKimg(sim))L.push({by:sg.by,f:function(){artShadow(sg.x,sg.by,sg.sw||sim.naturalWidth*.6,.45);artSway(sim,sg.x,sg.by,pl?0:(Math.floor(t*.8)%2?3:0));
@@ -4699,7 +4711,33 @@ function artStage(H,exi){var L=[],sg=H.singer,fi=exi[sg.f],ai=exi[sg.a],bi=exi[s
  var lu=exi[H.lulu.n],kg=exi[H.king.n],ld=Math.floor(t*1.1+.5)%2?3:0,kd=Math.floor(t*1.1)%2?3:0;
  if(OUT.lvis&&lu&&!lu.bad)L.push({by:H.lulu.by,f:function(){artShadow(H.lulu.x,H.lulu.by,H.lulu.rx||29);artSway(lu,H.lulu.x,H.lulu.by,ld);if(luTalk&&spSay)artBubble(H.lulu.x+(H.lulu.bx||20),H.lulu.by-lu.naturalHeight-26)}});
  if(OUT.hvis&&kg&&!kg.bad)L.push({by:H.king.by,f:function(){artShadow(H.king.x,H.king.by,H.king.rx||36);artSway(kg,H.king.x,H.king.by,kd)}});
- L.sort(function(a,b){return a.by-b.by});for(i=0;i<L.length;i++)L[i].f()}
+ if(H.spot)artSpot(sg,1);   /* 光の円錐と足もとの光だまり: 人物より先(下)に描く → 観客・ルル・キング・歌手を隠さない */
+ L.sort(function(a,b){return a.by-b.by});for(i=0;i<L.length;i++)L[i].f();
+ if(H.spot)artSpot(sg,2)}   /* キラキラ: 人物の上の空の側にだけ小さく */
+/* ステージ照明(タスク076)。コード描画・単純な半透明図形だけ(shadowBlur・グラデーションは使わない。ドットの粒を潰さない)。曲が鳴っている間だけ強く、鳴っていないときは消える。拍で脈打つ。
+   artSpotK = 光の強さ(0〜1。曲が鳴ると上がり、止まるとなめらかに消える)。part 1 = 光の円錐+足もとの光だまり、part 2 = キラキラ */
+var artSpotK=0,artSpotT0=0;
+function artSpot(sg,part){
+ if(part===1){var dt=Math.min(.1,Math.max(0,t-artSpotT0));artSpotT0=t;var on=(typeof songPlaying==='function')&&songPlaying();artSpotK+=((on?1:0)-artSpotK)*Math.min(1,dt*3);if(artSpotK<.01)artSpotK=0}
+ if(artSpotK<=0)return;
+ var k=artSpotK,pu=(typeof songBeatPulse==='function')?songBeatPulse():0,x=sg.x,by=sg.by;
+ ca.save();
+ if(part===1){
+  /* 円錐: 歌手の上方(y=40・幅±22)から足もと(幅±190)へ。ふたつ重ねて中心を少し濃く。透明度は控えめ(拍で少しだけ強まる) */
+  ca.fillStyle='#ffe3a0';
+  ca.globalAlpha=(.07+.03*pu)*k;ca.beginPath();ca.moveTo(x-22,40);ca.lineTo(x+22,40);ca.lineTo(x+190,by);ca.lineTo(x-190,by);ca.closePath();ca.fill();
+  ca.globalAlpha=(.07+.04*pu)*k;ca.beginPath();ca.moveTo(x-12,40);ca.lineTo(x+12,40);ca.lineTo(x+95,by);ca.lineTo(x-95,by);ca.closePath();ca.fill();
+  /* 足もとの光だまり(楕円・外と内) */
+  ca.globalAlpha=.14*k;ca.beginPath();ca.ellipse(x,by,170,30,0,0,6.2832);ca.fill();
+  ca.globalAlpha=(.12+.06*pu)*k;ca.beginPath();ca.ellipse(x,by,96,17,0,0,6.2832);ca.fill()}
+ else{
+  /* キラキラ: 位置は固定(決め打ちの配列)・星(十字のドット)。瞬き=ゆっくりの位相、脈打ち=拍。観客の頭(y>600)より上の空の側に置く */
+  var S0=[[-300,-210,0],[-210,-90,1.3],[-120,-330,2.1],[-150,-170,.7],[0,-290,3.2],[-250,-60,1.9],[130,-210,4.1],[200,-120,2.6],[290,-260,.4],[340,-80,3.7],[-340,-70,5.0],[250,-70,1.1],[-170,-50,4.4],[40,-340,5.6]];   /* 歌手の体(x±110・y 484〜734)と観客の頭(y>600)には重ならない位置 */
+  ca.fillStyle='#fff3c4';
+  for(var i=0;i<S0.length;i++){var q=S0[i],tw=.5+.5*Math.sin(t*2.4+q[2]*2),a=(.18+.5*tw)*(.4+.6*pu)*k;if(a<.03)continue;
+   var sx=Math.round(x+q[0]),sy=Math.round(by+q[1]-60),r=(i%3===0)?10:6;ca.globalAlpha=Math.min(.7,a);
+   ca.fillRect(sx-1,sy-1,3,3);if(tw>.45||pu>.5){ca.fillRect(sx-r,sy,r*2+1,2);ca.fillRect(sx,sy-r,2,r*2+1)}}}
+ ca.restore()}
 /* 大きさを指定して描く artSway(タスク068。同梱プレビューの大きさに合わせる。NEAREST)。dw×dh=描く大きさ(素材を一様に拡大)、clipY=これより下(画面の y)は描かない(テーブルの天板で下半身が隠れる)。
    揺れていないコマ(d=0)は1回で描く(同梱プレビューと同じ画素になる)。上半身は d 画素ふくらむ(artSway と同じ)。 */
 function artSwayZ(img,cx,by,d,dw,dh,clipY){var w=img.naturalWidth,h=img.naturalHeight,x=Math.round(cx-dw/2),y=by-dh;
@@ -4961,12 +4999,16 @@ window.CHANT=CHANT;
 var SONGBASE=ARTBASE.replace(/art\/$/,'song/');
 var SONGFILE={theme:'song-theme.mp3'};
 var SONGVOL={theme:.65};     /* テーマは聴くのが主役(チャントの音量 0.2 は chant.js) */
-var SONGSC={"id": "nbo_song", "who": "ラウンジの歌手", "bg": "npool", "sp": "singer", "intro": "夜のプールサイド。水辺の小さな台のまわりに、人が集まっている。ふたりも、その輪に加わった。", "notice": {"who": "ルル", "en": "Look, King! Someone is going to sing."}, "beats": [0.16, 0.74, 1.3, 1.88, 2.43, 3.01, 3.57, 4.03, 4.71, 5.27, 5.73, 6.41, 6.98, 7.54, 8.12, 8.68, 9.12, 9.82, 10.36, 10.94, 11.49, 12.09, 12.63, 13.21, 13.77, 14.33, 14.91, 15.48, 15.9, 16.32, 16.88, 17.44, 18.04, 18.58, 19.14, 19.72, 20.17, 20.85, 21.41, 21.97, 22.53, 23.11, 23.55, 24.23, 24.68, 25.38, 25.92, 26.5, 27.06, 27.62, 28.06, 28.75, 29.21, 29.89, 30.35, 30.99, 31.59, 32.15, 32.71, 33.28, 33.74, 34.42, 34.98, 35.54, 36.1, 36.68, 37.24, 38.09, 38.65, 39.23, 39.65, 40.07, 40.51, 41.19, 41.77, 42.34, 42.9, 43.48, 44.04, 44.58, 45.04, 45.72, 46.16, 46.85, 47.41, 47.99, 48.43, 49.11, 49.67, 50.11, 50.53, 51.1, 51.66, 52.22, 52.78, 53.36, 53.92, 54.48, 55.04, 55.61, 56.15, 56.73, 57.29, 57.85, 58.43, 58.99, 59.55, 60.12, 60.68, 61.24, 61.8, 62.38, 62.92, 63.38, 64.06, 64.63, 65.19, 65.77, 66.31, 66.89, 67.45, 68.01, 68.58, 69.14, 69.7, 70.26, 70.82, 71.38, 71.94, 72.5, 73.07, 73.51], "after": [{"w": "singer", "who": "ラウンジの歌手", "en": "Thank you for listening. Karibu Nairobi. Welcome!"}, {"w": "lulu", "who": "ルル", "en": "That was beautiful. I could listen all night."}, {"w": "king", "who": "キング", "en": "Asante! It was a wonderful song."}, {"w": "singer", "who": "ラウンジの歌手", "en": "Asante sana. Sleep well, and enjoy Nairobi."}], "listen": 1, "lobby": {"nbo_pool": "The pool is just outside. It is so beautiful at night.", "nbo_bbar": "The Balcony Bar has a lovely view. Please enjoy your evening."}};
+var SONGSC={"id": "nbo_song", "who": "ラウンジの歌手", "bg": "npool", "sp": "singer", "intro": "夜のプールサイド。水辺の小さな台のまわりに、人が集まっている。ふたりも、その輪に加わった。", "notice": {"who": "ルル", "en": "Look, King! Someone is going to sing."}, "beats": [0.16, 0.74, 1.3, 1.88, 2.43, 3.01, 3.57, 4.03, 4.71, 5.27, 5.73, 6.41, 6.98, 7.54, 8.12, 8.68, 9.12, 9.82, 10.36, 10.94, 11.49, 12.09, 12.63, 13.21, 13.77, 14.33, 14.91, 15.48, 15.9, 16.32, 16.88, 17.44, 18.04, 18.58, 19.14, 19.72, 20.17, 20.85, 21.41, 21.97, 22.53, 23.11, 23.55, 24.23, 24.68, 25.38, 25.92, 26.5, 27.06, 27.62, 28.06, 28.75, 29.21, 29.89, 30.35, 30.99, 31.59, 32.15, 32.71, 33.28, 33.74, 34.42, 34.98, 35.54, 36.1, 36.68, 37.24, 38.09, 38.65, 39.23, 39.65, 40.07, 40.51, 41.19, 41.77, 42.34, 42.9, 43.48, 44.04, 44.58, 45.04, 45.72, 46.16, 46.85, 47.41, 47.99, 48.43, 49.11, 49.67, 50.11, 50.53, 51.1, 51.66, 52.22, 52.78, 53.36, 53.92, 54.48, 55.04, 55.61, 56.15, 56.73, 57.29, 57.85, 58.43, 58.99, 59.55, 60.12, 60.68, 61.24, 61.8, 62.38, 62.92, 63.38, 64.06, 64.63, 65.19, 65.77, 66.31, 66.89, 67.45, 68.01, 68.58, 69.14, 69.7, 70.26, 70.82, 71.38, 71.94, 72.5, 73.07, 73.51], "call": {"who": "ラウンジの歌手", "en": "Come on, everybody — sing with me!"}, "lyrics": [[4.0, "Pack my bag, the sky is blue"], [8.0, "Every airport waits for you"], [12.0, "Step by step, and mile by mile"], [16.0, "I will say it with a smile"], [20.0, "This is my promise, Lulu"], [23.5, "We will travel around the world together"], [28.0, "And have fun every day"], [31.5, "My body is healthy, my mind is calm"], [35.0, "I eat good food, sleep well"], [38.5, "And never push too hard"], [42.0, "When I feel afraid"], [45.0, "I breathe and think of you"], [48.5, "We both help each other"], [52.0, "Let's see every village"], [55.0, "Hear every voice"], [58.0, "Share every little treasure"], [61.0, "Thank you for being here"], [64.0, "This is my promise, Lulu"], [67.0, "We will travel around the world together"], [70.0, "And have fun every day"], [72.5, "Let's go, let's go!"]], "after": [{"w": "singer", "who": "ラウンジの歌手", "en": "Thank you for listening. Karibu Nairobi. Welcome!"}, {"w": "lulu", "who": "ルル", "en": "That was beautiful. I could listen all night."}, {"w": "king", "who": "キング", "en": "Asante! It was a wonderful song."}, {"w": "singer", "who": "ラウンジの歌手", "en": "Asante sana. Sleep well, and enjoy Nairobi."}], "listen": 1, "lobby": {"nbo_bbar": "The Balcony Bar has a lovely view. Please enjoy your evening."}, "barReady": 0};
 var ROOMSC={"id": "nbo_room", "who": "ホテルの部屋", "bg": "nroom", "sp": "lulu", "intro": "夜のホテルの部屋。長い一日がおわった。ふたりは、ほっと息をついた。", "lines": [{"w": "lulu", "who": "ルル", "en": "We made it. This is our room at the Villa Rosa Kempinski."}, {"w": "king", "who": "キング", "en": "It is so quiet. Look at the moon."}, {"w": "lulu", "who": "ルル", "en": "Nairobi is beautiful at night."}, {"w": "king", "who": "キング", "en": "My blue suitcase is here. I am so tired."}, {"w": "lulu", "who": "ルル", "en": "Rest well, King. Tomorrow is a new day."}, {"w": "king", "who": "キング", "en": "Lala salama, Lulu."}], "rest": 1};   /* ホテルの部屋(タスク051) */
+var POOLSC={"id": "nbo_pool1", "who": "ホテルのプール", "bg": "npoolq", "sp": null, "intro": "夜のプールサイド。ショーのない時間は静かで、水が光っている。", "lines": [{"w": "lulu", "who": "ルル", "en": "Look at the water. It is so quiet now."}, {"w": "king", "who": "キング", "en": "The pool looks beautiful at night."}, {"w": "lulu", "who": "ルル", "en": "Let's sit here for a while."}, {"w": "king", "who": "キング", "en": "Good idea. What a long day."}]};   /* 静かなプール nbo_pool1(タスク077・実在の場面) */
+var BARSC={"id": "nbo_bar1", "who": "バルコニーバル", "bg": "nbar", "sp": null, "intro": "ホテルのバルコニーバル。街の明かりが見える。", "lines": [{"w": "bartender", "who": "バーテンダー", "en": "Good evening. What can I get you?"}, {"w": "king", "who": "キング", "en": "A mango juice, please."}, {"w": "bartender", "who": "バーテンダー", "en": "Here you are. Enjoy the view."}, {"w": "lulu", "who": "ルル", "en": "Look at the city lights, King."}, {"w": "king", "who": "キング", "en": "Thank you. What a beautiful night."}]};     /* バルコニーバル nbo_bar1(タスク077・枠組みのみ・背景素材待ち。SONGSC.barReady が真になるまで遷移しない) */
 var SONG={el:null,key:null,ac:null,gn:null,want:null};
 SP.singer={pitch:1.1,m:[[HJ,P(2,{x:'#2d8f8a',o:'#e0b040'})]]};   /* 絵が読めなかったときの、いつものドット */
 BGS.nlobby=BGS.lobby;   /* 背景の絵が読めなかったときの、いつものドットのロビー */
 BGS.npool=BGS.lobby;    /* プールサイド(タスク066)の背景が読めなかったときも、いつものドットのロビー */
+BGS.npoolq=BGS.lobby;   /* 静かなプール(タスク077)の背景が読めなかったときも、いつものドットのロビー */
+BGS.nbar=BGS.lobby;     /* バルコニーバル(タスク077): 背景が読めなかったとき(素材待ちの間も)のいつものドットのロビー */
 BGS.nsong=BGS.lobby;    /* 歌場面版の背景(タスク060)が読めなかったときも、いつものドットのロビー */
 /* 曲が鳴っているあいだは、場面の背景の音楽(Snd.go)を止めて重ならないようにする。曲が止まったら、いまの場面の音楽に戻す */
 var SONGSNDGO=Snd.go;
@@ -5011,10 +5053,24 @@ window.__songGo=function(S){CHANT.stop()};
 function songBeatN(){
  if(!songPlaying())return -1;var B=SONGSC&&SONGSC.beats;if(!B||!B.length)return -1;
  var ct=SONG.el.currentTime,lo=0,hi=B.length;while(lo<hi){var m=(lo+hi)>>1;if(B[m]<=ct)lo=m+1;else hi=m}return lo}
+/* 拍の脈(タスク076): 直前の拍の瞬間が1、つぎの拍に向かって0へ減る(鳴っていなければ0)。ステージのキラキラ・光の強さが使う */
+function songBeatPulse(){
+ if(!songPlaying())return 0;var B=SONGSC&&SONGSC.beats,n=songBeatN();if(!B||n<1)return 0;
+ var ct=SONG.el.currentTime,a=B[n-1],b=n<B.length?B[n]:a+.6;return Math.max(0,Math.min(1,1-(ct-a)/Math.max(.2,b-a)))}
+/* 歌詞(タスク076): 曲の再生位置(SONG.el.currentTime)に連動して、メッセージ欄に1行ずつ出す(行単位・英語のみ)。最初の行の前は「♪」。
+   一時停止(マイク中・タブ非表示の __songSync)では currentTime が止まるので、表示も止まって、戻れば続きから追随する。曲が止まったら(SONG.el=null)何もしない=ほかの表示に任せる */
+function songLyric(){
+ var S=G.scene,L=SONGSC&&SONGSC.lyrics;
+ if(!L||!SONG.el||SONG.key!=='theme'||G.view!=='scene'||!S||!S.d||S.d.listen!==1||!S.songLyr)return;
+ var ct=SONG.el.currentTime,i=-1,k;for(k=0;k<L.length;k++){if(L[k][0]<=ct)i=k;else break}
+ if(i===S.lyrIdx)return;S.lyrIdx=i;who.textContent='';msgText.textContent=i<0?'♪':L[i][1]}
+setInterval(songLyric,100);
 /* ---- ホテルのロビー・通常版(タスク066): 受付のスタッフの案内の3択。ショータイム→プールサイドの歌場面。プール・Balcony Bar→スタッフの一言(英文だけ・読み上げ)を出して、選択にもどる ---- */
 window.__lobbyPick=function(vid){
  var pl=G.scene&&G.scene.pl;if(!pl||pl.id!=='hsong'||!SONGSC||!SONGSC.lobby)return false;
  if(vid==='nbo_show'){songListen(pl);return true}
+ if(vid==='nbo_pool'&&POOLSC){hearScene(pl,POOLSC);return true}   /* タスク077: プール → 実在の場面 nbo_pool1(静かなプール) */
+ if(vid==='nbo_bbar'&&BARSC&&SONGSC.barReady){hearScene(pl,BARSC);return true}   /* ★バーの切り替えの口: song_data.py の BAR_READY=True(先に art.js の ART.nbar の PLACEHOLDER 座標を確定し、placeholder:1 の印を外しておく)で場面 nbo_bar1 へ。素材待ちの間は下の一言→メニューに戻る(壊れた場面には行かない) */
  var en=SONGSC.lobby[vid];if(!en)return false;
  hubMenu('main');stopSay();speaker=null;msgText.textContent=en;say(en,.9,1);return true};
 /* ---- ホテルのロビーの「聴く」イベント ---- */
@@ -5036,19 +5092,34 @@ function songListen(pl){
   go.addEventListener('click',function(){stopSay();spSay=false;luTalk=false;onGo()})}
  function onGo(){
   if(G.sid!==sid||S.songGo)return;S.songGo=1;
-  clearPanel();setMsgInstant('♪','');
-  function next(){if(G.sid!==sid||S.songAfter)return;S.songAfter=1;songLine(0)}
+  clearPanel();
+  function next(){if(G.sid!==sid||S.songAfter)return;S.songAfter=1;S.songLyr=0;songLine(0)}
   function nextBtn(){if(G.sid!==sid||S.songAfter||panel.querySelector('.songnext'))return;
    var b=el('button','btn sub songnext','つぎへ ▶');b.type='button';panel.appendChild(b);
    b.addEventListener('click',function(){if(G.sid!==sid)return;songStop();next()})}
-  var ok=songStart('theme',function(why){
+  function onSong(why){
    if(G.sid!==sid)return;
    if(why==='end')next();                        /* 曲が終わった */
-   else{nextBtn()}                               /* 音オフ・ブロック・読み込み失敗: 曲なしで先へ進める */
-  });
-  if(!ok)nextBtn();
-  else later(20000,nextBtn);                     /* 十分聴いたら、先へ進めるボタンを出す(曲の途中でも出口ボタンでマップに戻れる) */
+   else if(why==='blocked'){nextBtn();           /* 再生が止められた(自動再生の制限): 曲なしで先へ進めるほか、もう一度の GO！(ユーザー操作の中)で鳴らし直せる */
+    if(!panel.querySelector('.songretry')){var rb=el('button','btn go songretry','GO！');rb.type='button';panel.insertBefore(rb,panel.firstChild);
+     rb.addEventListener('click',function(){if(G.sid!==sid||S.songAfter)return;rb.remove();S.lyrIdx=-2;if(!songStart('theme',onSong))nextBtn()})}}
+   else{nextBtn()}                               /* 音オフ・読み込み失敗: 曲なしで先へ進める */
   }
+  /* 曲を始める(呼びかけを読み終わってから) */
+  function begin(){
+   if(G.sid!==sid||S.songBegun)return;S.songBegun=1;spSay=false;speaker=null;luTalk=false;stopSay();
+   setMsgInstant('♪','');S.songLyr=1;S.lyrIdx=-2;   /* 歌詞は曲の再生位置に連動(songLyric)。最初の行の前は「♪」 */
+   var ok=songStart('theme',onSong);
+   if(!ok)nextBtn();
+   else later(20000,nextBtn)}                     /* 十分聴いたら、先へ進めるボタンを出す(曲の途中でも出口ボタンでマップに戻れる) */
+  /* タスク076: 曲が始まる直前に、歌手の呼びかけを1つ(英語・表示+読み上げ)。読み終わってから曲。読み上げが使えない・音が出ない環境では、短い待ち(約1秒)で先へ進める。曲の拍・歌詞は再生位置(currentTime)基準なので、呼びかけの長さに影響されない */
+  var c=d.call;
+  if(c&&c.en){
+   speaker=SP.singer;luTalk=false;S.pitch=SP.singer.pitch;setMsgInstant(c.en,c.who);spSay=true;
+   var tts=false;try{tts=typeof speechSynthesis!=='undefined'&&!!window.SpeechSynthesisUtterance&&PREF.voice>0&&songSndOn()}catch(x){}
+   if(tts)say(c.en,.9,S.pitch,gd(begin));
+   else later(songSndOn()?1000:500,begin)}
+  else begin()}
  /* 歌手・ルル・キングの短いやりとり。読み上げて表示するだけ(マイクなし・採点なし)。タップで早送りできる */
  function songLine(i){
   var L=d.after[i];
@@ -5085,6 +5156,28 @@ function roomRest(pl){
   S.pitch=L.w==='lulu'?1.35:1;
   setMsgInstant(L.en,L.who);
   var adv=false;function go2(){if(adv||G.sid!==sid)return;adv=true;spSay=false;stopSay();roomLine(i+1)}
+  var sk=el('button','btn sub','つぎへ ▶');sk.type='button';panel.appendChild(sk);sk.addEventListener('click',go2);
+  spSay=true;say(L.en,.9,S.pitch,gd(function(){spSay=false;later(900,go2)}))}}
+
+/* ---- ロビーの案内から入る、聞くだけの場面(タスク077): 静かなプール nbo_pool1・バルコニーバル nbo_bar1。nbo_room(051)と同じ型: 入りの1行(日本語)→GO！→英語の台詞を表示+読み上げ(つぎへ/自動で進む)→終わったらマップに戻る。
+   マイク・発音採点・単語バトルなし。保存の記録(save.seen)・新しい保存キーは何も足さない。d = POOLSC / BARSC。w = 話す人(lulu / king / bartender) ---- */
+function hearScene(pl,d){
+ G.sid++;clearTimers();stopSay();Snd.go(null);resetOUT();
+ G.scene={id:pl.id,vid:null,pl:pl,d:d,turns:[],words:[],pitch:1,from:null,anim:null,lastSp:null,tables:null};
+ speaker=null;applyCtx({bg:d.bg,who:d.who,sp:null,hero:'blue',lulu:'plain',gold:0});
+ cam=0;spX=360;spSay=false;luTalk=false;G.view='scene';G.ti=0;G.tries=0;$m('mapView').hidden=true;$m('sceneView').hidden=false;
+ clearPanel();G.phase='listen';setMsgInstant(d.intro,'');$m('tapHint').textContent='';
+ var S=G.scene,sid=G.sid;
+ var go=el('button','btn go','GO！');go.type='button';panel.appendChild(go);
+ go.addEventListener('click',function(){if(G.sid!==sid||S.hearGo)return;S.hearGo=1;Snd.go('hotel');hearLine(0)});
+ function hearLine(i){
+  var L=d.lines[i];
+  if(!L){speaker=null;luTalk=false;spSay=false;later(700,function(){if(G.sid===sid)showMap()});return}
+  clearPanel();G.phase='listen';
+  speaker=null;luTalk=(L.w==='lulu');
+  S.pitch=L.w==='lulu'?1.35:(L.w==='bartender'?.95:1);
+  setMsgInstant(L.en,L.who);
+  var adv=false;function go2(){if(adv||G.sid!==sid)return;adv=true;spSay=false;stopSay();hearLine(i+1)}
   var sk=el('button','btn sub','つぎへ ▶');sk.type='button';panel.appendChild(sk);sk.addEventListener('click',go2);
   spSay=true;say(L.en,.9,S.pitch,gd(function(){spSay=false;later(900,go2)}))}}
 /* ===== CAアナウンス・イベント(タスク048): 自分の声が機内放送になる =====
