@@ -7,3 +7,14 @@ compatibility_date = "2025-01-01"
 # ゲームを置いている場所（GitHub Pages）だけに、トークンを配る。
 ALLOWED_ORIGINS = "https://kingtheq.github.io"
 AZURE_SPEECH_REGION = "eastus"
+
+# --- 英会話カフェの自由会話（タスク073）POST /chat ---
+# 返事を作るAI。キーは使わない（Cloudflare の Workers AI をバインディングで呼ぶ）。
+[ai]
+binding = "AI"
+
+# 次の変数は、必要なときだけ Cloudflare の画面で足す（ここには書かない・キーは絶対に書かない）：
+#   CHAT_MODEL    … 先頭が「@」なら Workers AI のモデル名（例 @cf/google/gemma-4-26b-a4b-it・未設定ならこれ）。
+#                   「@」なしなら外部API用のモデル名（未設定なら llama-3.1-8b-instant）。
+#   CHAT_API_URL  … 外部API（Groq など OpenAI 互換）の https の URL。Groq は https://api.groq.com/openai/v1/chat/completions
+#   CHAT_API_KEY  … 外部APIのキー。必ずシークレットで登録する。

@@ -11,6 +11,7 @@
 (7) 先生が話しているあいだ、頭の上に「…」の吹き出しが出る
 マイク・実機の見え方・実機の音は確認できない(このテストの音声認識と声は偽物)。"""
 import os, sys, io, re, json, base64, subprocess
+DEC="()=>{var d=document.querySelectorAll('.dq');if(d.length===2&&__T.G.phase==='free'){d[1].click();return 1}return 0}"
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'flow025'))
 from play import serve, INIT as FAKE_INIT, ROOT
 from playwright.sync_api import sync_playwright
@@ -142,6 +143,7 @@ with sync_playwright() as pw:
     p2.click('.btn.go'); bub = 0; bubble_seen = False
     for i in range(900):
         p2.wait_for_timeout(50)
+        p2.evaluate(DEC)   # タスク073: 5往復のあと、自由会話の誘いが出たら断って終える
         if p2.evaluate("()=>__T.G.view") == 'map': break
     st = p2.evaluate("()=>({view:__T.G.view,ph:window.__ph,txt:window.__txt,sp:window.__sp,errs:window.__perr,seen:__T.save.seen})")
     npc = [l['n'] for l in dl['lines'] if l.get('n')]; cues = [re.sub(r'\*', '', l['y']) for l in dl['lines'] if l.get('y')]
@@ -165,6 +167,7 @@ with sync_playwright() as pw:
             q.wait_for_timeout(50)
             if use_help and not helped and q.evaluate("()=>__T.G.phase") == 'assist':
                 q.wait_for_timeout(300); q.evaluate("()=>{var b=document.querySelector('#panel .btn.help');b&&b.click()}"); helped = True
+            q.evaluate(DEC)
             if q.evaluate("()=>__T.G.view") == 'map': break
         return q.evaluate("()=>({view:__T.G.view,srn:window.__srn,errs:window.__perr})"), helped
     fs, _ = run_fail(2, False)

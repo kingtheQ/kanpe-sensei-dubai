@@ -52,6 +52,7 @@ for x in data.D:
             if x.get(k) is not None: dl[x['id']][k] = x[k]
     if x.get('kind'): dl[x['id']]['kind'] = x['kind']
     if x.get('conv'): dl[x['id']]['conv'] = 1   # 会話に溶かした場面(タスク053): Word Battle と Meaning! を出さない
+    if x.get('freetalk'): dl[x['id']]['freetalk'] = 1   # タスク073: 台本パートのあとに、先生が5分の自由会話に誘う(freetalk.js)
     if x.get('flow2'): dl[x['id']]['flow2'] = 1   # 新しい会話の流れ(タスク061): おてほんボタンなし・自動おてほん・発音の数値なし・日本語カード・支払いの演出
     if x.get('keep'): dl[x['id']]['keep'] = x['keep']   # 秘密イベントの下地(タスク043): この場面を遊び終えたらルルが拾い物をする(画面には出さない)
 # ---------- 持ち越し(005案B): 相手のセリフの差しかえ。種の場面(save.seen)を遊んでいたときだけ返る ----------
@@ -698,9 +699,11 @@ SHARED = [
  ("G.phase='pass';G.tries=0;var th=", "G.phase='pass';G.tries=0;dreamPass();var th="),
  ("G.tries++;\n if(G.tries>=3){if(G.camp){G.phase='assist'", "G.tries++;\n if(dreamGiveUp())return;\n if(G.tries>=3){if(G.camp){G.phase='assist'"),
  ("setMsgInstant('Clear!  ぜんぶ いえた！',whoNow());later(2000,startWords)",
-  "var W0=G.scene.d&&(G.scene.d.win||G.scene.d.ev||G.scene.d.conv);setMsgInstant(G.scene.d.dream?'Good night.':W0?'Clear!':'Clear!  ぜんぶ いえた！',whoNow());later(W0?1300:2000,W0?finishScene:startWords)"),
+  "var W0=G.scene.d&&(G.scene.d.win||G.scene.d.ev||G.scene.d.conv);setMsgInstant(G.scene.d.dream?'Good night.':W0?'Clear!':'Clear!  ぜんぶ いえた！',whoNow());later(W0?1300:2000,W0?(typeof FT!=='undefined'&&G.scene.d.freetalk?FT.end:finishScene):startWords)"),
  ("if(!G.scene||G.phase==='idle'||G.phase==='words'||G.phase==='reveal'||G.phase==='inter'||G.phase==='hub')return;",
   "if(!G.scene||G.phase==='idle'||G.phase==='words'||G.phase==='reveal'||G.phase==='inter'||G.phase==='hub'||G.phase==='sample'||G.phase==='pay')return;"),
+ # 英会話カフェの5分自由会話(タスク073): 自由会話の最中に ✕ を押したら、先生が「バイバイ」に返してから出る(それ以外は今までどおり、すぐ出る)
+ ("$m('exitBtn').addEventListener('click',function(){showMap()});", "$m('exitBtn').addEventListener('click',function(){if(typeof FT!=='undefined'&&FT.exit())return;showMap()});"),
  # 新しい会話の流れ(タスク061): この場面(d.flow2)だけ、おてほんボタンを置かず、発音の数値・判定の文字を出さない。他の場面は今のまま
  ("row.appendChild(demo);\n demo.addEventListener('click',", "if(!f2()||blind)row.appendChild(demo);\n demo.addEventListener('click',"),
  ("stat.className='stat ok';stat.textContent=(res.okN===res.n?'Nice!  ':'')+(hideNum()?'':cnt);onPass();return}\n  stat.className='stat ng';stat.textContent=hideNum()?'':cnt+'  7割未満';onFail()}",
@@ -778,6 +781,7 @@ function paSay(text,rate,pitch,done){
 import conv_data
 EVJS += _rd('conv.js').replace('DREAMBANK_JSON', json.dumps(dict((k, [v[0], v[1], window_data.star(v[2]), v[3]]) for k, v in conv_data.DREAM.items()), ensure_ascii=False)).replace('DREAMFB_JSON', json.dumps(conv_data.FALLBACK, ensure_ascii=False))
 EVJS += _rd('cards.js')   # 新しい会話の流れ(タスク061): 日本語カード・見本の音声先出し・自動おてほん・支払いの演出
+EVJS += _rd('freetalk.js')   # 英会話カフェの5分自由会話(タスク073): 誘い・聞き取り・中継 /chat・締め。使うのは場面データに freetalk=1 がある場面だけ
 EVJS = EVJS.replace("||[])[1]||'';", "||[])[1]||(window.__CHK?'off':'');", 1).replace('EVSLOTS_JSON', json.dumps(event_data.SLOTS + doha_data.SLOTS, ensure_ascii=False)).replace('\\\\w', '\\w')
 
 def ev_patches(o):
@@ -929,7 +933,7 @@ o = rep(o, "function storeSave(){", "var TOUR_FRESH=(function(){try{return local
 # ---- CAアナウンス・イベント(タスク048): ナイロビ(tour/)だけ ----
 # 設定の注意書き(声の扱い)と、マイク画面のカンペの見た目。終わりの場面(o_pre のあと)には入れない
 o = rep(o, SNOTE_NEW, SNOTE_TOUR)
-o = rep(o, ".cue .heard.live{color:#8a7b55}", ".cue .heard.live{color:#8a7b55}\n" + _rd('pa.css') + _rd('cards.css'))
+o = rep(o, ".cue .heard.live{color:#8a7b55}", ".cue .heard.live{color:#8a7b55}\n" + _rd('pa.css') + _rd('cards.css') + _rd('freetalk.css'))
 # 羽田の機内の会話が終わったとき、ほかの出来事より先に差しこむ(最初の長距離便で1回)
 o = rep(o, "if(evGate('after',S.pl.id,function(){G.scene=S;finishScene()}))return}",
         "if(window.PA&&PA.gate(S,function(){G.scene=S;finishScene()}))return;if(evGate('after',S.pl.id,function(){G.scene=S;finishScene()}))return}")

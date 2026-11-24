@@ -17,7 +17,7 @@ var ART={
   strips:[{img:'nairobi-eikaiwa-cafe-lamps-strip.png',x:0,y:0,n:4,fw:1536,fh:960,step:.7},{img:'nairobi-eikaiwa-cafe-window-strip.png',x:996,y:172,n:4,fw:200,fh:320,step:1.6},
    {img:'nairobi-eikaiwa-cafe-steam-strip.png',x:0,y:0,n:4,fw:1536,fh:960,step:.9,over:1}],
   dep:{lulu:{n:'hall-lulu-back',x:928,by:932,w:129,h:200},king:{n:'hall-king-back',x:672,by:932,w:148,h:248},
-   people:[{n:'@teacher-sit-front',x:800,by:706,z:.791,clipY:648,sit:1,spk:1}],bubble:{x:800,y:400}}},
+   people:[{n:'@teacher-sit-front',x:800,by:706,z:.791,clipY:648,sit:1,spk:1}],bubble:{x:800,y:400},cup:{x:805,by:736}}},
  /* ナイロビのタクシー乗り場(タスク051): 朝の屋外。人なしの背景(1536×960。黄色の公式タクシーが並ぶ到着カーブ)。歩道(y≥775)に立つ。fx は無し(昼の絵なので、夜の星・ガラスのきらめきは出さない)。
     people=縁石の手前の歩道の右はし(係員・ふたりの動線と重ねない)。*/
  nairobi:{bg:'nairobi-taxi-v1.png',mode:'wide',base:926,lulu:300,king:470,suit:575,npc:{x:1060,px:9,slide:1},fx:'',npcS:{taxi_staff:'w-front-man-dashiki',driver:'w-front-man-suit-1'},
@@ -544,8 +544,24 @@ function artDep(cf,exi,S,te){
  if(kg&&OUT.hvis)L.push({by:D.king.by,f:function(){if(D.king.h){artSwayZ(kg,D.king.x,D.king.by,kd,D.king.w,D.king.h);return}
   if(D.shF)artShadowF(D.king.x,D.king.by-7,84,D.shF);else artShadow(D.king.x,D.king.by,70);artSway(kg,D.king.x,D.king.by,kd)}});
  L.sort(function(a,b){return a.by-b.by});for(i=0;i<L.length;i++)L[i].f();
+ if(D.cup)artCup(D.cup);
  artStrips(cf.strips,1);
  if(spSay&&speaker&&!speaker.ghost&&!said&&D.bubble)artBubble(D.bubble.x,D.bubble.y)}   /* 絵に出ない相手(ghost=電話の声・アナウンス)には「…」を出さない。立つ人・係員・座る人が話し相手のとき、その人の上に出す */
+/* 自由会話のコーヒーカップ(タスク073): 残り時間の見せ方。数字・文字は出さない。FT.cup()=残り(1→0)。自由会話の最中だけ、テーブルの手前(先生とキング・ルルのあいだ)に大きめのカップを置き、コーヒーが少しずつ(4px刻みで12段)減っていく。cx=中心 by=受け皿の底 */
+function artCup(C){
+ var f=(typeof FT!=='undefined'&&FT.cup)?FT.cup():null;if(f==null)return;
+ var O='#5a3a24',CUP='#f6f1e6',SH='#e0d6c0',bx=C.x-48,top=C.by-80,sx=C.x-60,i;
+ artR('#5a4a3a',sx-4,C.by-12,128,4);artR('#c9bfa8',sx,C.by-8,120,8);artR('#f4eee0',sx,C.by-8,120,4);   /* 受け皿 */
+ var hb=[[bx+92,top+16,20,8],[bx+104,top+16,8,32],[bx+92,top+40,20,8]];   /* 取っ手(Cの字) */
+ for(i=0;i<3;i++)artR(O,hb[i][0]-4,hb[i][1]-4,hb[i][2]+8,hb[i][3]+8);
+ for(i=0;i<3;i++)artR(CUP,hb[i][0],hb[i][1],hb[i][2],hb[i][3]);
+ artR(O,bx-4,top-4,104,64);artR(O,bx+4,top+56,88,24);   /* 本体のふち(上は広く、下はすぼむ) */
+ artR(CUP,bx,top,96,56);artR(CUP,bx+8,top+56,80,16);artR(SH,bx+80,top+4,16,52);artR(SH,bx+72,top+56,16,16);
+ artR('#fffaf0',bx,top,96,4);
+ artR('#d8cdb4',bx+8,top+8,80,44);   /* カップのなか(空) */
+ var h=Math.round(f*40/4)*4;
+ if(h>0){artR('#6b3f23',bx+8,top+52-h,80,h);artR('#8f5a34',bx+8,top+52-h,80,4)}   /* コーヒー。h=0〜40 */
+ if(f>.05){var ph;for(i=0;i<2;i++){ph=(Math.floor(t*1.5)+i*2)%4;ca.globalAlpha=.5;artR('#fff',bx+28+i*28+(ph%2)*4,top-14-ph*6,8,8)}ca.globalAlpha=1}}
 /* 背景に重ねる小さな動き(タスク051)。strips=[{img,x,y,n,fw,fh,step}]。NEARESTの粒のまま(拡大縮小しない)。会話の進み方にはかかわらず、時間だけで切り替わる */
 function artStrips(list,over){for(var i=0;i<(list||[]).length;i++){var q=list[i],im=artImg(q.img);if(!!q.over!==!!over||im.bad||!artOKimg(im))continue;var f=Math.floor(t/q.step)%q.n;
   if(q.sync==='beat'&&typeof songBeatN==='function'){var bn=songBeatN();if(bn>=0)f=bn%q.n}   /* タスク066: テーマ曲が鳴っているあいだは、曲の再生位置の拍に合わせて切りかえる(鳴っていないときは、ゆっくりの時間切りかえ) */
