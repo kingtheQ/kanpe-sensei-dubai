@@ -25,6 +25,12 @@ var ART={
     tv=壁のTV画面の矩形(1536×960座標)。今回は何も映さない。将来の映画場面のために名前つきで記録しておく */
  nroom:{bg:'nairobi-hotel-room-v1.png',mode:'wide',hall:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884}},tv:{x:1120,y:216,w:344,h:176}},
  hotel:{bg:'hotel-front.png',mode:'room',base:895,lulu:250,king:450,suit:560,npc:{x:1290,px:15,top:262,clip:412},fx:'hotel',npcS:{c_front:'o-front-woman-blonde-suit'}},
+ /* ドーハのコルニーシュ(タスク070): 朝・人なしの背景(1536×960)。絵に文字は一切なし。対象は bg ccorn の4場面(doh_city_c1/c2/c3・doh_ev_j_ask。結びは doha 側 artIdFor だけ)。
+    ふたりは右の端から歩いて入り、ルル x=1060・キング x=1180(足もと y=884)で止まる(dir:-1)。スーツケースは左どなり。相手は左の広い舗道(ベンチの手前)。
+    strips=別素材(背景には舟もきらめきも描いていない): ダウ舟(その場で2コマ揺れる。船体は手すり y=516 より上の水面)・水面のきらめき(4コマ)。
+    実画が表示される間は、コード描画(BGS.ccorn)の舟・波は出ない(実画が読めないときだけ、そちらに落ちる) */
+ dcorn:{bg:'doha-corniche-v1.png',mode:'wide',base:884,dir:-1,lulu:1060,king:1180,suit:960,npc:{x:800,px:9,slide:1},fx:'',
+  strips:[{img:'doha-corniche-sparkle-strip.png',x:0,y:372,n:4,fw:1536,fh:192,step:.5},{img:'doha-corniche-dhow-strip.png',x:700,y:258,n:2,fw:512,fh:256,step:.8}]},
  /* 賢者の広間(タスク040): 人なしの背景をフルブリード。賢者は壇上の中央(大人の高さ136px)、ルル(左)とキング(右)は絨毯の上に後ろ姿で寄って立つ(広い場面の大きさ)。
     globe=背景の球の位置(球の外わく 312..473×356..517)に、球だけ8コマ(96px。2倍=192px)を重ね、period秒で1回転。人は足と影を固定し、上半身だけ小さく揺れる(タスク037) */
  sage:{bg:'sage-hall-bg-clean.png',mode:'wide',hall:{sage:{n:'hall-sage',x:768,by:684},lulu:{n:'hall-lulu-back',x:733,by:905},king:{n:'hall-king-back',x:803,by:905},
@@ -168,6 +174,12 @@ ART.nsafari={bg:'nairobi-safari-v1.png',mode:'wide',dep:{shF:1,lulu:{n:'hall-lul
 ART.nmarket={bg:'nairobi-market-v1.png',mode:'wide',dep:{shF:'rgba(3,10,21,.4)',lulu:{n:'hall-lulu-back',x:716,by:884},king:{n:'hall-king-back',x:800,by:884},
  npcS:{market_vendor:{n:'t-maasai-front',x:900,by:596,sw:79}},
  fx:[{k:'strip',img:'nairobi-market-cloths-strip.png',x:704,y:326,fw:112,fh:168,n:2,every:1.4}]}};
+/* ロヴァニエミの到着ロビー(タスク065): 人なしの背景(1536×960。天窓の光が床に描く北極圏ラインが主役)に、オーロラの別素材(4コマ。1コマ1376×172)を左上(80,128)=窓帯の空の部分に重ねる。
+   ふたりは後ろ姿で足もと y=884(ルルが左 x=700・キングが右 x=836。ラインの手前。配置の正本は同梱の rovaniemi-arrivals-preview.png)。
+   話し相手(rvn_lobby1/2)は、ふたりの右(トロリーとウェルカム看板のあいだの床)に立つ。キャンバスの上から2番目の重ね(背景→オーロラ→人)。 */
+ART.rvnlobby={bg:'rovaniemi-arrivals-v1.png',mode:'wide',strips:[{img:'rovaniemi-aurora-strip.png',x:80,y:128,n:4,fw:1376,fh:172,step:1.2}],
+ dep:{shF:'rgba(3,10,21,.4)',lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},
+  npcS:{r_greeter:{n:'t-backpacker-front',x:1010,by:890,sw:79},r_local:{n:'w-front-man-suit-1',x:1010,by:890,sw:70}}}};
 /*ARTSEL*/
 function artImg(n){var i=ARTI[n];if(!i){i=ARTI[n]=new Image();i.onerror=function(){i.bad=1};i.src=ARTBASE+n}return i}
 function artShow(on){if(ARTSHOW===on)return;ARTSHOW=on;cv.hidden=!!on;cvA.hidden=!on}
@@ -472,10 +484,10 @@ var AMB={
  sea:{src:'',vol:.10,note:'海ぞい: 波'}};
 /* 場面の音の名前(場所の snd) → カテゴリ */
 var AMBSND={info:'airport',hall:'airport',tdesk:'airport',map:'airport',nbo:'airport',doh:'airport',cafe:'cafe',costa:'cafe',mall:'cafe',s34:'cafe',
- ahlan:'lounge',hotel:'hotel',room:'hotel',home:'hotel',sage:'hotel',vault:'hotel',mosque:'hotel',atop:'cabin',souk:'street',city:'street',dohc:'street',
+ rvn:'airport',ahlan:'lounge',hotel:'hotel',room:'hotel',home:'hotel',sage:'hotel',vault:'hotel',mosque:'hotel',atop:'cabin',souk:'street',city:'street',dohc:'street',
  beach:'sea',marina:'sea',fountain:'outdoor',safari:'outdoor'};
 /* 背景の名前 → カテゴリ(場所の音と食いちがうとき、こちらが先) */
-var AMBBG={taxi:'outdoor',dtaxi:'outdoor',cabinQ:'cabin',cabin:'cabin',chotel:'hotel',cbreak:'hotel'};
+var AMBBG={taxi:'outdoor',dtaxi:'outdoor',rbus:'outdoor',cabinQ:'cabin',cabin:'cabin',chotel:'hotel',cbreak:'hotel'};
 var ambEl=null,ambCat=null,ambDuck=false;
 function ambOn(){try{return localStorage.getItem('kd_snd')!=='off'}catch(e){return true}}
 function ambApply(){var c=ambCat&&AMB[ambCat];

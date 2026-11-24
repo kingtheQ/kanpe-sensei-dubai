@@ -3,7 +3,7 @@
 羽田出発の残り5場面(hnd_checkin_ow / hnd_sec / hnd_exit / hnd_plane_ow / hnd_plane_star)を実画に結んだ。
 A. 結び(artIdFor): 本編側で 5場面が hcheckin_ow / hsec / hexit / hcabin_ow / hcabin_st に結ばれる。
    既存の結び(055 hcheckin_st・048 cabinseat・機内食 cabinmeal・054 ナイロビ出発・羽田のゲート)は変わらない
-B. ドーハ側ビルド(tour/doha/index.html)の artIdFor は今までどおり(ホテルのフロントだけ)。羽田の結びを含まない
+B. ドーハ側ビルド(tour/doha/index.html)の artIdFor は今までどおり(origin/main と同じ)。羽田の結びを含まない
 C. 通常モード: 5場面とも実画の背景(sceneA)が出る・読み込み失敗なし・エラーなし。別素材(荷物・トレイ・表示灯・機内の明滅)が読まれて描かれる
 D. 配置: 同梱プレビューと見比べた画素の差(動く別素材・話す「…」の場所は除く)
 E. 大きさ: 客室乗務員の高さ274・頭105px(この場面のキングの頭100pxの1.05倍)
@@ -60,7 +60,11 @@ with sync_playwright() as pw:
     chk('A4 054 ナイロビ出発は従来どおり(ncheckin1/2・nsec1/2・機内 nbo_plane は結ばれない)', (r['nbo_checkin1'], r['nbo_checkin2'], r['nbo_sec1'], r['nbo_sec2'], r['nbo_plane1'], r['nbo_plane2'], r['nbo_immig1']) == ('ncheckin1', 'ncheckin2', 'nsec1', 'nsec2', None, None, 'immig'), r)
     chk('A5 vid が hnd_ でない同名の bg(doh_ など)は今回の絵に結ばない', r['doh_x'] is None and r['doh_y'] is None and r['doh_z'] is None and r['doh_w'] is None, (r['doh_x'], r['doh_y'], r['doh_z'], r['doh_w']))
     # ---------------- B. ドーハ側 ----------------
-    chk('B1 ドーハ側ビルドの artIdFor は ホテルのフロントだけ(変更なし)', "function artIdFor(S){return S&&S.vid==='doh_city_h1'?'hotel':null}" in doha)
+    import subprocess
+    def fn_line(t): return [l for l in t.split('\n') if l.startswith('function artIdFor(S)')]
+    try: base_doha = subprocess.run(['git', '-C', ROOT, 'show', 'origin/main:tour/doha/index.html'], capture_output=True, text=True, check=True).stdout
+    except Exception: base_doha = None
+    chk('B1 ドーハ側ビルドの artIdFor は origin/main のものと同じ(結びを足していない)', base_doha is None or fn_line(doha) == fn_line(base_doha), fn_line(doha))
     chk('B2 ドーハ側ビルドの artIdFor に 羽田の結びは入っていない', not re.search(r"function artIdFor\(S\)\{[^\n]*(hcheckin_ow|hsec|hexit|hcabin_)", doha))
     chk('B3 本編側の artIdFor に結びが入っている', all(('return\'' + x + '\'') in src for x in ('hcheckin_ow', 'hsec', 'hexit', 'hcabin_ow', 'hcabin_st')))
     # ---------------- C. 通常モード ----------------

@@ -1430,7 +1430,7 @@ var TRIP=(function(){
   ADD:{id:'addis',n:'アディスアベバ',en:'Addis Ababa',lon:38.80,lat:8.98},BOG:{id:'bogota',n:'ボゴタ',en:'Bogota',lon:-74.15,lat:4.70},
   IAH:{id:'houston',n:'ヒューストン',en:'Houston',lon:-95.34,lat:29.98},GUM:{id:'guam',n:'グアム',en:'Guam',lon:144.80,lat:13.48},
   NRT:{id:'narita',n:'成田',en:'Tokyo',lon:140.39,lat:35.77}};
- var IMPL={HND:1,NBO:1,DOH:1};   /* 場面のある空港。ここ以外の行き先は、地図と券には出すが、行けない */
+ var IMPL={HND:1,NBO:1,DOH:1,RVN:1};   /* 065: ロヴァニエミ(到着まわり)。ヘルシンキは乗り継ぎだけ(chain が場面なしの区間をはさむ) */   /* 場面のある空港。ここ以外の行き先は、地図と券には出すが、行けない */
  function codeOf(apId){for(var k in AIRP)if(AIRP[k].id===apId)return k;return null}
  /* ---------- 券ごとの区間(会社は docs/world-tour-design.md の便の表。別切符は会社を書かない)。[出発,到着,会社,表の日,別切符] ---------- */
  var LEGS={
@@ -1453,7 +1453,7 @@ var TRIP=(function(){
    [7,'DOH','city',1,"Doha. Let's walk through the old market.",['doh_city','doh_hotel_am']],
    [8,'DOH','rest',0,'Doha. A slow morning.',[]],
    [9,'DOH','air',1,'Doha. Our flight to Helsinki is today.',['doh_dep']],
-   [10,'HEL','air',2,'Rovaniemi. The north, at last.',[]],[11,'RVN','city',1,'Lapland. Dogs and reindeer.',[]],
+   [10,'HEL','air',2,'Rovaniemi. The north, at last.',['rvn_arr']],[11,'RVN','city',1,'Lapland. Dogs and reindeer.',[]],
    [12,'RVN','city',2,'Lapland. Tonight we wait for the lights.',[]],[13,'RVN','air',0,'Rovaniemi. Madrid is next.',[]],
    [14,'MAD','city',1,'Madrid. Art and a long lunch.',[]],[15,'MAD','move',0,'Madrid. A very long flight today.',[]],
    [16,'LIM','rest',0,'Lima. A slow morning.',[]],[17,'LIM','air',1,'Lima. We go up into the mountains.',[]],
@@ -1469,7 +1469,7 @@ var TRIP=(function(){
    [4,'NBO','city',2,"Nairobi. Let's go on a safari.",['nbo_market','nbo_safari']],[5,'NBO','rest',0,'Nairobi. A slow morning.',[]],
    [6,'NBO','air',1,'Nairobi. Our flight to Addis Ababa is today.',['nbo_air']],
    [7,'ADD','move',1,'Addis Ababa. Fog this morning.',[]],[8,'IST','city',1,'Istanbul. The old city and the bazaar.',[]],
-   [9,'IST','air',2,'Istanbul. We fly north today.',[]],[10,'RVN','city',1,'Lapland. Dogs and reindeer.',[]],
+   [9,'IST','air',2,'Istanbul. We fly north today.',[]],[10,'RVN','city',1,'Lapland. Dogs and reindeer.',['rvn_arr']],
    [11,'RVN','city',2,'Lapland. Tonight we wait for the lights.',[]],[12,'RVN','move',1,'Rovaniemi. Back to Istanbul.',[]],
    [13,'IST','move',0,'Istanbul. A very long flight today.',[]],[14,'BOG','rest',0,'Bogota. A slow morning.',[]],
    [15,'BOG','air',1,'Bogota. We go up into the mountains.',[]],[16,'CUZ','city',0,"The Sacred Valley. Let's take the train.",[]],
@@ -1504,13 +1504,15 @@ var TRIP=(function(){
   doh_arr:[['doh_immig1','doh_immig2'],['doh_bag1','doh_bag2'],['doh_sim1','doh_sim2'],['doh_taxi','doh_metro']],
   doh_city:[['doh_city_t2','doh_city_t1','doh_city_t3'],['doh_city_h1','doh_city_h2'],['doh_city_s1','doh_city_s2','doh_city_s3'],['doh_city_r1','doh_city_r2','doh_city_r3'],['doh_city_c1','doh_city_c2','doh_city_c3']],
   doh_hotel_am:[['doh_city_h3','doh_city_h4']],
+  rvn_arr:[['rvn_immig1','rvn_immig2'],['rvn_bag1','rvn_bag2'],['rvn_lobby1','rvn_lobby2'],['rvn_wifi1','rvn_wifi2'],['rvn_bus1','rvn_bus2']],   /* 065: ロヴァニエミの到着(両方の券とも10日目。ドーハの次の到着枠) */
   doh_dep:[['doh_dep_checkin','doh_dep_passport'],['doh_dep_bear'],['doh_dep_train'],['doh_dep_orchard','doh_dep_lounge'],['doh_dep_gate','doh_dep_plane']]};
  /* 場所の名前(各ページの place id) → まとまり。鍵(ロック)と、タブの開きに使う */
  var PLACEGRP={hreturn:'hnd_ret',hcheckin:'hnd_dep',hsec:'hnd_dep',hexit:'hnd_dep',hgate:'hnd_dep',hboard:'hnd_dep',hplane:'hnd_dep',immig:'nbo_arr',bag:'nbo_arr',sim:'nbo_arr',taxi:'nbo_arr',market:'nbo_market',safari:'nbo_safari',java:'nbo_air',art:'nbo_air',lounge:'nbo_air',duty:'nbo_air',
   qcheckin:'nbo_dep',nsec:'nbo_dep',gate:'nbo_dep',qplane:'nbo_dep',dimmig:'doh_arr',dbag:'doh_arr',dsim:'doh_arr',dride:'doh_arr',
   calley:'doh_city',chotel:'doh_city',csouq:'doh_city',crest:'doh_city',ccorn:'doh_city',cbreak:'doh_hotel_am',
-  dcounter:'doh_dep',dsouth:'doh_dep',dtrain:'doh_dep',dnorth:'doh_dep',dgate:'doh_dep'};
- var MODEGRP={hret:{tour:'hnd_ret'},hdep:{tour:'hnd_dep'},arr:{tour:'nbo_arr',doha:'doh_arr'},stay:{tour:['nbo_market','nbo_safari']},air:{tour:'nbo_air'},dep:{tour:'nbo_dep',doha:'doh_dep'},city:{doha:'doh_city'},sage:{tour:'hnd'}};
+  dcounter:'doh_dep',dsouth:'doh_dep',dtrain:'doh_dep',dnorth:'doh_dep',dgate:'doh_dep',
+  rimmig:'rvn_arr',rbag:'rvn_arr',rlobby:'rvn_arr',rwifi:'rvn_arr',rbus:'rvn_arr'};
+ var MODEGRP={hret:{tour:'hnd_ret'},hdep:{tour:'hnd_dep'},arr:{tour:'nbo_arr',doha:'doh_arr',rovaniemi:'rvn_arr'},stay:{tour:['nbo_market','nbo_safari']},air:{tour:'nbo_air'},dep:{tour:'nbo_dep',doha:'doh_dep'},city:{doha:'doh_city'},sage:{tour:'hnd'}};
  /* お金の1行(場面の台詞に出る値段。円に直すレートは架空で固定)。タクシーとメトロは台詞に値段がないので、架空の値段 */
  var MONEY={nbo_sim1:['sim',1000,'KES'],nbo_taxi1:['taxi',3000,'KES'],nbo_java1:['coffee',800,'KES'],nbo_market:['gift',1500,'KES'],nbo_duty1:['duty',24,'USD'],
   doh_sim1:['sim',30,'QAR'],doh_taxi:['taxi',55,'QAR'],doh_metro:['metro',6,'QAR'],doh_city_t1:['tea',2,'QAR'],doh_city_s1:['gift',10,'QAR'],
@@ -1525,7 +1527,8 @@ var TRIP=(function(){
  /* 場面の絵の名前 → 写真の見た目(場面の絵が使えないページ=世界マップで、控えの写真に使う) */
  var THEME={checkinT:'air',immigH:'air',hgateOW:'air',hgateST:'air',cabinT:'cabin',tdesk:'desk',sage:'desk',javaK:'air',artK:'air',safariK:'street',marketK:'souq',lounge:'lng',duty:'air',gate:'air',sim:'air',taxi:'street',checkinQ:'air',cabinQ:'cabin',
   dimmig:'dair',dbag:'dair',dsim:'dair',dtaxi:'street',dmetro:'dair',dcheck:'dair',dsouth:'dair',dtrain:'dair',dorch:'dair',dlng:'lng',dgate:'dair',dcabin:'cabin',
-  calley:'souq',chotel:'hotel',csouq:'souq',crest:'souq',cbreak:'hotel',ccorn:'sea',night:'night',nap:'night'};
+  calley:'souq',chotel:'hotel',csouq:'souq',crest:'souq',cbreak:'hotel',ccorn:'sea',night:'night',nap:'night',
+  rimmig:'dair',rbag:'dair',rlobby:'dair',rwifi:'dair',rbus:'night'};
 
  /* ---------- 場面の現地時刻(タスク032 / 020-3) ----------
     旅の中の場面は、いまの本当の時計でなく「旅の中の現地時刻」で昼夜を決める。
@@ -1540,7 +1543,8 @@ var TRIP=(function(){
   dimmig:22,dbag:22,dsim:22,dride:22,                  /* ドーハ到着(台本: Good evening。ナイロビから約5時間) */
   calley:20,chotel:21,csouq:19,crest:20,               /* ドーハ市内の夜(台本: Good evening) */
   cbreak:7,ccorn:10,                                   /* ドーハの翌朝(朝食 6:30〜・コルニーシュは朝食のあと) */
-  dcounter:13,dsouth:14,dtrain:14,dnorth:15,dgate:15}; /* ドーハ出発(台本: Good afternoon) */
+  dcounter:13,dsouth:14,dtrain:14,dnorth:15,dgate:15,
+  rimmig:23,rbag:23,rlobby:23,rwifi:23,rbus:23};      /* ロヴァニエミ到着(065。物語の時刻で、実在の便の時刻ではない。夜の便・深夜の到着=021 の R1〜R4) */ /* ドーハ出発(台本: Good afternoon) */
  /* 券ごとの上書き: スターのナイロビ着は 01:25(夜)。台本のあいさつは朝のまま(夜版の台本は未作成) */
  var HOUR_TK={star:{immig:1,bag:2,sim:2,taxi:3}};
  function hourAt(tk,id){if(!id)return null;var o=HOUR_TK[tk];if(o&&has(o,id))return o[id];return has(HOUR,id)?HOUR[id]:null}
@@ -4277,6 +4281,12 @@ var ART={
     tv=壁のTV画面の矩形(1536×960座標)。今回は何も映さない。将来の映画場面のために名前つきで記録しておく */
  nroom:{bg:'nairobi-hotel-room-v1.png',mode:'wide',hall:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884}},tv:{x:1120,y:216,w:344,h:176}},
  hotel:{bg:'hotel-front.png',mode:'room',base:895,lulu:250,king:450,suit:560,npc:{x:1290,px:15,top:262,clip:412},fx:'hotel',npcS:{c_front:'o-front-woman-blonde-suit'}},
+ /* ドーハのコルニーシュ(タスク070): 朝・人なしの背景(1536×960)。絵に文字は一切なし。対象は bg ccorn の4場面(doh_city_c1/c2/c3・doh_ev_j_ask。結びは doha 側 artIdFor だけ)。
+    ふたりは右の端から歩いて入り、ルル x=1060・キング x=1180(足もと y=884)で止まる(dir:-1)。スーツケースは左どなり。相手は左の広い舗道(ベンチの手前)。
+    strips=別素材(背景には舟もきらめきも描いていない): ダウ舟(その場で2コマ揺れる。船体は手すり y=516 より上の水面)・水面のきらめき(4コマ)。
+    実画が表示される間は、コード描画(BGS.ccorn)の舟・波は出ない(実画が読めないときだけ、そちらに落ちる) */
+ dcorn:{bg:'doha-corniche-v1.png',mode:'wide',base:884,dir:-1,lulu:1060,king:1180,suit:960,npc:{x:800,px:9,slide:1},fx:'',
+  strips:[{img:'doha-corniche-sparkle-strip.png',x:0,y:372,n:4,fw:1536,fh:192,step:.5},{img:'doha-corniche-dhow-strip.png',x:700,y:258,n:2,fw:512,fh:256,step:.8}]},
  /* 賢者の広間(タスク040): 人なしの背景をフルブリード。賢者は壇上の中央(大人の高さ136px)、ルル(左)とキング(右)は絨毯の上に後ろ姿で寄って立つ(広い場面の大きさ)。
     globe=背景の球の位置(球の外わく 312..473×356..517)に、球だけ8コマ(96px。2倍=192px)を重ね、period秒で1回転。人は足と影を固定し、上半身だけ小さく揺れる(タスク037) */
  sage:{bg:'sage-hall-bg-clean.png',mode:'wide',hall:{sage:{n:'hall-sage',x:768,by:684},lulu:{n:'hall-lulu-back',x:733,by:905},king:{n:'hall-king-back',x:803,by:905},
@@ -4420,6 +4430,12 @@ ART.nsafari={bg:'nairobi-safari-v1.png',mode:'wide',dep:{shF:1,lulu:{n:'hall-lul
 ART.nmarket={bg:'nairobi-market-v1.png',mode:'wide',dep:{shF:'rgba(3,10,21,.4)',lulu:{n:'hall-lulu-back',x:716,by:884},king:{n:'hall-king-back',x:800,by:884},
  npcS:{market_vendor:{n:'t-maasai-front',x:900,by:596,sw:79}},
  fx:[{k:'strip',img:'nairobi-market-cloths-strip.png',x:704,y:326,fw:112,fh:168,n:2,every:1.4}]}};
+/* ロヴァニエミの到着ロビー(タスク065): 人なしの背景(1536×960。天窓の光が床に描く北極圏ラインが主役)に、オーロラの別素材(4コマ。1コマ1376×172)を左上(80,128)=窓帯の空の部分に重ねる。
+   ふたりは後ろ姿で足もと y=884(ルルが左 x=700・キングが右 x=836。ラインの手前。配置の正本は同梱の rovaniemi-arrivals-preview.png)。
+   話し相手(rvn_lobby1/2)は、ふたりの右(トロリーとウェルカム看板のあいだの床)に立つ。キャンバスの上から2番目の重ね(背景→オーロラ→人)。 */
+ART.rvnlobby={bg:'rovaniemi-arrivals-v1.png',mode:'wide',strips:[{img:'rovaniemi-aurora-strip.png',x:80,y:128,n:4,fw:1376,fh:172,step:1.2}],
+ dep:{shF:'rgba(3,10,21,.4)',lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},
+  npcS:{r_greeter:{n:'t-backpacker-front',x:1010,by:890,sw:79},r_local:{n:'w-front-man-suit-1',x:1010,by:890,sw:70}}}};
 function artIdFor(S){var g=S&&S.d&&S.d.bg,h=S&&S.hub&&S.ctx&&S.ctx.bg,v=String(S&&S.vid||''),k=/2$/.test(v)?'2':'1';if(/^nbo_/.test(v)){if(g==='checkinQ')return'ncheckin'+k;if(g==='security')return'nsec'+k;if(g==='duty')return'nduty'+k;if(g==='lounge')return'nlounge'+k;if(g==='gate')return'ngate'+k}if(/^hnd_/.test(v)){if(g==='checkinT')return'hcheckin_st';if(g==='checkinQ')return'hcheckin_ow';if(g==='security')return'hsec';if(g==='immigH')return'hexit';if(/^hnd_plane_/.test(v)){if(g==='cabinQ')return'hcabin_ow';if(g==='cabinT')return'hcabin_st'}}if(/^hnd_ev_ca_/.test(v))return 'cabinseat';if(/^hnd_ev_meal_/.test(v))return 'cabinmeal';return g==='nsong'?'nsong':g==='safariK'?'nsafari':g==='marketK'?'nmarket':g==='nlobby'?'nlobby':g==='nroom'?'nroom':g==='sim'?'simshop':(g==='sage'||h==='sage')?'sage':((g==='tdesk'||g==='rtmap')?'ticket':(g==='taxi'?'nairobi':(g==='immig'?'immig':(g==='baggage'?'bagclaim':(g==='hgateOW'?'hgate_ow':(g==='hgateST'?'hgate_st':null))))))}
 function artImg(n){var i=ARTI[n];if(!i){i=ARTI[n]=new Image();i.onerror=function(){i.bad=1};i.src=ARTBASE+n}return i}
 function artShow(on){if(ARTSHOW===on)return;ARTSHOW=on;cv.hidden=!!on;cvA.hidden=!on}
@@ -4724,10 +4740,10 @@ var AMB={
  sea:{src:'',vol:.10,note:'海ぞい: 波'}};
 /* 場面の音の名前(場所の snd) → カテゴリ */
 var AMBSND={info:'airport',hall:'airport',tdesk:'airport',map:'airport',nbo:'airport',doh:'airport',cafe:'cafe',costa:'cafe',mall:'cafe',s34:'cafe',
- ahlan:'lounge',hotel:'hotel',room:'hotel',home:'hotel',sage:'hotel',vault:'hotel',mosque:'hotel',atop:'cabin',souk:'street',city:'street',dohc:'street',
+ rvn:'airport',ahlan:'lounge',hotel:'hotel',room:'hotel',home:'hotel',sage:'hotel',vault:'hotel',mosque:'hotel',atop:'cabin',souk:'street',city:'street',dohc:'street',
  beach:'sea',marina:'sea',fountain:'outdoor',safari:'outdoor'};
 /* 背景の名前 → カテゴリ(場所の音と食いちがうとき、こちらが先) */
-var AMBBG={taxi:'outdoor',dtaxi:'outdoor',cabinQ:'cabin',cabin:'cabin',chotel:'hotel',cbreak:'hotel'};
+var AMBBG={taxi:'outdoor',dtaxi:'outdoor',rbus:'outdoor',cabinQ:'cabin',cabin:'cabin',chotel:'hotel',cbreak:'hotel'};
 var ambEl=null,ambCat=null,ambDuck=false;
 function ambOn(){try{return localStorage.getItem('kd_snd')!=='off'}catch(e){return true}}
 function ambApply(){var c=ambCat&&AMB[ambCat];

@@ -277,7 +277,7 @@ var TRIP=(function(){
   ADD:{id:'addis',n:'アディスアベバ',en:'Addis Ababa',lon:38.80,lat:8.98},BOG:{id:'bogota',n:'ボゴタ',en:'Bogota',lon:-74.15,lat:4.70},
   IAH:{id:'houston',n:'ヒューストン',en:'Houston',lon:-95.34,lat:29.98},GUM:{id:'guam',n:'グアム',en:'Guam',lon:144.80,lat:13.48},
   NRT:{id:'narita',n:'成田',en:'Tokyo',lon:140.39,lat:35.77}};
- var IMPL={HND:1,NBO:1,DOH:1};   /* 場面のある空港。ここ以外の行き先は、地図と券には出すが、行けない */
+ var IMPL={HND:1,NBO:1,DOH:1,RVN:1};   /* 065: ロヴァニエミ(到着まわり)。ヘルシンキは乗り継ぎだけ(chain が場面なしの区間をはさむ) */   /* 場面のある空港。ここ以外の行き先は、地図と券には出すが、行けない */
  function codeOf(apId){for(var k in AIRP)if(AIRP[k].id===apId)return k;return null}
  /* ---------- 券ごとの区間(会社は docs/world-tour-design.md の便の表。別切符は会社を書かない)。[出発,到着,会社,表の日,別切符] ---------- */
  var LEGS={
@@ -300,7 +300,7 @@ var TRIP=(function(){
    [7,'DOH','city',1,"Doha. Let's walk through the old market.",['doh_city','doh_hotel_am']],
    [8,'DOH','rest',0,'Doha. A slow morning.',[]],
    [9,'DOH','air',1,'Doha. Our flight to Helsinki is today.',['doh_dep']],
-   [10,'HEL','air',2,'Rovaniemi. The north, at last.',[]],[11,'RVN','city',1,'Lapland. Dogs and reindeer.',[]],
+   [10,'HEL','air',2,'Rovaniemi. The north, at last.',['rvn_arr']],[11,'RVN','city',1,'Lapland. Dogs and reindeer.',[]],
    [12,'RVN','city',2,'Lapland. Tonight we wait for the lights.',[]],[13,'RVN','air',0,'Rovaniemi. Madrid is next.',[]],
    [14,'MAD','city',1,'Madrid. Art and a long lunch.',[]],[15,'MAD','move',0,'Madrid. A very long flight today.',[]],
    [16,'LIM','rest',0,'Lima. A slow morning.',[]],[17,'LIM','air',1,'Lima. We go up into the mountains.',[]],
@@ -316,7 +316,7 @@ var TRIP=(function(){
    [4,'NBO','city',2,"Nairobi. Let's go on a safari.",['nbo_market','nbo_safari']],[5,'NBO','rest',0,'Nairobi. A slow morning.',[]],
    [6,'NBO','air',1,'Nairobi. Our flight to Addis Ababa is today.',['nbo_air']],
    [7,'ADD','move',1,'Addis Ababa. Fog this morning.',[]],[8,'IST','city',1,'Istanbul. The old city and the bazaar.',[]],
-   [9,'IST','air',2,'Istanbul. We fly north today.',[]],[10,'RVN','city',1,'Lapland. Dogs and reindeer.',[]],
+   [9,'IST','air',2,'Istanbul. We fly north today.',[]],[10,'RVN','city',1,'Lapland. Dogs and reindeer.',['rvn_arr']],
    [11,'RVN','city',2,'Lapland. Tonight we wait for the lights.',[]],[12,'RVN','move',1,'Rovaniemi. Back to Istanbul.',[]],
    [13,'IST','move',0,'Istanbul. A very long flight today.',[]],[14,'BOG','rest',0,'Bogota. A slow morning.',[]],
    [15,'BOG','air',1,'Bogota. We go up into the mountains.',[]],[16,'CUZ','city',0,"The Sacred Valley. Let's take the train.",[]],
@@ -351,13 +351,15 @@ var TRIP=(function(){
   doh_arr:[['doh_immig1','doh_immig2'],['doh_bag1','doh_bag2'],['doh_sim1','doh_sim2'],['doh_taxi','doh_metro']],
   doh_city:[['doh_city_t2','doh_city_t1','doh_city_t3'],['doh_city_h1','doh_city_h2'],['doh_city_s1','doh_city_s2','doh_city_s3'],['doh_city_r1','doh_city_r2','doh_city_r3'],['doh_city_c1','doh_city_c2','doh_city_c3']],
   doh_hotel_am:[['doh_city_h3','doh_city_h4']],
+  rvn_arr:[['rvn_immig1','rvn_immig2'],['rvn_bag1','rvn_bag2'],['rvn_lobby1','rvn_lobby2'],['rvn_wifi1','rvn_wifi2'],['rvn_bus1','rvn_bus2']],   /* 065: ロヴァニエミの到着(両方の券とも10日目。ドーハの次の到着枠) */
   doh_dep:[['doh_dep_checkin','doh_dep_passport'],['doh_dep_bear'],['doh_dep_train'],['doh_dep_orchard','doh_dep_lounge'],['doh_dep_gate','doh_dep_plane']]};
  /* 場所の名前(各ページの place id) → まとまり。鍵(ロック)と、タブの開きに使う */
  var PLACEGRP={hreturn:'hnd_ret',hcheckin:'hnd_dep',hsec:'hnd_dep',hexit:'hnd_dep',hgate:'hnd_dep',hboard:'hnd_dep',hplane:'hnd_dep',immig:'nbo_arr',bag:'nbo_arr',sim:'nbo_arr',taxi:'nbo_arr',market:'nbo_market',safari:'nbo_safari',java:'nbo_air',art:'nbo_air',lounge:'nbo_air',duty:'nbo_air',
   qcheckin:'nbo_dep',nsec:'nbo_dep',gate:'nbo_dep',qplane:'nbo_dep',dimmig:'doh_arr',dbag:'doh_arr',dsim:'doh_arr',dride:'doh_arr',
   calley:'doh_city',chotel:'doh_city',csouq:'doh_city',crest:'doh_city',ccorn:'doh_city',cbreak:'doh_hotel_am',
-  dcounter:'doh_dep',dsouth:'doh_dep',dtrain:'doh_dep',dnorth:'doh_dep',dgate:'doh_dep'};
- var MODEGRP={hret:{tour:'hnd_ret'},hdep:{tour:'hnd_dep'},arr:{tour:'nbo_arr',doha:'doh_arr'},stay:{tour:['nbo_market','nbo_safari']},air:{tour:'nbo_air'},dep:{tour:'nbo_dep',doha:'doh_dep'},city:{doha:'doh_city'},sage:{tour:'hnd'}};
+  dcounter:'doh_dep',dsouth:'doh_dep',dtrain:'doh_dep',dnorth:'doh_dep',dgate:'doh_dep',
+  rimmig:'rvn_arr',rbag:'rvn_arr',rlobby:'rvn_arr',rwifi:'rvn_arr',rbus:'rvn_arr'};
+ var MODEGRP={hret:{tour:'hnd_ret'},hdep:{tour:'hnd_dep'},arr:{tour:'nbo_arr',doha:'doh_arr',rovaniemi:'rvn_arr'},stay:{tour:['nbo_market','nbo_safari']},air:{tour:'nbo_air'},dep:{tour:'nbo_dep',doha:'doh_dep'},city:{doha:'doh_city'},sage:{tour:'hnd'}};
  /* お金の1行(場面の台詞に出る値段。円に直すレートは架空で固定)。タクシーとメトロは台詞に値段がないので、架空の値段 */
  var MONEY={nbo_sim1:['sim',1000,'KES'],nbo_taxi1:['taxi',3000,'KES'],nbo_java1:['coffee',800,'KES'],nbo_market:['gift',1500,'KES'],nbo_duty1:['duty',24,'USD'],
   doh_sim1:['sim',30,'QAR'],doh_taxi:['taxi',55,'QAR'],doh_metro:['metro',6,'QAR'],doh_city_t1:['tea',2,'QAR'],doh_city_s1:['gift',10,'QAR'],
@@ -372,7 +374,8 @@ var TRIP=(function(){
  /* 場面の絵の名前 → 写真の見た目(場面の絵が使えないページ=世界マップで、控えの写真に使う) */
  var THEME={checkinT:'air',immigH:'air',hgateOW:'air',hgateST:'air',cabinT:'cabin',tdesk:'desk',sage:'desk',javaK:'air',artK:'air',safariK:'street',marketK:'souq',lounge:'lng',duty:'air',gate:'air',sim:'air',taxi:'street',checkinQ:'air',cabinQ:'cabin',
   dimmig:'dair',dbag:'dair',dsim:'dair',dtaxi:'street',dmetro:'dair',dcheck:'dair',dsouth:'dair',dtrain:'dair',dorch:'dair',dlng:'lng',dgate:'dair',dcabin:'cabin',
-  calley:'souq',chotel:'hotel',csouq:'souq',crest:'souq',cbreak:'hotel',ccorn:'sea',night:'night',nap:'night'};
+  calley:'souq',chotel:'hotel',csouq:'souq',crest:'souq',cbreak:'hotel',ccorn:'sea',night:'night',nap:'night',
+  rimmig:'dair',rbag:'dair',rlobby:'dair',rwifi:'dair',rbus:'night'};
 
  /* ---------- 場面の現地時刻(タスク032 / 020-3) ----------
     旅の中の場面は、いまの本当の時計でなく「旅の中の現地時刻」で昼夜を決める。
@@ -387,7 +390,8 @@ var TRIP=(function(){
   dimmig:22,dbag:22,dsim:22,dride:22,                  /* ドーハ到着(台本: Good evening。ナイロビから約5時間) */
   calley:20,chotel:21,csouq:19,crest:20,               /* ドーハ市内の夜(台本: Good evening) */
   cbreak:7,ccorn:10,                                   /* ドーハの翌朝(朝食 6:30〜・コルニーシュは朝食のあと) */
-  dcounter:13,dsouth:14,dtrain:14,dnorth:15,dgate:15}; /* ドーハ出発(台本: Good afternoon) */
+  dcounter:13,dsouth:14,dtrain:14,dnorth:15,dgate:15,
+  rimmig:23,rbag:23,rlobby:23,rwifi:23,rbus:23};      /* ロヴァニエミ到着(065。物語の時刻で、実在の便の時刻ではない。夜の便・深夜の到着=021 の R1〜R4) */ /* ドーハ出発(台本: Good afternoon) */
  /* 券ごとの上書き: スターのナイロビ着は 01:25(夜)。台本のあいさつは朝のまま(夜版の台本は未作成) */
  var HOUR_TK={star:{immig:1,bag:2,sim:2,taxi:3}};
  function hourAt(tk,id){if(!id)return null;var o=HOUR_TK[tk];if(o&&has(o,id))return o[id];return has(HOUR,id)?HOUR[id]:null}
@@ -885,11 +889,12 @@ var AP={
  guam:{n:'グアム',en:'Guam',lon:144.80,lat:13.48,url:'../guam/'},
  dubai:{n:'ドバイ',en:'Dubai',lon:55.37,lat:25.25,url:'../dubai/',mx:59.5,my:20.5},
  nairobi:{n:'ナイロビ',en:'Nairobi',lon:36.93,lat:-1.32,url:'../tour/'},
- doha:{n:'ドーハ',en:'Doha',lon:51.61,lat:25.27,url:'../tour/doha/',mx:45.5,my:30,gw:1}
+ doha:{n:'ドーハ',en:'Doha',lon:51.61,lat:25.27,url:'../tour/doha/',mx:45.5,my:30,gw:1},
+ rovaniemi:{n:'ロヴァニエミ',en:'Rovaniemi',lon:25.83,lat:66.56,url:'../tour/rovaniemi/'}   /* タスク065: 到着まわり。ヘルシンキは乗り継ぎだけ(旅の骨組みの chain がはさむ) */
 };
 /* 第1版: 羽田-グアム、グアム-ドバイ(臨時の線。20か所が揃ったら見本の地図に直す) */
 /* 世界一周編: 羽田-ナイロビ-ドーハ(oneworld の順)。mx/my は地図の上だけの位置(ドバイとドーハの札が重ならないように少しずらす。距離は lon/lat で計算) */
-var NEI={haneda:['guam','nairobi'],guam:['haneda','dubai'],dubai:['guam','doha'],nairobi:['haneda','doha'],doha:['nairobi','dubai']};
+var NEI={haneda:['guam','nairobi'],guam:['haneda','dubai'],dubai:['guam','doha'],nairobi:['haneda','doha'],doha:['nairobi','dubai','rovaniemi'],rovaniemi:['doha']};
 var has=function(o,k){return Object.prototype.hasOwnProperty.call(o,k)};
 var TOTAL=20;   /* 旧: クリア n / 20。いまは数えに使わない(タスク030) */
 Object.keys(TRIP.AIRP).forEach(function(code){var a=TRIP.AIRP[code];if(!has(AP,a.id)){AP[a.id]={n:a.n,en:a.en,lon:a.lon,lat:a.lat,url:null,soon:1};NEI[a.id]=[]}});

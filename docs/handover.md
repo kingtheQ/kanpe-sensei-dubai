@@ -93,6 +93,13 @@
 - `tour/`・`tour/doha/` に `?check=1` を付けた時だけ動く点検モード。全場所ロックなし／左端の「CHECK」で場面一覧（各場所の場面・割りこみ・窓口の各段）から直接開始／券は一覧で切りかえ・前の場面は満たした扱い／進行は専用キー `chk1:` で通常のセーブに触れない／旅の骨組み（TRIP）は動かさない。パラメータなしは従来どおり（生成物の差分はゲート付きの追加だけ）。
 - 確認：`tour-src/tests/test_check056.py`（通常時の不変・全場面の直接開始・通常セーブの不変）。既存テストは通る（trip030・people047 は変更前の main でも同じく失敗＝今回の変更とは無関係）。未確認：実機の見え方・マイク。点検モードのまま 世界マップ(🌏)・強化合宿へ行くと、そのページは通常モードになる。対象外：`tour/ending/`。
 
+## 今回（11/24）タスク070でやったこと（ドーハのコルニーシュの実画 ccorn）
+- 対象は bg ccorn の4場面（doh_city_c1/c2/c3・doh_ev_j_ask、すべて doha 側）。ART `dcorn`（tour-src/art.js）：背景 doha-corniche-v1.png・wide・足もと y=884・ルル x=1060・キング x=1180・ふたりは右から歩いて入る(dir:-1)・スーツケースは左どなり(x=960)・相手は左の舗道(x=800)
+- 結びは doha 側 artIdFor（build.py）だけ。doh_city_h1→'hotel' は据え置き。ナイロビ側 artIdFor は触っていない
+- 別素材 strips：きらめき(0,372,4コマ,0.5秒)・ダウ舟(700,258,2コマ,0.8秒・その場で揺れる)。実画の表示中はドット描画(BGS.ccorn)のキャンバスが隠れるので舟は二重に出ない。実画が読めないときだけ BGS.ccorn に落ちる
+- 台詞は変更なし。テスト: tour-src/tests/test_corniche070.py
+- 参考: 同梱の指示書 070-doha-corniche-binding.md（正本は pm-kit/tasks/）
+
 ## 今回（11/22）タスク060でやったこと（ホテル歌場面のステージと観客）
 - 歌場面（`nbo_song`）の背景を歌場面版（`nairobi-hotel-lobby-song-v1.png`、art 設定 `nsong`）に。歌手は台の上、観客5人は半円、ルル・キングは中央。入りは「観客の絵→つぎへ→ルルの一言（英語のみ）→GO！→歌」。歌・曲後の会話・ほかの場面は変更なし。通常のロビー（`nlobby`）は残してある。詳細・数字・プレビューとの違いは `docs/pm/deliverables/060-song-stage-report-v1.md`。
 
@@ -153,3 +160,7 @@
 - 実装：`tour-src/cards.js`・`cards.css`（新規）、`data.py` の nbo_java1、`build.py` の SHARED。確認は `python3 tour-src/tests/test_flow061.py`（30項目）と `test_conv053.py`。報告と「クロが決めたこと」は `docs/pm/deliverables/061-cafe-flow-impl-report-v1.md`。
 - 裏の反応時間→持ち越し→夢（053）は継続（shillings だけ。iced・slice の計測は選択がなくなったため外れた）。ルルの代行回数・ポイント・スパルタ教室は未決定のため入れていない（詰んだときは既存ヘルプ）。
 - 未確認：実機のマイク・声・見え方。参考にしたURL：なし（新しい外部URLは使っていない）。
+
+## 今回（11/24）タスク065でやったこと（ロヴァニエミ到着まわり）
+- 新しい到着のまとまり `rvn_arr`（入国審査・手荷物・到着ロビー・無料Wi-Fi・バス乗り場 × 各2場面）と新ページ `tour/rovaniemi/`。台詞は `tour-src/rvn_data.py`、場所・背景・音は `build.py`、旅程は `trip.js`（10日目・両ルート）。到着ロビーだけ実画＋オーロラstrip（`art.js` の `rvnlobby`）。
+- 詳細・数値・要確認（指示書が見当たらない／oneworldの入国審査／23時／Wi-Fi名が公式で未確認／バス8番の扱い／tour/assets未公開）は `docs/pm/deliverables/065-rovaniemi-arrival-report-v1.md`。確認は `tour-src/tests/test_arrival065.py`。
