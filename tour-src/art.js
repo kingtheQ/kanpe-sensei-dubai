@@ -54,6 +54,19 @@ var ART={
    ['back-man-thobe',952,684],['back-couple-red',952,786],['back-woman-blonde-suit',952,892],
    ['back-man-dashiki',1320,792],['back-couple-colorful',1321,896],
    ['front-safari',399,947,'walk'],['front-pilot-fa',1119,946,'walk']]},
+ /* ドーハの入国審査・出国審査(タスク064): bg が dimmig で vid が doh_ の場面だけ(ナイロビの immig・羽田の同名 bg は対象外)。人なしの背景(1536×960。窓口3つ・表示灯)。
+    係官は3窓口とも同一の絵(o-front-officer-blue)を ×0.93(表示 51×127)にして、top=511・clip=600 で頭と肩だけ見せる(頭56px)。話し相手の窓口(lead)は dimmig=中央・dimmig2(別の窓口)=右。
+    表示灯の緑ランプは strips で1秒ごとに点滅(2コマ。背景の上・人物より奥)。キングとルルは右から歩いて入り、行列のロープの右に立つ(ルルが左・キングが右)。ロープの中の並ぶ人は後ろ姿 */
+ dimmig:{bg:'doha-immigration-v1.png',mode:'wide',base:818,dir:-1,lulu:1052,king:1151,suit:1253,
+  strips:[{img:'doha-immigration-lights-strip.png',x:0,y:300,n:2,fw:1536,fh:64,step:1}],
+  booths:[{n:'o-front-officer-blue',x:320,top:511,clip:600,s:.93},{n:'o-front-officer-blue',x:768,top:511,clip:600,s:.93,lead:1},{n:'o-front-officer-blue',x:1216,top:511,clip:600,s:.93}],
+  glass:{c:'rgba(190,215,226,.22)',r:[[128,380,385,220],[576,380,385,220],[1024,380,385,220]]},
+  crowd:[['back-backpacker',300,845],['back-man-thobe',452,845]]},
+ dimmig2:{bg:'doha-immigration-v1.png',mode:'wide',base:818,dir:-1,lulu:1052,king:1151,suit:1253,
+  strips:[{img:'doha-immigration-lights-strip.png',x:0,y:300,n:2,fw:1536,fh:64,step:1}],
+  booths:[{n:'o-front-officer-blue',x:320,top:511,clip:600,s:.93},{n:'o-front-officer-blue',x:768,top:511,clip:600,s:.93},{n:'o-front-officer-blue',x:1216,top:511,clip:600,s:.93,lead:1}],
+  glass:{c:'rgba(190,215,226,.22)',r:[[128,380,385,220],[576,380,385,220],[1024,380,385,220]]},
+  crowd:[['back-backpacker',300,845],['back-man-thobe',452,845]]},
  /* 羽田の出発ゲート(タスク043): 人なしの背景をフルブリード。券で絵が出し分けられる(oneworld=DOHA・Qatar Airways / Star=ISTANBUL・Turkish Airlines)。
     ルル(左・102px)とキング(右・114px)は広間と同じ後ろ姿で、足もとは y=884。相手の係員は絵には出さず(声だけ)、話すときカウンターの上に「…」を出す(bubble)。
     秘密イベント(ルルの拾い物)は、この場面を遊び終えたとき 保存の keep に入るだけで、絵にも画面にも何も出さない(予告しない) */
@@ -219,10 +232,15 @@ function ARTframe(S,A0,dt){
  if(cf.fx==='night')artFxNight();else if(cf.fx==='hotel')artFxHotel();
  /* 相手(いつもの顔のドット): 空港では右から入ってくる。カウンターの中は動かず、頭と肩だけ見せる(カウンターの高さで切る) */
  /* 窓口の係官(入国審査): 頭と肩だけ見せる(窓口の台の高さで切る)。話し相手の窓口は、話すとき小さくうなずいて「…」を出す。そのほかの窓口もゆっくり小さく動く */
- if(cf.booths){var lead=S.d&&S.d.sp==='officer2';
+ if(cf.booths){var lead=S.d&&S.d.sp==='officer2',pb=null;
   cf.booths.forEach(function(b,bi){var im2=exi[(lead&&b.sw)?b.sw:b.n],bw=im2.naturalWidth,bob2=b.lead&&speaker&&spSay?(Math.floor(t*6)%2?-3:0):(Math.floor(t*.9+bi*.37)%2?-2:0),by0=b.top+bob2,x0=Math.round(b.x-bw/2);
+   if(b.s){var dw=Math.round(bw*b.s),dh=Math.round(im2.naturalHeight*b.s),vis=Math.min(b.clip-by0,dh);   /* 倍率つきの窓口(タスク064): 最近傍で縮め、頭と肩だけ(clip の高さで切る) */
+    ca.drawImage(im2,0,0,bw,vis/b.s,Math.round(b.x-dw/2),by0,dw,vis);
+    if(b.lead&&speaker&&spSay)pb=[b.x+Math.round(dw*.4),b.top-18];return}
    ca.drawImage(im2,0,0,bw,b.clip-by0,x0,by0,bw,b.clip-by0);
-   if(b.lead&&speaker&&spSay)artBubble(b.x+Math.round(bw*.4),b.top-18)})}
+   if(b.lead&&speaker&&spSay)artBubble(b.x+Math.round(bw*.4),b.top-18)});
+  if(cf.glass){ca.fillStyle=cf.glass.c;cf.glass.r.forEach(function(q){ca.fillRect(q[0],q[1],q[2],q[3])})}   /* ガラス越し(タスク064): 係官の上にガラスの薄い色を重ねる(正本プレビューと同じ)。「…」はガラスの手前 */
+  if(pb)artBubble(pb[0],pb[1])}
  /* 相手が素材の絵(w-:縮めた絵)のとき: 足もとをそろえて立ち、右から入ってくる。いつもの小さな動きは今までと同じ */
  var sk=artSpKey(),spr=(cf.npcS&&sk&&cf.npcS[sk])?exi[cf.npcS[sk]]:null;
  if(spr&&cf.npc.clip){   /* カウンター越しの係員: 頭と肩だけ(カウンターの高さで切る)。動かず、ゆっくり小さく揺れ、話すときうなずいて「…」 */
