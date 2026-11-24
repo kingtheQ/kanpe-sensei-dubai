@@ -56,7 +56,7 @@ with sync_playwright() as pw:
     chk('A2 keep なし: 28日目は今までどおり「まだ作っていない日」(載らない・開かない・朝のまま・最終日=27のまま)', n['gt'] == 0 and not n['reach'] and n['st'][0] != 'day' and n['max'] != 28, (n['gt'], n['reach'], n['st'], n['max']))
     chk('A3 スター券: 28日目はグアム(羽田ではない)。keep があっても場面は載らない', st['gt'] == 0 and not st['reach'], st['gt'])
     chk('A4 「羽田」タブ(hret)は keep ありの28日目をあそぶ最中だけ出て、朝の1枚のあとそのタブへ移る。keep なし・スターでは出ない・移らない', k['hret'] and k['mode'] == 'hret' and not n['hret'] and n['mode'] != 'hret' and not st['hret'] and st['mode'] != 'hret', (k['hret'], k['mode'], n['hret'], n['mode'], st['hret']))
-    chk('A5 モードの並び: hret は hdep のあと・arr の前(タスク068の eikai は末尾のチェックモード専用タブなので除く)', [m for m in k['modes'] if m != 'eikai'] == ['sage', 'hdep', 'hret', 'arr', 'stay', 'air', 'dep'], k['modes'])
+    chk('A5 モードの並び: hret は hdep のあと・arr の前(タスク068の eikai・タスク078の camp は末尾のチェックモード専用タブなので除く)', [m for m in k['modes'] if m not in ('eikai', 'camp')] == ['sage', 'hdep', 'hret', 'arr', 'stay', 'air', 'dep'], k['modes'])
     chk('A6 既存の日の並びは変わらない(1・2・3・27日目)', k['rest'] == n['rest'] and k['rest'][0] == 'hnd+hnd_dep' and k['rest'][1] == 'nbo_arr', k['rest'])
     # ---------------- B・C. 会話と記録 ----------------
     def go(sv, tk='ow'):
