@@ -199,6 +199,13 @@
 - 確認：`EIKAI_PREVIEW=<teacher-cafe-preview.png> python3 tour-src/tests/test_eikaiwa068.py`（30項目）。報告は `docs/pm/deliverables/068-eikaiwa-cafe-report-v1.md`。`test_departure054.py` の出発まわりの絞り込みに `eikai` を足した。
 - 未確認：実機のマイク・声・見え方。並び（キング左・ルル右）は同梱プレビューのとおりで、`docs/rules.md` の「ルルが左・キングが右」とは逆（PM確認待ち）。参考にしたURL：なし（新しい外部URLは使っていない）。
 
+## 今回（11/25）タスク078でやったこと（合宿＝マッチョルル教室のデモ版）
+- 新場面 `camp_demo1`（場所 `camp`）。**チェックモード（`?check=1`）の一覧（「💪 合宿」）からだけ入る**。本編の進行・セーブ・完了の数えに入れず、新しい保存キーなし。入口の仕組み（案B第4項）は未決定のまま。
+- 画面：大きなルル（左・通常のルルで代用＝マッチョルルの素材なし。差し替えは `tour-src/camp_data.py` の `LULU_IMG` 1か所）＋カード（右・1080×1920を1枚ずつ・青い枠で今の単語）＋口パーツ（ルルの真下・読み上げ中だけ）＋今の単語（既存のカンペ表示）。
+- 流れ：導入→全単語を1語ずつ2回ずつ→Repeat after me!→1語ずつ→短文（2回→Repeat→丸ごと）→2枚目→締め。発音判定・失敗ルール（074）は既存の `showCue`／`onFail`／`autoRescue` を流用。
+- 実装：`tour-src/camp_data.py`（データ）・`camp.js`（進行）・`camp.css`、`build.py` に差しこみ。確認：`python3 tour-src/tests/test_gasshuku078.py`（42項目）。報告は `docs/pm/deliverables/078-gasshuku-demo-report-v1.md`。
+- 未確認：実機のマイク・単語1語の判定の感触・声・見え方。同梱の `mouth-open` / `mouth-round` は実寸480×384（ファイル名は160x128）。
+
 ## 今回（11/24）タスク074でやったこと（タイトルの3モード・失敗ルール統一・オープニングの語り）
 - モード：`PREF.mode`（`kd_prefs_v1` の数値キー。0＝カンペ／1＝耳学＆カンペ／2＝耳学）。出し分けは土台 `dubai/index.html` の `npcHide()`（相手の台詞の文字）・`cueBlind(T)`（自分のカンペ）・`npcMsg()`・`showCue()`（耳学で見本の自動再生）。`tour-src/build.py` の生成で tour／doha／rovaniemi／ending 全ページに入る。台本データは変更なし。
 - 失敗ルール：`onFail()`→`failDemo()`（自動おてほん）→3回目 `autoRescue()`（ルルが代行・save.help は減らさない・noteWeak）。`luSayCue()` は手動ヘルプ `useHelp()` と共通。強化合宿（G.camp）だけ従来の assist。061 専用だった `f2Fail`（cards.js）は全場面共通の onFail に統合して削除。
@@ -206,3 +213,9 @@
 - world：タイトルのコマンド窓にモード選択（`#mSel`）と「せつめいを きく」（`#cNarr`）。「はじめから」→語り（`playOpeningNarration`）→語り終えたら（または「すすむ」）tour/ へ。チャントは `CHANT.narr()` で語りのあいだ一時停止。
 - 確認：`python3 tour-src/tests/test_modes074.py`。チェックモード（?check=1）の保存は専用の名前 `chk1:kd_prefs_v1` になる（タイトルで選んだモードはチェックモードへ引き継がない。チェックモードの設定から3モードを確認できる）。
 - 未確認：実機の日本語読み上げの声質、実マイクでの3モードの流れ（耳学モードの「お手本→マイク」）。
+
+## 今回（11/24）タスク076＋077でやったこと（プールサイドのショータイム格上げ／ロビーの3択を行き先につなぐ・コードのみ）
+- 076：歌手は再生中 [sing1→正面→sing2→正面] を拍ごとに（正面は既存素材 `s-stand-front`・新規素材なし）。GO！のあと呼びかけ "Come on, everybody — sing with me!" を読み上げてから曲。歌詞は `song_data.py` の `SONG_SCENE['lyrics']`（21行・`[開始秒, 行]`）を曲の再生位置に連動して画面下に1行ずつ（英語のみ）。ステージ照明（光の円錐・足もとの光だまり・拍で脈打つキラキラ）は art.js の `artSpot`（`npool` の stage に `spot:1`）。**歌詞タイミングは初版近似・実機調整前提**（直すのは表の秒だけ）。
+- 077：ロビーの「The swimming pool」は実在の場面 `nbo_pool1`（art `npoolq`・ルルとキングだけ・聞くだけ型・終わるとマップへ）。「The Balcony Bar」は枠組みのみ（`nbo_bar1`・art `nbar`＝PLACEHOLDER・台本 `BAR_SCENE`）で**背景素材待ち**。有効化は `song_data.py` の `BAR_READY = True` の1か所だけ（背景 nairobi-balcony-bar-v1.png・別ストリップ・座標確定のあと、後続の素材結びタスクで）。それまでは「スタッフの一言→メニューに戻る」。
+- 確認：`tour-src/tests/test_showtime076.py`・`test_lobby077.py`・更新した `test_lobby066.py`。詳細は docs/pm/DECISIONS.md の 076・077。
+- 未確認：実機の曲と歌詞の同期・照明の見え方・読み上げの聞こえ方・iPhone の自動再生。参考にしたURL：なし。

@@ -1,0 +1,24 @@
+/* ===== 合宿(マッチョルル教室)デモ版(タスク078): #sceneView.gs の時だけ効く。ほかの場面には影響しない ===== */
+#sceneView.gs .stage{background:#1d2440}
+#sceneView.gs .stage canvas{display:none}
+#sceneView.gs .stage #tip{display:none}
+#sceneView.gs .stage #exitBtn{left:6px;right:auto}
+#sceneView.gs .stage .setbtn{left:50px;right:auto}
+#gsStage{display:flex;gap:8px;align-items:stretch;height:clamp(360px,47dvh,540px);padding:0 6px 0 6px;box-sizing:border-box}
+#gsLuluCol{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;padding-top:46px}
+#gsLulu{position:relative;width:100%;max-width:230px;flex:none}
+#gsLulu .sh{position:absolute;left:14%;right:14%;bottom:-2%;height:7%;background:rgba(0,0,0,.28);border-radius:50%}
+#gsLulu .lay{position:absolute;left:0;top:0;width:100%;height:100%;image-rendering:pixelated;display:block}
+#gsLulu .up{transform-origin:50% 79.3%;animation:gsbreath .91s ease-in-out infinite}
+@keyframes gsbreath{0%,100%{transform:scaleY(1)}50%{transform:scaleY(var(--gsk,1.02))}}
+#gsMouth{flex:none;width:100%;max-width:200px;aspect-ratio:160/128;border:3px solid #ffc72c;border-radius:10px;background:#f6cda8;overflow:hidden;visibility:hidden}
+#gsMouth.on{visibility:visible}
+#gsMouth img{width:100%;height:100%;display:block}
+#gsCardBox{flex:none;height:100%;aspect-ratio:9/16;position:relative;background:#fff8ea;border-radius:8px;overflow:hidden;border:2px solid #5b6690;box-sizing:border-box}
+#gsCard{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
+#gsHi{position:absolute;border:3px solid #2d6cdf;border-radius:6px;box-shadow:0 0 0 2px #fff8ea;pointer-events:none;display:none}
+#panel .cue.gsm{justify-content:center;text-align:center;padding-bottom:12px}
+#panel .cue.gsm .w.s{font-size:56px}
+#sceneView.gs .cue .w.s{overflow-wrap:anywhere}
+@media (prefers-reduced-motion:reduce){#gsLulu .up{animation:none}}
+@media (max-height:700px){#panel .cue.gsm .w.s{font-size:40px}}

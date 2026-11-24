@@ -328,3 +328,5 @@ rvn_stay_data.add(D)
 # ---- 英会話カフェ(タスク068・試作): ナイロビの小さな英会話カフェで先生と予行練習。チェックモードからだけ入る ----
 import eikaiwa_data
 eikaiwa_data.add(D)
+import camp_data   # タスク078: 合宿(マッチョルル教室)デモ版。チェックモードからだけ入る
+camp_data.add(D)

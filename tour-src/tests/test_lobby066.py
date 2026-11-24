@@ -2,6 +2,7 @@
 """タスク066 の動作確認(ヘッドレス)。使い方: python3 -I tour-src/tests/test_lobby066.py
 (1)ロビーは通常版: 受付のスタッフが案内する場面(hub)・案内の3択(ショータイム/プール/Balcony Bar)・歌手は出ない
 (2)ショータイムを選ぶと別場面のプールサイド(npool)で歌う。歌手は高さ250・観客・ルル・キングは指示書の座標・描いた絵を配置の正本プレビューと画素で比較
+(1b)タスク077: プールは実在の場面へ・バーは素材待ち(一言→メニュー)
 (3)照明ストリップ: 曲が鳴っているあいだは再生位置の拍に合わせて切りかえ(歌手の絵も)、鳴っていないときはゆっくり明滅
 (4)049の歌・進行(曲→やりとり→マップ)は変わらない
 マイク・実機の音・実機の見え方は確認できない。"""
@@ -40,9 +41,9 @@ def match(img):
 ART = os.path.join(ROOT, 'tour/assets/art')
 BG = Image.open(os.path.join(ART, 'nairobi-pool-v2.png')).convert('RGBA'); LS = Image.open(os.path.join(ART, 'nairobi-pool-lights-strip.png')).convert('RGBA')
 def top_expect(f):   # 背景+照明ストリップの f コマ目 の上の域(y0-300)。きらめき(y484〜)・人物は入らない域
-    c = BG.copy(); c.alpha_composite(LS.crop((f * 1536, 0, f * 1536 + 1536, 960))); return np.array(c.convert('RGB'))[0:300]
+    c = BG.copy(); c.alpha_composite(LS.crop((f * 1536, 0, f * 1536 + 1536, 960))); return np.array(c.convert('RGB'))[0:300, 0:400]   # タスク076: 光の円錐・キラキラは歌手のまわり(x 450〜)だけなので、左の x<400 で照明ストリップを比べる
 def top_frame(img):
-    a = np.array(img)[0:300].astype(int); r = []
+    a = np.array(img)[0:300, 0:400].astype(int); r = []
     for f in range(4): r.append(round(float((np.abs(a - top_expect(f).astype(int)).sum(2) <= 12).mean() * 100), 2))
     return r
 srv = serve(ROOT); base = 'http://127.0.0.1:%d' % srv.server_address[1]
@@ -75,10 +76,12 @@ with sync_playwright() as pw:
     chk('ロビー: 背景の絵が描かれている(受付まわりの画素の一致 80% 以上)', float((np.abs(a - bgl).sum(2)[0:480] <= 12).mean()) > .8)
     chk('ロビー: 案内の一言を読み上げ・メニュー3つ+もどる', 'Welcome to the Villa Rosa Kempinski. What would you like to see?' in pg.evaluate("window.__say") and pg.evaluate("document.querySelectorAll('button.dq').length") == 4)
     chk('ロビー: 曲は鳴らない・日本語の選択肢なし', plays(pg) == [])
-    pg.click('button.dq:nth-child(2)'); pg.wait_for_timeout(500)
-    chk('「The swimming pool」: スタッフの一言(英文)を表示・読み上げ・選択にもどる', 'The pool is just outside' in pg.evaluate("document.querySelector('#msg').innerText") and any('The pool is just outside' in s for s in pg.evaluate("window.__say")) and pg.evaluate("document.querySelectorAll('button.dq').length") == 4 and pg.evaluate("__T.G.view") == 'scene')
+    # タスク077: バーは素材待ちの間は一言→メニューにもどる(仮置きが残る)。プールは実在の場面 nbo_pool1 へ(詳しくは test_lobby077.py)
     pg.click('button.dq:nth-child(3)'); pg.wait_for_timeout(500)
-    chk('「The Balcony Bar」: スタッフの一言(英文)・選択にもどる', 'Balcony Bar has a lovely view' in pg.evaluate("document.querySelector('#msg').innerText") and pg.evaluate("document.querySelectorAll('button.dq').length") == 4)
+    chk('「The Balcony Bar」(素材待ち): スタッフの一言(英文)・選択にもどる', 'Balcony Bar has a lovely view' in pg.evaluate("document.querySelector('#msg').innerText") and pg.evaluate("document.querySelectorAll('button.dq').length") == 4)
+    pg.click('button.dq:nth-child(2)'); pg.wait_for_timeout(700)
+    chk('「The swimming pool」: 場面 nbo_pool1(静かなプール)に入る・絵は npoolq', pg.evaluate("[__T.G.view,__T.G.scene.d.id,__T.artIdFor(__T.G.scene)]") == ['scene', 'nbo_pool1', 'npoolq'], pg.evaluate("[__T.G.view,__T.G.scene.d.id,__T.artIdFor(__T.G.scene)]"))
+    pg.click('#exitBtn'); pg.wait_for_timeout(500); pg.click('.node[data-id=hsong]'); pg.wait_for_timeout(1500)
     # ---- ショータイム → プールサイド ----
     pg.click('button.dq:nth-child(1)'); pg.wait_for_timeout(2500)
     chk('ショータイム: 別場面(nbo_song)・絵は npool(プールサイド)', pg.evaluate("[__T.G.scene.id,__T.G.scene.d.id,__T.G.scene.d.bg,__T.artIdFor(__T.G.scene)]") == ['hsong', 'nbo_song', 'npool', 'npool'], pg.evaluate("[__T.G.scene.d.bg,__T.artIdFor(__T.G.scene)]"))
@@ -107,10 +110,10 @@ with sync_playwright() as pw:
         a = np.array(img.crop((x0, y0, x0 + s.width, y0 + 120))).astype(int); sp = np.array(s)[:120].astype(int); m = sp[..., 3] > 0
         return round(float((np.abs(a - sp[..., :3]).sum(2)[m] <= 12).mean() * 100), 1)
     ims = []
-    for ct in [B[10] + .05, B[11] + .05]:
+    for ct in [B[11] + .05, B[12] + .05, B[13] + .05, B[14] + .05]:   # 拍の数 12,13,14,15 → タスク076: [歌う絵1 → 正面 → 歌う絵2 → 正面]
         pg.evaluate("(function(ct){Object.defineProperty(window.__fake,'currentTime',{get:function(){return ct},configurable:true})})(%f)" % ct); pg.wait_for_timeout(250); ims.append(canvas(pg))
-    sg = [[sing_frac(i, n) for n in ('s-stand-sing1', 's-stand-sing2')] for i in ims]
-    chk('歌手: 拍ごとに 歌う絵1 / 歌う絵2 を切りかえる(高さ250・足もと y=734)', sg[0][1] >= 95 and sg[1][0] >= 95 and sg[0][1] > sg[0][0] and sg[1][0] > sg[1][1], sg)
+    sg = [[sing_frac(i, n) for n in ('s-stand-sing1', 's-stand-front', 's-stand-sing2')] for i in ims]
+    chk('歌手: 拍ごとに [歌う絵1 → 正面 → 歌う絵2 → 正面] を切りかえる(高さ250・足もと y=734)', [r.index(max(r)) for r in sg] == [0, 1, 2, 1] and all(max(r) >= 95 for r in sg), sg)
     chk('聴くだけ: カンペ・マイク・単語バトルの画面は出ない', pg.evaluate("[!!document.querySelector('.cue'),__T.G.phase]") == [False, 'listen'])
     chk('場面は保存の記録(save.seen)を変えない', pg.evaluate("JSON.stringify(__T.save.seen)") == seen0)
     ims[0].save('/tmp/pool066-singing.png')
