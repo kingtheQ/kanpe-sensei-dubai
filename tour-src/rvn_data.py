@@ -275,7 +275,7 @@ def add(D):
         pairs=[
             ("Good evening. Are you waiting for a bus too?", E,
              star("Yes. We want to go to Santa Claus Village. Which bus is it?"), E),
-            OT("The Airport Express goes to the village. Bus number eight goes there too, from the city.", E, [
+            OT("The Airport Express goes to the village. You can also take bus number eight from the city.", E, [
                 O('eight', "Bus number eight. Thank you!", E, ok=1,
                   rep=("Yes, eight. Look for the number on the front of the bus.", E)),
                 O('eat', "Bus number eat? Do we eat on the bus?", E,
