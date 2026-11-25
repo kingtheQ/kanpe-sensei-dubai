@@ -42,7 +42,7 @@ def newpage(ctx, base, vid='nbo_java1'):
     q.add_init_script("localStorage.setItem('kanpe-tour-save-v1',%s);localStorage.setItem('kanpe-trip-v1',%s);" % (json.dumps(json.dumps({'seen': {}, 'ticket': 'ow'})), json.dumps(json.dumps(tseed()))))
     q.route('**/tour/index.html', hooked); q.goto(base + '/tour/index.html'); q.wait_for_timeout(1700); q.evaluate(POLL)
     return q
-PX = "(xy)=>{var cv=document.getElementById('scene'),g=cv.getContext('2d'),d=g.getImageData(xy[0],xy[1],1,1).data;return [d[0],d[1],d[2]]}"
+PX = "(xy)=>{var cv=document.getElementById('sceneA'),g=cv.getContext('2d'),d=g.getImageData(380+xy[0]*3,324+xy[1]*3,1,1).data;return [d[0],d[1],d[2]]}"
 def play(q, pick, wait_tap=150, vid='nbo_java1', cap=None):
     """場面を始め、カードの画面が出たら wait_tap ミリ秒おいて pick 番目を押し、マップに戻るまで進める。cap: 'pay' の最中の画素を調べる"""
     q.evaluate("(v)=>{var T=__T;T.save.missed=[];T.save.wrec={};T.save.seen={};window.__sp.length=0;window.__ph.length=0;window.__pan.length=0;window.__btn.clear();window.__cs=0;window.__srn=0;window.__msg.length=0;T.startVid(T.PBY.java,v,null)}", vid)

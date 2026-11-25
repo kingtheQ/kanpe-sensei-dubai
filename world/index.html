@@ -1501,24 +1501,25 @@ modeShow();
 /* ---------- オープニングの語り(タスク074): ゲームの説明は文字で出さず、日本語の音声ナレーションで語る ----------
    文案はキングの下書きが正本(句読点の調整のみ可)。文案はこの定数1か所、再生は playOpeningNarration() 1つ。
    あとでキング本人の録音に差し替えるときは、OPENING_NARRATION_AUDIO に音声ファイルのURLを入れるだけ(空のあいだはブラウザ読み上げ speechSynthesis・ja-JP)。 */
-var OPENING_NARRATION='ようこそ！空港えいご物語へ！これからあなたはキングとして、相棒のルルと一緒に世界一周の旅に出ます。ルルはあなたをサポートしてくれる。キングとして大きな声で口の筋肉を鍛える、その耳で音を聞いて相手のリズムを体感してください。ただそれだけ。楽しんでいってらっしゃい！';
+var OPENING_NARRATION='ようこそ！空港えいご物語へ！これからあなたはキングとして、相棒のルルと一緒に世界一周の旅にでます。ルルはあなたをサポートしてくれる。キングとして大きな声で口の筋肉を鍛える、その耳で音を聞いて相手のリズムを体感してください。ただそれだけ。はじめて聞く英語は、意味がわからなくて戸惑うかもしれません。でも、キングの使命はひたすら発音すること。言えないときは、相棒のルルが助けてくれます。やっていて、意味がわからないし、合っているかも分からないと思うでしょう。でも安心してください。あなたの耳と口の筋肉が、自然に覚えていきます。気にしないで、どんどん世界を旅してください。楽しんでいってらっしゃい！';
 var OPENING_NARRATION_AUDIO='';
-var NARR={tok:0,on:false,au:null};
+var NARR_RATE=1.12,NARR_PITCH=1.05;   /* タスク085-D: 説明の読み上げの速さ・高さ(後から調整できる定数)。voice(声の選択)は変えない */
+var NARR={tok:0,on:false,au:null,heard:false,cb:null};   /* heard=このタイトル滞在中に説明を最後まで聞いた(セッション内のみ・セーブに残さない)。cb=流れている最中に「はじめから」が押されたとき、語り終えてから呼ぶもの(085-B) */
 /* 語りを流す。終わったら(または止めたら)チャントを元の扱いに戻す。done は最後まで語り終えたときだけ呼ぶ */
 function playOpeningNarration(done){
  stopOpeningNarration();var my=++NARR.tok;NARR.on=true;try{CHANT.narr(true)}catch(e){}
  var fired=false,guard=0;
- function fin(){if(fired||my!==NARR.tok)return;fired=true;clearTimeout(guard);NARR.on=false;NARR.au=null;if(done){done();return}   /* 語りのあとゲームへ進むときは、チャントを一時停止のまま渡す(ページが変わり、tour/ が続きから鳴らす) */
+ function fin(){if(fired||my!==NARR.tok)return;fired=true;clearTimeout(guard);NARR.on=false;NARR.au=null;NARR.heard=true;var d=done||NARR.cb;NARR.cb=null;if(d){d();return}   /* 語りのあとゲームへ進むときは、チャントを一時停止のまま渡す(ページが変わり、tour/ が続きから鳴らす) */
   try{CHANT.narr(false)}catch(e){}}
  guard=setTimeout(fin,OPENING_NARRATION.length*230+4000);   /* 声が使えない端末でも止まらない保険 */
  if(OPENING_NARRATION_AUDIO){try{var a=new Audio(OPENING_NARRATION_AUDIO);NARR.au=a;a.onended=fin;a.onerror=fin;var pr=a.play();if(pr&&pr.catch)pr.catch(fin)}catch(e){fin()}return}
  try{var ss=window.speechSynthesis;if(!ss||typeof SpeechSynthesisUtterance==='undefined'){fin();return}
-  ss.cancel();var u=new SpeechSynthesisUtterance(OPENING_NARRATION);u.lang='ja-JP';u.rate=.95;u.pitch=1;u.volume=1;
+  ss.cancel();var u=new SpeechSynthesisUtterance(OPENING_NARRATION);u.lang='ja-JP';u.rate=NARR_RATE;u.pitch=NARR_PITCH;u.volume=1;
   try{var vs=ss.getVoices()||[];for(var i=0;i<vs.length;i++){if(/^ja/i.test(vs[i].lang)){u.voice=vs[i];break}}}catch(e){}
   u.onend=fin;u.onerror=fin;ss.speak(u)}catch(e){fin()}}
 /* 止める(画面を離れる・ページを離れる・ゲームを始める)。done は呼ばない */
 function stopOpeningNarration(){
- var was=NARR.on;NARR.tok++;NARR.on=false;
+ var was=NARR.on;NARR.tok++;NARR.on=false;NARR.cb=null;
  if(NARR.au){try{NARR.au.onended=null;NARR.au.onerror=null;NARR.au.pause()}catch(e){}NARR.au=null}
  try{if('speechSynthesis' in window)speechSynthesis.cancel()}catch(e){}
  if(was){try{CHANT.narr(false)}catch(e){}}}
@@ -1526,12 +1527,17 @@ window.addEventListener('pagehide',stopOpeningNarration);
 
 /* ---------- はじめから / つづきから ---------- */
 function hasSave(s){return s.at!=='haneda'||Object.keys(s.cleared).length>1||Object.keys(s.seen).length>1}
-function enterTour(){stopOpeningNarration();location.href='../tour/'}
+/* 085-A: ゲーム開始(場面に入る)の時点でタイトルの音楽を止める。続きを tour/ へ渡さない(kw-chant も消す) */
+function enterTour(){stopOpeningNarration();try{CHANT.leave()}catch(e){}try{sessionStorage.removeItem('kw-chant')}catch(e){}location.href='../tour/'}
 /* 「はじめから」: 語りを流して、語り終えたら(または「すすむ」で)世界一周編へ。語りの途中で始めても、語りは止まって場面の音声とぶつからない */
-function beginNew(){$('cmdMain').hidden=true;$('cmdAsk').hidden=true;$('cmdNarr').hidden=false;$('cGo').focus({preventScroll:true});playOpeningNarration(enterTour)}
+/* 085-B: 同じタイトル滞在中に「せつめいを きく」で聞いた回は、「はじめから」で流さない(そのまま始める)。ボタンからは何度でも聞ける。流れている最中なら、やり直さず語り終えてから始める */
+function beginNew(){if(NARR.heard){enterTour();return}
+ $('cmdMain').hidden=true;$('cmdAsk').hidden=true;$('cmdNarr').hidden=false;$('cGo').focus({preventScroll:true});
+ if(NARR.on){NARR.cb=enterTour;return}
+ playOpeningNarration(enterTour)}
 function enterMap(){try{sessionStorage.setItem('kw-started',String(Date.now()))}catch(e){}renderMap();show('sMap')}
 function openCmd(){
- S=load();var hs=hasSave(S);
+ NARR.heard=false;S=load();var hs=hasSave(S);
  var info=$('cInfo');info.hidden=!hs;
  if(hs)info.textContent=(TRIP.inTrip()?'区間　'+TRIP.landed()+' / '+TRIP.total():'スタンプ　'+TRIP.stamps())+'　いま '+AP[S.at].n;
  var cc=$('cCont');cc.setAttribute('aria-disabled',hs?'false':'true');

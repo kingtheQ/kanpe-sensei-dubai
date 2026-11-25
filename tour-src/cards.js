@@ -45,11 +45,11 @@ function payStart(kind,done){
 function payEase(x){x=Math.max(0,Math.min(1,x));return x*x*(3-2*x)}
 function payTick(P,x,y,w){   /* 支払いの終わりのしるし(✓) */
  [[0,3],[1,4],[2,3],[3,2],[4,1],[5,0]].forEach(function(q){R('#34d27b',x+q[0]*w,y+q[1]*w,w,w)})}
-function payFg(){
+function payFg(art){   /* art=1: 本格背景の場面(085-F)。art の座標系(ox,oy + k倍)で呼ばれ、背景を塗りつぶす片づけは出さない */
  var P=PAYFX;if(!P||P.S!==G.scene||G.view!=='scene')return;
  var e=t-P.t0,YB=62,rx=142,ry=YB-18,ok=e>=.9&&e<1.8;
  /* カウンターの上を少し片づけて(背景の飾りのカップを隠して)、見やすい大きさで出す */
- R('#e8dcc4',140,30,80,32);
+ if(!art)R('#e8dcc4',140,30,80,32);
  /* カードリーダー(カウンターの上) */
  R('#2a2f3a',rx,ry,22,18);R('#6b7488',rx,ry,22,3);R('#10131f',rx+3,ry+5,16,6);R(ok||P.res?'#34d27b':'#8a93a8',rx+8,ry+13,6,3);
  if(e<1.8){

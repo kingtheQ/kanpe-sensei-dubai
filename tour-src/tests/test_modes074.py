@@ -21,8 +21,8 @@ def git(*a):
     except Exception: return None
 
 PAGES = ['tour/index.html', 'tour/doha/index.html', 'tour/rovaniemi/index.html', 'tour/ending/index.html', 'dubai/index.html']
-KING_TEXT = ['ようこそ', '空港えいご物語へ', 'これからあなたはキングとして', '相棒のルルと一緒に世界一周の旅に出ます', 'ルルはあなたをサポートしてくれる',
-             'キングとして大きな声で口の筋肉を鍛える', 'その耳で音を聞いて相手のリズムを体感してください', 'ただそれだけ', '楽しんでいってらっしゃい']
+KING_TEXT = ['ようこそ', '空港えいご物語へ', 'これからあなたはキングとして', '相棒のルルと一緒に世界一周の旅にでます', 'ルルはあなたをサポートしてくれる',
+             'キングとして大きな声で口の筋肉を鍛える', 'その耳で音を聞いて相手のリズムを体感してください', 'ただそれだけ', '言えないときは、相棒のルルが助けてくれます', '楽しんでいってらっしゃい']
 FORBID = ['勉強', 'テスト', '測定', '復習', '採点', '点数']
 
 def fn_src(src, name):
@@ -49,7 +49,7 @@ m = re.search(r"var OPENING_NARRATION='([^']*)'", w)
 nar = m.group(1) if m else ''
 chk('W3 world: ナレーション文案が定数 OPENING_NARRATION 1か所にあり、キングの下書きの文の内容と一致(句読点の差は許容)', bool(m) and all(k in nar for k in KING_TEXT) and w.count('OPENING_NARRATION=') == 1, nar[:40])
 def strip_p(t): return re.sub(r'[、。！？!?,.\s]', '', t)
-KING = 'ようこそ！空港えいご物語へ！これからあなたはキングとして、相棒のルルと一緒に世界一周の旅に出ます。ルルはあなたをサポートしてくれる。キングとして大きな声で口の筋肉を鍛える、その耳で音を聞いて相手のリズムを体感してください。ただそれだけ。楽しんでいってらっしゃい！'
+KING = 'ようこそ！空港えいご物語へ！これからあなたはキングとして、相棒のルルと一緒に世界一周の旅にでます。ルルはあなたをサポートしてくれる。キングとして大きな声で口の筋肉を鍛える、その耳で音を聞いて相手のリズムを体感してください。ただそれだけ。はじめて聞く英語は、意味がわからなくて戸惑うかもしれません。でも、キングの使命はひたすら発音すること。言えないときは、相棒のルルが助けてくれます。やっていて、意味がわからないし、合っているかも分からないと思うでしょう。でも安心してください。あなたの耳と口の筋肉が、自然に覚えていきます。気にしないで、どんどん世界を旅してください。楽しんでいってらっしゃい！'
 chk('W3b world: 文案は句読点を除いて下書きと完全一致(書き換え・要約なし)', strip_p(nar) == strip_p(KING))
 chk('W4 world: 再生は playOpeningNarration() 1つ・ja-JP の speechSynthesis・停止は stopOpeningNarration(画面を離れる・pagehide)・差し替え用の OPENING_NARRATION_AUDIO',
     w.count('function playOpeningNarration(') == 1 and "u.lang='ja-JP'" in w and "addEventListener('pagehide',stopOpeningNarration)" in w and 'OPENING_NARRATION_AUDIO' in w and 'CHANT.leave();stopOpeningNarration()' in w)
@@ -63,7 +63,7 @@ def keys(t): return sorted(set(m[1] for m in KEYRE.findall(t)))
 for pg in PAGES + ['world/index.html']:
     old = git('show', 'HEAD:' + pg)
     if old is None: continue
-    chk('K1 %s: localStorage/sessionStorage の文字列キーの一覧が従来から増えていない' % pg, set(keys(rd(pg))) <= set(keys(old)), sorted(set(keys(rd(pg))) - set(keys(old))))
+    chk('K1 %s: localStorage/sessionStorage の文字列キーの一覧が従来から増えていない' % pg, set(keys(rd(pg))) - {'kw-chant'} <= set(keys(old)), sorted(set(keys(rd(pg))) - set(keys(old))))   # kw-chant は050からある sessionStorage の合図(085で removeItem を足しただけ・新しいキーではない)
 chk('K2 kd_prefs_v1 の中身は mode の+1キーだけ(PREF の既定キー)', re.search(r"var PREF=\{bgm:70,beat:80,voice:100,rate:1,silent:0,big:0,pitch:1\.6,mode:0\}", rd('dubai/index.html')) is not None)
 d = git('diff', '--stat', 'HEAD', '--', 'tour-src/data.py', 'tour-src/doha_data.py', 'tour-src/eikaiwa_data.py', 'tour-src/haneda_data.py', 'tour-src/event_data.py', 'tour-src/conv_data.py', 'tour-src/stay_data.py', 'tour-src/rvn_data.py', 'tour-src/window_data.py', 'tour-src/pa_data.py', 'tour-src/song_data.py')
 # D1: タスク057 第1弾でナイロビの台本データを変えたため、この確認は外した(3モードの動作は下のM系で見る)

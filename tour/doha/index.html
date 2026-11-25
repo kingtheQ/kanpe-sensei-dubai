@@ -2386,7 +2386,7 @@ function advance(){
  if(!G.camp){var D0=G.scene.turns[G.ti];if(D0&&D0.rep&&!D0.repd){D0.repd=1;G.phase='rep';npcMsg(D0.rep.n,D0.rep.who||whoNow());spSay=true;(paRep(G.scene,D0.rep)?paSay:say)(D0.rep.n,.95,G.scene.pitch,gd(function(){spSay=false;later(450,advance)}));return}
  if(D0&&D0.pay&&!D0.payd){D0.payd=1;payStart(D0.pay,advance);return}}
  if(G.camp){var done=G.scene.turns[G.ti];save.weak=save.weak.filter(function(w){return w.c!==done.cue});storeSave();G.ti++;if(G.ti>=G.scene.turns.length)campDone();else npcTurn();return}
- G.ti++;playInter(G.ti-1,function(){if(G.ti>=G.scene.turns.length){G.phase='clear';Snd.jingle('clear');var W0=G.scene.d&&(G.scene.d.win||G.scene.d.ev||G.scene.d.conv);setMsgInstant(G.scene.d.dream?'Good night.':W0?'Clear!':'Clear!  ぜんぶ いえた！',whoNow());later(W0?1300:2000,W0?(typeof FT!=='undefined'&&G.scene.d.freetalk?FT.end:finishScene):startWords)}else npcTurn()})}
+ G.ti++;playInter(G.ti-1,function(){if(G.ti>=G.scene.turns.length){G.phase='clear';Snd.jingle('clear');var W0=G.scene.d&&(G.scene.d.win||G.scene.d.ev||G.scene.d.conv);setMsgInstant(G.scene.d.dream?'Good night.':W0?'Clear!':'Clear!  ぜんぶ いえた！',whoNow());later(W0?1300:2000,G.scene.d.reveal?startReveal:W0?(typeof FT!=='undefined'&&G.scene.d.freetalk?FT.end:finishScene):startWords)}else npcTurn()})}
 function onPass(){
  Snd.jingle('pass');G.phase='pass';G.tries=0;dreamPass();var th=THANKS[Math.floor(Math.random()*THANKS.length)];npcMsg(th,whoNow());spSay=true;
  say(th,1,G.scene.pitch,gd(function(){spSay=false;later(350,advance)}))}
@@ -3990,11 +3990,11 @@ function payStart(kind,done){
 function payEase(x){x=Math.max(0,Math.min(1,x));return x*x*(3-2*x)}
 function payTick(P,x,y,w){   /* 支払いの終わりのしるし(✓) */
  [[0,3],[1,4],[2,3],[3,2],[4,1],[5,0]].forEach(function(q){R('#34d27b',x+q[0]*w,y+q[1]*w,w,w)})}
-function payFg(){
+function payFg(art){   /* art=1: 本格背景の場面(085-F)。art の座標系(ox,oy + k倍)で呼ばれ、背景を塗りつぶす片づけは出さない */
  var P=PAYFX;if(!P||P.S!==G.scene||G.view!=='scene')return;
  var e=t-P.t0,YB=62,rx=142,ry=YB-18,ok=e>=.9&&e<1.8;
  /* カウンターの上を少し片づけて(背景の飾りのカップを隠して)、見やすい大きさで出す */
- R('#e8dcc4',140,30,80,32);
+ if(!art)R('#e8dcc4',140,30,80,32);
  /* カードリーダー(カウンターの上) */
  R('#2a2f3a',rx,ry,22,18);R('#6b7488',rx,ry,22,3);R('#10131f',rx+3,ry+5,16,6);R(ok||P.res?'#34d27b':'#8a93a8',rx+8,ry+13,6,3);
  if(e<1.8){
@@ -4453,19 +4453,31 @@ var ART={
   fx:[{k:'shuttle',img:'haneda-checkin-qatar-belt-bag.png',x0:1132,x1:1234,w:80,h:96,by:606,v:20,wait:2}]}},
  /* 保安検査(bg security・vid が hnd_ のときだけ。ナイロビの nsec とは別の絵)。係員 sec_n1 は右端のゲート(アーチ)の横(o2-front-officer-blue=×2・足もと y=892)。トレイは別素材(strips)をベルトの上に重ねる(底がベルト面 y=636) */
  hsec:{bg:'haneda-security-v1.png',mode:'wide',strips:[{img:'haneda-security-trays-strip.png',x:0,y:504,n:4,fw:1536,fh:144,step:1}],
-  dep:{lulu:{n:'hall-lulu-back',x:690,by:884},king:{n:'hall-king-back',x:774,by:884},npcS:{sec_n1:{n:'o2-front-officer-blue',x:1330,by:892,sw:130}},bubble:{x:1330,y:560}}},
+  dep:{lulu:{n:'hall-lulu-back',x:690,by:884,w:153,h:236,sh:78},king:{n:'hall-king-back',x:774,by:884,w:158,h:264,sh:82},npcS:{sec_n1:{n:'o2-front-officer-blue',x:1330,by:892,sw:130}},bubble:{x:1330,y:560},
+   people:[{n:'a-back-backpacker',x:300,by:706},{n:'a-back-dashiki',x:1130,by:706}]}},
  /* 出国審査(bg immigH・vid が hnd_ のときだけ)。窓口は3つ(中心 x=320/768/1216・ガラス帯 y380〜600・カウンター上端 y=600)。係官は中央の窓口の中に頭と肩だけ(top=482・clip=600。入国審査 immig と同じ booths の作法。絵はプレビューから切り出した hexit-officer=幅97。既存の o2-front-officer-blue は110幅で合わない)。
     青いスーツケースも既存の artSuit(四角い箱)ではなく、プレビューの絵(hexit-suitcase。suitImg)。
     ふたりは中央の窓口の前に正面の立ち姿(歩いて入らない: dist を極小にして止まった状態から)。青いスーツケースはキングの右 x=862。表示灯は別素材(strips・1秒ごと) */
- hexit:{bg:'haneda-exit-immigration-v1.png',mode:'wide',base:812,dist:.001,lulu:662,king:760,suit:862,suitImg:{n:'hexit-suitcase',x:862},
+ hexit:{bg:'haneda-exit-immigration-v1.png',mode:'wide',base:812,dist:.001,lulu:662,king:760,lh:236,kh:264,suit:862,suitImg:{n:'hexit-suitcase',x:862},people:[{n:'a-back-backpacker',x:320,by:812}],
   strips:[{img:'haneda-exit-lights-strip.png',x:0,y:300,n:2,fw:1536,fh:64,step:1}],
-  booths:[{n:'hexit-officer',x:768,top:482,clip:600,lead:1}]},
+  booths:[{n:'hexit-officer',x:320,top:482,clip:600},{n:'hexit-officer',x:768,top:482,clip:600,lead:1},{n:'hexit-officer',x:1216,top:482,clip:600}]},
  /* 機内の会話場面(bg cabinQ=えんじ色の座席 / cabinT=赤いヘッドレスト・vid が hnd_plane_ のときだけ。048 の cabinseat・機内食 cabinmeal とは別の絵)。
     客室乗務員は ca-front を高さ274にした絵(npc/ca-front-274。頭105px＝この場面のキングの頭100pxの1.05倍)で通路に立つ(中心 x=1000・足もと y=896)。座席の画面と読書灯の明滅は別素材(全面・2社共通) */
- hcabin_ow:{bg:'haneda-cabin-qatar-v1.png',mode:'wide',strips:[{img:'haneda-cabin-lights-strip.png',x:0,y:0,n:2,fw:1536,fh:960,step:1}],
-  dep:{lulu:{n:'tk-lulu-back',x:596,by:896},king:{n:'tk-king-back',x:712,by:896},npcS:{qr_crew:{n:'ca-front-274',x:1000,by:896,sw:150}},bubble:{x:1000,y:610}}},
- hcabin_st:{bg:'haneda-cabin-turkish-v1.png',mode:'wide',strips:[{img:'haneda-cabin-lights-strip.png',x:0,y:0,n:2,fw:1536,fh:960,step:1}],
-  dep:{lulu:{n:'tk-lulu-back',x:596,by:896},king:{n:'tk-king-back',x:712,by:896},npcS:{tk_crew:{n:'ca-front-274',x:1000,by:896,sw:150}},bubble:{x:1000,y:610}}},
+ hcabin_ow:{bg:'haneda-cabin-qatar-pax-v1.png',mode:'wide',strips:[{img:'haneda-cabin-lights-strip.png',x:0,y:0,n:2,fw:1536,fh:960,step:1}],
+  dep:{lulu:{n:'tk-lulu-back',x:596,by:896,w:172,h:269,sh:73},king:{n:'tk-king-back',x:712,by:896,w:178,h:300,sh:92},npcS:{qr_crew:{n:'ca-front-274',x:1000,by:896,sw:150}},bubble:{x:1000,y:610}}},
+ /* ナイロビのカフェ2軒(タスク085-F): bg javaK=Java House / artK=Artcaffe(vid が nbo_java と nbo_art)。1536×960・人なし。
+    店員(t-cafe-java 189×300 / t-cafe-art 192×300)はカウンターの向こう: x=768, top=220 から clip=520(カウンター上面)まで描き、腰から下は描かない(npc 方式=dep の clerk)。
+    主人公は hall 方式: ルル x=716・キング x=800、ともに by=884(キング w148 h248 / ルル w140 h234。tk-*-back を拡大)。吹き出しは x=768, y=200。
+    pay=支払いの演出(061 の payFg)をカウンター(上面 y≈510)の上に出すための原点と倍率(旧画面の座標×k を足した位置) */
+ javaK:{bg:'nairobi-cafe-java-v1.png',mode:'wide',dep:{lulu:{n:'tk-lulu-back',x:716,by:884,w:140,h:234},king:{n:'tk-king-back',x:800,by:884,w:148,h:248},
+  clerk:{x:768,top:220,clip:520},npcS:{cafe_staff:'t-cafe-java',cafe_staff2:'t-cafe-java'},bubble:{x:768,y:200},pay:{ox:380,oy:324,k:3}}},
+ artK:{bg:'nairobi-cafe-art-v1.png',mode:'wide',dep:{lulu:{n:'tk-lulu-back',x:716,by:884,w:140,h:234},king:{n:'tk-king-back',x:800,by:884,w:148,h:248},
+  clerk:{x:768,top:220,clip:520},npcS:{cafe_staff3:'t-cafe-art',cafe_staff4:'t-cafe-art'},bubble:{x:768,y:200},pay:{ox:380,oy:324,k:3}}},
+ /* ナイロビ便の機内(タスク085-G): bg cabinQ・vid が nbo_ のとき(nbo_plane1/2)。bg は乗客入り haneda-cabin-qatar-pax-v1.png、配置・strips は hcabin_ow と同じ。 */
+ cabinQ:{bg:'haneda-cabin-qatar-pax-v1.png',mode:'wide',strips:[{img:'haneda-cabin-lights-strip.png',x:0,y:0,n:2,fw:1536,fh:960,step:1}],
+  dep:{lulu:{n:'tk-lulu-back',x:596,by:896,w:172,h:269,sh:73},king:{n:'tk-king-back',x:712,by:896,w:178,h:300,sh:92},npcS:{qr_crew:{n:'ca-front-274',x:1000,by:896,sw:150},qr_crew2:{n:'ca-front-274',x:1000,by:896,sw:150}},bubble:{x:1000,y:610}}},
+ hcabin_st:{bg:'haneda-cabin-turkish-pax-v1.png',mode:'wide',strips:[{img:'haneda-cabin-lights-strip.png',x:0,y:0,n:2,fw:1536,fh:960,step:1}],
+  dep:{lulu:{n:'tk-lulu-back',x:596,by:896,w:172,h:269,sh:73},king:{n:'tk-king-back',x:712,by:896,w:178,h:300,sh:92},npcS:{tk_crew:{n:'ca-front-274',x:1000,by:896,sw:150}},bubble:{x:1000,y:610}}},
  /* ナイロビの手荷物受け取り(タスク045): 人なしの背景(主ベルトは荷物も中央の島も描かない版)に、荷物6個が楕円の経路を1周 period 秒でまわる。
     ベルトの形(中心 cx,cy・経路の半径 rx,ry)は素材の絵(768×480)の半分の大きさの座標で書く。荷物は 2倍の NEAREST の粒のまま、2画素単位で動く。
     描く順: 奥の半分(sin<0)の荷物 → 中央の島 → 手前の半分の荷物 → ふたり。荷物は奥ほど小さく暗い(絵の段階 lv=13 を sin で引く)。手前では左→右、奥では右→左。
@@ -4609,6 +4621,8 @@ function artIdFor(S){var g=S&&S.d&&S.d.bg,v=String(S&&S.vid||'');if(/^doh_/.test
 function artImg(n){var i=ARTI[n];if(!i){i=ARTI[n]=new Image();i.onerror=function(){i.bad=1};i.src=ARTBASE+n}return i}
 function artShow(on){if(ARTSHOW===on)return;ARTSHOW=on;cv.hidden=!!on;cvA.hidden=!on}
 function artR(col,x,y,w,h){ca.fillStyle=col;ca.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h))}
+function artSprH(img,cx,by,h,flip){var w=Math.round(img.naturalWidth*h/img.naturalHeight),x=Math.round(cx-w/2),y=Math.round(by-h);   /* 表示の高さ h にそろえる(縦横比は素材のまま・NEAREST) */
+ if(flip){ca.save();ca.translate(x+w,y);ca.scale(-1,1);ca.drawImage(img,0,0,w,h);ca.restore()}else ca.drawImage(img,x,y,w,h)}
 function artSpr(img,cx,by,flip){var w=img.naturalWidth,h=img.naturalHeight,x=Math.round(cx-w/2),y=Math.round(by-h);
  if(flip){ca.save();ca.translate(x+w,y);ca.scale(-1,1);ca.drawImage(img,0,0);ca.restore()}else ca.drawImage(img,x,y)}
 function artShadow(cx,by,rx,al){var ry=rx*.12,ps=4;ca.fillStyle='rgba(0,0,0,'+(al||.62)+')';
@@ -4703,13 +4717,13 @@ function ARTframe(S,A0,dt){
   if(walking){var lf=Math.floor(te/.2)%4;limg=im[['lulu-walk-a','lulu-walk-b','lulu-walk-c','lulu-walk-b'][lf]];ly=lf%2?-BOB:0}
   else{limg=im['lulu-idle'];ly=Math.floor(t*1.6+.5)%2?-BOB:0}
   if(luHelp&&!walking)ly-=Math.floor(t*7)%2?10:0;
-  artShadow(lx,B,shw*.8);artSpr(limg,lx,B+ly,walking&&dir<0);   /* ルルの歩きのコマは右向き。左へ歩くときだけ反転 */
-  if(luTalk&&spSay&&!walking)artBubble(lx+20,B-limg.naturalHeight-26);
-  if(luHelp&&!walking){ca.fillStyle='#e8452c';ca.font='800 26px sans-serif';ca.textAlign='center';ca.textBaseline='middle';ca.fillText('♪',lx+limg.naturalWidth*.5,B-limg.naturalHeight-12)}}});
+  var lk=cf.lh?cf.lh/limg.naturalHeight:1;artShadow(lx,B,shw*.8*lk);if(cf.lh)artSprH(limg,lx,B+ly,cf.lh,walking&&dir<0);else artSpr(limg,lx,B+ly,walking&&dir<0);   /* ルルの歩きのコマは右向き。左へ歩くときだけ反転。lh=表示の高さ(085-I) */
+  if(luTalk&&spSay&&!walking)artBubble(lx+20,B-(cf.lh||limg.naturalHeight)-26);
+  if(luHelp&&!walking){ca.fillStyle='#e8452c';ca.font='800 26px sans-serif';ca.textAlign='center';ca.textBaseline='middle';ca.fillText('♪',lx+(cf.lh?cf.lh/limg.naturalHeight:1)*limg.naturalWidth*.5,B-(cf.lh||limg.naturalHeight)-12)}}});
  if(OUT.hvis)L.push({by:B,f:function(){var ky=0,kimg;
   if(walking){var kf=Math.floor(te/.32)%2;kimg=im[kf?'king-walk-b':'king-walk-a'];ky=kf?-BOB:0}
   else{kimg=im['king-idle'];ky=Math.floor(t*1.6)%2?-BOB:0}
-  artShadow(kx,B,shw);artSpr(kimg,kx,B+ky,walking&&dir>0)}});   /* 右へ歩くときは、元の左向きのコマを左右反転(左へ歩くときは元のまま) */
+  artShadow(kx,B,shw*(cf.kh?cf.kh/kimg.naturalHeight:1));if(cf.kh)artSprH(kimg,kx,B+ky,cf.kh,walking&&dir>0);else artSpr(kimg,kx,B+ky,walking&&dir>0)}});   /* 右へ歩くときは、元の左向きのコマを左右反転(左へ歩くときは元のまま) */
  L.sort(function(a,b){return a.by-b.by});for(var li=0;li<L.length;li++)L[li].f();
  return true}
 /* 荷物受け取りを描く(タスク045)。荷物6個が楕円の経路を1周 period 秒でまわる(時間だけで動く。会話の進み方にはかかわらない)。
@@ -4941,15 +4955,16 @@ function artDep(cf,exi,S,te){
    if(q.after){var ai=artImg(q.after.img);if(artOKimg(ai))ca.drawImage(ai,q.after.x,q.after.y)}
    if(spSay&&speaker&&(q.spk||(sv&&sv.p&&sv.p===q.id))){artBubble(q.x+Math.round(im.naturalWidth*(q.z||1)*.3),q.by-Math.round(im.naturalHeight*(q.z||1))-18);said=true}}})});
  var lu=D.lulu&&exi[D.lulu.n],kg=D.king&&exi[D.king.n],ld=Math.floor(t*1.1+.5)%2?3:0,kd=Math.floor(t*1.1)%2?3:0;
- if(lu&&OUT.lvis)L.push({by:D.lulu.by,f:function(){if(D.lulu.h){artSwayZ(lu,D.lulu.x,D.lulu.by,ld,D.lulu.w,D.lulu.h);   /* 大きさ指定の後ろ姿(068): 影は描かない(同梱プレビューと同じ) */
+ if(lu&&OUT.lvis)L.push({by:D.lulu.by,f:function(){if(D.lulu.h){if(D.lulu.sh)artShadow(D.lulu.x,D.lulu.by,D.lulu.sh);artSwayZ(lu,D.lulu.x,D.lulu.by,ld,D.lulu.w,D.lulu.h);   /* 大きさ指定の後ろ姿(068): 影は描かない(同梱プレビューと同じ) */
    if(luTalk&&spSay)artBubble(D.lulu.x+20,D.lulu.by-D.lulu.h-26);return}
   if(D.shF)artShadowF(D.lulu.x,D.lulu.by-7,84,D.shF);else artShadow(D.lulu.x,D.lulu.by,56);artSway(lu,D.lulu.x,D.lulu.by,ld);
   if(luTalk&&spSay)artBubble(D.lulu.x+20,D.lulu.by-lu.naturalHeight-26);
   if(luHelp){ca.fillStyle='#e8452c';ca.font='800 26px sans-serif';ca.textAlign='center';ca.textBaseline='middle';ca.fillText('♪',D.lulu.x+Math.round(lu.naturalWidth*.5),D.lulu.by-lu.naturalHeight-12)}}});
- if(kg&&OUT.hvis)L.push({by:D.king.by,f:function(){if(D.king.h){artSwayZ(kg,D.king.x,D.king.by,kd,D.king.w,D.king.h);return}
+ if(kg&&OUT.hvis)L.push({by:D.king.by,f:function(){if(D.king.h){if(D.king.sh)artShadow(D.king.x,D.king.by,D.king.sh);artSwayZ(kg,D.king.x,D.king.by,kd,D.king.w,D.king.h);return}
   if(D.shF)artShadowF(D.king.x,D.king.by-7,84,D.shF);else artShadow(D.king.x,D.king.by,70);artSway(kg,D.king.x,D.king.by,kd)}});
  L.sort(function(a,b){return a.by-b.by});for(i=0;i<L.length;i++)L[i].f();
  if(D.cup)artCup(D.cup);
+ if(D.pay&&typeof payFg==='function'&&typeof PAYFX!=='undefined'&&PAYFX){var c0=c;c=ca;ca.save();ca.translate(D.pay.ox,D.pay.oy);ca.scale(D.pay.k,D.pay.k);try{payFg(1)}catch(e){}ca.restore();c=c0}   /* 支払いの演出(061): 旧画面の座標を ox,oy + k倍で重ねる(背景を塗りつぶす片づけは art では出さない) */
  artStrips(cf.strips,1);
  if(spSay&&speaker&&!speaker.ghost&&!said&&D.bubble)artBubble(D.bubble.x,D.bubble.y)}   /* 絵に出ない相手(ghost=電話の声・アナウンス)には「…」を出さない。立つ人・係員・座る人が話し相手のとき、その人の上に出す */
 /* 自由会話のコーヒーカップ(タスク073): 残り時間の見せ方。数字・文字は出さない。FT.cup()=残り(1→0)。自由会話の最中だけ、テーブルの手前(先生とキング・ルルのあいだ)に大きめのカップを置き、コーヒーが少しずつ(4px刻みで12段)減っていく。cx=中心 by=受け皿の底 */

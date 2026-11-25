@@ -17,7 +17,7 @@ W.OT("You choose a group of airlines. Then you fly from city to city, always goi
     cards=1, fork={'tw':['airline']}),
 ("Your first stop is Nairobi, in Kenya. It is a good place to practice.","最初の寄港地はケニアのナイロビです。練習にぴったりの場所です。","*Nairobi*! *Is* it *far*?","ナイロビ！遠いですか。"),
 ("It is a long flight. But do not worry. Speak slowly, and smile.","長い飛行です。でも心配はいりません。ゆっくり話して、笑顔でいなさい。","*Thank* you. *We* *will* *try*!","ありがとうございます。がんばります。")],
-[("round the world","世界一周"),("ticket","航空券"),("airline","航空会社"),("practice","練習する"),("slowly","ゆっくり")],conv=1,flow2=1)
+[("round the world","世界一周"),("ticket","航空券"),("airline","航空会社"),("practice","練習する"),("slowly","ゆっくり")],conv=1,flow2=1,reveal=1)
 d('sage_2','達人賢者','sage','sage','達人賢者に、航空券のえらび方をきいてみよう。',[
 ("Do you know the two big groups of airlines?","航空会社の大きなグループを2つ知っていますか。","*No*, *I* *don't*. *Please* *tell* me.","いいえ。教えてください。"),
 W.OT("They are Star Alliance and oneworld. Each group has many airlines.","スターアライアンスとワンワールドです。どちらもたくさんの航空会社があります。",[
@@ -29,7 +29,7 @@ W.OT("They are Star Alliance and oneworld. Each group has many airlines.","ス�
 ("The airlines are different, so the routes are different. Which one suits you depends on how you travel.","航空会社がちがうので、ルートもちがいます。どちらが合うかは、あなたの旅の仕方で決まります。","*Can* I *change* my *mind* *later*?","あとで気が変わってもいいですか。"),
 ("Choose one for this trip. You can choose the other one next time.","この旅ではひとつ選びます。もうひとつは、次の機会に選べます。","*But* *how* *do* *we* *know* *which* *one* *suits* *us*?","でも、どちらが私たちに合うか、どうやってわかりますか。"),
 ("Go to the ticket desk and talk it over well. Tell them how you want to travel.","航空券の窓口へ行って、よく相談しなさい。どんな旅をしたいか、伝えるのです。","*Okay*. *We'll* *go* *and* *talk* *with* *them* *now*!","わかりました。これから窓口で相談してきます。")],
-[("alliance","航空会社の連合"),("route","ルート"),("suit","合う"),("change my mind","気が変わる"),("ticket desk","航空券の窓口")],conv=1,flow2=1)
+[("alliance","航空会社の連合"),("route","ルート"),("suit","合う"),("change my mind","気が変わる"),("ticket desk","航空券の窓口")],conv=1,flow2=1,reveal=1)
 d('sage_3','達人賢者','sage','sage','達人賢者から、旅の英語のコツをきこう。',[
 ("Here is a secret about travel English. Short is good.","旅の英語のひみつを教えましょう。短くて大丈夫です。","*Short* *is* *good*? *Really*?","短くていいのですか。本当に？"),
 W.OT("Yes. Say 'Excuse me,' then say what you need. People will help you.","はい。『すみません』と言ってから、必要なことを言う。人は助けてくれます。",[
@@ -41,7 +41,7 @@ W.OT("Yes. Say 'Excuse me,' then say what you need. People will help you.","は�
 ("Say, 'Could you say that again, please?' It is very polite.","『もう一度言っていただけますか』と言いなさい。とても丁寧です。","*Could* *you* *say* *that* *again*, *please*?","もう一度言っていただけますか。"),
 ("Perfect! And if it is too fast, say, 'Slowly, please.'","完璧です。それでも速すぎたら、『ゆっくりお願いします』と。","*Slowly*, *please*. *I* *can* *do* *that*.","ゆっくりお願いします。できそうです。"),
 ("You are ready. Now, go and choose your ticket.","準備はできました。さあ、航空券を選びに行きなさい。","*Thank* *you*, *wise* *teacher*!","ありがとうございます、賢者さま。")],
-[("excuse me","すみません"),("polite","丁寧な"),("again","もう一度"),("understand","理解する"),("ready","準備ができた")],conv=1,flow2=1)
+[("excuse me","すみません"),("polite","丁寧な"),("again","もう一度"),("understand","理解する"),("ready","準備ができた")],conv=1,flow2=1,reveal=1)
 
 # ---- 券選び(2種類) ----
 d('ticket_star','スターアライアンスの窓口係','tdesk','desk_star','スターアライアンスの窓口。ターキッシュ エアラインズで、最初の都市ナイロビへ。',[
@@ -50,14 +50,14 @@ d('ticket_star','スターアライアンスの窓口係','tdesk','desk_star','�
 ("Thank you. Would you like a window seat or an aisle seat?","ありがとうございます。窓側と通路側、どちらがよいですか。","*A* *window* *seat*, *please*. *I* *want* *to* *see* *the* *clouds*.","窓側をお願いします。雲を見たいので。"),
 ("A window seat. Do you have any bags to check in?","窓側ですね。預ける荷物はありますか。","*Yes*, *one* *suitcase*.","はい、スーツケースがひとつです。"),
 ("Here is your boarding pass. Have a wonderful trip!","搭乗券です。すばらしい旅を。","*Thank* *you*! *See* *you* *in* *Nairobi*!","ありがとうございます。ナイロビでお会いしましょう。")],
-[("passport","パスポート"),("window seat","窓側の席"),("aisle seat","通路側の席"),("check in","預ける・手続きする"),("boarding pass","搭乗券")])
+[("passport","パスポート"),("window seat","窓側の席"),("aisle seat","通路側の席"),("check in","預ける・手続きする"),("boarding pass","搭乗券")],reveal=1)
 d('ticket_ow','ワンワールドの窓口係','tdesk','desk_ow','ワンワールドの窓口。カタール航空で、最初の都市ナイロビへ。',[
 ("Welcome to the oneworld desk. Where are you going?","ワンワールドの窓口へようこそ。どちらへ行かれますか。","*We* *are* *going* *around* the *world*. *First*, *Nairobi*.","世界一周です。まず、ナイロビへ。"),
 ("Nairobi. Very nice. May I see your passport, please?","ナイロビですね。すてきです。パスポートを見せていただけますか。","*Here* *you* *are*.","どうぞ。"),
 ("Thank you. Would you like a window seat or an aisle seat?","ありがとうございます。窓側と通路側、どちらがよいですか。","*An* *aisle* *seat*, *please*. *I* *like* *to* *walk* *around*.","通路側をお願いします。歩き回るのが好きなので。"),
 ("An aisle seat. Do you have any bags to check in?","通路側ですね。預ける荷物はありますか。","*Yes*, *one* *suitcase*.","はい、スーツケースがひとつです。"),
 ("Here is your boarding pass. Have a wonderful trip!","搭乗券です。すばらしい旅を。","*Thank* *you*! *See* *you* *in* *Nairobi*!","ありがとうございます。ナイロビでお会いしましょう。")],
-[("passport","パスポート"),("aisle seat","通路側の席"),("window seat","窓側の席"),("suitcase","スーツケース"),("boarding pass","搭乗券")])
+[("passport","パスポート"),("aisle seat","通路側の席"),("window seat","窓側の席"),("suitcase","スーツケース"),("boarding pass","搭乗券")],reveal=1)
 
 # ---- 到着: ナイロビ ----
 d('nbo_immig1','入国審査の係官','immig','officer','ナイロビのジョモ・ケニヤッタ国際空港に到着。入国審査の列にならんだ。',[
