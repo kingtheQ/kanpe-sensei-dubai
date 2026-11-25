@@ -2211,6 +2211,7 @@ function setupAction(act,stat,toks,spans,T){
  /* おてほんの あいだは 聞くのを止める(ルルの声で 合格にならないように) */
  G.mute=function(){if(rec){var r0=rec;rec=null;try{r0.abort()}catch(e){}}listening=false;Snd.duck(0);if(act.isConnected)setIdle();heardEl.textContent=''};
  function finish(txt,conf){
+  if(!String(txt||'').replace(/\s+/g,'')){noResult();return}   /* 086: 中身のない結果は「聞き取れなかった」。失敗には数えない */
   var res=analyze(tgToks,txt);renderEval(card,spans,toks,res,heardEl);
   plogAdd({ts:Date.now(),v:G.scene?G.scene.vid:'',tg:tgToks.join(' '),hd:String(txt||'').slice(0,200),cf:conf||0,ok:res.okN,n:res.n,
    miss:res.words.filter(function(w){return !w.ok}).map(function(w){return {t:missKey(w.t),h:w.h,k:w.k}})});
@@ -2219,6 +2220,9 @@ function setupAction(act,stat,toks,spans,T){
   /* 7割以上でOK(グアム編と同じ)。赤い語は記録に入り、羽田の発音教室で練習する */
   if(res.ratio>=0.7){stat.className='stat ok';stat.textContent=f2()?'':(res.okN===res.n?'Nice!  ':'')+(hideNum()?'':cnt);onPass();return}
   stat.className='stat ng';stat.textContent=f2()?'':hideNum()?'':cnt+'  7割未満';onFail()}
+ /* 086: 認識結果がなかった(聞き取れなかった)とき。「言ったけれど違った」とは別あつかい: 失敗に数えない・ブザーもシェイクもしない・失敗回数(自動救済のカウント)を進めない。
+    お手本を1回流して、もう一度聞く(回数の上限なし)。結果が出て内容が違ったときだけ、従来の失敗の流れ(finish→onFail)に入る */
+ function noResult(){noHear=0;heardEl.textContent='…';stat.className='stat ng';stat.textContent='きこえませんでした';onNoResult()}
  function start(){
   stopSay();resetCard();heardEl.className='heard live';heardEl.textContent='…';stat.className='stat';stat.textContent='';
   var r;try{r=new SR()}catch(e){blocked('マイクが使えません');return}
@@ -2236,7 +2240,7 @@ function setupAction(act,stat,toks,spans,T){
    setIdle();if(got)return;
    if(errCode==='network'){stat.className='stat ng';stat.textContent='ネットワークエラー';return}
    if(lastInt){finish(lastInt,0);return}
-   heardEl.textContent='…';stat.className='stat ng';stat.textContent='きこえませんでした';noHear++;if(noHear>=2){noHear=0;onFail()}else later(800,function(){if(G.kick)G.kick()})};
+   noResult()};
   try{Snd.duck(1);r.start();listening=true;act.classList.add('down');act.textContent='きいてます…';
    later(15000,function(){if(rec===r){try{r.stop()}catch(e){}}})}
   catch(e){Snd.duck(0);blocked('マイクが使えません')}}
@@ -2363,6 +2367,11 @@ function setupActionTimer(act,stat,toks,spans,T){
  act.addEventListener('contextmenu',function(e){e.preventDefault()})}
 var RETRY=["Sorry, one more time?","Could you say that again, please?","Pardon? Once more, please."];
 var THANKS=["Okay.","Sure.","I see.","Right.","Got it.","Of course."];
+/* 086: 聞き取れなかった(認識結果なし)。失敗に数えず、お手本を1回流してまた聞く。強化合宿(camp78)は専用の流れ */
+function onNoResult(){
+ if(G.scene&&G.scene.d&&G.scene.d.camp78){gsNoResult();return}
+ var T=G.scene&&G.scene.turns[G.ti];if(!T)return;
+ G.phase='retry';failDemo()}
 function onFail(){
  Snd.jingle('buzz');A_shake();G.tries++;
  if(dreamGiveUp())return;

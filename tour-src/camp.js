@@ -78,25 +78,28 @@ function gsLine(text,cb,rate){
  say(text,rate||.85,1.35,gd(function(){spSay=false;later(350,cb)}))}
 /* ---- 自分の声(083): 端末の中だけ。メモリに置いて、1回鳴らしたら捨てる。サーバーへ送らない・どこにも保存しない(ブラウザの保存領域にも、ファイルにも書かない)。
    発音を調べる Azure の中継(voice.js)とは別系統で、このファイルは voice.js の関数・保存キーを呼ばない・書かない。通信の命令(ネットワークへ出す呼び出し)も一切使わない。
-   使えない(マイク不許可・MediaRecorderなし・こえを出さないモード)ときは、自分の声の再生だけ静かに飛ばす。音声認識(判定)とは別に同じマイクを開く=実機(特にiOS)での同時利用は未確認 ---- */
+   使えない(マイク不許可・MediaRecorderなし・こえを出さないモード)ときは、自分の声の再生だけ静かに飛ばす。
+   086: 音声認識(判定)とは別に同じマイクを開く(getUserMedia)ので、Android では取り合って「言ったのに聞こえない」が起きうる。判定を最優先にする:
+   聞き取れなかった(認識結果なし)ときは、その回の録音を捨て、同じ項目ではもう録らない(GS.noRec)。録音を試みたうえで聞き取れなかったことが合計2回になったら、合宿の残りは録らない(GS.recOff)。
+   音声認識に録音と同じ音を渡す方法(SpeechRecognition.start に音声トラックを渡す)は、実機で使えるか確認できないので使わない ---- */
 var GR=null,GRN=0,GOWN=null;
 function gsRecOK(){try{return typeof MediaRecorder!=='undefined'&&!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)&&!PREF.silent}catch(e){return false}}
 function gsRecTy(){var L=['audio/mp4','audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus'];try{for(var i=0;i<L.length;i++)if(MediaRecorder.isTypeSupported(L[i]))return L[i]}catch(e){}return ''}
 function gsRecRel(r){try{if(r&&r.stream)r.stream.getTracks().forEach(function(t){try{t.stop()}catch(e){}})}catch(e){}}
 function gsRecDrop(){GRN++;var r=GR;GR=null;if(!r)return;try{r.mr.ondataavailable=null;r.mr.onstop=null;if(r.mr.state!=='inactive')r.mr.stop()}catch(e){}gsRecRel(r);r.parts=null}
 function gsRecOn(){   /* 判定の聞き取りが始まるたびに呼ばれる(build.py の差しこみ)。前の録音は捨てて録り直す */
- gsRecDrop();if(!GS||!gsRecOK())return;var n=GRN;
+ gsRecDrop();if(!GS||!gsRecOK()||GS.noRec||GS.recOff)return;var n=GRN;GS.recTried=1;
  try{navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
   if(n!==GRN||!GS){gsRecRel({stream:stream});return}
   try{var ty=gsRecTy(),mr=ty?new MediaRecorder(stream,{mimeType:ty}):new MediaRecorder(stream),r={stream:stream,mr:mr,parts:[],ty:mr.mimeType||ty||'audio/mp4',t0:Date.now()};
-   mr.ondataavailable=function(e){if(e.data&&e.data.size&&r.parts)r.parts.push(e.data)};GR=r;mr.start()}catch(e){gsRecRel({stream:stream});GR=null}
+   mr.ondataavailable=function(e){if(e.data&&e.data.size&&r.parts)r.parts.push(e.data)};GR=r;mr.start(100)}catch(e){gsRecRel({stream:stream});GR=null}
  },function(){})}catch(e){}}
-function gsRecTake(cb){   /* 録音を止めて {blob,ms} を返す(なければ null)。マイクはここで閉じる */
+function gsRecTake(cb){   /* 録音を止めて {blob,ms} を返す(なければ null)。マイクはここで閉じる。086: 判定からあまり待たない(100ミリ秒ごとにたまったデータがあれば、止まりの合図を待っても最大120ミリ秒。なければ最大600ミリ秒) */
  var r=GR;GRN++;GR=null;if(!r){cb(null);return}
  var fin=false;
  function done(){if(fin)return;fin=true;gsRecRel(r);var b=null;try{if(r.parts&&r.parts.length)b=new Blob(r.parts,{type:r.ty})}catch(e){}r.parts=null;cb(b&&b.size?{blob:b,ms:Date.now()-r.t0}:null)}
  r.mr.onstop=done;try{if(r.mr.state!=='inactive')r.mr.stop();else done()}catch(e){done()}
- setTimeout(done,2000)}
+ setTimeout(done,r.parts&&r.parts.length?120:600)}
 function gsOwnStop(){var o=GOWN;GOWN=null;if(!o)return;try{if(o.au)o.au.pause()}catch(e){}try{if(o.url)URL.revokeObjectURL(o.url)}catch(e){}o.blob=null}
 function gsPlayOwn(r,cb){   /* 自分の声を1回だけ鳴らして捨てる */
  if(!r||!r.blob){cb();return}
@@ -117,7 +120,7 @@ function gsModelOnce(text,cb){spSay=true;say(text,1,1,gd(function(){spSay=false;
 function gsPlayList(list,done){
  (function step(i){
   if(i>=list.length){done();return}
-  var it=list[i];it.fails=0;
+  var it=list[i];it.fails=0;GS.noRec=0;GS.recTried=0;
   GS.after=function(){later(250,function(){step(i+1)})};
   GS.cur=it;gsHi(it.i);who.textContent='Lulu';
   if(it.pre)gsModelOnce(it.text,function(){gsAsk(it)});else gsAsk(it)})(0)}
@@ -135,6 +138,14 @@ function gsFail(){
   if(chunk&&it.fails>=2){gsOwnStop();gsModelOnce(it.text,function(){gsAfter()});return}
   if(!chunk&&it.fails>=3){gsOwnStop();setMsgInstant(it.text,'Lulu');spSay=true;say(it.text,.85,1.75,gd(function(){spSay=false;later(900,function(){gsAfter()})}));return}
   gsPlayOwn(r,function(){gsModelOnce(it.text,function(){gsAsk(it)})})})}
+/* 聞き取れなかったとき(onNoResult から。086): 認識結果が出なかった=「言えなかった」ではない。失敗に数えない(it.fails・G.tries を進めない)・ブザー・シェイク・自分の声の再生はしない。
+   その回の録音は捨てて、同じ項目ではもう録らない(判定を優先)。お手本を1回流して、また聞く(回数の上限なし)。録音を試みたうえで聞き取れなかったことが合計2回になったら、合宿の残りは録らない */
+function gsNoResult(){
+ var it=GS&&GS.cur;if(!it)return;var sd=G.sid;G.phase='gsfail';G.tries=0;if(G.mute)G.mute();
+ gsRecDrop();gsOwnStop();
+ if(GS.recTried){GS.nrN=(GS.nrN||0)+1;if(GS.nrN>=2)GS.recOff=1}
+ GS.noRec=1;GS.recTried=0;
+ gsModelOnce(it.text,function(){if(G.sid===sd)gsAsk(it)})}
 /* advance() から呼ばれる(合格・ルルの救済のあと) */
 function gsAfter(){var f=GS&&GS.after;GS&&(GS.after=null);if(f)f()}
 function gsStar(s){return s.split(' ').map(function(w){return '*'+w+'*'}).join(' ')}
