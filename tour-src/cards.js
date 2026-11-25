@@ -1,9 +1,11 @@
-/* ===== 新しい会話の流れ(タスク061)。対象は d.flow2 の場面だけ(いまは nbo_java1)。他の場面は今のまま =====
+/* ===== 新しい会話の流れ(タスク061 → 057 第1弾でナイロビ＋賢者の28場面へ展開)。対象は d.flow2 の場面だけ。他の場面は今のまま =====
    流れ: 店員が英語で話す → 選ぶのは1場面に1回(日本語の短い単語カード) → 見本の英語が音声だけで流れる(文字なし) → カンペ(文字)が出て声に出す
         → 間違えたら、ボタンなしで自動でおてほんが流れて言い直し → 発音の数値は出さず、通じたかは店員の反応で返す → 支払いは目に見える形で返す。
    M-Pesa(知らない現地のカード): タップしたら、プレイヤーが店員に「What is M-Pesa?」と聞く → 短い説明 → 支払い(分からないまま進ませない)。
    裏の反応時間(カードが出てからタップするまで)の測定と持ち越し→夢(053)は、conv.js の forkNote/noteWord をそのまま使う。画面には出さない。
-   ルルの代行回数・ポイント・スパルタ教室は入れない(未決定)。詰んだときは今までのヘルプのまま。 */
+   ルルの代行回数・ポイント・スパルタ教室は入れない(未決定)。詰んだときは今までのヘルプのまま。
+   カードの絵(ico)は選択肢ごとに台本で決める(o.ico)。支払いの演出(pay=card/cash/mpesa・コーヒーとケーキ)は Java House(nbo_java1)だけ。
+   ほかの場面の「結果が目に見える形で返る」は、相手の反応(rep)と場面の物語の中で返す(新しい演出は足さない)。 */
 function f2(){var S=G.scene;return !!(S&&S.d&&S.d.flow2&&!G.camp)}
 if(typeof CT!=='undefined'){CT.mpesa=['m','pesa'];CT.empesa=['m','pesa']}   /* 音声認識が M-Pesa を1語に聞く場合の保険(実機で未確認) */
 var CARDICO={card:'💳',cash:'💵',mpesa:'📱'};
@@ -11,15 +13,15 @@ var CARDICO={card:'💳',cash:'💵',mpesa:'📱'};
 function cardsOpts(T){
  G.phase='opts';clearPanel();clearInterval(G.typeTimer);msgText.textContent=npcHide()?'':T.npc;var sid=G.sid;
  var box=el('div','jcards'),t0=performance.now();
- T.opts.forEach(function(o){var b=el('button','jcard');b.type='button';b.setAttribute('data-pay',o.pay||'');
-  b.appendChild(el('span','ico',CARDICO[o.pay]||''));b.appendChild(el('span','lb',o.card));
+ T.opts.forEach(function(o){var b=el('button','jcard');b.type='button';b.setAttribute('data-pay',o.pay||o.k||'');
+  b.appendChild(el('span','ico',o.ico||CARDICO[o.pay]||''));b.appendChild(el('span','lb',o.card));
   b.addEventListener('click',function(){cardPick(T,o,performance.now()-t0)});box.appendChild(b)});
  panel.appendChild(box);
  later(LIMIT,function(){if(G.sid===sid&&G.phase==='opts'&&!T.fk){T.fk=1;forkNote(T,'timeout',LIMIT)}})}
 function cardPick(T,o,ms){
  if(G.phase!=='opts')return;stopSay();var S=G.scene;
  if(!T.fk){T.fk=1;forkNote(T,ms<=fastMs()?'fast':(ms<=LIMIT?'slow':'timeout'),ms)}
- S.pick=o.pay;T.pk=o.pay;T.cue=o.y;T.cueJp=o.jp;
+ S.pick=o.pay||o.k;T.pk=o.pay||o.k;T.cue=o.y;T.cueJp=o.jp;
  if(o.then){   /* 知らない現地のカード: まず店員に聞く → 短い説明 → 支払い */
   T.rep=null;var T2={npc:o.then.n,npcJp:o.then.jp,cue:o.then.y,cueJp:o.then.yjp,rep:o.then.rep,pay:o.pay,ctx:T.ctx,pitch:T.pitch};
   S.turns.splice(G.ti+1,0,T2)}

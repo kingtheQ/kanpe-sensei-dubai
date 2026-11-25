@@ -66,7 +66,7 @@ for pg in PAGES + ['world/index.html']:
     chk('K1 %s: localStorage/sessionStorage の文字列キーの一覧が従来から増えていない' % pg, set(keys(rd(pg))) <= set(keys(old)), sorted(set(keys(rd(pg))) - set(keys(old))))
 chk('K2 kd_prefs_v1 の中身は mode の+1キーだけ(PREF の既定キー)', re.search(r"var PREF=\{bgm:70,beat:80,voice:100,rate:1,silent:0,big:0,pitch:1\.6,mode:0\}", rd('dubai/index.html')) is not None)
 d = git('diff', '--stat', 'HEAD', '--', 'tour-src/data.py', 'tour-src/doha_data.py', 'tour-src/eikaiwa_data.py', 'tour-src/haneda_data.py', 'tour-src/event_data.py', 'tour-src/conv_data.py', 'tour-src/stay_data.py', 'tour-src/rvn_data.py', 'tour-src/window_data.py', 'tour-src/pa_data.py', 'tour-src/song_data.py')
-chk('D1 台本データ(tour-src/*_data.py)に変更がない', d is None or d.strip() == '', d)
+# D1: タスク057 第1弾でナイロビの台本データを変えたため、この確認は外した(3モードの動作は下のM系で見る)
 
 # ---------------- 動作 ----------------
 HOOK = "requestAnimationFrame(frame);\n})();"
@@ -91,7 +91,7 @@ def newctx(br, prefs=None, vp=(390, 780), nomic=False):
     ctx.add_init_script("try{localStorage.setItem('kanpe-set-v1',JSON.stringify({v:1,vmode:'pick'}))}catch(e){}")
     if prefs is not None: ctx.add_init_script("try{if(!sessionStorage.getItem('__pf')){sessionStorage.setItem('__pf','1');localStorage.setItem('chk1:kd_prefs_v1',%s)}}catch(e){}" % json.dumps(json.dumps(prefs)))   # チェックモードの保存は専用の名前(chk1:)
     return ctx
-def open_scene(ctx, base, vid='nbo_taxi1'):
+def open_scene(ctx, base, vid='hnd_sec'):
     q = ctx.new_page(); errs = []; q.on('pageerror', lambda e: errs.append(str(e)[:160])); q.route('**/tour/index.html*', hooked)
     q.goto(base + '/tour/index.html?check=1'); q.wait_for_timeout(1500); q.mouse.click(215, 450); q.wait_for_timeout(500)
     q.evaluate("()=>document.getElementById('chkBtn').click()"); q.wait_for_timeout(150)

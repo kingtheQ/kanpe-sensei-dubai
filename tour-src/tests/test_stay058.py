@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """タスク058 の動作確認(ヘッドレス)。使い方: python3 tour-src/tests/test_stay058.py
-ナイロビの滞在(観光): サファリ nbo_safari ・マサイマーケット nbo_market(053の分かれ目の型。英語の返事を選んで声に出す)。
+ナイロビの滞在(観光): サファリ nbo_safari ・マサイマーケット nbo_market(タスク057 第1弾で新しい流れ=061 の flow2 に統一: 選ぶのは1か所だけ・日本語の単語カード)。
 A. 配置: 滞在3日の中(oneworld: 3日目=市場・4日目=サファリ・5日目=休養・6日目=空港／スター: 4日目=市場+サファリ)・「滞在」タブ・場所の鍵・既存の日の並びは変えない
 B. 絵: 背景が素材と一致・動物6点/布が配置の正本プレビューどおり(画素一致)・布が2コマで揺れる・影の色
-C. 会話: 分かれ目2か所・英語の返事だけ(日本語なし)・選び方で相手の反応が変わる・Word Battle/Meaning なし・点数/○×/「復習」「テスト」なし・
+C. 会話: 選ぶのは1か所(日本語の単語カード2枚)・選び方で相手の反応が変わる・Word Battle/Meaning なし・点数/○×/「復習」「テスト」なし・
    語ごとの記録(即答/間違い/時間切れ)と持ち越し・完了(save.seen)とマップへの戻り・お金の1行
 D. 既存を壊さない: セーブ形式(kanpe-trip-v1 のキー)・既存の場面(nbo_java1 など)・空港のクリア判定(PLACES_AIR)に入らない
 マイク・実機の見え方・実機の音は確認できない(このテストの音声認識は、カンペの文をそのまま返す偽物)。"""
@@ -117,62 +117,54 @@ with sync_playwright() as pw:
     q.screenshot(path='/tmp/s058/t_market.png')
     q.close()
     # ---------------- C. 会話 ----------------
-    def run(q, vid, place, picks, waits):
-        """picks=[分かれ目1で押す番号, 分かれ目2で押す番号], waits=[ms, ms]"""
+    def run(q, vid, place, pick, wait):
+        """pick=日本語カードで押す番号, wait=カードが出てから押すまでの ms"""
         q.evaluate("(a)=>{var T=__T;T.save.missed=[];T.save.wrec={};T.save.seen={};window.__ph.clear();window.__txt.length=0;window.__dq.length=0;T.startVid(T.PBY[a[0]],a[1],null)}", [place, vid])
-        q.wait_for_timeout(500); q.evaluate("()=>{document.querySelectorAll('.trip-ov').forEach(function(o){o.remove()})}"); q.click('.btn.go', force=True); k = 0; seenq = []
+        q.wait_for_timeout(500); q.evaluate("()=>{document.querySelectorAll('.trip-ov').forEach(function(o){o.remove()})}"); q.click('.btn.go', force=True); k = 0; labels = []
         for step in range(260):
             q.wait_for_timeout(200)
-            n = q.evaluate("()=>document.querySelectorAll('.dq').length")
-            if n and k < 2:
-                q.wait_for_timeout(waits[k]); texts = q.evaluate("()=>[].map.call(document.querySelectorAll('.dq'),function(b){return b.textContent})"); seenq.append(texts)
-                q.evaluate("(i)=>{document.querySelectorAll('.dq')[i].click()}", picks[k]); k += 1; q.wait_for_timeout(600)
-            if k >= 2 and q.evaluate("(v)=>__T.save.seen[v]>0", vid): q.wait_for_timeout(700); break
-        return k, seenq
-    SC = {'nbo_safari': ('safari', ['giraffe', 'rhino'], 8), 'nbo_market': ('market', ['cloth', 'price'], 11)}
-    for vid, (place, tw, hr) in SC.items():
+            n = q.evaluate("()=>document.querySelectorAll('.jcard').length")
+            if n and k < 1:
+                q.wait_for_timeout(wait); labels = q.evaluate("()=>[].map.call(document.querySelectorAll('.jcard .lb'),function(b){return b.textContent})")
+                q.evaluate("(i)=>{document.querySelectorAll('.jcard')[i].click()}", pick); k += 1; q.wait_for_timeout(600)
+            if k >= 1 and q.evaluate("(v)=>__T.save.seen[v]>0", vid): q.wait_for_timeout(700); break
+        return k, labels
+    # タスク057 第1弾: 分かれ目(英語の返事を選ぶ)は2か所→1か所に減らし、日本語の単語カード(061 の flow2)に作り替えた。もう1か所は固定文(本線の返事をカンペで読む)
+    SC = {'nbo_safari': ('safari', ['rhino'], ['写真', '静かに見る'], ['Yes, please! But', 'Good. The rhino'], ['Yes! Its neck']),
+          'nbo_market': ('market', ['price'], ['値切る', '買う'], ['Ah, you are', 'Wonderful! You'], ['Good choice! Red'])}
+    for vid, (place, tw, labs, reps, fixrep) in SC.items():
         q = seed(ctx, {'seen': {}, 'ticket': 'ow'}, tseed('ow', 4 if place == 'safari' else 3, 4 if place == 'safari' else 3, 'day')); q.route('**/tour/index.html', hooked)
         q.goto(base + '/tour/index.html'); q.wait_for_timeout(1800); q.evaluate(POLL)
-        # 通じた返事(0番・すぐ押す)
-        k, sq = run(q, vid, place, [0, 0 if vid == 'nbo_market' else 1], [200, 200])
-        # 通じた返事を押す番号は場面ごとに違う: 市場=0(red)/0(cheaper)、サファリ=0(see)/1(see) -- 下で内容を確かめる
+        k, lb = run(q, vid, place, 0, 200)
         s = q.evaluate("()=>({w:__T.save.wrec,m:__T.save.missed,seen:__T.save.seen,view:__T.G.view,ph:Array.from(window.__ph),dq:window.__dq,txt:window.__txt.join('\\n'),led:__T.TRIP.state().cur.led})")
-        print('  %s ok: forks=%d wrec=%s' % (vid, k, json.dumps(dict((a, (b['o'], b['ms'])) for a, b in s['w'].items()), ensure_ascii=False)))
-        chk('C1 %s: 分かれ目は2か所(▶の英語の返事を選ぶ)' % vid, k == 2 and all(len(x) == 3 for x in sq), [len(x) for x in sq])
-        alltxt = '\n'.join(sum(sq, []))
-        chk('C2 %s: 選択肢は英語だけ(日本語なし)・点数/○×/「復習」「テスト」なし' % vid, not re.search(JP, alltxt) and not any(w in s['txt'] for w in ['復習', 'テスト', '点', '○', '×', '正解']), alltxt[:80])
+        print('  %s card0: wrec=%s' % (vid, json.dumps(dict((a, (b['o'], b['ms'])) for a, b in s['w'].items()), ensure_ascii=False)))
+        chk('C1 %s: 選ぶのは1か所だけ(日本語の単語カード2枚: %s)・英語の▶の選択肢は出ない' % (vid, '／'.join(labs)), k == 1 and lb == labs and not s['dq'], (k, lb))
+        chk('C2 %s: 点数/○×/「復習」「テスト」なし' % vid, not any(w in s['txt'] for w in ['復習', 'テスト', '点', '○', '×', '正解']), '')
         chk('C3 %s: Word Battle・Meaning!・3択の答え合わせは出ない(phase に words/reveal なし)' % vid, 'words' not in s['ph'] and 'reveal' not in s['ph'] and 'CHOICES' not in s['ph'] and 'REVEAL' not in s['ph'], s['ph'])
         chk('C4 %s: 終わると場面の完了(save.seen)が +1・その日の最後なら夜の1枚(それ以外はマップ)へ' % vid, s['seen'].get(vid) == 1 and (s['view'] == 'map' or q.evaluate("()=>!!document.querySelector('.trip-ov')")), (s['view'], s['seen']))
-        chk('C5 %s: 通じた返事をすぐ選ぶと「即答(fast)」で卒業(持ち越しに入らない)' % vid, all(s['w'].get(w, {}).get('o') == 'fast' for w in tw) and not s['m'], dict((a, b['o']) for a, b in s['w'].items()))
-        # 聞き違えた返事(ok なしの選択肢)を選ぶ
-        bad_i = [1, 0] if vid == 'nbo_safari' else [1, 1]   # サファリ: 1番目の分かれ目=graph(1)・2番目=lion(0) / 市場: clock(1)・prize(1)
-        k, sq = run(q, vid, place, bad_i, [200, 200])
-        s = q.evaluate("()=>({w:__T.save.wrec,m:__T.save.missed,seen:__T.save.seen,view:__T.G.view,txt:window.__txt.join('\\n')})")
-        why = dict((m[0], m[3]) for m in s['m'])
-        print('  %s 聞き違え: %s' % (vid, json.dumps(why, ensure_ascii=False)))
-        chk('C6 %s: 聞き違えた返事を選ぶと「間違い」で持ち越し(理由つき)。物語は止まらず終わる' % vid, why == dict((w, '間違い') for w in tw) and s['seen'].get(vid) == 1, why)
-        rep = {'nbo_safari': ['A graph? Ha', 'No, no! A rhino'], 'nbo_market': ['A clock? Ha', 'A prize? Ha']}[vid]
-        okrep = {'nbo_safari': ['Yes! Its neck', 'Good. The'], 'nbo_market': ['Good choice!', 'Ah, you are']}[vid]
-        chk('C7 %s: 選び方で相手の反応が変わる(聞き違え→言い直してくれる)' % vid, all(r_ in s['txt'] for r_ in rep) and not any(o_ in s['txt'] for o_ in okrep), dict((x_, x_ in s['txt']) for x_ in (rep + okrep)))
-        k, sq = run(q, vid, place, [0, 0 if vid == 'nbo_market' else 1], [200, 200])
-        s = q.evaluate("()=>({txt:window.__txt.join('\\n')})")
-        chk('C8 %s: 通じた返事なら、その返事に合う一言が返る' % vid, all(o_ in s['txt'] for o_ in okrep), dict((x_, x_ in s['txt']) for x_ in okrep))
-        # 時間切れ(制限時間をこえて選ばない) → 裏で時間切れを記録するだけ。物語は進む
-        k, sq = run(q, vid, place, [0, 0 if vid == 'nbo_market' else 1], [5600, 5600])
+        chk('C5 %s: カードをすぐ押すと「即答(fast)」で卒業(持ち越しに入らない)・記録されるのはカードの語 %s だけ' % (vid, tw), list(s['w'].keys()) == tw and all(s['w'][w]['o'] == 'fast' for w in tw) and not s['m'], dict((a, b['o']) for a, b in s['w'].items()))
+        chk('C6 %s: カードの選び方で相手の反応が変わる(0番目) ・固定文に戻したほうの一言も返る' % vid, reps[0] in s['txt'] and reps[1] not in s['txt'] and all(f_ in s['txt'] for f_ in fixrep), dict((x_, x_ in s['txt']) for x_ in (reps + fixrep)))
+        k, lb = run(q, vid, place, 1, 200)
+        s = q.evaluate("()=>({txt:window.__txt.join('\\n'),seen:__T.save.seen})")
+        chk('C7 %s: 1番目のカードなら、その選び方に合う一言が返る' % vid, reps[1] in s['txt'] and reps[0] not in s['txt'] and s['seen'].get(vid) == 1, dict((x_, x_ in s['txt']) for x_ in reps))
+        k, lb = run(q, vid, place, 0, 3200)
+        s = q.evaluate("()=>({w:__T.save.wrec,m:__T.save.missed,seen:__T.save.seen})"); why = dict((m[0], m[3]) for m in s['m'])
+        chk('C8 %s: 3.2秒かかると「遅い」で持ち越し(理由つき)。物語は止まらず終わる' % vid, why == dict((w, '遅い') for w in tw) and s['seen'].get(vid) == 1, why)
+        k, lb = run(q, vid, place, 0, 5600)
         s = q.evaluate("()=>({w:__T.save.wrec,m:__T.save.missed,seen:__T.save.seen,view:__T.G.view})"); why = dict((m[0], m[3]) for m in s['m'])
         chk('C9 %s: 制限時間をこえて選ぶと「時間切れ」(ms=制限時間)。物語は進んで終わる' % vid, why == dict((w, '時間切れ') for w in tw) and all(s['w'][w]['ms'] == 5000 for w in tw) and s['seen'].get(vid) == 1, why)
         q.close()
     # お金の1行(市場): 1500シリングが ledger に載る。サファリは お金なし
     q = seed(ctx, {'seen': {}, 'ticket': 'ow'}, tseed('ow', 3, 3, 'day')); q.route('**/tour/index.html', hooked)
     q.goto(base + '/tour/index.html'); q.wait_for_timeout(1800); q.evaluate(POLL)
-    run(q, 'nbo_market', 'market', [0, 0], [200, 200]); q.wait_for_timeout(1500)
+    run(q, 'nbo_market', 'market', 0, 200); q.wait_for_timeout(1500)
     led = q.evaluate("()=>{var s=__T.TRIP.state();return JSON.stringify(s.ph==='night'?s.days.concat([s.cur]):[s.cur])}")
     chk('C10 市場: お金の1行 gift 1,500 KES(どの返事でも同じ値段)が記録帳に載る', '"gift",1500,"KES"' in led.replace(' ', ''), led[:160])
     q.close()
     # ---------------- D. 既存を壊さない ----------------
     q = seed(ctx, {'seen': {}, 'ticket': 'ow'}, tseed('ow', 4, 4, 'day')); q.route('**/tour/index.html', hooked)
     q.goto(base + '/tour/index.html'); q.wait_for_timeout(1800); q.evaluate(POLL)
-    run(q, 'nbo_safari', 'safari', [0, 1], [200, 200]); q.wait_for_timeout(1500)
+    run(q, 'nbo_safari', 'safari', 0, 200); q.wait_for_timeout(1500)
     keys = q.evaluate("()=>Object.keys(JSON.parse(localStorage.getItem('kanpe-trip-v1'))).sort()")
     okk = ['bun', 'cur', 'day', 'days', 'legs', 'nph', 'ph', 'td', 'tk', 'trip', 'v']
     chk('D1 旅の記録(kanpe-trip-v1)のキーは今までと同じ(新しいキーなし)', set(keys) <= set(okk), keys)
