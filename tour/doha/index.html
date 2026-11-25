@@ -4287,9 +4287,9 @@ var ART={
  simshop:{bg:'nairobi-sim-v1.png',mode:'wide',base:900,lulu:700,king:860,suit:965,npc:{x:768,top:372,clip:500},fx:'',npcS:{sim_staff:'w-front-man-suit-1',sim_staff2:'w-front-man-dashiki'},
   strips:[{img:'nairobi-sim-spinner-strip.png',x:1204,y:596,n:4,fw:120,fh:300,step:.5},{img:'nairobi-sim-blink-strip.png',x:704,y:524,n:2,fw:128,fh:48,step:1}],
   people:[{n:'t-safari-front',x:218,by:702,sw:85},{n:'t-woman-hijab-front',x:1430,by:712,sw:79}]},
- /* ナイロビのホテルの部屋(タスク051): 到着の夜、部屋で休む場面(nbo_room)。人なしの背景をフルブリード。ふたりは後ろ姿(足もと y=884、ルル x=700・キング x=836)。人は置かない。
+ /* ナイロビのホテルの部屋(タスク051): 到着の夜、部屋で休む場面(nbo_room)。人なしの背景をフルブリード。ふたりは後ろ姿(足もと y=884)。075で室内基準に拡大: キング148×248(旧 68×114)・ルル129×200(旧 66×102)=カフェ eikai の主人公と同値。素材を NEAREST で拡大して置く(artSwayZ)。ルル x=690・キング x=846(拡大後に重ならず絨毯 x396-1100 の上)。影(sh)は拡大に合わせた幅(ルル57・キング78=旧 29/36 を表示倍率にそろえた)。人は置かない。
     tv=壁のTV画面の矩形(1536×960座標)。今回は何も映さない。将来の映画場面のために名前つきで記録しておく */
- nroom:{bg:'nairobi-hotel-room-v1.png',mode:'wide',hall:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884}},tv:{x:1120,y:216,w:344,h:176}},
+ nroom:{bg:'nairobi-hotel-room-v1.png',mode:'wide',hall:{lulu:{n:'hall-lulu-back',x:690,by:884,w:129,h:200,sh:57},king:{n:'hall-king-back',x:846,by:884,w:148,h:248,sh:78}},tv:{x:1120,y:216,w:344,h:176}},
  hotel:{bg:'hotel-front.png',mode:'room',base:895,lulu:250,king:450,suit:560,npc:{x:1290,px:15,top:262,clip:412},fx:'hotel',npcS:{c_front:'o-front-woman-blonde-suit'}},
  /* ドーハのコルニーシュ(タスク070): 朝・人なしの背景(1536×960)。絵に文字は一切なし。対象は bg ccorn の4場面(doh_city_c1/c2/c3・doh_ev_j_ask。結びは doha 側 artIdFor だけ)。
     ふたりは右の端から歩いて入り、ルル x=1060・キング x=1180(足もと y=884)で止まる(dir:-1)。スーツケースは左どなり。相手は左の広い舗道(ベンチの手前)。
@@ -4729,11 +4729,11 @@ function artHall(H,exi){var g=H.globe,gi=g&&artImg(g.img);
    var nx2=H.sage.x+28+nq*30+Math.round(Math.sin(t*2+nq*2)*8),ny2=H.sage.by-sg.naturalHeight-16-np2*70,nc=nq%2?'♫':'♪';ca.strokeText(nc,nx2,ny2);ca.fillText(nc,nx2,ny2)}ca.globalAlpha=1}}
  else if(H.clerk)artClerk(H.clerk,exi);
  else if(H.bubble&&spSay&&speaker)artBubble(H.bubble.x,H.bubble.y);   /* 相手を絵に出さない場面(羽田のゲート): 声のぬしの場所に「…」 */
- if(OUT.lvis){if(H.lulu.h){artSwayZ(lu,H.lulu.x,H.lulu.by,ld,H.lulu.w,H.lulu.h);   /* 大きさ指定の後ろ姿(077b): 影なし・素材を拡大して置く(dep の w/h と同じ作法) */
+ if(OUT.lvis){if(H.lulu.h){if(H.lulu.sh)artShadow(H.lulu.x,H.lulu.by,H.lulu.sh);artSwayZ(lu,H.lulu.x,H.lulu.by,ld,H.lulu.w,H.lulu.h);   /* 大きさ指定の後ろ姿(077b): 影なし・素材を拡大して置く(dep の w/h と同じ作法) */
    if(luTalk&&spSay)artBubble(H.lulu.x+(H.lulu.bx||20),H.lulu.by-H.lulu.h-26)}
   else{artShadow(H.lulu.x,H.lulu.by,H.lulu.rx||29);artSway(lu,H.lulu.x,H.lulu.by,ld);
   if(luTalk&&spSay)artBubble(H.lulu.x+(H.lulu.bx||20),H.lulu.by-lu.naturalHeight-26)}}
- if(OUT.hvis){if(H.king.h)artSwayZ(kg,H.king.x,H.king.by,kd,H.king.w,H.king.h);
+ if(OUT.hvis){if(H.king.h){if(H.king.sh)artShadow(H.king.x,H.king.by,H.king.sh);artSwayZ(kg,H.king.x,H.king.by,kd,H.king.w,H.king.h)}
   else{artShadow(H.king.x,H.king.by,H.king.rx||36);artSway(kg,H.king.x,H.king.by,kd)}}}
 /* チケット売り場を描く(タスク041)。歩かない。足と影は動かさず、上半身だけ小さく揺れる(037)。係員は話しているとき「…」を出す。
    航路の地図(route)は、窓口の「線を引く」会話(bg:'rtmap')のあいだだけ。描けなければ、航路入りの静止画に切りかえる。会話の進み方には一切かかわらない(時間だけで動く) */

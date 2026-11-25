@@ -5,7 +5,7 @@
 (3)タクシー(nbo_taxi1/2): 背景が nairobi-taxi-v1.png・既存の会話が進む・fx は無し
 (4)旅行者: SIM2人・タクシー2人。相手・ふたり・回転台と重ならない・絵が描かれている
 (5)ホテルの部屋 hroom: 到着タブの hsong の次・v 空(場面の数・完了条件・save.seen に入らない)・タクシーのあとに開く
-(6)nbo_room: 背景 nairobi-hotel-room-v1.png・後ろ姿のふたり(足もと y=884、ルル x=700・キング x=836)・人なし・発音課題/マイク/採点なし・6つの台詞が読み上げ+表示で進む・マップへ戻る
+(6)nbo_room: 背景 nairobi-hotel-room-v1.png・後ろ姿のふたり(足もと y=884、ルル x=690・キング x=846。075で拡大)・人なし・発音課題/マイク/採点なし・6つの台詞が読み上げ+表示で進む・マップへ戻る
 (7)TV画面の矩形(x1120-1464 / y216-392)が art 設定にあり、画面には何も映っていない
 (8)絵が読めないときは今までのドット描画に落ちる(真っ暗にならない)
 (9)ドーハ側の art 設定の入口(artIdFor)・049/050 の場面は変わらない  (10)画面に「勉強・テスト・測定・練習」の言葉がない
@@ -169,14 +169,14 @@ with sync_playwright() as pw:
     sc = pg.evaluate("[__T.G.view,__T.G.phase,__T.G.scene.d.id,!!document.querySelector('.cue'),__T.G.scene.turns.length,__T.artIdFor(__T.G.scene)]")
     chk('部屋の場面に入る(nbo_room・art id nroom・カンペ/会話の型ではない)', sc[0] == 'scene' and sc[2] == 'nbo_room' and sc[3] is False and sc[4] == 0 and sc[5] == 'nroom', sc)
     bgR = rgb('nairobi-hotel-room-v1.png'); sn = snap(pg)
-    chk('部屋の背景の画素が素材と一致(上半分・TVも含む。人のいない領域)', frac_same(sn[0:760, :], bgR[0:760, :]) > .9995, frac_same(sn[0:760, :], bgR[0:760, :]))
+    chk('部屋の背景の画素が素材と一致(y<630・TVも含む。拡大後のキングの頭 y≈636 より上の人のいない領域)', frac_same(sn[0:630, :], bgR[0:630, :]) > .9995, frac_same(sn[0:630, :], bgR[0:630, :]))
     tv = pg.evaluate("__T.ART.nroom.tv")
     chk('art 設定に TV画面の矩形 tv:{x:1120,y:216,w:344,h:176}(= x1120-1464 / y216-392)が記録されている', tv == {'x': 1120, 'y': 216, 'w': 344, 'h': 176}, tv)
     chk('TVには何も映っていない(その矩形の画素が背景のまま)', frac_same(sn[216:392, 1120:1464], bgR[216:392, 1120:1464]) == 1.0)
     hl = pg.evaluate("(function(){var h=__T.ART.nroom.hall;return [h.lulu.n,h.lulu.x,h.lulu.by,h.king.n,h.king.x,h.king.by,!!h.sage,(__T.ART.nroom.people||[]).length]})()")
-    chk('ふたりは後ろ姿(hall-lulu-back/hall-king-back)・足もと y=884・ルル x=700・キング x=836・人は置かない', hl == ['hall-lulu-back', 700, 884, 'hall-king-back', 836, 884, False, 0], hl)
-    for nm, n, x in [('ルル', 'hall-lulu-back', 700), ('キング', 'hall-king-back', 836)]:
-        w, h = Image.open(os.path.join(ART, 'npc', n + '.png')).size; b = (x - w // 2, 884 - h, x - w // 2 + w, 884)
+    chk('ふたりは後ろ姿(hall-lulu-back/hall-king-back)・足もと y=884・ルル x=690・キング x=846(075で室内基準に拡大。大きさは test_hotelroom075.py)・人は置かない', hl == ['hall-lulu-back', 690, 884, 'hall-king-back', 846, 884, False, 0], hl)
+    for nm, n, x, w, h in [('ルル', 'hall-lulu-back', 690, 129, 200), ('キング', 'hall-king-back', 846, 148, 248)]:
+        b = (x - w // 2, 884 - h, x - w // 2 + w, 884)
         chk('%s が描かれている(足もと y=884)' % nm, frac_same(sn[b[1]:b[3], b[0]:b[2]], bgR[b[1]:b[3], b[0]:b[2]]) < .85)
     txt = pg.evaluate("document.body.innerText"); chk('部屋の入り: 画面に「勉強・テスト・測定・練習」の言葉がない', not any(w in txt for w in FORBID))
     chk('部屋の入り: マイク・カンペ・単語バトルの画面は出ない', pg.evaluate("[!!document.querySelector('.cue'),__T.G.phase]") == [False, 'listen'])

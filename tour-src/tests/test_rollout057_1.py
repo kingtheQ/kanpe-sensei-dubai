@@ -36,7 +36,8 @@ print(json.dumps(g['dl'], ensure_ascii=False))
 """ % (os.path.join(ROOT, 'tour-src'), os.path.join(ROOT, 'tour-src/build.py'))], capture_output=True, text=True, cwd=ROOT)
 dl = json.loads(j.stdout.strip().split('\n')[-1])
 cnt_flow2 = sorted(k for k, v in dl.items() if v.get('flow2'))
-chk('S0 flow2 の場面は nbo_java1 + 第1弾の28場面 = 29(ほかの場面には付いていない)', cnt_flow2 == sorted(SCN + ['nbo_java1']), len(cnt_flow2))
+HND2 = ['hnd_checkin_ow', 'hnd_checkin_star', 'hnd_sec', 'hnd_exit', 'hnd_gate_ow', 'hnd_gate_star', 'hnd_board_ow', 'hnd_board_star', 'hnd_plane_ow', 'hnd_plane_star', 'hnd_return']   # 第2弾(羽田11場面。確認は test_rollout057_2.py)
+chk('S0 flow2 の場面は nbo_java1 + 第1弾の28場面 = 29 + 第2弾の羽田11場面(第3弾以降のドーハ・ロヴァニエミ・イベントには付いていない)', cnt_flow2 == sorted(SCN + ['nbo_java1'] + HND2), len(cnt_flow2))
 for sid in SCN:
     d_ = dl[sid]; L = d_['lines']; cards = [i for i, l in enumerate(L) if l.get('cards')]
     opts = L[cards[0]]['opts'] if cards else []
@@ -48,7 +49,7 @@ for sid in SCN:
     chk('S2 %s: fork の語(%s)は場面の単語5語の中にある' % (sid, tw), tw in [w['w'] if isinstance(w, dict) else w[0] for w in d_['words']], d_['words'][:2])
 # 既存フラグが残る
 chk('S3 既存フラグ: nbo_java2・nbo_lounge2 は kind=trav のまま', dl['nbo_java2'].get('kind') == 'trav' and dl['nbo_lounge2'].get('kind') == 'trav')
-chk('S4 窓口・ドーハ・羽田・ロヴァニエミ・イベントの場面は変えていない(flow2 なし)', not any(dl[k].get('flow2') for k in dl if k.startswith(('win_', 'ticket_', 'doh_', 'hnd_', 'rvn_', 'nbo_ev_', 'nbo_eikaiwa'))))
+chk('S4 窓口・ドーハ・羽田のイベント・ロヴァニエミ・ナイロビのイベントの場面は変えていない(flow2 なし。羽田の出発11場面は第2弾で変えた)', not any(dl[k].get('flow2') for k in dl if k.startswith(('win_', 'ticket_', 'doh_', 'hnd_ev_', 'rvn_', 'nbo_ev_', 'nbo_eikaiwa'))))
 # ---------------- 動作 ----------------
 HOOK = "requestAnimationFrame(frame);\n})();"
 def hooked(route):

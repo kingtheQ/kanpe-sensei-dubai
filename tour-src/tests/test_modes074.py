@@ -91,9 +91,9 @@ def newctx(br, prefs=None, vp=(390, 780), nomic=False):
     ctx.add_init_script("try{localStorage.setItem('kanpe-set-v1',JSON.stringify({v:1,vmode:'pick'}))}catch(e){}")
     if prefs is not None: ctx.add_init_script("try{if(!sessionStorage.getItem('__pf')){sessionStorage.setItem('__pf','1');localStorage.setItem('chk1:kd_prefs_v1',%s)}}catch(e){}" % json.dumps(json.dumps(prefs)))   # チェックモードの保存は専用の名前(chk1:)
     return ctx
-def open_scene(ctx, base, vid='hnd_sec'):
-    q = ctx.new_page(); errs = []; q.on('pageerror', lambda e: errs.append(str(e)[:160])); q.route('**/tour/index.html*', hooked)
-    q.goto(base + '/tour/index.html?check=1'); q.wait_for_timeout(1500); q.mouse.click(215, 450); q.wait_for_timeout(500)
+def open_scene(ctx, base, vid='doh_immig1'):   # タスク057 第2弾で羽田(hnd_sec)も新しい流れ(おてほんボタンなし)になったので、まだ変えていないドーハの doh_immig1 を使う
+    q = ctx.new_page(); errs = []; q.on('pageerror', lambda e: errs.append(str(e)[:160])); q.route('**/tour/index.html*', hooked); q.route('**/tour/doha/index.html*', hooked)
+    q.goto(base + ('/tour/doha/index.html?check=1' if vid.startswith('doh_') else '/tour/index.html?check=1')); q.wait_for_timeout(1500); q.mouse.click(215, 450); q.wait_for_timeout(500)
     q.evaluate("()=>document.getElementById('chkBtn').click()"); q.wait_for_timeout(150)
     q.evaluate("(v)=>{[].filter.call(document.querySelectorAll('#chkPan button'),function(b){return b.textContent===v})[0].click()}", vid); q.wait_for_timeout(600)
     q.click('.btn.go'); q.errs = errs

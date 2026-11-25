@@ -136,20 +136,23 @@ with sync_playwright() as pw:
             q.wait_for_timeout(400); q.evaluate("()=>{window.__bad=0;var b=document.querySelector('#panel .btn.help');b&&b.click()}"); used = True
         if q.evaluate("()=>__T.G.view") == 'map': break
     chk('F1 詰んだとき: ヘルプ(ルルが代わりに言う)を使うと、残り回数が減り、そのまま支払いまで進んで終わる(今までのヘルプのまま)', used and q.evaluate("()=>__T.save.help") == 4 and q.evaluate("()=>__T.G.view") == 'map' and 'pay' in q.evaluate("()=>window.__ph"), (used, q.evaluate("()=>__T.save.help"), q.evaluate("()=>window.__ph")))
-    # ---------- G. ほかの場面は今のまま(タスク057 第1弾でナイロビ＋賢者の28場面にも広げたので、まだ変えていない羽田の hnd_sec で確かめる) ----------
+    # ---------- G. ほかの場面は今のまま(タスク057 第1弾・第2弾でナイロビ・賢者・羽田にも広げたので、まだ変えていないドーハの doh_immig1 で確かめる) ----------
+    q.close(); q = ctx.new_page(); q.on('pageerror', lambda e: ERR.append(str(e)[:160]))   # 第2弾で羽田も新しい流れになったので、まだ変えていないドーハ(tour/doha/)の doh_immig1 で確かめる
+    q.add_init_script("localStorage.setItem('kanpe-tour-save-v1',%s);localStorage.setItem('kanpe-trip-v1',%s);" % (json.dumps(json.dumps({'seen': {}, 'ticket': 'ow'})), json.dumps(json.dumps(tseed()))))
+    q.route('**/tour/doha/index.html', hooked); q.goto(base + '/tour/doha/index.html'); q.wait_for_timeout(1700); q.evaluate(POLL)
     q.evaluate("()=>{window.__bad=0}")
-    q.evaluate("(v)=>{var T=__T;T.save.missed=[];T.save.wrec={};T.save.seen={};window.__btn.clear();window.__pan.length=0;var pl=null;for(var k in T.PBY){var p=T.PBY[k];if(p&&p.v&&p.v.indexOf(v)>=0){pl=p;break}} T.startVid(pl,v,null)}", 'hnd_sec'); q.wait_for_timeout(500); q.click('.btn.go')
+    q.evaluate("(v)=>{var T=__T;T.save.missed=[];T.save.wrec={};T.save.seen={};window.__btn.clear();window.__pan.length=0;var pl=null;for(var k in T.PBY){var p=T.PBY[k];if(p&&p.v&&p.v.indexOf(v)>=0){pl=p;break}} T.startVid(pl,v,null)}", 'doh_immig1'); q.wait_for_timeout(500); q.click('.btn.go')
     for i in range(60):
         q.wait_for_timeout(150)
         if q.evaluate("()=>__T.G.phase") == 'cue': break
     q.wait_for_timeout(1600)
     s = q.evaluate("()=>({btn:Array.from(window.__btn),pan:window.__pan.join('\\n')})")
     # タスク074: 数字のスコア(語数・%)は全場面で出さない(キング決定)。おてほんボタンは新しい流れではない場面に今までどおり残る
-    chk('G1 hnd_sec(新しい流れではない場面)は、おてほんボタンが今までどおり出る。発音の数値(語数・%)は出ない(タスク074で全場面共通になった)', 'おてほん' in ' '.join(s['btn']) and re.search(r'\d+/\d+語', s['pan']) is None, (s['btn'], re.findall(r'\d+/\d+語[^\n]{0,12}', s['pan'])[:1]))
+    chk('G1 doh_immig1(新しい流れではない場面)は、おてほんボタンが今までどおり出る。発音の数値(語数・%)は出ない(タスク074で全場面共通になった)', 'おてほん' in ' '.join(s['btn']) and re.search(r'\d+/\d+語', s['pan']) is None, (s['btn'], re.findall(r'\d+/\d+語[^\n]{0,12}', s['pan'])[:1]))
     for i in range(150):
         q.wait_for_timeout(200)
         if 'words' in q.evaluate("()=>window.__ph"): break
-    chk('G2 hnd_sec は今までどおり Word Battle へ進む', 'words' in q.evaluate("()=>window.__ph"))
+    chk('G2 doh_immig1 は今までどおり Word Battle へ進む', 'words' in q.evaluate("()=>window.__ph"))
     q.close()
     chk('Z ページのエラーなし', not ERR, ERR[:3])
     br.close()

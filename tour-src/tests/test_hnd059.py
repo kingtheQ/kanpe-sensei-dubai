@@ -2,7 +2,7 @@
 """タスク059 の動作確認(ヘッドレス)。使い方: python3 tour-src/tests/test_hnd059.py
 28日目の羽田に戻った場面 hnd_return(1日目に拾った落とし物=木のおもちゃの飛行機を、持ち主に返す)。
 A. 出る条件: 保存の keep.hnd1 があるセーブ(oneworld の28日目)だけ。ない人・スターには、場面も「羽田」タブも出ない。既存の1〜27日の並びは変えない
-B. 会話: 分かれ目2か所・英語の返事だけ(日本語なし)・Word Battle/Meaning なし・点数/○×/「復習」「テスト」なし・聞き違えた返事で言い直してくれる・完了(save.seen)
+B. 会話(タスク057 第2弾で新形式 flow2 に変更): 分かれ目は1か所だけ=日本語の短い単語カード2枚(お礼)・もう1か所は固定文・Word Battle/Meaning なし・点数/○×/「復習」「テスト」なし・選び方で相手の反応が変わる・遅いと持ち越し・完了(save.seen)
 C. 記録: 新しい保存キーを作らない(localStorage のキーの数)・keep.hnd1 は残る・カバンの記録帳が「ひろった」→「かえした」・「かいわ n / 全部」の分母が変わらない
 D. 世界マップ: 羽田の「くうこうに もどる」が28日目だけ ../tour/ へ
 マイク・実機の見え方・実機の音は確認できない(このテストの音声認識は、カンペの文をそのまま返す偽物)。"""
@@ -20,7 +20,7 @@ def chk(name, ok, val=''):
     print(('OK  ' if ok else 'NG  ') + name, val if val != '' else '')
     if not ok: bad.append(name)
 JP = r"[぀-ヿ㐀-鿿]"
-POLL = ("window.__txt=[];window.__ph=new Set();window.__dq=[];(function(){var t=setInterval(function(){var m=document.getElementById('msgText');if(m){clearInterval(t);new MutationObserver(function(){window.__txt.push(m.textContent)}).observe(m,{childList:true,characterData:true,subtree:true})}},30)})();setInterval(function(){try{"
+POLL = ("window.__sp=[];(function(){var o=speechSynthesis.speak;speechSynthesis.speak=function(u){window.__sp.push(u.text);o.call(speechSynthesis,u)}})();window.__txt=[];window.__ph=new Set();window.__dq=[];(function(){var t=setInterval(function(){var m=document.getElementById('msgText');if(m){clearInterval(t);new MutationObserver(function(){window.__txt.push(m.textContent)}).observe(m,{childList:true,characterData:true,subtree:true})}},30)})();setInterval(function(){try{"
         "var m=document.getElementById('msgText');if(m)window.__txt.push(m.textContent);"
         "var p=document.getElementById('panel')||document.querySelector('.panel');if(p){window.__txt.push(p.innerText);"
         "if(p.querySelector('.choices'))window.__ph.add('CHOICES');if(p.querySelector('.reveal'))window.__ph.add('REVEAL');"
@@ -35,6 +35,7 @@ def seed(ctx, sv, trip):
     q = ctx.new_page(); q.on('pageerror', lambda e: ERR.append(str(e)[:160]))
     q.add_init_script("if(!localStorage.getItem('kanpe-tour-save-v1')){localStorage.setItem('kanpe-tour-save-v1',%s);localStorage.setItem('kanpe-trip-v1',%s)}" % (json.dumps(json.dumps(sv)), json.dumps(json.dumps(trip))))
     q.route('**/tour/index.html', hooked); return q
+DEPINTRO = 'ひさしぶりの羽田。出発ゲートの前で、ひとりの男の人が、足もとを見ながらゆっくり歩いている。'
 DEP = {k: 1 for k in ['hnd_checkin_ow', 'hnd_sec', 'hnd_exit', 'hnd_gate_ow', 'hnd_board_ow', 'hnd_plane_ow']}   # 1日目の羽田の出発は遊び終えている(出発の途中ではない)
 SV_KEEP = {'seen': dict(DEP), 'ticket': 'ow', 'keep': {'hnd1': 1}}
 SV_NONE = {'seen': dict(DEP), 'ticket': 'ow'}
@@ -62,33 +63,34 @@ with sync_playwright() as pw:
     def go(sv, tk='ow'):
         c = br.new_context(viewport={'width': 430, 'height': 900}); c.add_init_script(INIT)
         q = seed(c, sv, tseed(tk, 28, 27, 'morning')); q.goto(base + '/tour/index.html'); q.wait_for_timeout(1800); q.evaluate(POLL); return q, c
-    def play(q, picks, waits=(200, 200)):
-        q.evaluate("()=>{__T.save.missed=[];__T.save.wrec={};window.__ph.clear();window.__txt.length=0;window.__dq.length=0}")
+    def play(q, picks, waits=(200,)):
+        """カードは1か所だけ(日本語の単語カード)。カードが出たら waits[0] ミリ秒おいて picks[0] 番を押し、場面が終わるまで進める"""
+        q.evaluate("()=>{__T.save.missed=[];__T.save.wrec={};window.__ph.clear();window.__txt.length=0;window.__dq.length=0;window.__sp.length=0}")
         q.evaluate("()=>{__T.startVid(__T.PBY['hreturn'],'hnd_return',null)}")
         q.wait_for_timeout(500); q.evaluate("()=>{document.querySelectorAll('.trip-ov').forEach(function(o){o.remove()})}"); q.click('.btn.go', force=True); k = 0; seenq = []
-        for step in range(300):
+        for step in range(400):
             q.wait_for_timeout(200)
-            n = q.evaluate("()=>document.querySelectorAll('.dq').length")
-            if n and k < 2:
-                q.wait_for_timeout(waits[k]); seenq.append(q.evaluate("()=>[].map.call(document.querySelectorAll('.dq'),function(b){return b.textContent})"))
-                q.evaluate("(i)=>{document.querySelectorAll('.dq')[i].click()}", picks[k]); k += 1; q.wait_for_timeout(600)
-            if k >= 2 and q.evaluate("()=>__T.save.seen['hnd_return']>0"): q.wait_for_timeout(700); break
+            n = q.evaluate("()=>document.querySelectorAll('.jcard').length")
+            if n and k < 1:
+                q.wait_for_timeout(waits[0]); seenq.append(q.evaluate("()=>[].map.call(document.querySelectorAll('.jcard .lb'),function(b){return b.textContent})"))
+                q.evaluate("(i)=>{document.querySelectorAll('.jcard')[i].click()}", picks[0]); k += 1; q.wait_for_timeout(600)
+            if k >= 1 and q.evaluate("()=>__T.save.seen['hnd_return']>0"): q.wait_for_timeout(700); break
         return k, seenq
     q, c = go(SV_KEEP)
     keys0 = q.evaluate("()=>Object.keys(localStorage).sort()")
-    ids = q.evaluate("()=>({ids:__T.TOUR_IDS.length,has:__T.TOUR_IDS.indexOf('hnd_return')>=0,dlg:!!__T.DLG.hnd_return,bg:__T.DLG.hnd_return&&__T.DLG.hnd_return.bg,conv:__T.DLG.hnd_return&&__T.DLG.hnd_return.conv,keep:__T.DLG.hnd_return&&__T.DLG.hnd_return.keep||null,art:__T.artIdFor({d:__T.DLG.hnd_return,vid:'hnd_return'})})")
-    chk('B0 場面の形: 既存の背景(hgateOW)・既存の出発ゲートの絵(hgate_ow)・conv=1(Word Battle なし)・keep は付けない(新しい拾い物を作らない)', ids['dlg'] and ids['bg'] == 'hgateOW' and ids['art'] == 'hgate_ow' and ids['conv'] == 1 and ids['keep'] is None, ids)
+    ids = q.evaluate("()=>({ids:__T.TOUR_IDS.length,has:__T.TOUR_IDS.indexOf('hnd_return')>=0,dlg:!!__T.DLG.hnd_return,bg:__T.DLG.hnd_return&&__T.DLG.hnd_return.bg,conv:__T.DLG.hnd_return&&__T.DLG.hnd_return.conv,flow2:__T.DLG.hnd_return&&__T.DLG.hnd_return.flow2,keep:__T.DLG.hnd_return&&__T.DLG.hnd_return.keep||null,art:__T.artIdFor({d:__T.DLG.hnd_return,vid:'hnd_return'})})")
+    chk('B0 場面の形: 既存の背景(hgateOW)・既存の出発ゲートの絵(hgate_ow)・conv=1・flow2=1(Word Battle なし)・keep は付けない(新しい拾い物を作らない)', ids['dlg'] and ids['bg'] == 'hgateOW' and ids['art'] == 'hgate_ow' and ids['conv'] == 1 and ids['flow2'] == 1 and ids['keep'] is None, ids)
     chk('C1 「かいわ n / 全部」の分母(TOUR_IDS)に入れない(出ない人の分母を変えない)', not ids['has'], ids['ids'])
-    # 通じた返事(ok=1)を選ぶ: 1つめ=0番(plane)・2つめ=0番(home)
-    k, sq = play(q, [0, 0])
-    s = q.evaluate("()=>({seen:__T.save.seen,keep:__T.save.keep,w:__T.save.wrec,m:__T.save.missed,ph:Array.from(window.__ph),txt:window.__txt.join('\\n'),view:__T.G.view})")
+    # カード(お礼)の0番(お礼はいらない)をすぐ押す
+    k, sq = play(q, [0])
+    s = q.evaluate("()=>({seen:__T.save.seen,keep:__T.save.keep,w:__T.save.wrec,m:__T.save.missed,ph:Array.from(window.__ph),txt:window.__txt.join('\\n'),sp:window.__sp.join('\\n'),jp:window.__txt.join('\\n').split('\\n').filter(function(l){return /[぀-ヿ㐀-鿿]/.test(l)}).filter(function(l,i,a){return a.indexOf(l)===i}).slice(0,12),view:__T.G.view})")
     alltxt = '\n'.join(sum(sq, []))
-    chk('B1 分かれ目は2か所(▶の英語の返事を3つから選ぶ)', k == 2 and all(len(x) == 3 for x in sq), [len(x) for x in sq])
-    chk('B2 選択肢は英語だけ(日本語なし)・点数/○×/「復習」「テスト」なし', not re.search(JP, alltxt) and not any(w in s['txt'] for w in ['復習', 'テスト', '点', '○', '×', '正解']), alltxt[:90])
+    chk('B1 分かれ目は1か所だけ(日本語の単語カード2枚: お礼はいらない/息子さんへ)。木の飛行機の側は固定文に戻った(カードが2回出ない)', k == 1 and sq == [['お礼はいらない', '息子さんへ']], sq)
+    chk('B2 日本語は選ぶカードの単語だけ(台詞の訳は出ない)・点数/○×/「復習」「テスト」なし', all(l.startswith(('ひさしぶりの羽田', 'カンペ', '🎤', 'ヘルプ', 'きいてます', 'お礼はいらない', '息子さんへ')) for l in s['jp']) and not any(w in s['txt'] for w in ['復習', 'テスト', '点', '○', '×', '正解']), s['jp'])
     chk('B3 Word Battle・Meaning!・3択の答え合わせは出ない', 'words' not in s['ph'] and 'REVEAL' not in s['ph'] and 'CHOICES' not in s['ph'], s['ph'])
     chk('B4 終わると場面の完了(save.seen.hnd_return=1)', s['seen'].get('hnd_return') == 1, s['seen'])
-    chk('B5 通じた返事をすぐ選ぶと「即答」(持ち越しに入らない)', all(s['w'].get(w, {}).get('o') == 'fast' for w in ['airplane', 'thank']) and not s['m'], dict((a, b['o']) for a, b in s['w'].items()))
-    chk('B6 台詞の英語は出る(相手の最初の一言・最後の一言)', 'A month ago, I lost a small toy' in s['txt'] and 'Welcome home, travelers' in s['txt'], '')
+    chk('B5 カードをすぐ押すと語 thank が「即答」(061の forkNote→noteWord)・持ち越しに入らない。airplane の計測は外した(分かれ目が1か所になったため)', s['w'].get('thank', {}).get('o') == 'fast' and 'airplane' not in s['w'] and not s['m'], dict((a, b['o']) for a, b in s['w'].items()))
+    ts = s['txt'] + s['sp']; chk('B6 台詞の英語は出る(相手の最初の一言・最後の一言)・固定文に戻した返事(木の飛行機を見つけた)の相手の反応も出る', 'A month ago, I lost a small toy' in ts and 'Welcome home, travelers' in ts and 'wonderful news' in ts, [x in ts for x in ['A month ago, I lost a small toy', 'Welcome home, travelers', 'wonderful news']])
     keys1 = q.evaluate("()=>Object.keys(localStorage).sort()")
     new = sorted(set(keys1) - set(keys0) - {'kanpe-pron-v1'})   # kanpe-pron-v1 は どの会話場面でも書く 既存の発音の記録(この場面が作ったものではない)
     chk('C2 新しい保存キーを作らない(既存の発音の記録 kanpe-pron-v1 を除いて、localStorage のキーが増えない)', not new, new)
@@ -110,13 +112,13 @@ with sync_playwright() as pw:
     lines0 = q.evaluate("()=>[].map.call(document.querySelectorAll('.tt'),function(e){return e.textContent}).filter(function(t){return /わすれもの/.test(t)})")
     chk('C6 返す前は「ひろった もの：ちいさな わすれもの」のまま', any(t.startswith('ひろった') for t in lines0), lines0)
     q.close(); c.close()
-    # 聞き違えた返事(ok なし): 1つめ=1番(plain)・2つめ=1番(tank)
+    # もう1枚のカード(息子さんへ)を3.2秒おいて押す: 相手の反応が変わる・語 thank は「遅い」で持ち越し・物語は止まらず終わる
     q, c = go(SV_KEEP)
-    k, sq = play(q, [1, 1])
-    s = q.evaluate("()=>({seen:__T.save.seen,m:__T.save.missed,txt:window.__txt.join('\\n')})")
+    k, sq = play(q, [1], waits=(3200,))
+    s = q.evaluate("()=>({seen:__T.save.seen,m:__T.save.missed,txt:window.__txt.join('\\n'),sp:window.__sp.join('\\n')})")
     why = dict((m[0], m[3]) for m in s['m'])
-    chk('B7 聞き違えた返事を選ぶと「間違い」で持ち越し。物語は止まらず終わる', why == {'airplane': '間違い', 'thank': '間違い'} and s['seen'].get('hnd_return') == 1, why)
-    chk('B8 選び方で相手の反応が変わる(聞き違え→言い直してくれる)', 'Not a plain' in s['txt'] and 'not a tank' in s['txt'] and 'wonderful news' not in s['txt'], [x for x in ['Not a plain', 'not a tank', 'wonderful news'] if x in s['txt']] or s['txt'][:200])
+    chk('B7 カードを3.2秒かけて押すと thank は「遅い」で持ち越し。物語は止まらず終わる', why.get('thank') == '遅い' and s['seen'].get('hnd_return') == 1, why)
+    chk('B8 選び方で相手の反応が変わる(息子さんへ→"take it to bed tonight"・お礼はいらない→"My son will be so happy")', 'take it to bed tonight' in (s['txt'] + s['sp']) and 'My son will be so happy' not in (s['txt'] + s['sp']), [x for x in ['take it to bed tonight', 'My son will be so happy'] if x in (s['txt'] + s['sp'])])
     q.close(); c.close()
     # D. 28日目の途中(day)で「羽田」タブが出る・初期のタブが hret
     q, c = go(SV_KEEP)
