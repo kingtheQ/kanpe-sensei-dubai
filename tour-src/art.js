@@ -45,12 +45,15 @@ var ART={
   globe:{img:'sage-hall-globe-strip.png',x:296,y:340,n:8,fw:96,z:2,period:1.8}}},
  /* チケット売り場=旅行代理店の一室(タスク041): 人なし・航路なしの背景をフルブリード(028)。係員はカウンターの向こうの中央に大人の大きさ(室内の基準273px)で、カウンターの高さで切って下は隠す。
     ルル(左)とキング(右)は絨毯の上に後ろ姿で寄って立つ(室内の基準の大きさ。素材のまま)。中心の間隔136px・体の横幅は131＋136pxで、すき間は約3px。
-    route=壁の地図に航路を引く場面(窓口の「線を引く」会話 bg:'rtmap')だけの設定。bgFix=アニメが描けなかったときの、航路入りの静止画。
+    route=壁の地図に航路を引く場面(窓口の「線を引く」会話 bg:'rtmap')だけの設定。bgFix=アニメが描けなかったときの静止画(089: 旧ルートの絵は実際のルートと食い違うので、航路なしの絵に落とす)。
     cities=地図の上の都市の位置(1536×960の座標。地図の枠の内側は x340..1200, y92..478)。segs=区間(出発,到着,横ずれ)。横ずれ -860 は、地図の左はしから出て右はしに入る西まわり */
- ticket:{bg:'ticket-office-bg-clean-noroute.png',mode:'room',tk:{bgFix:'ticket-office-bg-clean.png',
+ ticket:{bg:'ticket-office-bg-clean-noroute.png',mode:'room',tk:{bgFix:'ticket-office-bg-clean-noroute.png',
   clerk:{n:'tk-clerk',x:768,top:420,clip:596},clerkS:{n:'tk-clerk-star'},lulu:{n:'tk-lulu-back',x:699,by:920},king:{n:'tk-king-back',x:835,by:920},
-  route:{x0:340,x1:1200,D:1.1,sp:15,cities:{tok:[1080,193],nbo:[784,237],rov:[806,142],cus:[552,300],hon:[476,177]},
-   segs:[['tok','nbo',0],['nbo','rov',0],['rov','cus',0],['cus','hon',0],['hon','tok',-860]]}}},
+  route:{x0:340,x1:1200,D:.8,sp:15,
+   /* 089: 1周目の実際のルート(16区間)。都市の位置は壁の地図(絵)の大陸の上に置いた目安。tag=区間番号の札の位置(絵の座標)。ヨーロッパは都市が近いので、札を輪のように外へ出して線でつなぐ */
+   cities:{tok:[1080,193],nbo:[784,237],doh:[905,204],rov:[808,136],ath:[826,164],rom:[806,160],zur:[790,152],fra:[798,142],lon:[766,140],lis:[760,162],nyc:[532,166],hon:[392,206],syd:[1062,333],sin:[1000,256],bkk:[968,222],gum:[1128,268]},
+   segs:[['tok','nbo',0],['nbo','doh',0],['doh','rov',0],['rov','ath',0],['ath','rom',0],['rom','zur',0],['zur','fra',0],['fra','lon',0],['lon','lis',0],['lis','nyc',0],['nyc','hon',0],['hon','syd',-860],['syd','sin',0],['sin','bkk',0],['bkk','gum',0],['gum','tok',0]],
+   tag:{2:[868,250],3:[886,112],4:[846,112],5:[868,160],6:[804,196],7:[796,106],8:[742,108],9:[722,164],10:[650,140]}}}},
  /* 入国審査(タスク031): 人なしの背景。キングとルルは右の端から歩いて入り、いちばん右の列(Visitors)のおわりに立つ(dir:-1 = 左へ歩く)。ルルが左・キングが右 */
  immig:{bg:'nairobi-immigration.png',mode:'wide',base:690,dir:-1,lulu:1290,king:1360,suit:1250,
   /* 窓口の係官(頭と肩だけ。大人の高さ136pxに縮めた絵)。lead=話し相手の係官の窓口。sw=話し相手が officer2(女性)のとき入れ替わる絵 */
@@ -538,10 +541,20 @@ function artRoute(R,S){
  /* 都市の印: 出発地は最初から光り、着いた都市は光る(着いてすぐは光の輪がまたたく) */
  var A=R.cities;rtCity(A.tok[0],A.tok[1],true,99);
  for(var kc in ci){rtCity(A[kc][0],A[kc][1],true,ci[kc])}
- if(rw>=6){var f6=Math.max(0,Math.min(1,e/1.2)),H=A.hon,C=A.cus,lim=.28*f6,ex=null;
-  for(k=0;k<=24*lim;k++){var u=k/24,xx=H[0]+(C[0]-H[0])*u,yy=H[1]+(C[1]-H[1])*u;if(k%2===0){ca.fillStyle='#5aa0ff';ca.fillRect(Math.round(xx)-2,Math.round(yy)-2,4,4)}ex=[xx,yy]}
-  if(f6>=1&&ex&&Math.floor(t*3)%2){ca.fillStyle='#fff';ca.fillRect(Math.round(ex[0])-12,Math.round(ex[1])-12,24,24);ca.fillStyle='#2f6ad8';ca.fillRect(Math.round(ex[0])-10,Math.round(ex[1])-10,20,20);
-   ca.fillStyle='#fff';ca.font='800 18px sans-serif';ca.textAlign='center';ca.textBaseline='middle';ca.fillText('✕',Math.round(ex[0]),Math.round(ex[1])+1)}}
+ /* 区間の番号の札(089): 線を半分引いたところで、その区間の番号(1〜16)が出る。引いた番号は残る。札は区間の中ほどか、R.tag の位置(札が重なるところ)。札の位置が線から離れるときは、細い線でつなぐ */
+ var mv=0;
+ for(i=0;i<R.segs.length;i++){var f2=0;if(i<rf)f2=1;else if(i<rn)f2=Math.max(0,Math.min(1,(e-(i-rf)*D)/D));if(f2>0)mv=i+1;if(f2<.5)continue;
+  var mp=rtAt(RTP[i],RTP[i].len*.5),mx=rtWrap(R,mp[0]),my=mp[1],tg=R.tag&&R.tag[i+1],tx=tg?tg[0]:mx,ty=tg?tg[1]:my-26;
+  if(tg||Math.abs(tx-mx)+Math.abs(ty-my)>30){ca.strokeStyle='#6e4c2c';ca.lineWidth=3;ca.beginPath();ca.moveTo(mx,my);ca.lineTo(tx,ty);ca.stroke()}
+  var pop=(i>=rf&&f2<1)?1.2:1,rr=19*pop;
+  ca.fillStyle='#6e4c2c';ca.beginPath();ca.arc(tx,ty,rr+3,0,6.2832);ca.fill();ca.fillStyle='#fff7dc';ca.beginPath();ca.arc(tx,ty,rr,0,6.2832);ca.fill();
+  ca.fillStyle='#6e4c2c';ca.font='900 '+Math.round(24*pop)+'px sans-serif';ca.textAlign='center';ca.textBaseline='middle';ca.fillText(String(i+1),tx,ty+1)}
+ /* 数えるカウンター(089): 左下に「移動 n/16」、寄港を数えている会話では右に「寄港 m/15」。大きい数字で、いくつまで数えたかが見える */
+ function plaque(x,label,n,mx2){ca.fillStyle='#6e4c2c';ca.fillRect(x-4,358,208,122);ca.fillStyle='#f4ecd0';ca.fillRect(x,362,200,114);
+  ca.fillStyle='#8a7b55';ca.font='800 28px sans-serif';ca.textAlign='left';ca.textBaseline='alphabetic';ca.fillText(label,x+12,396);
+  ca.fillStyle='#c9730e';ca.font='900 62px sans-serif';ca.fillText(n+'/'+mx2,x+12,460)}
+ if(mv>0)plaque(350,'MOVES',mv,16);
+ if(S.stp>0)plaque(850,'STOPS',S.stp,15);
  /* 小さい飛行機: いま飛んでいる区間の先頭。どこも引いていないときは羽田で待つ */
  if(!head)head=[A.tok[0],A.tok[1]];
  rtPlane(head[0],head[1]-14+(Math.floor(t*3)%2?-1:0),face)}

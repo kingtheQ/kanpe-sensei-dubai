@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """タスク088 の動作確認(ヘッドレス)。使い方: python3 tour-src/tests/test_star088.py
 (1) 窓口の分岐をどう選んでも(先頭・最後・oneworld寄り・古いセーブが ow)、価格・読み上げ・発券はスター版だけで、save.ticket==='star'
-(2) ルール説明の場面(win_rules / win_count)が、おすすめのあと・値段の前に出る
+(2) ルール説明は win_route(地図と合体・タスク089)で、はじめての人のあと・値段の前に出る
 (3) 数えた数字(寄港15・移動16・同じ国3回・30日)が、ルート表から計算した値とスターの決まりに合う
 (4) ow4/ow5・ticket_ow のデータは残っている(2周目用)。リポジトリの生成物(tour/)は書き換えない。マイク・実機は確認できない。"""
 import os, sys, re, json, threading, http.server, socketserver
@@ -60,8 +60,9 @@ with sync_playwright() as pw:
         chk('[%s] 発券はスター(ticket=%s)' % (name, fin['tk']), fin['tk'] == 'star' and fin['done'] and not fin['err'], fin['err'])
         chk('[%s] ow の値段・読み上げ・券の場面に入らない' % name, not [v for v in seq if re.search(r'ow[45]|ticket_ow', v)] and seq[-1] == 'ticket_star', seq[-4:])
         chk('[%s] 値段=star・読み上げ=star' % name, 'win_price_star' in seq and 'win_rb_star' in seq)
-        i = {v: (seq.index(v) if v in seq else -1) for v in ['win_rec', 'win_rules', 'win_count', 'win_price_star']}
-        chk('[%s] ルール→数える の順で、おすすめのあと・値段の前 %s' % (name, i), 0 <= i['win_rec'] < i['win_rules'] < i['win_count'] < i['win_price_star'])
+        i = {v: (seq.index(v) if v in seq else -1) for v in ['win_c1', 'win_route', 'win_price_star']}
+        chk('[%s] 地図とルール(win_route。089で合体)が、はじめての人のあと・値段の前 %s' % (name, i), 0 <= i['win_c1'] < i['win_route'] < i['win_price_star'])
+        chk('[%s] 旧ルール(win_rules)・旧数え(win_count)・おすすめ(win_rec)・c2/c5/c7/c8 には入らない(089)' % name, not [v for v in seq if re.search(r'win_rules|win_count|win_rec|win_c[2578]', v)])
     # (4) ow のデータが残っている
     r = pg.evaluate("()=>({t:!!__T.DLG.ticket_ow,p5:!!__T.DLG.win_price_ow5,p4:!!__T.DLG.win_price_ow4,r5:!!__T.DLG.win_rb_ow5,r4:!!__T.DLG.win_rb_ow4})")
     chk('ow4/ow5・ticket_ow の場面データは残っている %s' % r, all(r.values()))

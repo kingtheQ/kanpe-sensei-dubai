@@ -34,9 +34,24 @@ function voiceSetM(kind,M){
  if(v.trips.length>20)v.trips=v.trips.slice(-20);
  vSave(v)}
 /* ブラウザの音声認識だけで読んだとき(同意なし・通信なし)の記録。数字は null、単語ごとは bits だけ */
-function voiceSaveSR(kind,tg,res,txt){
- voiceSetM(kind,{ts:Date.now(),src:'sr',tot:null,acc:null,flu:null,cmp:null,w:null,
-  bits:res.words.map(function(w){return w.ok?'1':'0'}).join(''),heard:String(txt||'').slice(0,600)})}
+function voiceSaveSR(kind,tg,res,txt,T){
+ voiceSetMPart(kind,{ts:Date.now(),src:'sr',tot:null,acc:null,flu:null,cmp:null,w:null,
+  bits:res.words.map(function(w){return w.ok?'1':'0'}).join(''),heard:String(txt||'').slice(0,600)},T)}
+/* タスク089: 始めの宣言は文ごとに区切って言う(T.dp)。文ごとの結果をためて、最後の文(T.dl)で1つにまとめ、これまでと同じ1件の記録(kanpe-voice-v1 の start)として残す。
+   最初の文(T.df)で、前の途中までのたまりは捨てる。Azure の値は語数で重みづけして平均(1文でも Azure でなければ、まとめた記録はブラウザの音声認識の扱い) */
+function voiceMergeM(L){
+ var az=L.every(function(m){return m.src==='az'&&m.w&&m.w.length}),M={ts:L[L.length-1].ts,src:az?'az':'sr',tot:null,acc:null,flu:null,cmp:null,w:null,
+  bits:L.map(function(m){return m.bits}).join(''),heard:L.map(function(m){return String(m.heard||'').trim()}).filter(Boolean).join(' ').slice(0,600)};
+ if(az){var n=0,k=['tot','acc','flu','cmp'],sum=[0,0,0,0],w=[],sg=[];
+  L.forEach(function(m){var c=m.w.length;n+=c;k.forEach(function(q,i){sum[i]+=(+m[q]||0)*c});w=w.concat(m.w);sg=sg.concat(m.sg||[])});
+  M.calc=VCALC;M.tot=Math.round(sum[0]/n*10)/10;M.acc=Math.round(sum[1]/n*10)/10;M.flu=Math.round(sum[2]/n*10)/10;M.cmp=Math.round(sum[3]/n*10)/10;M.sg=sg;M.w=w}
+ return M}
+function voiceSetMPart(kind,M,T){
+ if(kind==='decl'&&T&&T.dp){
+  if(T.df||!G.dAcc)G.dAcc=[];G.dAcc.push(M);
+  if(T.dl){var L=G.dAcc;G.dAcc=null;voiceSetM('decl',voiceMergeM(L))}
+  return}
+ voiceSetM(kind,M)}
 
 /* ---- 中継からトークンをもらう(8秒で見切る)・Speech SDK を読みこむ(同意した人が読むときだけ) ---- */
 var _vt=null,_sdkP=null;
@@ -198,7 +213,7 @@ function setupDiagAz(act,stat,toks,spans,T,card){
    plogAdd({ts:M.ts,v:G.scene?G.scene.vid:'',tg:tg.join(' '),hd:txt.slice(0,600),cf:0,ok:res.okN,n:res.n,
     miss:res.words.filter(function(w){return !w.ok}).slice(0,40).map(function(w){return {t:missKey(w.t),h:w.h,k:w.k}}),
     diag:T.diag,why:why,seg:segs.length,bits:M.bits,alts:[],src:M.src,az:M.src==='az'?[M.tot,M.acc,M.flu,M.cmp]:undefined});   /* src: 'az'=Azure／'sr'=ブラウザの音声認識。az=[総合,正確さ,流れ,言い切り度](Azure の値) */
-   if(T.diag==='decl'||T.diag==='decl_end')voiceSetM(T.diag,M);   /* 始め・終わりの宣言だけ、比べるための記録(kanpe-voice-v1)に入れる。窓口の読み返し(readback)は plog だけ */
+   if(T.diag==='decl'||T.diag==='decl_end')voiceSetMPart(T.diag,M,T);   /* 始め・終わりの宣言だけ、比べるための記録(kanpe-voice-v1)に入れる。窓口の読み返し(readback)は plog だけ */
    card.classList.add('shown');heardEl.className='heard fin';heardEl.textContent=txt||'…';
    later(Math.min(6500,2600+txt.length*16),diagDone)}
   if(h0)h0.stop(go);else go()}

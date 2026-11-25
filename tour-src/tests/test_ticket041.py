@@ -63,6 +63,9 @@ with sync_playwright() as pw:
     chk('背景の航路なし(地図が背景と同じ)', int(np.abs(fr[0][MAP] - BGN[MAP]).sum() > 0) == 0 or float((np.abs(fr[0][MAP] - BGN[MAP]).sum(axis=2) > 0).mean()) < 0.001)
     # (3) 線を引く: 1区間ずつ
     start(p, 6, 'win_route'); marks = []
+    p.wait_for_timeout(1200)
+    for _ in range(3):   # 089: 地図の場面は『ルール1〜2・旅を描く』から始まる。線を引く最初の番(route=1)まで進める
+        p.evaluate("()=>__T.onPass()"); p.wait_for_timeout(500)
     for k in range(3):
         p.wait_for_timeout(300); s0 = grab(p); p.wait_for_timeout(1000); s1 = grab(p); p.wait_for_timeout(3500); s2 = grab(p)
         info = p.evaluate("()=>({ph:__T.G.phase,ti:__T.G.ti,rf:__T.G.scene.rf,rn:__T.G.scene.rn})")
@@ -75,8 +78,8 @@ with sync_playwright() as pw:
     # (4) 描けない → 静止画
     p2 = ctx.new_page(); p2.add_init_script("window.__artRouteBreak=1"); p2.route('**/tour/index.html', hooked); p2.goto(base + '/tour/index.html'); p2.wait_for_timeout(2000)
     start(p2, 6, 'win_route'); p2.wait_for_timeout(2500)
-    f = grab(p2); d = float((np.abs(f[MAP] - BGR[MAP]).sum(axis=2) > 0).mean())
-    ph = p2.evaluate("()=>__T.G.phase"); chk('描けないとき: 航路入りの静止画(地図の違い %.4f)' % d, d < 0.01 and ph in ('cue', 'cuing', 'listen', 'npc', 'rep'), ph)
+    f = grab(p2); d = float((np.abs(f[MAP] - BGN[MAP]).sum(axis=2) > 0).mean())   # 089: 旧ルートの絵(BGR)は実際のルートと食い違うので、航路なしの絵(BGN)に落とす
+    ph = p2.evaluate("()=>__T.G.phase"); chk('描けないとき: 航路なしの静止画(地図の違い %.4f)' % d, d < 0.01 and ph in ('cue', 'cuing', 'listen', 'npc', 'rep'), ph)
     p2.evaluate("()=>__T.onPass()"); p2.wait_for_timeout(1500)
     chk('描けなくても会話は次へ進む(ti=%s)' % p2.evaluate("()=>__T.G.ti"), p2.evaluate("()=>__T.G.ti") == 1)
     chk('JSエラー 0', not p.evaluate("()=>window.__errs"), p.evaluate("()=>window.__errs"))

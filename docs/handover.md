@@ -247,3 +247,8 @@
 - 先生の声：pitch 1.1 → **0.6**（ほかの最低は r_santa 0.72・ルル 1.35）。
 - **中継のデプロイはPM待ち**（`relay/worker.js` が変わった）。確認：`python3 tour-src/tests/test_eikaiwa073.py`（78項目）・`node relay/test/worker.test.mjs`（30項目）。報告：`docs/pm/deliverables/079-freetalk-improvements-report-v1.md`。
 - 未確認：実機のマイク（continuous・自動再開・2.8秒の感触）・声の聞こえ方・実際のモデルが `FIX:`／`REPLY:` の形で返すか。
+
+## タスク089（2026-11-26）窓口と宣言場面の分かりやすさ
+- 内容と決定は `docs/pm/DECISIONS.md` の2026-11-26。窓口の流れ・マイク・地図の区間番号・再訪の飛ばし方は `tour-src/window.js`（WSTEP・declMic）、台本は `tour-src/window_data.py`（win_decl・win_c1・win_route・win_back）、地図の絵は `tour-src/art.js`（ticket の route）。
+- 参考にしたURL：なし（スターアライアンスの決まりの数字は088で確認済みのものをそのまま使用。確認日2026-11-25）。
+- PMに確認したいこと：win_c8・win_rec も1周目から外した（流れの図に無かったため）。マイクの素材（PM作成）が来たら `MICBIG_IMG` に入れる。実機のマイクの動きは未確認。

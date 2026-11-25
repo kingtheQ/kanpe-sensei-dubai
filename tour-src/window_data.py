@@ -75,6 +75,13 @@ DECL_JP = ("これがわたしの約束だよ、ルル。ふたりで世界じ�
            "ふたりで、助け合う。すべての村を見て、すべての声を聞いて、小さな宝ものを分かち合おう。"
            "そばにいてくれて、ありがとう。さあ、行こう！")
 
+# 宣言を文ごとに区切る(タスク089)。ルルがお手本→プレイヤーが言う、を1文ずつ。DECL 全体(終わりの宣言・比較の記録)は上の1本のまま。
+DECL_SENT = [s.strip() for s in re.split(r'(?<=[.!?]) ', DECL)]
+DECL_SENT_JP = ["これがわたしの約束だよ、ルル。", "ふたりで世界じゅうを旅して、毎日、楽しもう。", "からだは元気。心は穏やか。",
+                "おいしいものを食べて、よく眠って、無理はしすぎない。", "こわくなったら、深呼吸して、あなたのことを思う。", "ふたりで、助け合う。",
+                "すべての村を見て、すべての声を聞いて、小さな宝ものを分かち合おう。", "そばにいてくれて、ありがとう。", "さあ、行こう！"]
+assert ' '.join(DECL_SENT) == DECL and ''.join(DECL_SENT_JP) == DECL_JP and len(DECL_SENT) == len(DECL_SENT_JP) == 9, DECL_SENT
+
 # ---- 読み上げ確認（004 の S3。券で値段・大陸の数だけ変わる） ----
 def readback(price, cont):
     return ("Let me read it back. Round the world, business class. %s continents in thirty days. "
@@ -94,32 +101,37 @@ PRICE = {
 TICKET_NAME = {'star': 'Star Alliance', 'ow5': 'oneworld Explorer', 'ow4': 'oneworld Explorer'}
 
 def add(D):
-    # ---------- 宣言 ----------
-    scene(D, 'win_decl', [
-        T("Good morning. Before we begin, please make your promise to Lulu. Take your time.",
-          "おはようございます。始める前に、ルルへの約束を宣言してください。ゆっくりどうぞ。",
-          DECL, DECL_JP, diag='decl',
-          rep=("Beautiful. Lulu is smiling.", "すてきです。ルルが笑っています。")),
-    ], intro='The Round the World desk. Lulu is beside you.', auto=0)
+    # ---------- 宣言(089) ----------
+    # 係員の短い一言 → ルルがお手本(1文) → プレイヤーが言う(マイクの大きい絵)、を9文ぶん。前の旅のメモは win_memo(window.js が組む)に分けた。
+    LULU = {'who': 'Lulu', 'sp': 'lulu'}
+    decl = [T("This is a promise for your trip.", "これは、あなたの旅の約束です。",
+              "Okay. I'm ready.", "はい。いいですよ。")]
+    for i, (en, jp) in enumerate(zip(DECL_SENT, DECL_SENT_JP)):
+        kw = dict(diag='decl', dp=1, cx=LULU)
+        if i == 0: kw['df'] = 1
+        if i == len(DECL_SENT) - 1:
+            kw['dl'] = 1
+            kw['rep'] = ("That was beautiful, King.", "すてきだったよ、キング。")
+        decl.append(T(en, jp, en, jp, **kw))
+    scene(D, 'win_decl', decl, intro='The Round the World desk. Lulu is beside you.', auto=0)
 
-    # ---------- 会話1：はじめての人 ----------
+    # ---------- 会話1：はじめての人(089: 1つの吹き出しは1文まで) ----------
     scene(D, 'win_c1', [
-        T("Welcome to the Round the World desk. Is this your first time?", "世界一周の窓口へようこそ。はじめてですか。",
-          "Yes, it is. I'm excited, but a little nervous.", "はい。わくわくしますが、少し緊張しています。"),
-        OT("That is normal. This is a big ticket. Do you already know where you want to go?",
-           "ふつうのことです。大きな券ですから。行きたい場所はもう決まっていますか。", [
+        T("Is this your first time?", "はじめてですか。",
+          "Yes. I'm excited, but a little nervous.", "はい。わくわくしますが、少し緊張しています。"),
+        OT("Do you already know where you want to go?",
+           "行きたい場所はもう決まっていますか。", [
             O('A', "Not really. I just want to see famous cities.", "あまり。有名な街を見たいだけです。",
               mt='star', why="You want to see famous cities."),
-            O('B', "Yes. I have four places on my map.", "はい。地図に4つ置いてあります。")]),
-        T("No problem.", "大丈夫。", "I see. What decides the price?", "なるほど。値段は何で決まるのですか。",
-          by={'A': ("No problem. Many people start that way. Star Alliance has simple rules and the most routes.",
-                    "大丈夫。そう始める人は多いです。スターアライアンスは決まりが簡単で、路線がいちばん多いです。"),
-              'B': ("Good. Then the places will choose the ticket for you.", "よかった。それなら、場所が券を選んでくれます。")}),
-        T("Star Alliance counts your miles. oneworld Explorer counts your continents.",
-          "スターアライアンスは飛ぶ距離を数えます。oneworld Explorer は大陸の数を数えます。",
-          "Miles or continents. That's interesting.", "距離か、大陸か。おもしろいですね。"),
-        T("So I will ask you a few questions. Take your time.", "ですから、いくつか質問をします。ゆっくりどうぞ。",
-          "Okay. Please ask me anything.", "はい。何でも聞いてください。"),
+            O('B', "Yes. I have a few places on my map.", "はい。地図にいくつか置いてあります。")]),
+        T("Many people start that way.", "そう始める人は多いです。",
+          "I see. Thank you.", "なるほど。ありがとう。",
+          by={'A': ("Many people start that way.", "そう始める人は多いです。"),
+              'B': ("Good. Your places will help us choose the ticket.", "よかった。その場所が、券選びの助けになります。")}),
+        T("Star Alliance has simple rules.", "スターアライアンスは、決まりが簡単です。",
+          "Simple rules. That sounds good.", "簡単な決まり。いいですね。"),
+        T("Let me show you the rules on the map.", "地図で、決まりをお見せします。",
+          "Yes, please show me.", "はい、お願いします。"),
     ])
 
     # ---------- 会話2：大陸を数える ----------
@@ -199,19 +211,66 @@ def add(D):
             O('B', "Maybe. My work is busy.", "あるかもしれません。仕事が忙しいので。", mt='ow', why="You said your trip may be short.")]),
     ])
 
-    # ---------- 線を引く（地図。route = 何本目の線まで引くか） ----------
+    # ---------- 地図とルール(089: win_route にルール説明を合体)。route=何本目の区間まで引くか(1〜16)、stp=寄港を何か所まで数えたか ----------
+    # 区間: 1羽田→ナイロビ 2→ドーハ 3→ロヴァニエミ 4→アテネ 5→ローマ 6→チューリッヒ(鉄道) 7→フランクフルト(鉄道) 8→ロンドン(鉄道) 9→リスボン 10→ニューヨーク 11→ホノルル 12→シドニー 13→シンガポール 14→バンコク 15→グアム 16→羽田
+    F = route_facts(); N = NUMW
+    assert F['moves'] == 16 and F['rail'] == 3 and F['flights'] == 13 and F['stops'] == 15 and len(ROUTE_STOPS) == 15
+    assert [c for c, _ in ROUTE_STOPS][:2] == ['Nairobi', 'Doha'] and ROUTE_RAIL[0] == ('Rome', 'Zurich')
+    stops = [c for c, _ in ROUTE_STOPS]
     scene(D, 'win_route', [
-        T("Now I will draw your trip on the map. We start in Japan, and we go west, to Kenya.",
-          "では、あなたの旅を地図に描きます。日本から出発して、西へ、ケニアへ。",
-          "Yes. West, to Kenya.", "はい。西へ、ケニアへ。", route=1),
-        T("Next, Finland, Peru, and Hawaii. Then home to Japan again.",
-          "次に、フィンランド、ペルー、ハワイ。そして、また日本へ。",
-          "Finland, Peru, Hawaii, and home.", "フィンランド、ペルー、ハワイ、そして家へ。", route=5),
-        T("Now look. If I draw a line back to Peru, the line stops. You cannot go back.",
-          "さあ、見て。ペルーへ戻る線を引くと、線は止まります。戻ることはできません。",
-          "I see. The line only goes one way.", "なるほど。線は一方向にしか進めないのですね。", route=6),
-    ], bg='rtmap')
+        T("Round-the-world ticket rules!", "世界一周券のルールです！",
+          "Rules! I'm ready.", "ルール！ いいですよ。"),
+        T("Rule one: you go the same way, and you come home to Japan.", "ルール1：同じ向きに進んで、日本に帰ってきます。",
+          "The same way, and home to Japan.", "同じ向きに進んで、日本に帰ります。"),
+        T("Rule two: a flight is one move, and a train ride is one move.", "ルール2：飛行機は1回、鉄道も1回と数えます。",
+          "A flight is one move. A train is one move, too.", "飛行機で1回。鉄道も1回。"),
+        T("Let's draw your trip: west from Japan to Kenya.", "旅を地図に描きましょう。日本から西へ、ケニアへ。",
+          "Move one.", "1回目。", route=1),
+        T("Then Qatar, and Finland.", "次はカタールと、フィンランド。",
+          "Move two. Move three.", "2回目。3回目。", route=3),
+        T("Then Greece, and Italy.", "次はギリシャと、イタリア。",
+          "Move four. Move five.", "4回目。5回目。", route=5),
+        T("From Rome, we take three train rides: Zurich, Frankfurt, and London.", "ローマからは鉄道に3回乗ります。チューリッヒ、フランクフルト、ロンドン。",
+          "Moves six, seven, and eight.", "6回目、7回目、8回目。", route=8),
+        T("Then Portugal, and New York.", "次はポルトガルと、ニューヨーク。",
+          "Move nine. Move ten.", "9回目。10回目。", route=10),
+        T("Then Hawaii, and Australia.", "次はハワイと、オーストラリア。",
+          "Move eleven. Move twelve.", "11回目。12回目。", route=12),
+        T("Then Singapore, and Thailand.", "次はシンガポールと、タイ。",
+          "Move thirteen. Move fourteen.", "13回目。14回目。", route=14),
+        T("Then Guam, and home to Japan.", "次はグアム、そして日本へ。",
+          "Move fifteen. Move sixteen.", "15回目。16回目。", route=16),
+        T("That is %s flights and %s train rides: %s moves." % (N[F['flights']], N[F['rail']], N[F['moves']]), "飛行機が%d回、鉄道が%d回です。" % (F['flights'], F['rail']),
+          "%s moves. That is the limit." % N[F['moves']].capitalize(), "移動は%d回。上限ぴったりです。" % F['moves']),
+        T("Rule three: you can stop %s times at most." % N[RULE['stops']], "ルール3：寄港は%d回までです。" % RULE['stops'],
+          "%s stops at most." % N[RULE['stops']].capitalize(), "寄港は%d回まで。" % RULE['stops']),
+        T("A stop is a stay of twenty-four hours or more.", "寄港とは、24時間以上の滞在のことです。",
+          "One day or more.", "1日以上ですね。"),
+        T("Let's count your stops: %s." % ', '.join(stops[0:5]), "寄港を数えましょう。" + '、'.join(JPN[c] for c in stops[0:5]) + "。",
+          "Five stops.", "5か所。", stp=5),
+        T("%s." % ', '.join(stops[5:10]), '、'.join(JPN[c] for c in stops[5:10]) + "。",
+          "Ten stops.", "10か所。", stp=10),
+        T("%s." % ', '.join(stops[10:15]), '、'.join(JPN[c] for c in stops[10:15]) + "。",
+          "%s stops!" % N[F['stops']].capitalize(), "%dか所！" % F['stops'], stp=15),
+        T("%s stops is the limit, too." % N[F['stops']].capitalize(), "%d回。これも上限です。" % F['stops'],
+          "Right on the limit!", "ぴったり！"),
+        T("Rule four: you can visit the same country %s times at most." % N[RULE['same_country']],
+          "ルール4：同じ国には%d回まで寄れます。" % RULE['same_country'],
+          "%s times at most." % N[RULE['same_country']].capitalize(), "%d回まで。" % RULE['same_country']),
+        T("You visit America %s times: %s, %s, and %s." % (N[F['max_same']], F['us'][0], F['us'][1], F['us'][2]),
+          "アメリカには%d回。%s、%s、%s。" % (F['max_same'], JPN[F['us'][0]], JPN[F['us'][1]], JPN[F['us'][2]]),
+          "%s times. That is the limit." % N[F['max_same']].capitalize(), "%d回。上限ぴったりです。" % F['max_same']),
+        T("Rule five: the trip is ten days at least, and one year at most.", "ルール5：旅は10日以上、1年までです。",
+          "Ten days to one year.", "10日から1年まで。"),
+        T("Your thirty-day trip fits every rule!", "あなたの旅は30日。すべてルールに合っています！",
+          "Everything fits. Thank you!", "すべて合っています。ありがとう！"),
+    ], bg='rtmap', intro='Round-the-world ticket rules!')
 
+    # ---------- 再訪の挨拶(089): 2回目に窓口へ来たとき。宣言・ルール・地図の説明は飛ばして、値段へ ----------
+    scene(D, 'win_back', [
+        T("Welcome back!", "おかえりなさい！", "Hello again.", "また来ました。"),
+        T("Shall we finish your ticket?", "券の手続きを進めましょうか。", "Yes, please.", "はい、お願いします。"),
+    ], intro='The Round the World desk.')
 
     # ---------- スターの決まり(088)。券のおすすめのあと・値段の前 ----------
     F = route_facts(); N = NUMW

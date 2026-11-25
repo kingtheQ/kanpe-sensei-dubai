@@ -5,3 +5,8 @@
 .cue.diag .heard{position:static;flex-basis:100%;max-height:none;font-size:15px;margin-top:6px}
 .cue.diag.shown .w{display:none}
 .cue.diag .heard.fin{font-size:19px;line-height:1.4;overflow:auto;max-height:100%;color:#3a3526}
+/* 宣言のマイク(089): プレイヤーが話す番の、大きいマイク(ステージの右下。幅は画面の約1/4・高さ約1/2。きいている間ははねる) */
+.declmic{position:absolute;right:8px;bottom:8px;width:84px;height:119px;z-index:4;pointer-events:none;filter:drop-shadow(0 3px 0 rgba(58,42,26,.55))}
+.declmic canvas,.declmic img{width:100%;height:100%;image-rendering:pixelated;display:block}
+.declmic.on{animation:micbob .5s steps(2) infinite}
+@keyframes micbob{0%{transform:translateY(0)}100%{transform:translateY(-6px)}}

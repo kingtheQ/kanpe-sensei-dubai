@@ -29,10 +29,14 @@ for x in data.D:
             nl = {'n': p['n'], 'jp': p['njp']}
             if 'by' in p: nl['by'] = dict((k, {'n': v[0], 'jp': v[1]}) for k, v in p['by'].items())
             if 'route' in p: nl['route'] = p['route']
+            if 'stp' in p: nl['stp'] = p['stp']   # 窓口の地図: 寄港を何か所まで数えたか(タスク089)
+            if 'cx' in p: nl['cx'] = p['cx']   # この番だけ話す人を替える(宣言のルルのお手本。タスク089)
             yl = {'y': p.get('y', ''), 'jp': p.get('yjp', '')}
             if 'opts' in p: yl['opts'] = [dict((k2, v2) if k2 != 'rep' else (k2, repo(v2)) for k2, v2 in o.items()) for o in p['opts']]
             if 'cueBy' in p: yl['cueBy'] = dict((k, {'y': v[0], 'jp': v[1]}) for k, v in p['cueBy'].items())
             if 'diag' in p: yl['diag'] = p['diag']
+            for _k in ('dp', 'df', 'dl'):   # 宣言を文ごとに区切る印(タスク089): dp=区切りの1文 / df=最初 / dl=最後
+                if _k in p: yl[_k] = p[_k]
             if 'fork' in p: yl['fork'] = p['fork']   # 分かれ目(タスク053): 選ぶまでの時間を測る語
             if 'cards' in p: yl['cards'] = 1   # 日本語の単語カードで選ぶ分かれ目(タスク061)
             if 'rep' in p: yl['rep'] = {'n': p['rep'][0], 'jp': p['rep'][1]}
@@ -692,12 +696,13 @@ def record(label, memo=False):
 # 分かれ目(opts)・相手の言い分け(by)・持ち越しの差しかえ(vr)・あとの一言(rep)・自動で始まる場面(auto)・単語バトルに入らない場面(win/ev)
 SHARED = [
  ("if(n.n&&L[i+1]&&L[i+1].y){T.push({npc:n.n,npcJp:n.jp,cue:L[i+1].y,cueJp:L[i+1].jp});i+=2}",
-  "if(n.n&&L[i+1]&&L[i+1].y!==undefined){var Y=L[i+1];T.push({npc:n.n,npcJp:n.jp,cue:Y.y,cueJp:Y.jp,by:n.by,vr:n.vr,cueBy:Y.cueBy,opts:Y.opts,diag:Y.diag,rep:Y.rep,route:n.route,fork:Y.fork,cards:Y.cards,dw:n.dw});i+=2}"),
+  "if(n.n&&L[i+1]&&L[i+1].y!==undefined){var Y=L[i+1];T.push({npc:n.n,npcJp:n.jp,cue:Y.y,cueJp:Y.jp,by:n.by,vr:n.vr,cueBy:Y.cueBy,opts:Y.opts,diag:Y.diag,dp:Y.dp,df:Y.df,dl:Y.dl,rep:Y.rep,route:n.route,stp:n.stp,cx:n.cx,fork:Y.fork,cards:Y.cards,dw:n.dw});i+=2}"),
  (" clearPanel();G.phase='npc';var S=G.scene,T=S.turns[G.ti];\n if(T.ctx)applyCtx(T.ctx);",
   " clearPanel();G.phase='npc';var S=G.scene,T=S.turns[G.ti];\n"
   " if(T.vr&&!T.vd){T.vd=1;for(var vi=0;vi<T.vr.length;vi++){var vv=T.vr[vi];if(window.__CHK||save.seen[vv.s]>0){T.npc=vv.n;T.npcJp=vv.jp;if(vv.y){T.cue=vv.y;T.cueJp=vv.yjp}break}}}\n"
   " var bv=T.by&&S.pick&&T.by[S.pick];if(bv){T.npc=bv.n;T.npcJp=bv.jp}var cv=T.cueBy&&S.pick&&T.cueBy[S.pick];if(cv){T.cue=cv.y;T.cueJp=cv.jp}\n"
   " if(T.route!=null){S.rf=S.rn||0;S.rn=T.route;S.rt=t}\n"
+  " if(T.stp!=null)S.stp=T.stp;\n"
   " if(T.dw&&!T.dts)T.dts=Date.now();\n"
   " if(T.ctx)applyCtx(T.ctx);"),
  ("var T=G.scene.turns[G.ti],toks=parseCue(T.cue);clearInterval(G.typeTimer);msgText.textContent=npcHide()?'':T.npc;",
@@ -872,6 +877,10 @@ o = rep(o, "  if(/^[0-9]+$/.test(p)){var nw=numWords(parseInt(p,10));",
 for _a, _b in SHARED: o = rep(o, _a, _b)   # 場面の部品(窓口・割りこみ・持ち越しで共有。ドーハ版にも同じものを入れる)
 o = rep(o, "card=el('div','cue'+(blind?' blind':''));", "card=el('div','cue'+(blind?' blind':'')+(T.diag?' diag':''));")
 o = rep(o, " if(!G.camp)addHelp(T)}", " if(!G.camp&&!T.diag&&!G.scene.d.nohelp)addHelp(T)}")
+# タスク089: 宣言の文ごとの番(T.dp)では、大きいマイクを出す。話す人を番ごとに替える(T.cx)。clearPanel でマイクを消す
+o = rep(o, " if(!G.camp&&!T.diag&&!G.scene.d.nohelp)addHelp(T)}", " if(!G.camp&&!T.diag&&!G.scene.d.nohelp)addHelp(T);\n if(T.dp&&typeof declMic==='function')declMic(act)}")
+o = rep(o, "function clearPanel(){panel.textContent=''}", "function clearPanel(){panel.textContent='';if(typeof declMicOff==='function')declMicOff()}")
+o = rep(o, "S.turns.forEach(function(T,i){T.ctx=ctxAt(d,i);T.pitch=", "S.turns.forEach(function(T,i){T.ctx=ctxAt(d,i);if(T.cx)T.ctx=Object.assign({},T.ctx,T.cx);T.pitch=")
 o = rep(o, " G.mute=null;var card=spans.length?spans[0].parentNode:null;",
         " G.mute=null;var card=spans.length?spans[0].parentNode:null;\n if(T.diag&&!PREF.silent&&card){var AZ=(T.diag==='decl'||T.diag==='decl_end'||T.diag==='readback')&&voiceAzureOn();if(AZ||SR){(AZ?setupDiagAz:setupDiag)(act,stat,toks,spans,T,card);return}}")
 # 長いカンペは、ブザーも合格音もなく、いつも先へ進む

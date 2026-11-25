@@ -19,7 +19,7 @@ function setupDiag(act,stat,toks,spans,T,card){
   plogAdd({ts:Date.now(),v:G.scene?G.scene.vid:'',tg:tg.join(' '),hd:txt.slice(0,600),cf:cfN?cfSum/cfN:0,ok:res.okN,n:res.n,
    miss:res.words.filter(function(w){return !w.ok}).slice(0,40).map(function(w){return {t:missKey(w.t),h:w.h,k:w.k}}),
    diag:T.diag,why:why,seg:segs.length,bits:res.words.map(function(w){return w.ok?'1':'0'}).join(''),alts:alts.slice(0,12),src:'sr'});
-  if(T.diag==='decl'||T.diag==='decl_end')voiceSaveSR(T.diag,tg,res,txt);  /* 始め・終わりの宣言は、比べるための別の記録(kanpe-voice-v1)にも残す */
+  if(T.diag==='decl'||T.diag==='decl_end')voiceSaveSR(T.diag,tg,res,txt,T);  /* 始め・終わりの宣言は、比べるための別の記録(kanpe-voice-v1)にも残す */
   card.classList.add('shown');heardEl.className='heard fin';heardEl.textContent=txt||'…';
   later(Math.min(6500,2600+txt.length*16),diagDone)}
  function start(){

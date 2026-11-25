@@ -143,6 +143,11 @@ body{margin:0;box-sizing:border-box;background:var(--bg);color:var(--line);font-
 .cue.diag .heard{position:static;flex-basis:100%;max-height:none;font-size:15px;margin-top:6px}
 .cue.diag.shown .w{display:none}
 .cue.diag .heard.fin{font-size:19px;line-height:1.4;overflow:auto;max-height:100%;color:#3a3526}
+/* 宣言のマイク(089): プレイヤーが話す番の、大きいマイク(ステージの右下。幅は画面の約1/4・高さ約1/2。きいている間ははねる) */
+.declmic{position:absolute;right:8px;bottom:8px;width:84px;height:119px;z-index:4;pointer-events:none;filter:drop-shadow(0 3px 0 rgba(58,42,26,.55))}
+.declmic canvas,.declmic img{width:100%;height:100%;image-rendering:pixelated;display:block}
+.declmic.on{animation:micbob .5s steps(2) infinite}
+@keyframes micbob{0%{transform:translateY(0)}100%{transform:translateY(-6px)}}
 /* 声(タスク016): 同意の1枚・せっていの注記 */
 .vcons{background:var(--paper);color:var(--ink);border:3px solid var(--brown);border-radius:10px;padding:12px 14px;flex:1;min-height:0;overflow:auto;font-size:15px;line-height:1.55;font-weight:700}
 .vcons .vh{font-size:22px;font-weight:900;margin-bottom:6px}
@@ -1978,7 +1983,7 @@ function later(ms,fn){var s=G.sid;var id=setTimeout(function(){if(G.sid===s)fn()
 function gd(fn){var s=G.sid;return function(){if(G.sid===s)return fn.apply(this,arguments)}}
 function clearTimers(){G.timers.forEach(clearTimeout);G.timers=[];clearInterval(G.typeTimer)}
 var panel=$m('panel'),msgText=$m('msgText'),who=$m('who');
-function clearPanel(){panel.textContent=''}
+function clearPanel(){panel.textContent='';if(typeof declMicOff==='function')declMicOff()}
 function typeText(text,cb){clearInterval(G.typeTimer);var i=0,s=G.sid;G.typeTimer=setInterval(function(){if(G.sid!==s){clearInterval(G.typeTimer);return}i++;msgText.textContent=text.slice(0,i);if(i>=text.length){clearInterval(G.typeTimer);if(cb)cb()}},26)}
 function setMsg(text,w){who.textContent=w||'';msgText.textContent='';typeText(text)}
 function setMsgInstant(text,w){clearInterval(G.typeTimer);who.textContent=w||'';msgText.textContent=text}
@@ -1990,7 +1995,7 @@ function say(text,rate,pitch,done){
 function stopSay(){sayTok++;paMark(0);try{speechSynthesis.cancel()}catch(e){}}
 function cueText(c){return c.replace(/\*/g,'')}
 function parseCue(c){return c.split(' ').map(function(k){return {txt:k.replace(/\*/g,''),s:k.indexOf('*')>=0}})}
-function turnsOf(id){var L=DLG[id].lines,T=[],i=0;while(i<L.length){var n=L[i];if(n.n&&L[i+1]&&L[i+1].y!==undefined){var Y=L[i+1];T.push({npc:n.n,npcJp:n.jp,cue:Y.y,cueJp:Y.jp,by:n.by,vr:n.vr,cueBy:Y.cueBy,opts:Y.opts,diag:Y.diag,rep:Y.rep,route:n.route,fork:Y.fork,cards:Y.cards,dw:n.dw});i+=2}else i++}return T}
+function turnsOf(id){var L=DLG[id].lines,T=[],i=0;while(i<L.length){var n=L[i];if(n.n&&L[i+1]&&L[i+1].y!==undefined){var Y=L[i+1];T.push({npc:n.n,npcJp:n.jp,cue:Y.y,cueJp:Y.jp,by:n.by,vr:n.vr,cueBy:Y.cueBy,opts:Y.opts,diag:Y.diag,dp:Y.dp,df:Y.df,dl:Y.dl,rep:Y.rep,route:n.route,stp:n.stp,cx:n.cx,fork:Y.fork,cards:Y.cards,dw:n.dw});i+=2}else i++}return T}
 
 /* ---------- 描く(場面) ---------- */
 function sp2(map,pal,x,y,px){for(var r=0;r<map.length;r++){var row=map[r];for(var k=0;k<row.length;k++){var ch=row.charAt(k);if(ch!=='.'){c.fillStyle=pal[ch]||'#f0f';c.fillRect(Math.round(x+k*px),Math.round(y+r*px),px,px)}}}}
@@ -2078,7 +2083,7 @@ function startVid(pl,vid,from){
  var d=DLG[vid];lastId=vid;G.sid++;clearTimers();stopSay();Snd.go(G.snd=pl.snd||pl.id);resetOUT();
  G.scene={id:pl.id,vid:vid,pl:pl,d:d,turns:turnsOf(vid),words:d.words,pitch:SP[vid]?SP[vid].pitch:1,from:from||null,anim:null,lastSp:null,tables:null};
  var S=G.scene;if(window.__ambScene)window.__ambScene(G.snd,d.bg);
- if(d.story){S.turns.forEach(function(T,i){T.ctx=ctxAt(d,i);T.pitch=T.ctx.sp==='lulu'?1.35:(SP[T.ctx.sp]?SP[T.ctx.sp].pitch:1)});speaker=null}
+ if(d.story){S.turns.forEach(function(T,i){T.ctx=ctxAt(d,i);if(T.cx)T.ctx=Object.assign({},T.ctx,T.cx);T.pitch=T.ctx.sp==='lulu'?1.35:(SP[T.ctx.sp]?SP[T.ctx.sp].pitch:1)});speaker=null}
  else{S.tables=INSIDE[pl.id]?makeTables():null;speaker=INSIDE[pl.id]?varySp(SP[vid]):SP[vid]}
  cam=pl.cam||0;spX=360;spSay=false;
  G.view='scene';G.ti=0;G.tries=0;$m('mapView').hidden=true;$m('sceneView').hidden=false;
@@ -2102,6 +2107,7 @@ function npcTurn(){
  if(T.vr&&!T.vd){T.vd=1;for(var vi=0;vi<T.vr.length;vi++){var vv=T.vr[vi];if(window.__CHK||save.seen[vv.s]>0){T.npc=vv.n;T.npcJp=vv.jp;if(vv.y){T.cue=vv.y;T.cueJp=vv.yjp}break}}}
  var bv=T.by&&S.pick&&T.by[S.pick];if(bv){T.npc=bv.n;T.npcJp=bv.jp}var cv=T.cueBy&&S.pick&&T.cueBy[S.pick];if(cv){T.cue=cv.y;T.cueJp=cv.jp}
  if(T.route!=null){S.rf=S.rn||0;S.rn=T.route;S.rt=t}
+ if(T.stp!=null)S.stp=T.stp;
  if(T.dw&&!T.dts)T.dts=Date.now();
  if(T.ctx)applyCtx(T.ctx);
  who.textContent=T.ctx?T.ctx.who:S.d.who;
@@ -2129,7 +2135,8 @@ function showCue(){
  setupAction(act,stat,toks,spans,T);
  if(blind&&!(typeof f2==='function'&&f2()&&T.pk))later(400,playDemo);   /* 耳学モード: 自分の番の冒頭でお手本が自動で流れ、流れ終わったらマイクが開く(音声を先に流した場面の直後は重ねない) */
  else if(SR&&!PREF.silent)later(500,function(){if(G.kick)G.kick()});
- if(!G.camp&&!T.diag&&!G.scene.d.nohelp)addHelp(T)}
+ if(!G.camp&&!T.diag&&!G.scene.d.nohelp)addHelp(T);
+ if(T.dp&&typeof declMic==='function')declMic(act)}
 /* ---------- 発音チェック: 目標の文と「聞こえた文字」を単語ごとに比べる ---------- */
 var ONES=['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
 var TENS=['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
@@ -3535,9 +3542,24 @@ function voiceSetM(kind,M){
  if(v.trips.length>20)v.trips=v.trips.slice(-20);
  vSave(v)}
 /* ブラウザの音声認識だけで読んだとき(同意なし・通信なし)の記録。数字は null、単語ごとは bits だけ */
-function voiceSaveSR(kind,tg,res,txt){
- voiceSetM(kind,{ts:Date.now(),src:'sr',tot:null,acc:null,flu:null,cmp:null,w:null,
-  bits:res.words.map(function(w){return w.ok?'1':'0'}).join(''),heard:String(txt||'').slice(0,600)})}
+function voiceSaveSR(kind,tg,res,txt,T){
+ voiceSetMPart(kind,{ts:Date.now(),src:'sr',tot:null,acc:null,flu:null,cmp:null,w:null,
+  bits:res.words.map(function(w){return w.ok?'1':'0'}).join(''),heard:String(txt||'').slice(0,600)},T)}
+/* タスク089: 始めの宣言は文ごとに区切って言う(T.dp)。文ごとの結果をためて、最後の文(T.dl)で1つにまとめ、これまでと同じ1件の記録(kanpe-voice-v1 の start)として残す。
+   最初の文(T.df)で、前の途中までのたまりは捨てる。Azure の値は語数で重みづけして平均(1文でも Azure でなければ、まとめた記録はブラウザの音声認識の扱い) */
+function voiceMergeM(L){
+ var az=L.every(function(m){return m.src==='az'&&m.w&&m.w.length}),M={ts:L[L.length-1].ts,src:az?'az':'sr',tot:null,acc:null,flu:null,cmp:null,w:null,
+  bits:L.map(function(m){return m.bits}).join(''),heard:L.map(function(m){return String(m.heard||'').trim()}).filter(Boolean).join(' ').slice(0,600)};
+ if(az){var n=0,k=['tot','acc','flu','cmp'],sum=[0,0,0,0],w=[],sg=[];
+  L.forEach(function(m){var c=m.w.length;n+=c;k.forEach(function(q,i){sum[i]+=(+m[q]||0)*c});w=w.concat(m.w);sg=sg.concat(m.sg||[])});
+  M.calc=VCALC;M.tot=Math.round(sum[0]/n*10)/10;M.acc=Math.round(sum[1]/n*10)/10;M.flu=Math.round(sum[2]/n*10)/10;M.cmp=Math.round(sum[3]/n*10)/10;M.sg=sg;M.w=w}
+ return M}
+function voiceSetMPart(kind,M,T){
+ if(kind==='decl'&&T&&T.dp){
+  if(T.df||!G.dAcc)G.dAcc=[];G.dAcc.push(M);
+  if(T.dl){var L=G.dAcc;G.dAcc=null;voiceSetM('decl',voiceMergeM(L))}
+  return}
+ voiceSetM(kind,M)}
 
 /* ---- 中継からトークンをもらう(8秒で見切る)・Speech SDK を読みこむ(同意した人が読むときだけ) ---- */
 var _vt=null,_sdkP=null;
@@ -3699,7 +3721,7 @@ function setupDiagAz(act,stat,toks,spans,T,card){
    plogAdd({ts:M.ts,v:G.scene?G.scene.vid:'',tg:tg.join(' '),hd:txt.slice(0,600),cf:0,ok:res.okN,n:res.n,
     miss:res.words.filter(function(w){return !w.ok}).slice(0,40).map(function(w){return {t:missKey(w.t),h:w.h,k:w.k}}),
     diag:T.diag,why:why,seg:segs.length,bits:M.bits,alts:[],src:M.src,az:M.src==='az'?[M.tot,M.acc,M.flu,M.cmp]:undefined});   /* src: 'az'=Azure／'sr'=ブラウザの音声認識。az=[総合,正確さ,流れ,言い切り度](Azure の値) */
-   if(T.diag==='decl'||T.diag==='decl_end')voiceSetM(T.diag,M);   /* 始め・終わりの宣言だけ、比べるための記録(kanpe-voice-v1)に入れる。窓口の読み返し(readback)は plog だけ */
+   if(T.diag==='decl'||T.diag==='decl_end')voiceSetMPart(T.diag,M,T);   /* 始め・終わりの宣言だけ、比べるための記録(kanpe-voice-v1)に入れる。窓口の読み返し(readback)は plog だけ */
    card.classList.add('shown');heardEl.className='heard fin';heardEl.textContent=txt||'…';
    later(Math.min(6500,2600+txt.length*16),diagDone)}
   if(h0)h0.stop(go);else go()}
@@ -3750,7 +3772,7 @@ function setupDiag(act,stat,toks,spans,T,card){
   plogAdd({ts:Date.now(),v:G.scene?G.scene.vid:'',tg:tg.join(' '),hd:txt.slice(0,600),cf:cfN?cfSum/cfN:0,ok:res.okN,n:res.n,
    miss:res.words.filter(function(w){return !w.ok}).slice(0,40).map(function(w){return {t:missKey(w.t),h:w.h,k:w.k}}),
    diag:T.diag,why:why,seg:segs.length,bits:res.words.map(function(w){return w.ok?'1':'0'}).join(''),alts:alts.slice(0,12),src:'sr'});
-  if(T.diag==='decl'||T.diag==='decl_end')voiceSaveSR(T.diag,tg,res,txt);  /* 始め・終わりの宣言は、比べるための別の記録(kanpe-voice-v1)にも残す */
+  if(T.diag==='decl'||T.diag==='decl_end')voiceSaveSR(T.diag,tg,res,txt,T);  /* 始め・終わりの宣言は、比べるための別の記録(kanpe-voice-v1)にも残す */
   card.classList.add('shown');heardEl.className='heard fin';heardEl.textContent=txt||'…';
   later(Math.min(6500,2600+txt.length*16),diagDone)}
  function start(){
