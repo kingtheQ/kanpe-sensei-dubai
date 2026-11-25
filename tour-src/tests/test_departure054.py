@@ -108,8 +108,9 @@ with sync_playwright() as pw:
     a = calls(fr, 'nairobi-dutyfree-screen-strip.png'); chk('免税店(2): 広告画面あり', len(a) == 1 and a[0][4:6] == [301, 281])
     # (5) ラウンジ
     CEN = [(850, 222), (954, 222), (1058, 222)]; OFF = [0, 4, 8]
-    SIT = {'t-woman-hijab-sit-side-2.png': (522, 537), 't-man-dashiki-sit-side-2.png': (578, 665), 't-safari-sit-side-2.png': (478, 762),
-           't-maasai-sit-side-1.png': (1256, 667), 't-man-thobe-sit-side-2.png': (995, 761), 't-backpacker-sit-side-1.png': (1331, 757)}
+    # タスク084: 正面座り(sit-front・198px)。X=x-w/2, Y=by-198。hijab(576,720) dashiki(672,848) safari(545,952) maasai(1305,882) thobe(1051,938) backpacker(1380,950)
+    SIT = {'t-woman-hijab-sit-front.png': (524, 522), 't-man-dashiki-sit-front.png': (620, 650), 't-safari-sit-front.png': (489, 754),
+           't-maasai-sit-front.png': (1251, 684), 't-man-thobe-sit-front.png': (999, 740), 't-backpacker-sit-front.png': (1328, 752)}
     for v in ('nbo_lounge1', 'nbo_lounge2'):
         start(p, v); okc = okt = True; seq = []
         for te in (0.2, 1.3, 2.4, 3.6, 5.7, 8.8, 11.5):
@@ -130,6 +131,8 @@ with sync_playwright() as pw:
         chk('ラウンジ %s: 座る人6人が正本プレビューの位置に全身で(上半身だけでない)' % v, oks and len(SIT) == 6, det)
     fr, t_, te_ = at(p, 1.0)
     chk('ラウンジ: 丸ブースのマサイ男性だけ手前のテーブル(front-054)が下半身を隠す(正本と同じ)', len(calls(fr, 'nairobi-lounge-front-054.png')) == 1 and calls(fr, 'nairobi-lounge-front-054.png')[0][:2] == [1256, 667])
+    chk('ラウンジ(084): トーブの人の前に机だけの前面絵(lounge-front-thobe-table)が (0,0) に1枚', len(calls(fr, 'lounge-front-thobe-table.png')) == 1 and calls(fr, 'lounge-front-thobe-table.png')[0][:2] == [0, 0])
+    chk('ラウンジ(084): 旧 sit-side は描かれない', not [c for c in fr if isinstance(c[0], str) and 'sit-side' in c[0]])
     # (6) ゲート
     for v in ('nbo_gate1', 'nbo_gate2'):
         start(p, v); okp = True; dxs = []; pil = True
