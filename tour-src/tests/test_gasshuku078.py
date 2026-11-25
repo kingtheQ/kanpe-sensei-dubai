@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """タスク078 の動作確認(ヘッドレス)。使い方: python3 tour-src/tests/test_gasshuku078.py
 合宿(マッチョルル教室)デモ版(場面 camp_demo1・場所 camp)。チェックモード(?check=1)からだけ入る独立場面。
-(1) 素材: カード2枚(1080×1920)・口パーツ7点(160×128)・ルルの素材が tour/assets/art/ にあり、大きさが指示書どおり。ルルの素材の指定は1か所(camp_data.LULU_IMG)
+(1) 素材: カード2枚(1080×1920)・口パーツ7点(160×128)・マッチョルル16枚・背景画(camp.png 1536×960)が tour/assets/art/ にあり、大きさが指示書どおり。ルルの素材の指定は1か所(camp_data.LULU_FRAMES。足もとの測り値も素材と照合)
 (2) 単語リスト: ドリルの単語・短文がカード(指示書)と一致。台本データ(DLG.camp_demo1.camp78)も同じ
 (3) 登録: チェックモードの一覧に出て入れる。通常モードでは CHECK ボタンなし・タブは隠れる・TOUR_IDS・ほかの場所に入らない。新しい保存キーなし(コード・実行の両方)
 (4) 禁止語: コード側の文字列・実行中の画面の文字に「復習・テスト・測定・練習」や数値スコア・回数・点数が出ない。日本語の訳もない
@@ -9,7 +9,8 @@
     読み上げ中は口パーツ(-ill=v3-i / thr=v3-th)・今の単語の大きな文字・カードの枠が出て、プレイヤーの番は単語がカードの順に並ぶ
 (6) 失敗ルール(074): 失敗→聞き返し→自動おてほん→言い直し→3回目でルルが代わりに言って先へ。ヘルプ回数は減らない。画面に数値・回数が出ない
 (7) 音声認識なし・「こえをださないモード」でも止まらず最後まで進む。耳学モード(PREF.mode=2)でも単語が出る
-(8) 画面: ルルが大きい・拡大はNEAREST・足もとと影は動かず腰より上だけ伸び縮み・カード全体が画面に入る(複数の画面サイズ)
+(8) 画面(タスク081・082): マッチョルルがカール運動(1→2→3→2→1…・約0.45秒/コマ)をループ・足もと(下端)がそろって跳ねない・ルルは従来の0.66倍・ルルは左下に固定で口パーツの出入りで動かない・
+    口パーツはルルの頭の上・カードはステージ幅の55%前後でハイライト枠が追従・背景は背景画(camp.png。artIdFor の campK→camp)・複数の画面サイズでカード全体が画面に入りルルと重ならない
 マイク・実機の見え方・実機の音・実際の発音の判定の感触は確認できない(このテストの音声認識と声は偽物)。"""
 import os, sys, io, re, json, hashlib, subprocess
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'flow025'))
@@ -21,7 +22,7 @@ import camp_data
 
 HOOK = "requestAnimationFrame(frame);\n})();"
 EXPOSE = ("window.__T={G:G,save:save,PBY:PBY,DLG:DLG,MODES:MODES,ART:ART,TOUR_IDS:TOUR_IDS,PREF:PREF,Snd:Snd,"
-          "get GS(){return typeof GS!=='undefined'?GS:null},get GSD(){return typeof GSD!=='undefined'?GSD:null}};")
+          "get GS(){return typeof GS!=='undefined'?GS:null},get GSD(){return typeof GSD!=='undefined'?GSD:null},gsHi:function(i){return gsHi(i)}};")
 bad = []
 def chk(name, ok, val=''):
     print(('OK  ' if ok else 'NG  ') + name, val if val != '' else '')
@@ -51,13 +52,29 @@ chk('1a カード2枚が tour/assets/art/camp/ にあり 1080×1920', ok)
 MOUTHS = ['v3-a-160x128.png', 'v3-i-160x128.png', 'v3-u-160x128.png', 'v3-th-160x128.png', 'v2-v-160x128.png', 'mouth-open-160x128.png', 'mouth-round-160x128.png']
 SZ = dict((n, Image.open(os.path.join(CAMP, n)).size) for n in MOUTHS)
 chk('1b 口パーツ7点が入っている。デモで使う5点(v3-a/i/u/th・v2-v)は 160×128。mouth-open・mouth-round はファイル名は160x128だが実寸は480×384(3倍・デモでは使わない)', all(SZ[n] == (160, 128) for n in MOUTHS[:5]) and all(SZ[n] in ((160, 128), (480, 384)) for n in MOUTHS[5:]), SZ)
-lu = Image.open(os.path.join(ART, camp_data.LULU_IMG))
-chk('1c ルルの素材(camp_data.LULU_IMG)があり、大きさ・腰の高さの指定が素材と合う', lu.size == (camp_data.LULU_W, camp_data.LULU_H) and 0 < camp_data.LULU_HIP < camp_data.LULU_H, (camp_data.LULU_IMG, lu.size))
+def measure(path):
+    """足もと(下端)と足もとの中心: 透明でない最下行(8画素以上)の次の行 / その上30行の x の範囲の中心。camp_data.LULU_FRAMES の foot_y・foot_x はこの式の測り値"""
+    im = Image.open(path).convert('RGBA'); a = im.getchannel('A'); W, H = im.size
+    cnt = [sum(1 for x in range(W) if a.getpixel((x, y)) > 128) for y in range(H)]
+    fy = max(y for y in range(H) if cnt[y] >= 8) + 1
+    xs = [x for y in range(fy - 30, fy) for x in range(W) if a.getpixel((x, y)) > 128]
+    top = min(y for y in range(H) if cnt[y] > 0)
+    return im.size, fy, (min(xs) + max(xs) + 1) / 2.0, top
+FR = camp_data.LULU_FRAMES
+meas = [measure(os.path.join(CAMP, f['img'])) for f in FR]
+chk('1c ルルの素材(camp_data.LULU_FRAMES の4コマ)が tour/assets/art/camp/ にあり、大きさ・足もとの高さ(foot_y)・足もとの中心(foot_x)の指定が素材の測り値と一致',
+    all(m[0] == (f['w'], f['h']) and m[1] == f['foot_y'] and abs(m[2] - f['foot_x']) < .01 for m, f in zip(meas, FR)) and meas[0][3] == 12 and camp_data.LULU_REF_H == meas[0][1] - meas[0][3],
+    [(m[0], m[1], m[2]) for m in meas])
+allm = sorted(n for n in os.listdir(CAMP) if n.startswith('macho-'))
+chk('1c2 マッチョルル16枚(dumbbell・exercise・rope・barbell の各1〜4。今回使うのは dumbbell だけ)が入っている', allm == sorted('macho-%s-%d.png' % (k, i) for k in ('barbell', 'dumbbell', 'exercise', 'rope') for i in range(1, 5)), len(allm))
+gym = Image.open(os.path.join(ART, 'camp.png'))
+chk('1c3 背景画 tour/assets/art/camp.png が 1536×960', gym.size == (1536, 960), gym.size)
 js = open(os.path.join(ROOT, 'tour-src/camp.js'), encoding='utf-8').read()
 css = open(os.path.join(ROOT, 'tour-src/camp.css'), encoding='utf-8').read()
 cd_src = open(os.path.join(ROOT, 'tour-src/camp_data.py'), encoding='utf-8').read()
-chk('1d ルルの素材の指定は1か所: camp.js・camp.css にファイル名がなく、camp_data.py に LULU_IMG が1つだけ',
-    'room-lulu' not in js and 'room-lulu' not in css and cd_src.count("LULU_IMG =") == 1 and cd_src.count('room-lulu-idle.png') == 1)
+chk('1d ルルの素材の指定は1か所: camp.js・camp.css にルルのファイル名がなく、camp_data.py に LULU_FRAMES・LULU_SCALE(=0.66)・LULU_SEQ([0,1,2,1])・LULU_FRAME_SEC(=0.45)が1つずつ',
+    'macho-' not in js and 'macho-' not in css and 'room-lulu' not in js + css + cd_src and cd_src.count("LULU_FRAMES =") == 1 and cd_src.count("LULU_SCALE =") == 1
+    and camp_data.LULU_SCALE == .66 and camp_data.LULU_SEQ == [0, 1, 2, 1] and camp_data.LULU_FRAME_SEC == .45 and camp_data.CARD_SHARE == .55)
 
 # ---------- (2) 単語リスト ----------
 cards = camp_data.CARDS
@@ -74,17 +91,17 @@ srv = serve(ROOT); base = 'http://127.0.0.1:%d' % srv.server_address[1]
 SETUP = """
 window.__perr=[];window.addEventListener('error',function(e){window.__perr.push(String(e.message))});
 localStorage.setItem('kanpe-set-v1',JSON.stringify({v:1,vmode:'pick'}));
-window.__tts=[];window.__trs=[];window.__srFail=0;window.__jin=[];
+window.__tts=[];window.__trs=[];window.__mon=[];window.__srFail=0;window.__jin=[];
 (function(){var o=speechSynthesis.speak;speechSynthesis.speak=function(u){var s=window.__snap?window.__snap():{};window.__tts.push({t:u.text,p:u.pitch,r:u.rate,s:s});return o.apply(this,arguments)}})();
 (function(){var P=window.SpeechRecognition;if(!P)return;
  function FS(){}FS.prototype.start=function(){var me=this;setTimeout(function(){
   var t=[].map.call(document.querySelectorAll('#panel .cue .w'),function(x){return x.textContent}).join(' ');
   if(window.__srFail>0){window.__srFail--;t='banana'}
-  window.__trs.push(t);var rs=[{transcript:t,confidence:.9}];rs.isFinal=true;
+  window.__trs.push(t);window.__mon.push(!!(document.getElementById('gsMouth')&&document.getElementById('gsMouth').classList.contains('on')));var rs=[{transcript:t,confidence:.9}];rs.isFinal=true;
   if(me.onresult)me.onresult({results:[rs]});setTimeout(function(){if(me.onend)me.onend({})},20)},60)};
  FS.prototype.abort=FS.prototype.stop=function(){};window.SpeechRecognition=FS;window.webkitSpeechRecognition=FS})();
 window.__snap=function(){var m=document.getElementById('gsMouth'),ci=document.getElementById('gsCard'),hi=document.getElementById('gsHi'),w=document.querySelector('#panel .cue .w');
- return {mouth:!!m&&m.classList.contains('on'),mimg:((document.querySelector('#gsMouth img')||{}).src||'').split('/').pop(),card:((ci||{}).src||'').split('/').pop(),
+ return {f:(document.getElementById('gsLulu')||{getAttribute:function(){return null}}).getAttribute('data-f'),mouth:!!m&&m.classList.contains('on'),mimg:((document.querySelector('#gsMouth img')||{}).src||'').split('/').pop(),card:((ci||{}).src||'').split('/').pop(),
   hi:hi&&hi.style.display!=='none'?[parseFloat(hi.style.left),parseFloat(hi.style.top)]:null,big:w?w.textContent:null,msg:(document.getElementById('msgText')||{}).textContent}};
 window.__jlog=function(){try{var J=__T.Snd.jingle;if(J.__w)return;var f=function(k){window.__jin.push(k);return J.apply(this,arguments)};f.__w=1;__T.Snd.jingle=f}catch(e){}};
 window.__texts=[];setInterval(function(){try{window.__texts.push((document.getElementById('sceneView')||{}).innerText||'')}catch(e){}},50);
@@ -119,7 +136,8 @@ with sync_playwright() as pw:
     cur = pn.evaluate("()=>({art:Object.keys(__T.ART).filter(function(k){return k!=='nroom'}).map(function(k){return k+':'+JSON.stringify(__T.ART[k])}),dl:Object.keys(__T.DLG).filter(function(k){return k!=='camp_demo1'&&['sage_1','sage_2','sage_3','nbo_immig1','nbo_immig2','nbo_bag1','nbo_bag2','nbo_sim1','nbo_sim2','nbo_taxi1','nbo_taxi2','nbo_java2','nbo_art1','nbo_art2','nbo_lounge1','nbo_lounge2','nbo_duty1','nbo_duty2','nbo_safari','nbo_market','nbo_checkin1','nbo_checkin2','nbo_sec1','nbo_sec2','nbo_gate1','nbo_gate2','nbo_plane1','nbo_plane2','hnd_checkin_ow','hnd_checkin_star','hnd_sec','hnd_exit','hnd_gate_ow','hnd_gate_star','hnd_board_ow','hnd_board_star','hnd_plane_ow','hnd_plane_star','hnd_return'].indexOf(k)<0}).map(function(k){return k+':'+JSON.stringify(__T.DLG[k])})})")
     ph = br.new_context().new_page(); ph.route('**/tour/index.html*', hooked_head); ph.goto(base + '/tour/index.html'); ph.wait_for_timeout(1500)
     old = ph.evaluate("()=>({art:Object.keys(__T.ART).filter(function(k){return k!=='nroom'}).map(function(k){return k+':'+JSON.stringify(__T.ART[k])}),dl:Object.keys(__T.DLG).filter(function(k){return k!=='camp_demo1'&&['sage_1','sage_2','sage_3','nbo_immig1','nbo_immig2','nbo_bag1','nbo_bag2','nbo_sim1','nbo_sim2','nbo_taxi1','nbo_taxi2','nbo_java2','nbo_art1','nbo_art2','nbo_lounge1','nbo_lounge2','nbo_duty1','nbo_duty2','nbo_safari','nbo_market','nbo_checkin1','nbo_checkin2','nbo_sec1','nbo_sec2','nbo_gate1','nbo_gate2','nbo_plane1','nbo_plane2','hnd_checkin_ow','hnd_checkin_star','hnd_sec','hnd_exit','hnd_gate_ow','hnd_gate_star','hnd_board_ow','hnd_board_star','hnd_plane_ow','hnd_plane_star','hnd_return'].indexOf(k)<0}).map(function(k){return k+':'+JSON.stringify(__T.DLG[k])})})")
-    chk('3d 既存の ART(%d項目)・既存の場面(タスク057で変えたナイロビ28場面・羽田11場面と、タスク075で変えた ART nroom を除く)の台本(%d本)が変更前(HEAD)と同じ' % (len(old['art']), len(old['dl'])), cur['art'] == old['art'] and cur['dl'] == old['dl'])
+    chk('3d 既存の ART(%d項目。082で足した camp は比べない=コミット前後どちらの HEAD でも通る)・既存の場面(タスク057で変えたナイロビ28場面・羽田11場面と、タスク075で変えた ART nroom を除く)の台本(%d本)が変更前(HEAD)と同じ' % (len(old['art']), len(old['dl'])),
+        [x for x in cur['art'] if not x.startswith('camp:')] == [x for x in old['art'] if not x.startswith('camp:')] and cur['dl'] == old['dl'] and any(x.startswith('camp:') for x in cur['art']))
     # ---------- (3) チェックモード ----------
     p = mk(br); p.goto(base + '/tour/index.html?check=1'); p.wait_for_timeout(1500); p.mouse.click(215, 450); p.wait_for_timeout(600)
     p.evaluate("()=>document.getElementById('chkBtn').click()"); p.wait_for_timeout(200)
@@ -133,25 +151,65 @@ with sync_playwright() as pw:
     open_camp(p)
     s = p.evaluate("()=>({view:__T.G.view,gs:document.getElementById('sceneView').classList.contains('gs'),errs:window.__perr})")
     chk('3f 一覧から入れる(場面の画面・合宿の画面)・エラーなし', s['view'] == 'scene' and s['gs'] and not s['errs'], s)
-    # ---------- (8) 画面 ----------
-    g = p.evaluate("""()=>{var r=function(e){var b=e.getBoundingClientRect();return [b.left,b.top,b.width,b.height]};var lu=document.getElementById('gsLulu'),cb=document.getElementById('gsCardBox'),ci=document.getElementById('gsCard');
-      var up=lu.querySelector('.up'),low=lu.querySelector('.low');
-      return {lu:r(lu),cb:r(cb),ci:r(ci),W:innerWidth,H:innerHeight,rend:[getComputedStyle(up).imageRendering,getComputedStyle(low).imageRendering],anim:[getComputedStyle(up).animationName,getComputedStyle(low).animationName],
-       nat:[ci.naturalWidth,ci.naturalHeight],luNat:[up.naturalWidth,up.naturalHeight],shadow:!!lu.querySelector('.sh'),stageDisp:getComputedStyle(document.getElementById('scene')).display}}""")
-    chk('8a ルルが大きい: 表示 %dx%d px(素材 138×184 の %.2f 倍。通常場面のルルは数十px)' % (g['lu'][2], g['lu'][3], g['lu'][3] / 184.0), g['lu'][3] >= 200 and g['lu'][2] >= 140, g['lu'])
-    chk('8b ルルの拡大は NEAREST(image-rendering: pixelated)', g['rend'] == ['pixelated', 'pixelated'], g['rend'])
-    chk('8c 足もと・影は動かさない(下半身の層は動かない)・腰より上の層だけが伸び縮みする', g['anim'][1] == 'none' and g['anim'][0] == 'gsbreath' and g['shadow'], g['anim'])
-    T1 = p.evaluate("()=>getComputedStyle(document.querySelector('#gsLulu .up')).transform"); p.wait_for_timeout(430)
-    T2 = p.evaluate("()=>getComputedStyle(document.querySelector('#gsLulu .up')).transform"); p.wait_for_timeout(210)
-    T3 = p.evaluate("()=>getComputedStyle(document.querySelector('#gsLulu .up')).transform")
-    chk('8d 腰より上の層の伸び縮みが実際に動いている(時間でtransformが変わる)', len({T1, T2, T3}) >= 2, (T1, T2, T3))
-    cr = g['cb']; asp = cr[2] / cr[3]
-    chk('8e カード全体が画面に入っている(430×900): 表示 %dx%d・画像の縦横比 9:16(ゆがまない)・切れていない' % (cr[2], cr[3], ), cr[0] >= 0 and cr[1] >= 0 and cr[0] + cr[2] <= g['W'] + .5 and cr[1] + cr[3] <= g['H'] and abs(g['ci'][2] / g['ci'][3] - 9 / 16) < .004 and g['nat'] == [1080, 1920], (cr, g['W'], g['H']))
-    chk('8f 合宿の画面では場面の小さな絵(canvas)は隠れている(主役はルルとカード)', g['stageDisp'] == 'none')
+    # ---------- (8) 画面(タスク081・082) ----------
+    p.wait_for_timeout(900)
+    GEO = """()=>{var r=function(e){var b=e.getBoundingClientRect();return [b.left,b.top,b.width,b.height]};var GS=__T.GS,D=__T.GSD.lulu,st=document.querySelector('#sceneView .stage');
+      var fr=[];for(var k in GS.frs){var b=GS.frs[k].getBoundingClientRect(),f=D.frames[+k];fr.push({i:+k,on:GS.frs[k].classList.contains('on'),vis:getComputedStyle(GS.frs[k]).visibility,
+        footY:b.top+f.foot_y*b.height/f.h,footX:b.left+f.foot_x*b.width/f.w,headY:b.top+12*b.height/f.h,top:b.top,w:b.width,h:b.height,rend:getComputedStyle(GS.frs[k]).imageRendering})}
+      return {lu:r(GS.lulu),cb:r(document.getElementById('gsCardBox')),ci:r(document.getElementById('gsCard')),mo:r(document.getElementById('gsMouth')),st:r(st),sh:r(GS.sh),fr:fr,dim:GS.dim,W:innerWidth,H:innerHeight,
+       sa:r(document.getElementById('sceneA')),sc:r(document.getElementById('scene')),saHidden:document.getElementById('sceneA').hidden,scHidden:document.getElementById('scene').hidden}}"""
+    g = p.evaluate(GEO)
+    OLDH = {(430, 900): 239, (390, 780): 221, (360, 640): 197, (412, 915): 212, (375, 667): 188}   # 変更前(078・HEAD)のルルの表示の高さ。同じ画面サイズで実測した値
+    d0 = g['dim']
+    chk('8a ルルの大きさ=従来の0.66倍: 従来の表示の高さ(基準)%dpx(変更前の実測 %dpx と一致)→ ルルの背の高さ %dpx(=%.3f倍)。倍率は camp_data.LULU_SCALE の1か所' % (d0['refH'], OLDH[(430, 900)], d0['lCharH'], d0['lCharH'] / float(d0['refH'])),
+        d0['refH'] == OLDH[(430, 900)] and abs(d0['lCharH'] / float(d0['refH']) - camp_data.LULU_SCALE) < .01 and camp_data.LULU_SCALE == .66, d0)
+    used = [f for f in g['fr']]
+    fy = [f['footY'] for f in used]; fx = [f['footX'] for f in used]
+    chk('8b 足もと(下端)と足もとの中心が全コマでそろっている(素材ごとに高さが違っても跳ねない): 足もとの高さのばらつき %.2fpx・中心 %.2fpx(1px未満)' % (max(fy) - min(fy), max(fx) - min(fx)), max(fy) - min(fy) < .6 and max(fx) - min(fx) < .6 and len(used) == 3, (fy, fx))
+    chk('8b2 コマの表示は全コマ同じ倍率(体の大きさが変わらない)・素材の縮小はなめらか(image-rendering: auto。拡大でなく縮小なので)', len(set(round(f['w'] / FR[f['i']]['w'], 4) for f in used)) == 1 and all(f['rend'] == 'auto' for f in used), [round(f['w'] / FR[f['i']]['w'], 4) for f in used])
+    # コマ送り: 1→2→3→2→1… 約0.45秒/コマ
+    seq = p.evaluate("""()=>new Promise(function(res){var out=[],t0=performance.now(),iv=setInterval(function(){var f=__T.GS.lulu.getAttribute('data-f');if(!out.length||out[out.length-1][0]!==f)out.push([f,Math.round(performance.now()-t0)]);if(performance.now()-t0>5200){clearInterval(iv);res(out)}},20)})""")
+    labels = [x[0] for x in seq]
+    ts = [x[1] for x in seq]
+    durs = [ts[i + 1] - ts[i] for i in range(1, len(ts) - 1)]
+    okseq = all(labels[i] == ['1', '2', '3', '2'][(labels.index('1') + i) % 4] for i in range(len(labels))) if '1' in labels else False
+    chk('8c ルルがカール運動のコマ送りをループ: 順番 %s(1→2→3→2→1…)・1コマ %d〜%dms(目標450ms)' % ('→'.join(labels[:9]), min(durs), max(durs)), len(labels) >= 9 and okseq and all(330 <= x <= 570 for x in durs), (seq, durs))
+    # ルルは固定: 口パーツの出入りで位置も大きさも変わらない
+    before = p.evaluate(GEO)
+    p.evaluate("()=>{__T.GS.mouth.classList.add('on')}"); p.wait_for_timeout(120)
+    on = p.evaluate(GEO)
+    p.evaluate("()=>{__T.GS.mouth.classList.remove('on')}"); p.wait_for_timeout(120)
+    off = p.evaluate(GEO)
+    same = lambda a, b: max(abs(x - y) for x, y in zip(a, b)) < .01
+    chk('8d ルルは左下に固定: 口パーツの表示・非表示でルルの位置・大きさが変わらない(箱 %s と 各コマ)' % [round(x) for x in before['lu']],
+        same(before['lu'], on['lu']) and same(on['lu'], off['lu']) and all(abs(a['top'] - b['top']) < .01 and abs(a['w'] - b['w']) < .01 for a, b in zip(before['fr'], on['fr'])), (before['lu'], on['lu']))
+    head = min(f['headY'] for f in on['fr']); mo = on['mo']
+    chk('8e 口パーツはルルの頭の上(頭と重ならない): 口の下端 %.0f < ルルの頭のてっぺん %.0f・口は左半分(ルルの上)・大きさ %dx%d(従来 150×120 と同程度)' % (mo[1] + mo[3], head, mo[2], mo[3]),
+        mo[1] + mo[3] <= head - 4 and mo[1] >= 40 and abs((mo[0] + mo[2] / 2) - (g['lu'][0] + g['dim']['lW'] / 2)) < g['dim']['lW'] / 2 and 110 <= mo[2] <= 150, (mo, head))
+    cr = g['cb']; stw = g['st'][2]
+    chk('8f カードが大きい: ステージ幅 %dpx に対し カード %dpx(%.1f%%。従来 199px=約46%%・目標55%%前後)・縦横比 9:16・切れていない' % (stw, cr[2], cr[2] / stw * 100),
+        .54 <= cr[2] / stw <= .56 and abs(g['ci'][2] / g['ci'][3] - 9 / 16) < .004 and cr[0] >= 0 and cr[1] >= 0 and cr[0] + cr[2] <= g['W'] + .5 and cr[1] + cr[3] <= g['H'], cr)
+    gb = p.evaluate("""()=>{var c=document.getElementById('sceneA'),x=c.getContext('2d'),pts=[[8,8],[770,170],[300,300],[1100,360],[100,800],[760,900]],o=[];pts.forEach(function(q){o.push(Array.prototype.slice.call(x.getImageData(q[0],q[1],1,1).data,0,3))});return {px:o,pts:pts}}""")
+    ref = [list(gym.convert('RGB').getpixel(tuple(q))) for q in gb['pts']]
+    chk('8g 背景がジムの絵(camp.png): 場面の背景用キャンバス(sceneA)が出ていて、画素が camp.png と一致(6点)・ステージいっぱいに敷かれている・紺の手順描画(campK)は出ていない',
+        gb['px'] == ref and not g['saHidden'] and g['scHidden'] and abs(g['sa'][2] - g['st'][2]) < 1 and abs(g['sa'][3] - g['st'][3]) < 1, (gb['px'], ref))
+    chk('8g2 背景は既存の画像背景の仕組み: ART.camp(bg=camp.png)と artIdFor(bg campK→camp)。camp_demo1 の bg は campK のまま', p.evaluate("()=>__T.ART.camp&&__T.ART.camp.bg==='camp.png'&&__T.DLG.camp_demo1.bg==='campK'"))
+    # ハイライト枠がカードの表示に追従する(単語マス・短文)
+    def hi_ok(pg, tag):
+        res = []
+        for idx in (0, 3, 5, -1):
+            r = pg.evaluate("""(i)=>{__T.gsHi(i);var h=document.getElementById('gsHi').getBoundingClientRect(),c=document.getElementById('gsCard').getBoundingClientRect(),D=__T.GSD;
+              var r=i<0?D.sent:[D.cell.x[i%2],D.cell.y[Math.floor(i/2)],D.cell.w,D.cell.h],k=c.width/D.cardW;
+              return [h.left-c.left-r[0]*k,h.top-c.top-r[1]*k,h.width-r[2]*k,h.height-r[3]*k]}   /* 080で枠は border-box(枠線込みでマスの寸法ちょうど) */""", idx)
+            res.append([round(x, 1) for x in r])
+        pg.evaluate("()=>__T.gsHi(null)")
+        return max(abs(x) for r in res for x in r) <= 1.6, res
+    hk, hr = hi_ok(p, '430')
+    chk('8h ハイライトの枠がカードの表示に追従(拡大後の寸法でも、カード画像の座標どおり。誤差1.6px以内)', hk, hr)
     p.screenshot(path='/tmp/g78_ready.png')
     # ---------- (5) ドリルの流れ(全部言えたとき) ----------
     go(p); finished = wait_map(p)
-    st = p.evaluate("()=>({view:__T.G.view,tts:window.__tts,trs:window.__trs,errs:window.__perr,seen:Object.keys(__T.save.seen).filter(function(k){return /camp/.test(k)}),help:__T.save.help,jin:window.__jin,texts:window.__texts,gsOff:!document.getElementById('gsStage')&&!document.getElementById('sceneView').classList.contains('gs')})")
+    st = p.evaluate("()=>({view:__T.G.view,tts:window.__tts,trs:window.__trs,errs:window.__perr,seen:Object.keys(__T.save.seen).filter(function(k){return /camp/.test(k)}),help:__T.save.help,jin:window.__jin,mon:window.__mon,texts:window.__texts,gsOff:!document.getElementById('gsStage')&&!document.getElementById('sceneView').classList.contains('gs')})")
     chk('5a 最後まで進み、終わるとマップへ戻る(エラーなし)・戻ったあと合宿の画面は片づく', finished and st['view'] == 'map' and not st['errs'] and st['gsOff'], (st['view'], st['errs']))
     T = [x['t'] for x in st['tts']]
     exp = []
@@ -186,6 +244,8 @@ with sync_playwright() as pw:
     chk('5e 読み上げ中: 今の単語・短文が大きな文字で出る', okb, why)
     chk('5f 読み上げ中: カードの該当マスに枠が出る(カードの並びどおり)・カードは1枚ずつ切り替わる(1枚目=ill・2枚目=thr)', okh and okc, why)
     chk('5g ルルの声: 読み上げは pitch 1.35 のルルの声', all(abs(x['p'] - 1.35) < .01 for x in st['tts']), sorted(set(x['p'] for x in st['tts'])))
+    fr_in_read = sorted(set(x['s'].get('f') for x in st['tts'] if x['s'].get('mouth')))
+    chk('5g2 口パーツはルルが読む間だけ: プレイヤーの番(聞いている間・14回)は口パーツが出ていない。ルルが読み上げている間もカール運動は続く(読み上げ中に見えたコマ %s)' % fr_in_read, len(st['mon']) == 14 and not any(st['mon']) and len(fr_in_read) >= 2, (st['mon'], fr_in_read))
     chk('5h クリア音は最後に1回(ドラクエ風)・本編の記録(save.seen)に camp_demo1 は入らない', st['jin'].count('clear') == 1 and not st['seen'], (st['jin'], st['seen']))
     # (4) 画面の文字
     alltxt = '\n'.join(st['texts'])
@@ -257,15 +317,24 @@ with sync_playwright() as pw:
     # ---------- (8) 画面サイズ ----------
     rows = []
     for vp in ((430, 900), (390, 780), (360, 640), (412, 915), (375, 667)):
-        pv = mk(br, vp=vp); open_camp(pv)
-        m = pv.evaluate("""()=>{var r=function(e){var b=e.getBoundingClientRect();return [Math.round(b.left),Math.round(b.top),Math.round(b.width),Math.round(b.height)]};
-          return {cb:r(document.getElementById('gsCardBox')),lu:r(document.getElementById('gsLulu')),mo:r(document.getElementById('gsMouth')),W:innerWidth,H:innerHeight,win:r(document.getElementById('msg')),go:r(document.querySelector('.btn.go'))}}""")
+        pv = mk(br, vp=vp); open_camp(pv); pv.wait_for_timeout(700)
+        m = pv.evaluate("""()=>{var r=function(e){var b=e.getBoundingClientRect();return [Math.round(b.left),Math.round(b.top),Math.round(b.width),Math.round(b.height)]};var GS=__T.GS;
+          return {cb:r(document.getElementById('gsCardBox')),lu:r(GS.lulu),mo:r(document.getElementById('gsMouth')),st:r(document.querySelector('#sceneView .stage')),W:innerWidth,H:innerHeight,win:r(document.getElementById('msg')),go:r(document.querySelector('.btn.go')),dim:GS.dim,
+           feet:Object.keys(GS.frs).map(function(k){var b=GS.frs[k].getBoundingClientRect(),f=__T.GSD.lulu.frames[+k];return b.top+f.foot_y*b.height/f.h}),
+           exit:(function(){var e=document.getElementById('exitBtn').getBoundingClientRect(),q=document.elementFromPoint(e.left+e.width/2,e.top+e.height/2);return !!q&&(q.id==='exitBtn'||!!q.closest('#exitBtn'))})()}}""")
         pv.screenshot(path='/tmp/g78_%dx%d.png' % vp)
         inside = m['cb'][0] >= 0 and m['cb'][1] >= 0 and m['cb'][0] + m['cb'][2] <= m['W'] and m['cb'][1] + m['cb'][3] <= m['H'] and abs(m['cb'][2] / m['cb'][3] - 9 / 16) < .01
         noover = m['lu'][0] + m['lu'][2] <= m['cb'][0] + 1 and m['go'][1] + m['go'][3] <= m['H'] + 1
-        rows.append((vp, inside, noover, m['lu'][2:], m['cb'][2:]))
+        scale_ok = m['dim']['refH'] == OLDH[vp] and abs(m['dim']['lCharH'] / float(m['dim']['refH']) - .66) < .012
+        share = m['cb'][2] / float(m['st'][2])
+        feet_ok = max(m['feet']) - min(m['feet']) < .6
+        mouth_ok = m['mo'][1] >= 40 and m['mo'][0] >= 0 and m['mo'][0] + m['mo'][2] <= m['cb'][0] + 1 and m['mo'][1] + m['mo'][3] <= m['lu'][1] + m['lu'][3]
+        rows.append((vp, inside, noover, scale_ok, .52 <= share <= .56, feet_ok, mouth_ok, m['exit'], m['lu'][2:], m['cb'][2:], share, m['dim']['refH'], m['dim']['lCharH']))
         pv.close()
-    chk('8g カード全体が画面に入り、ルルと重ならず、GO!が画面内: ' + ' / '.join('%dx%d:カード%dx%d・ルル%dx%d' % (r[0][0], r[0][1], r[4][0], r[4][1], r[3][0], r[3][1]) for r in rows), all(r[1] and r[2] for r in rows), [(r[0], r[1], r[2]) for r in rows if not (r[1] and r[2])])
+    chk('8i 5つの画面サイズ: カード全体が画面に入り(縦横比9:16)・ルルと重ならず・GO!が画面内・✕が押せる(最前面): ' + ' / '.join('%dx%d:カード%dx%d(%.0f%%)' % (r[0][0], r[0][1], r[9][0], r[9][1], r[10] * 100) for r in rows),
+        all(r[1] and r[2] and r[7] for r in rows), [(r[0], r[1], r[2], r[7]) for r in rows if not (r[1] and r[2] and r[7])])
+    chk('8j 5つの画面サイズ: ルルは従来の表示の高さ(変更前の実測 %s)の0.66倍・カードはステージ幅の52〜56%%(高さが足りない小さな画面は高さに合わせて縮む)・足もとのばらつき1px未満・口パーツはルルの上で画面内: ' % sorted(OLDH.values()) + ' / '.join('%dx%d:ルルの背%dpx(基準%d)' % (r[0][0], r[0][1], r[12], r[11]) for r in rows),
+        all(r[3] and r[4] and r[5] and r[6] for r in rows), [(r[0], r[3], r[4], r[5], r[6]) for r in rows if not (r[3] and r[4] and r[5] and r[6])])
     br.close()
 if bad: print(bad); sys.exit(1)
 print('ALL OK')
