@@ -3585,9 +3585,9 @@ function worldAt(k){try{var w=JSON.parse(localStorage.getItem('kanpe-world-v1')|
    設計の正本: docs/pm/deliverables/013-ending-scores-design-v1.md
    声の行き先: ブラウザの音声認識(いつも) / Azure(同意した人の、旅の始めの宣言・窓口の読み返し・旅の終わりの宣言だけ)。
    キーはゲームに置かない。中継(relay/)が10分だけ使えるトークンを渡す。中継の URL が空なら Azure は使わない。
-   build.py が "https://relay.example.test" の中身を tour-src/relay-url.txt から差しこむ(中継のURLは、そこ1か所だけ)。 */
+   build.py が "https://kanpe-speech-relay.jungood1219.workers.dev" の中身を tour-src/relay-url.txt から差しこむ(中継のURLは、そこ1か所だけ)。 */
 var VOICEKEY='kanpe-voice-v1',VREF='decl-v1',VCALC=2,CONSENT_VER=2;   /* VCALC: 4つの数字の意味の版。1=016の仮の式(正確さ×0.6＋流れ×0.2＋言い切り度[単語の一致率]×0.2)／2=Azure の値そのまま(タスク024)。印のない古い記録は1として扱う */
-var RELAY_URL="https://relay.example.test";
+var RELAY_URL="https://kanpe-speech-relay.jungood1219.workers.dev";
 var SDK_URL='https://cdn.jsdelivr.net/npm/microsoft-cognitiveservices-speech-sdk@1.45.0/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle-min.js';
 var SDK_SRI='sha384-RrysmqdtkBJHdL3yBqslKJR4EMsU7hA1rz+HpC9qMY001mmfKeRcKisr+NyuyI6H';
 
