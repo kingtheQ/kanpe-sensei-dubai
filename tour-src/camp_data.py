@@ -8,7 +8,9 @@
 #     短文も同じ流れ(2回読む → "Repeat after me!" → 丸ごと) → 次のカード。終わったら締めの台詞。
 #   ・発音判定・失敗ルール(074: 自動おてほん→3回目でルルが代わりに言う)は既存の「聞く→言う」フローを流用(新しい仕組みなし)。
 #   ・ルルはマッチョルルのダンベル・アニメーション(タスク081)。素材の指定は下の LULU_FRAMES(と LULU_SEQ・LULU_FRAME_SEC・LULU_SCALE)の1か所だけ。
-#   ・口パーツはルルの頭の上に出す(ルルは左下に固定。口の表示・非表示でルルの位置も大きさも変えない=081)。背景は背景画(camp.png)。
+#   ・口パーツ(素材ファイルは残す)は、タスク083から画面に出さない。ルルは左下に固定。背景は背景画(camp.png)。
+#   ・1回の合宿に使うカードは先頭の1枚(CARDS[0])だけ。選ぶ画面はない。2枚目(thr)のデータは残す(タスク083)。
+#   ・言えなかったとき(083): お手本が自動で(ふつうの速さで)流れる→自分の声が流れる(端末の中だけ)→お手本→言い直し。短文は意味のまとまり(chunks)ごと→最後に全文を1回。
 
 # ---- ルルの表示素材(1か所で指定)。ポーズ(コマ)を足す・順番を変えるときは、ここだけ変える ----
 LULU_DIR = 'camp/'                # tour/assets/art/camp/
@@ -23,7 +25,8 @@ LULU_FRAMES = [
 LULU_SEQ = [0, 1, 2, 1]           # コマの順(0始まり)。1→2→3→2→1→2→3→2… のカール往復ループ
 LULU_FRAME_SEC = 0.45             # 1コマの長さ(秒)
 LULU_SCALE = 0.66                 # ルルの表示倍率(従来の表示の高さに対する倍率。ここ1か所で変える)
-LULU_REF_H = 340                  # 素材の中のルルの背の高さ(px。頭のてっぺん y=12 から足もと y=352 まで。コマ1で測った値)
+LULU_REF_H = 340                  # 全コマに共通の「背の高さ」の基準(px。頭のてっぺん y=12 から足もとまで。コマ1・2の実測値)
+# タスク083: コマごとに背の高さ(頭のてっぺん→足の裏)が違った(コマ3・4は334、コマ1・2は340)ので、コマごとの倍率を REF_H÷(foot_y−12) にして、画面での背の高さを全コマで同じにする
 LULU_OLD = (138, 184)             # 従来の通常ルル素材の大きさ(倍率の基準=従来の表示の高さを出すためだけに使う)
 CARD_SHARE = 0.55                 # カードの表示の幅(ステージの幅に対する割合。従来は約0.46)
 
@@ -31,27 +34,28 @@ CARD_DIR = 'camp/'                # tour/assets/art/camp/
 CARDS = [
     dict(id='ill', img='card-ill-v3.png', mouth='v3-i-160x128.png', snd='-ill /ɪl/',
          words=['skill', 'drill', 'grill', 'chill', 'mill', 'pill'],          # カードの並び(左上→右上→次の段…)
-         sentence='Drills build grill skills.',
+         sentence='Drills are good for my skills.', chunks=['Drills are good', 'for my skills.'],
          intro="Welcome to camp! I'm Macho Lulu. Let's make our mouths strong!"),
     dict(id='thr', img='card-thr-v3.png', mouth='v3-th-160x128.png', snd='thr /θr/',
          words=['three', 'thrill', 'thriller', 'throw', 'through', 'three-point'],
-         sentence='The throw went through for three points!',
+         sentence='I can throw it through.', chunks=['I can', 'throw it', 'through.'],
          intro="Next card! Stick your tongue out a little."),
 ]
 OUTRO = "Great work! Your mouth is getting strong. See you at camp!"
 REPEAT = "Repeat after me!"
 READY = "Ready?"
+ALL = "Now the whole sentence!"
 
 # カード画像v3(1080×1920)の上の、単語のマスと短文の位置(タスク080: 生成スクリプトから実測。ハイライトの枠に使う)。左上x,y,幅,高さ
 CELL_X = (64, 556); CELL_Y = (380, 708, 1036); CELL_W, CELL_H = 460, 300
-SENT_BOX = (40, 1400, 1000, 468)
+SENT_BOX = (110, 1480, 860, 300)   # タスク083: 新カードの短文の文字(y1514〜1744・x150〜929)を囲む
 
 
 def payload():
     return dict(lulu=dict(dir=LULU_DIR, frames=LULU_FRAMES, seq=LULU_SEQ, sec=LULU_FRAME_SEC, scale=LULU_SCALE, refH=LULU_REF_H, old=list(LULU_OLD)),
-                cardShare=CARD_SHARE, dir=CARD_DIR, repeat=REPEAT, ready=READY, outro=OUTRO,
+                cardShare=CARD_SHARE, dir=CARD_DIR, repeat=REPEAT, all=ALL, ready=READY, outro=OUTRO,
                 cell=dict(x=list(CELL_X), y=list(CELL_Y), w=CELL_W, h=CELL_H), sent=list(SENT_BOX), cardW=1080, cardH=1920,
-                cards=[dict(id=c['id'], img=c['img'], mouth=c['mouth'], words=c['words'], sentence=c['sentence'], intro=c['intro']) for c in CARDS])
+                cards=[dict(id=c['id'], img=c['img'], mouth=c['mouth'], words=c['words'], sentence=c['sentence'], chunks=c['chunks'], intro=c['intro']) for c in CARDS])
 
 
 def add(D):

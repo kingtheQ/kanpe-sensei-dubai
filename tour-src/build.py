@@ -948,7 +948,9 @@ o = rep(o, ".cue .heard.live{color:#8a7b55}", ".cue .heard.live{color:#8a7b55}\n
 # ---- 合宿デモ(タスク078): camp_demo1(d.camp78)の時だけ効く差しこみ。ほかの場面は今のまま ----
 o = rep(o, "function startScene(){\n clearPanel();var S=G.scene;if(S.d.hook==='consent'){consentScene(S);return}", "function startScene(){\n clearPanel();var S=G.scene;if(S.d.camp78){gsReady();return}if(S.d.hook==='consent'){consentScene(S);return}")
 o = rep(o, "function advance(){\n", "function advance(){\n if(G.scene&&G.scene.d&&G.scene.d.camp78){gsAfter();return}\n")
-o = rep(o, "function onPass(){\n var Td=G.scene&&G.scene.turns[G.ti];if(Td&&Td.diag){diagDone();return}\n", "function onPass(){\n if(G.scene&&G.scene.d&&G.scene.d.camp78){Snd.jingle('pass');G.phase='pass';G.tries=0;later(450,advance);return}\n var Td=G.scene&&G.scene.turns[G.ti];if(Td&&Td.diag){diagDone();return}\n")
+o = rep(o, "function onPass(){\n var Td=G.scene&&G.scene.turns[G.ti];if(Td&&Td.diag){diagDone();return}\n", "function onPass(){\n if(G.scene&&G.scene.d&&G.scene.d.camp78){gsRecDrop();Snd.jingle('pass');G.phase='pass';G.tries=0;later(450,advance);return}\n var Td=G.scene&&G.scene.turns[G.ti];if(Td&&Td.diag){diagDone();return}\n")
+o = rep(o, "function onFail(){\n", "function onFail(){\n if(G.scene&&G.scene.d&&G.scene.d.camp78){gsFail();return}\n")   # 083: 合宿の失敗は専用の流れ(自分の声→お手本→言い直し)
+o = rep(o, "try{Snd.duck(1);r.start();listening=true;", "try{Snd.duck(1);if(G.scene&&G.scene.d&&G.scene.d.camp78)gsRecOn();r.start();listening=true;")   # 083: 聞き取りと同時に、自分の声を端末のメモリにだけ録る
 o = rep(o, "function npcHide(){if(!(PREF.mode>=1)||G.camp||!G.scene)return false;", "function npcHide(){if(!(PREF.mode>=1)||G.camp||!G.scene||(G.scene.d&&G.scene.d.camp78))return false;")
 o = rep(o, "function cueBlind(T){return PREF.mode===2&&!G.camp&&", "function cueBlind(T){return PREF.mode===2&&!G.camp&&!(G.scene&&G.scene.d&&G.scene.d.camp78)&&")
 o = rep(o, "function showMap(){\n G.view='map';", "function showMap(){\n if(typeof gsOff==='function')gsOff();\n G.view='map';")

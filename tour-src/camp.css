@@ -12,9 +12,6 @@
 #gsLulu .sh{position:absolute;background:rgba(0,0,0,.28);border-radius:50%}
 #gsLulu .fr{position:absolute;display:block;max-width:none;visibility:hidden}
 #gsLulu .fr.on{visibility:visible}
-#gsMouth{position:absolute;aspect-ratio:160/128;border:3px solid #ffc72c;border-radius:10px;background:#f6cda8;overflow:hidden;visibility:hidden;box-sizing:border-box}
-#gsMouth.on{visibility:visible}
-#gsMouth img{width:100%;height:100%;display:block}
 #gsCardBox{flex:none;position:relative;z-index:1;background:#fff8ea;border-radius:8px;overflow:hidden;border:2px solid #5b6690;box-sizing:border-box}
 #gsCard{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
 #gsHi{position:absolute;box-sizing:border-box;border:3px solid #2d6cdf;border-radius:6px;box-shadow:0 0 0 2px #fff8ea;pointer-events:none;display:none}
