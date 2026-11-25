@@ -227,3 +227,12 @@
 - 077：ロビーの「The swimming pool」は実在の場面 `nbo_pool1`（art `npoolq`・ルルとキングだけ・聞くだけ型・終わるとマップへ）。「The Balcony Bar」は枠組みのみ（`nbo_bar1`・art `nbar`＝PLACEHOLDER・台本 `BAR_SCENE`）で**背景素材待ち**。有効化は `song_data.py` の `BAR_READY = True` の1か所だけ（背景 nairobi-balcony-bar-v1.png・別ストリップ・座標確定のあと、後続の素材結びタスクで）。それまでは「スタッフの一言→メニューに戻る」。
 - 確認：`tour-src/tests/test_showtime076.py`・`test_lobby077.py`・更新した `test_lobby066.py`。詳細は docs/pm/DECISIONS.md の 076・077。
 - 未確認：実機の曲と歌詞の同期・照明の見え方・読み上げの聞こえ方・iPhone の自動再生。参考にしたURL：なし。
+
+## 今回（11/25）タスク079でやったこと（英会話カフェ自由会話の実機フィードバック改善・コードのみ）
+- 対象：`tour-src/freetalk.js`・`freetalk.css`、`relay/worker.js` の /chat、先生の声（`build.py` の `SP.eikai_teacher`）。台本パート（068）と他の場面は触っていない。
+- 聞き取りは continuous＋final の蓄積＋自動再開。送るのは「最後の発話から約2.8秒の沈黙（`FT.silenceMs`）」か「🎤タップ＝言い終わり」だけ。聞き取り中は🎤が脈打ち、先生の考え中は吹き出しに「…」。
+- /chat は `{reply, fix, via}`。fix（直した1文・はっきりした間違いのときだけ）があるときは、先生がお手本を読み→本人が言い直し（ゆるい一致・2回合わなければ先生がもう一度お手本を言って進む）→先生が短く受けて reply。fix なし／旧形式の応答は従来どおり。**カフェ（予行練習の場）に限った設計変更（キング決定 2026-11-25）**で、本編の「日常会話は止めない・採点しない」は変えていない。
+- 先生プロンプトを強化（具体的な中身に触れる・毎回質問で終えない・同じ言い出しを繰り返さない・出力は `FIX:`／`REPLY:` の2行）。reask・nudge は各8種で、直近に使った文を避ける。
+- 先生の声：pitch 1.1 → **0.6**（ほかの最低は r_santa 0.72・ルル 1.35）。
+- **中継のデプロイはPM待ち**（`relay/worker.js` が変わった）。確認：`python3 tour-src/tests/test_eikaiwa073.py`（78項目）・`node relay/test/worker.test.mjs`（30項目）。報告：`docs/pm/deliverables/079-freetalk-improvements-report-v1.md`。
+- 未確認：実機のマイク（continuous・自動再開・2.8秒の感触）・声の聞こえ方・実際のモデルが `FIX:`／`REPLY:` の形で返すか。

@@ -12,24 +12,30 @@
 (7) 保存:   localStorage のキー一覧が増えない。自由会話の内容(会話の文)が、どの保存にも入らない
 (8) 既存:   nbo_java1/2 の台本が変更前と同じ。台本パート(5往復)の中身が同じ。画面に「勉強・テスト・測定・復習・採点・点数・練習」が出ない
 マイク・実際のAIの返事・iOS Safari は確認できない(未確認)。"""
-import os, sys, re, json, subprocess
+import os, sys, re, json, subprocess, time
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'flow025'))
 from play import serve, ROOT
 from playwright.sync_api import sync_playwright
 
 HOOK = "requestAnimationFrame(frame);\n})();"
-EXPOSE = ("window.__T={G:G,save:save,DLG:DLG,PREF:PREF,FT:FT,setSR:function(v){SR=v},get spSay(){return spSay}};")
+EXPOSE = ("window.__T={G:G,save:save,DLG:DLG,PREF:PREF,FT:FT,SP:SP,setSR:function(v){SR=v},get spSay(){return spSay}};")
 INIT = """
 window.__errs=[];window.addEventListener('error',function(e){window.__errs.push(String(e.message))});
 window.__spoken=[];window.__sayMs=8;window.__sr=[];window.__srStarts=0;window.__txt=[];
-try{speechSynthesis.speak=function(u){window.__spoken.push(u.text);setTimeout(function(){if(u.onend)u.onend({})},window.__sayMs)};speechSynthesis.cancel=function(){}}catch(e){}
+try{speechSynthesis.speak=function(u){window.__spoken.push(u.text);(window.__pitch=window.__pitch||[]).push([u.text,u.pitch]);setTimeout(function(){if(u.onend)u.onend({})},window.__sayMs)};speechSynthesis.cancel=function(){}}catch(e){}
 (function(){function FS(){}
-FS.prototype.start=function(){var me=this;me.__ab=false;window.__srStarts++;
+window.__cont=[];window.__finalAt=0;window.__pitch=[];
+FS.prototype.start=function(){var me=this;me.__ab=false;window.__srStarts++;window.__cont.push(!!me.continuous);
  var cue=[].map.call(document.querySelectorAll('.cue .w'),function(x){return x.textContent}).join(' ');
  if(cue){setTimeout(function(){var rs=[{transcript:cue,confidence:.9}];rs.isFinal=true;if(me.onresult)me.onresult({results:[rs]});setTimeout(function(){if(me.onend)me.onend({})},20)},60);return}
  var b=window.__sr.length?window.__sr.shift():{k:'silence'};
  function end(){if(!me.__ab&&me.onend)me.onend({})}
- if(b.k==='say')setTimeout(function(){if(me.__ab)return;if(me.onspeechstart)me.onspeechstart();var rs=[{transcript:b.t,confidence:.9}];rs.isFinal=true;if(me.onresult)me.onresult({results:[rs]});setTimeout(end,20)},60);
+ me.__res=[];
+ /* continuous の認識: results は積み上がる。途中経過(interim)は、あとの結果で置き換わる */
+ function emit(t,fin){var rs=[{transcript:t,confidence:.9}];rs.isFinal=fin;var last=me.__res[me.__res.length-1];if(last&&!last.isFinal)me.__res.pop();
+  var idx=me.__res.length;me.__res.push(rs);if(fin)window.__finalAt=performance.now();if(me.onresult)me.onresult({resultIndex:idx,results:me.__res.slice()})}
+ if(b.k==='say')setTimeout(function(){if(me.__ab)return;if(me.onspeechstart)me.onspeechstart();emit(b.t,true);if(b.end!==undefined)setTimeout(end,b.end)},60);   /* 1つの final。そのあとセッションは開いたまま(continuous) */
+ else if(b.k==='seq'){b.steps.forEach(function(s,i){setTimeout(function(){if(me.__ab)return;if(i===0&&me.onspeechstart)me.onspeechstart();emit(s.t,!!s.f)},s.at)});if(b.end!==undefined)setTimeout(end,b.end)}   /* 時間差の途中経過・final。end があればそのあとセッションを切る(Chrome の自動切断) */
  else if(b.k==='silence')setTimeout(function(){if(me.__ab)return;if(me.onerror)me.onerror({error:'no-speech'});end()},60);
  else if(b.k==='miss')setTimeout(function(){if(me.__ab)return;if(me.onspeechstart)me.onspeechstart();end()},60);
  else if(b.k==='deny')setTimeout(function(){if(me.onerror)me.onerror({error:'not-allowed'});end()},30);
@@ -58,12 +64,13 @@ CORS = {'access-control-allow-origin': '*', 'access-control-allow-headers': 'con
 
 def chat_ok(replies):
     """/chat のモック: 順番に返事を返す。送られた本文を記録する"""
-    box = {'reqs': [], 'i': 0}
+    box = {'reqs': [], 'i': 0, 'ts': []}
     def h(route, request):
         if request.method == 'OPTIONS': route.fulfill(status=204, headers=CORS); return
-        box['reqs'].append(request.post_data_json)
+        box['reqs'].append(request.post_data_json); box['ts'].append(time.time())
         r = replies[min(box['i'], len(replies) - 1)]; box['i'] += 1
-        route.fulfill(status=200, headers=CORS, content_type='application/json', body=json.dumps({'reply': r, 'via': 'workers-ai'}))
+        body = dict(r) if isinstance(r, dict) else {'reply': r}; body['via'] = 'workers-ai'   # 文字列=旧形式(fix なし)・dict={reply,fix}
+        route.fulfill(status=200, headers=CORS, content_type='application/json', body=json.dumps(body))
     return h, box
 def chat_status(code, body='{"error":"not_configured"}'):
     box = {'reqs': []}
@@ -106,8 +113,9 @@ def close(p):
     except Exception: pass
     p.context.close()
 def view(p): return p.evaluate("()=>__T.G.view")
-def accept(p, clock=True):
+def accept(p, clock=True, sil=300):
     if clock: p.evaluate("()=>{window.__now=0;__T.FT.clock=function(){return window.__now}}")
+    if sil: p.evaluate("(m)=>{__T.FT.silenceMs=m}", sil)   # 送信までの沈黙。既定(2800ms)は 9b/9c で確かめる。ほかのテストは速く進めるため短くする
     p.evaluate("()=>document.querySelectorAll('.dq')[0].click()")
 def decline(p): p.evaluate("()=>document.querySelectorAll('.dq')[1].click()")
 def spoken(p): return p.evaluate("()=>window.__spoken.slice()")
@@ -236,14 +244,14 @@ with sync_playwright() as pw:
     p.evaluate("()=>{window.__sr.length=0;window.__sr.push({k:'say',t:'Hello teacher'},{k:'hang'})}"); accept(p)
     p.wait_for_function("(n)=>window.__spoken.some(function(s){return n.indexOf(s)>=0})", arg=L['nudge'], timeout=15000); p.wait_for_timeout(300)
     T = free_txt(p); sp = spoken(p)
-    chk('5b 返事に日本語が混ざっていたら、それは出さず・読まず、先生の軽い質問(英語)に差し替えて会話を続ける', not any(JP.search((t['msg'] or '')) for t in T) and not any(JP.search(s) for s in sp) and sp[-1] in L['nudge'] and view(p) == 'scene', sp[-1:])
+    chk('5b 返事に日本語が混ざっていたら、それは出さず・読まず、先生の軽い質問(英語)に差し替えて会話を続ける。差し替えが起きたことは FT.swaps(=1)で検出できる', not any(JP.search((t['msg'] or '')) for t in T) and not any(JP.search(s) for s in sp) and sp[-1] in L['nudge'] and view(p) == 'scene' and p.evaluate("()=>__T.FT.swaps") == 1, sp[-1:])
     close(p)
     # 聞き取れない: 3回で締め(2回までは聞き返し)
     h, box = chat_ok(['Nice!'])
     p = mk(br, h); enter(p); wait_free(p)
     p.evaluate("()=>{window.__sr.length=0;window.__sr.push({k:'miss'},{k:'miss'},{k:'miss'})}"); accept(p)
     wait_map(p, 40000); sp = spoken(p)
-    chk('5c 聞き取れないことが3回続くと、先生が聞き返し(2回)→ 穏やかに締めて終わる。AIは呼ばない・エラーなし', sp[-3:] == [L['reask'][0], L['reask'][1], L['soft']] and len(box['reqs']) == 0 and not errs(p), sp[-4:])
+    chk('5c 聞き取れないことが3回続くと、先生が聞き返し(2回・毎回ちがう文)→ 穏やかに締めて終わる。AIは呼ばない・エラーなし', sp[-3] in L['reask'] and sp[-2] in L['reask'] and sp[-3] != sp[-2] and sp[-1] == L['soft'] and len(box['reqs']) == 0 and not errs(p), sp[-4:])
     close(p)
     # 無音: 軽い質問で助ける。1回だけなら続く。3回で締め
     h, box = chat_ok(['Oh, I see. Do you like coffee?'])
@@ -274,6 +282,187 @@ with sync_playwright() as pw:
     p.wait_for_function("()=>__T.G.phase==='clear'", timeout=60000); p.evaluate("()=>{__T.setSR(null)}")
     p.wait_for_timeout(2500)
     chk('6b 音声認識がないブラウザ(SR なし)では、誘いを出さない(台本パートだけで終わり、マップへ)', view(p) == 'map' and not [t for t in alltxt(p) if t['ph'] == 'free'] and p.evaluate("()=>__T.FT.want({d:{freetalk:1}})") is False, view(p))
+    close(p)
+
+    # ================= (9) タスク079: 聞き取り(continuous・蓄積・送信タイミング) =================
+    # 9a/9b: 考えて間があいても先に進まない。final を蓄積し、最後の発話から約2.8秒の沈黙で、全文を1回だけ送る(既定の時間で確かめる)
+    h, box = chat_ok(['Mombasa sounds nice. Did you swim there?'])
+    p = mk(br, h); enter(p); wait_free(p)
+    p.evaluate("()=>{window.__sr.length=0;window.__sr.push({k:'seq',steps:[{t:'I went to',f:1,at:60},{t:'the zebra',f:0,at:1500},{t:'the zebra market',f:1,at:1800}]},{k:'hang'})}")
+    accept(p, sil=0)   # 沈黙の待ちは既定のまま
+    chk('9a-0 FT の沈黙の待ちの既定は約2.8秒(2.5〜3秒の範囲)', 2500 <= p.evaluate("()=>__T.FT.silenceMs") <= 3000, p.evaluate("()=>__T.FT.silenceMs"))
+    p.wait_for_function("()=>document.querySelector('.ftheard.live')&&window.__srStarts>=6", timeout=15000)
+    p.wait_for_timeout(1000)   # 1つ目の final(I went to)から約1秒: まだ送らない
+    chk('9a continuous=true で聞いている(聞き取りの開始すべて)', p.evaluate("()=>window.__cont.slice(5).length>0&&window.__cont.slice(5).every(function(x){return x===true})"), p.evaluate("()=>window.__cont"))
+    chk('9b 考えて間があいても(約1.5秒)先に進まない: 言いかけの文は先生に送られない・履歴にも入らない。heard 欄には途中経過がそのまま出ている', len(box['reqs']) == 0 and p.evaluate("()=>document.querySelector('.ftheard').textContent") == 'I went to', (len(box['reqs']), p.evaluate("()=>document.querySelector('.ftheard').textContent")))
+    p.wait_for_timeout(1400)   # 2つ目の途中経過(the zebra)が出ている頃
+    chk('9b2 話している途中の途中経過(interim)が、蓄積した言葉のあとにリアルタイムで出る', p.evaluate("()=>document.querySelector('.ftheard').textContent") in ('I went to the zebra', 'I went to the zebra market'), p.evaluate("()=>document.querySelector('.ftheard').textContent"))
+    p.wait_for_function("()=>window.__finalAt>0&&performance.now()-window.__finalAt>1500", timeout=8000)
+    chk('9b3 最後の発話から1.5秒たっても、まだ送らない(沈黙の待ち 約2.8秒の途中)', len(box['reqs']) == 0)
+    for _ in range(80):
+        if box['reqs']: break
+        p.wait_for_timeout(100)
+    fa = p.evaluate("()=>window.__finalAt"); now_ms = p.evaluate("()=>performance.now()")
+    chk('9c 送信は「最後の final から約2.5〜3秒の沈黙」のあと。送られた発言は蓄積した全文を1回だけ(言いかけの "I went to" は単独で送られない)', len(box['reqs']) == 1 and box['reqs'][0]['messages'][-1] == {'role': 'user', 'content': 'I went to the zebra market'} and [m['content'] for m in box['reqs'][0]['messages'] if m['role'] == 'user'] == ['I went to the zebra market'], box['reqs'][:1])
+    sent_after = (now_ms - fa) / 1000.0
+    chk('9c2 送られた時刻は最後の final から約2.8秒後(2.4〜3.6秒の間。測定: 送信を確認した時点で最後の final から %.2f 秒)' % sent_after, 2.4 <= sent_after <= 3.9, sent_after)
+    close(p)
+
+    # 9d: 🎤タップ=言い終わり → 沈黙を待たずに即送信
+    h, box = chat_ok(['Rice is great. I like it too.'])
+    p = mk(br, h); enter(p); wait_free(p)
+    p.evaluate("()=>{window.__sr.length=0;window.__sr.push({k:'say',t:'I like rice'},{k:'hang'})}")
+    accept(p, sil=0)
+    p.wait_for_function("()=>document.querySelector('.ftheard.live')&&document.querySelector('.ftheard').textContent==='I like rice'", timeout=15000)
+    p.wait_for_timeout(300)
+    chk('9d-0 タップ前は送られていない', len(box['reqs']) == 0)
+    t_tap = time.time(); p.evaluate("()=>document.querySelector('.ftbox button').click()")
+    for _ in range(40):
+        if box['reqs']: break
+        p.wait_for_timeout(50)
+    chk('9d 🎤タップ=言い終わり: 沈黙(2.8秒)を待たずに、すぐ(1秒以内)送られる。送る本文は聞こえた言葉', len(box['reqs']) == 1 and box['reqs'][0]['messages'][-1]['content'] == 'I like rice' and box['ts'][0] - t_tap < 1.0, (len(box['reqs']), box['ts'][0] - t_tap if box['ts'] else None))
+    close(p)
+
+    # 9e: 認識のセッションが途中で切れても、自動で再開し、表示は初期化されない(「聞いてない」ように見えない)。🎤の脈打ちも途切れない
+    h, box = chat_ok(['Mombasa has lovely beaches. Did you swim there?'])
+    p = mk(br, h); enter(p); wait_free(p)
+    p.evaluate("()=>{window.__sr.length=0;window.__sr.push({k:'seq',steps:[{t:'I went to Mombasa',f:1,at:60}],end:150},{k:'seq',steps:[{t:'with my friend',f:1,at:100}],end:250},{k:'hang'})}")
+    accept(p, sil=0); p.evaluate("()=>{__T.FT.silenceMs=1500}")
+    p.evaluate("""()=>{window.__samp=[];setInterval(function(){var m=document.querySelector('.ftbox .row .btn'),hb=document.querySelector('.ftheard');if(m&&hb)window.__samp.push({c:m.className,h:hb.textContent,mode:window.getComputedStyle(m).animationName})},25)}""")
+    p.wait_for_function("()=>window.__srStarts>=8", timeout=15000)
+    p.wait_for_function("()=>(document.querySelector('.ftheard')||{}).textContent==='I went to Mombasa with my friend'", timeout=8000)
+    smp = p.evaluate("()=>window.__samp.slice()")
+    i0 = next(i for i, x in enumerate(smp) if x['h'] == 'I went to Mombasa')
+    i1 = next(i for i, x in enumerate(smp) if x['h'] == 'I went to Mombasa with my friend')
+    after = smp[i0:i1 + 1]   # 最初の言葉が出てから、全文が出るまで(再開をまたぐ間)
+    chk('9e1 セッションが2回切れても自動で再開した(認識の開始が増えた)。蓄積は続き、全文が heard 欄に出る', p.evaluate("()=>window.__srStarts") >= 8 and after[-1]['h'] == 'I went to Mombasa with my friend', p.evaluate("()=>window.__srStarts"))
+    chk('9e2 再開のたびに heard 欄が空・「…」に戻らない(最初の言葉が出てから、全文が出るまで、表示は途切れない)', all(x['h'] and x['h'] != '…' and x['h'].startswith('I went to Mombasa') for x in after), [x['h'] for x in after if not x['h'].startswith('I went')][:3])
+    chk('9e3 🎤の脈打ち(ftlisten・アニメーション ftpulse)が、再開をまたいで途切れない', all('ftlisten' in x['c'] and x['mode'] == 'ftpulse' for x in after), [x['c'] for x in after if 'ftlisten' not in x['c']][:2])
+    p.wait_for_timeout(2300)
+    chk('9e4 そのあと沈黙が続くと、全文が1回だけ送られる(再開で言葉がなくなったり重複したりしない)', len(box['reqs']) == 1 and box['reqs'][0]['messages'][-1]['content'] == 'I went to Mombasa with my friend', box['reqs'][:1])
+    close(p)
+
+    # 9f: 状態表示 — 聞き取り中は🎤が脈打つ。先生の考え中(/chat 待ち)は🎤の脈打ちが止まり、先生の吹き出しに「…」。先生が話す間も脈打たない。画面に日本語なし
+    h, box = chat_hang()
+    p = mk(br, h); enter(p); wait_free(p)
+    p.evaluate("()=>{window.__sr.length=0;window.__sr.push({k:'say',t:'I like tea'},{k:'hang'})}")
+    p.evaluate("()=>{window.__sayMs=900}")
+    accept(p); st = {}
+    p.wait_for_function("()=>document.querySelector('.ftbox')", timeout=10000)
+    st['say'] = p.evaluate("()=>document.querySelector('.ftbox .row .btn').className")   # 先生の最初の一言を話している最中
+    p.wait_for_function("()=>document.querySelector('.ftheard.live')&&document.querySelector('.ftbox .row .btn').classList.contains('ftlisten')", timeout=10000)
+    st['listen'] = p.evaluate("()=>({c:document.querySelector('.ftbox .row .btn').className,a:getComputedStyle(document.querySelector('.ftbox .row .btn')).animationName})")
+    p.wait_for_function("()=>window.__txt.length&&document.getElementById('msgText').textContent==='…'", timeout=10000); p.wait_for_timeout(200)
+    st['think'] = p.evaluate("()=>({c:document.querySelector('.ftbox .row .btn').className,m:document.getElementById('msgText').textContent,a:getComputedStyle(document.querySelector('.ftbox .row .btn')).animationName})")
+    chk('9f1 聞き取り中: 🎤が脈打つ(ftlisten・アニメーション ftpulse)。先生が話している最中は脈打たない', 'ftlisten' not in st['say'] and 'ftlisten' in st['listen']['c'] and st['listen']['a'] == 'ftpulse', st)
+    chk('9f2 先生の考え中(/chat 待ち): 先生の吹き出しに「…」が出て、🎤の脈打ちは止まる', st['think']['m'] == '…' and 'ftlisten' not in st['think']['c'] and st['think']['a'] != 'ftpulse', st['think'])
+    T = free_txt(p); allf = ' '.join((t['msg'] or '') + ' ' + t['panel'] + ' ' + t['heard'] for t in T)
+    chk('9f3 状態表示に日本語・数字・ラベルを出さない', not JP.search(allf) and not any(w in allf for w in FORBID), allf[-60:])
+    close(p)
+
+    # ================= (10) タスク079: fix(直した文)と言い直し =================
+    FIX = 'I went to Mombasa yesterday.'
+    REP = 'Mombasa has lovely beaches! Did you swim there?'
+    REP2 = 'That sounds like a good day. What did you eat?'
+    def fixrun(replies, srs, extra=''):
+        h, box = chat_ok(replies)
+        p = mk(br, h); enter(p); wait_free(p)
+        p.evaluate("(a)=>{window.__sr.length=0;a.forEach(function(x){window.__sr.push(x)})}", srs)
+        accept(p); return p, box
+    def idx(sp, s, start=0):
+        try: return sp.index(s, start)
+        except ValueError: return -1
+    # 10a: fix があると、会話を進めず、先生がお手本を読み上げ(音声＋文字)→本人が言い直す→先生が短く受ける→reply から会話が続く
+    p, box = fixrun([{'reply': REP, 'fix': FIX}, REP2],
+                    [{'k': 'say', 't': 'I go to Mombasa yesterday'}, {'k': 'say', 't': 'I went to Mombasa yesterday'}, {'k': 'say', 't': 'We ate fish and chips'}, {'k': 'hang'}])
+    p.wait_for_function("()=>document.querySelector('.ftfix')&&document.querySelector('.ftfix').textContent!==''", timeout=15000)
+    p.wait_for_timeout(200)
+    sp = spoken(p); T = free_txt(p)
+    fixtxt = p.evaluate("()=>document.querySelector('.ftfix').textContent")
+    chk('10a1 fix があると、本人の発言(.ftheard)の下に、直した文だけが出る(ラベル・日本語・数字・「間違い」の言葉なし)', fixtxt == FIX and p.evaluate("()=>document.querySelector('.ftheard').nextElementSibling.className") == 'ftfix' and not JP.search(fixtxt) and not re.search(r'mistake|wrong|error|score|point|correct', fixtxt, re.I), fixtxt)
+    chk('10a2 先生がまずお手本(直した文)を読み上げ、reply は先生が言い直しを聞いたあとまで言わない(この時点で reply は読まれていない・画面にもない)', FIX in sp and REP not in sp and not any((t['msg'] or '').startswith('Mombasa has') for t in T), sp[-2:])
+    p.wait_for_function("()=>window.__spoken.indexOf(%s)>=0" % json.dumps(REP), timeout=15000)
+    sp = spoken(p); i_fix = sp.index(FIX); i_rep = sp.index(REP); mid = sp[i_fix + 1:i_rep]
+    chk('10a3 言い直せたら、先生が短く受ける(That\'s it. などの一言)→ そのあと reply から会話が続く。順番: お手本 → 受け → reply', len(mid) == 1 and mid[0] in L['ack'], mid)
+    chk('10a4 言い直しの間は /chat を呼ばない(言い直し前は1回だけ)。reply のあとの本人の発言で2回目', len(box['reqs']) >= 1)
+    p.wait_for_function("()=>window.__spoken.indexOf(%s)>=0" % json.dumps(REP2), timeout=15000)
+    r2 = box['reqs'][1]['messages']
+    chk('10a5 履歴: お手本・言い直し・先生の受けの一言は入らない。本人の元の発言 → 先生の reply → 次の発言 の順', [m['role'] for m in r2] == ['assistant', 'user', 'assistant', 'user'] and r2[1]['content'] == 'I go to Mombasa yesterday' and r2[2]['content'] == REP and r2[3]['content'] == 'We ate fish and chips' and not any(FIX in m['content'] or m['content'] in L['ack'] for m in r2), r2)
+    chk('10a6 reply を言うときに、お手本の表示は消える(次の会話に残らない)', p.evaluate("()=>document.querySelector('.ftfix').textContent") == '')
+    allp = ' '.join((t['msg'] or '') + ' ' + t['panel'] + ' ' + t['heard'] for t in free_txt(p))
+    chk('10a7 画面に日本語・「間違い」「テスト」等の言葉・点数が出ない。マイク入力は /chat に言い直しを送っていない', not JP.search(allp) and not any(w in allp for w in FORBID) and not any('I went to Mombasa yesterday' == m['content'] for r in box['reqs'] for m in r['messages'] if m['role'] == 'user'), '')
+    close(p)
+
+    # 10b: 言い直しはゆるい一致でよい(完全一致を求めない)。判定の単体
+    M = lambda f, s: p0.evaluate("([f,s])=>__T.FT.match(f,s)", [f, s])
+    p0 = mk(br); p0.goto(base + '/tour/index.html'); p0.wait_for_timeout(1200)
+    cases = [(FIX, 'I went to Mombasa yesterday', True), (FIX, 'i went mombasa yesterday', True), (FIX, 'I went to Mombasa yesterdays', True), (FIX, 'I went to Mombassa yesterday', True),
+             (FIX, 'well I went to Mombasa yesterday', True), (FIX, 'I go to Mombasa yesterday', True), (FIX, 'I like pizza', False), (FIX, 'Mombasa', False), (FIX, '', False),
+             ('I like tea.', 'I like tea', True), ('I like tea.', 'I like coffee', False), ('She is my friend.', 'She is my friend very much and a lot of other things', False)]
+    res = [(f, s, M(f, s), e) for f, s, e in cases]
+    close(p0)
+    chk('10b ゆるい一致の判定: 大きく違わなければ通る(冠詞抜け・1文字の聞き違い・前置きは可)・まったく別の文・1語だけ・空は通らない', all(r[2] == r[3] for r in res), [r for r in res if r[2] != r[3]])
+
+    # 10c: 2回言い直しても合わなければ、止まらず、先生がもう一度お手本を言って会話を進める。1回目の失敗では「もう一度」の一言
+    p, box = fixrun([{'reply': REP, 'fix': FIX}, REP2],
+                    [{'k': 'say', 't': 'I go to Mombasa yesterday'}, {'k': 'say', 't': 'I like pizza'}, {'k': 'say', 't': 'banana banana'}, {'k': 'say', 't': 'We ate fish'}, {'k': 'hang'}])
+    p.wait_for_function("()=>window.__spoken.indexOf(%s)>=0" % json.dumps(REP), timeout=20000)
+    sp = spoken(p); i1 = sp.index(FIX); seq = sp[i1:sp.index(REP) + 1]
+    chk('10c 合わないまま2回: お手本 → (1回目の失敗)「もう一度」の一言 → (2回目の失敗)先生がもう一度お手本 → reply。そこで止まらず会話が進む', len(seq) == 4 and seq[1] in L['again'] and seq[2] == FIX and seq[3] == REP, seq)
+    p.wait_for_function("()=>window.__spoken.indexOf(%s)>=0" % json.dumps(REP2), timeout=15000)
+    chk('10c2 そのあと普通に往復が続く(次の発言が /chat に送られる・言い直しの失敗は履歴に入らない)', len(box['reqs']) == 2 and box['reqs'][1]['messages'][-1]['content'] == 'We ate fish' and not any('pizza' in m['content'] or 'banana' in m['content'] for m in box['reqs'][1]['messages']), box['reqs'][-1:])
+    close(p)
+
+    # 10d: 言い直しの最中に声が出ない → 2回目の無音で、止まらずお手本を言って進む(エラー・締めにしない)
+    p, box = fixrun([{'reply': REP, 'fix': FIX}, REP2], [{'k': 'say', 't': 'I go to Mombasa yesterday'}, {'k': 'silence'}, {'k': 'silence'}, {'k': 'hang'}])
+    p.wait_for_function("()=>window.__spoken.indexOf(%s)>=0" % json.dumps(REP), timeout=20000)
+    sp = spoken(p)
+    chk('10d 言い直しで声が出ないまま: 「もう一度」→ もう一度お手本 → reply で進む。会話は締めない(場面は続く)', sp[sp.index(FIX) + 1] in L['again'] and sp[sp.index(FIX) + 2] == FIX and view(p) == 'scene' and not errs(p), sp[-5:])
+    close(p)
+
+    # 10e: 後方互換 — fix なし(旧形式の {reply} だけ・fix が空・日本語・本人の発言と同じ・短すぎ)は、今までどおりすぐ会話が進む(お手本・言い直しなし)
+    for label, rb in [('旧形式(fix の項目なし)', {'reply': REP}), ('fix が空文字', {'reply': REP, 'fix': ''}), ('fix が日本語', {'reply': REP, 'fix': 'こんにちは。'}),
+                      ('fix が本人の発言と同じ', {'reply': REP, 'fix': 'I went to Mombasa'}), ('fix が短すぎる', {'reply': REP, 'fix': 'Hi'}), ('fix が文字でない', {'reply': REP, 'fix': 7})]:
+        p, box = fixrun([rb], [{'k': 'say', 't': 'I went to Mombasa'}, {'k': 'hang'}])
+        p.wait_for_function("()=>window.__spoken.indexOf(%s)>=0" % json.dumps(REP), timeout=15000)
+        sp = spoken(p); shown = p.evaluate("()=>document.querySelector('.ftfix').textContent")
+        chk('10e %s: お手本・言い直しは出さず、reply がすぐ読まれる(エラーなし・fix の表示なし)' % label, shown == '' and sp[-1] == REP and len(box['reqs']) == 1 and not errs(p), (shown, sp[-2:]))
+        close(p)
+
+    # 10f: 時間切れ・Bye ボタンは、言い直しの最中でも穏やかに終わる
+    p, box = fixrun([{'reply': REP, 'fix': FIX}], [{'k': 'say', 't': 'I go to Mombasa yesterday'}, {'k': 'hang'}])
+    p.wait_for_function("()=>document.querySelector('.ftfix').textContent!==''&&window.__srStarts>=7", timeout=15000)
+    p.evaluate("()=>{window.__now=300000}"); wait_map(p, 30000); sp = spoken(p)
+    chk('10f 言い直しの聞き取り中に時間切れ: 先生の締めの台詞のあと場面が終わる(エラーなし・reply は言わない)', any(s in L['time'] for s in sp) and REP not in sp and not errs(p), sp[-2:])
+    close(p)
+
+    # 10g: 先生の台詞の同じ文が連続しない(聞き返し・無音の質問は毎回ちがう)。各8種以上
+    p = mk(br, chat_ok(['x'])[0]); enter(p); wait_free(p)
+    p.evaluate("()=>{window.__sr.length=0;window.__sr.push({k:'hang'},{k:'hang'})}"); accept(p)
+    p.wait_for_function("()=>document.querySelector('.ftheard.live')", timeout=10000)
+    out = {}
+    for key in ('reask', 'nudge'):
+        seqs = p.evaluate("(k)=>{var a=[];for(var i=0;i<200;i++)a.push(__T.FT.fresh(__T.FT.lines[k]));return a}", key)
+        out[key] = (len(L[key]), all(seqs[i] != seqs[i + 1] for i in range(len(seqs) - 1)), all(len(set(seqs[i:i + 4])) == 4 for i in range(len(seqs) - 3)), set(seqs) == set(L[key]))
+    chk('10g 聞き返し(reask)・無音の質問(nudge)は各8種以上。200回選んでも、連続で同じ文が出ず・直近4つは全部ちがい・8種すべてが使われる', all(v[0] >= 8 and v[1] and v[2] and v[3] for v in out.values()), out)
+    close(p)
+
+    # ================= (11) タスク079: 先生の声(男性・低い pitch) =================
+    p = mk(br); p.goto(base + '/tour/index.html'); p.wait_for_timeout(1200)
+    pit = p.evaluate("()=>{var o={};Object.keys(__T.SP).forEach(function(k){if(__T.SP[k]&&typeof __T.SP[k].pitch==='number')o[k]=__T.SP[k].pitch});return o}")
+    others = {k: v for k, v in pit.items() if k != 'eikai_teacher'}
+    close(p)
+    chk('11a 先生(eikai_teacher)の pitch は %s。ほかの全キャラの最低(%s=%s)より0.1以上低い。ルル(1.35)・キングと聞き分けられ、既存の pitch と衝突しない' % (pit.get('eikai_teacher'), min(others, key=others.get), min(others.values())), pit.get('eikai_teacher') == 0.6 and min(abs(v - pit['eikai_teacher']) for v in others.values()) >= 0.1 and pit['eikai_teacher'] < min(others.values()) - 0.09, pit.get('eikai_teacher'))
+    h, box = chat_ok(['Good!'])
+    p = mk(br, h); enter(p); wait_free(p)
+    p.wait_for_timeout(2600)
+    pitches = p.evaluate("()=>window.__pitch.slice()")
+    dl = p.evaluate("()=>__T.DLG.nbo_eikaiwa1"); npc = [l['n'] for l in dl['lines'] if l.get('n')]
+    sc = [x[1] for x in pitches if x[0] in npc]
+    p.evaluate("()=>{window.__sr.length=0;window.__sr.push({k:'hang'})}"); accept(p)
+    p.wait_for_function("()=>window.__spoken.indexOf(%s)>=0" % json.dumps(L['open']), timeout=10000)
+    ft = [x[1] for x in p.evaluate("()=>window.__pitch.slice()") if x[0] in (L['invite'], L['open'])]
+    chk('11b 台本パート(068の5往復の先生の台詞)も自由会話(誘い・最初の一言)も、同じ pitch 0.6 で読まれる(片方だけ変わる不整合なし)', len(sc) >= 5 and set(round(x, 3) for x in sc) == {0.6} and set(round(x, 3) for x in ft) == {0.6}, (sc, ft))
     close(p)
 
     # ================= (8) 既存の場面・台本パートが変わっていない =================
