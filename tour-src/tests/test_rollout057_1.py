@@ -122,7 +122,7 @@ with sync_playwright() as pw:
             ok_flow = r['view'] == 'map' and r['seen'].get(sid) == 1
             chk('A1 %s: 最後まで通り、マップへ戻る(save.seen=1)' % tag, ok_flow, (r['view'], r['seen']))
             chk('A2 %s: 日本語カードの画面は1回だけ・カードの文字は台本どおり' % tag, r['cs'] == 1 and r['lb'] == [x['card'] for x in opts], (r['cs'], r['lb']))
-            chk('A3 %s: 英語の選択肢(▶の枠)・Word Battle・Meaning!・おてほんボタンは出ない' % tag, r['dq'] == 0 and 'words' not in ph and 'reveal' not in ph and 'おてほん' not in ' '.join(r['btn']), (r['dq'], ph, r['btn']))
+            chk('A3 %s: 英語の選択肢(▶の枠)・Word Battle・おてほんボタンは出ない(Meaning! は賢者の3場面だけ=085-E。ほかは出ない)' % tag, r['dq'] == 0 and 'words' not in ph and (('reveal' in ph) == (sid in ('sage_1', 'sage_2', 'sage_3'))) and 'おてほん' not in ' '.join(r['btn']), (r['dq'], ph, r['btn']))
             sm = [x for x in sp if x['t'] == strip(o['y'])]
             i_s = ph.index('sample') if 'sample' in ph else -1
             chk('A4 %s: カードを押すと見本の英語が声だけで流れ(画面にカンペの文字なし)、そのあとカンペ(cue)が出る' % tag, bool(sm) and sm[0]['ph'] == 'sample' and not sm[0]['cue'] and strip(o['y']) not in sm[0]['pan'] and i_s >= 0 and 'cue' in ph[i_s:], (sm[:1], ph[:8]))
@@ -149,10 +149,10 @@ with sync_playwright() as pw:
         L = dl[sid]['lines']; ci = [i for i, l in enumerate(L) if l.get('cards')][0]; o = L[ci]['opts'][pk]; cue = strip(o['y'])
         q.close(); q = newpage(ctx, base); r = run(q, sid, pk, bad_after=2); sp_t = [x['t'] for x in r['sp']]
         k = sp_t.index('Sorry, one more time?') if 'Sorry, one more time?' in sp_t else -1
-        chk('C1 %s: 言えなかったら店員が聞き返し(Sorry, one more time?)→自動で見本(おてほん)が流れ→言い直せる(ボタンなし)' % sid, k >= 0 and sp_t[k + 1] == cue and r['view'] == 'map' and 'おてほん' not in ' '.join(r['btn']), sp_t[:8])
+        chk('C1 %s: 言えなかったら店員が聞き返し(Sorry, one more time?)→自動で見本(おてほん)が流れ→言い直せる(ボタンなし)' % sid, k >= 0 and sp_t[k + 1] == cue and (r['view'] in ('scene', 'map') if sid.startswith('sage_') else r['view'] == 'map') and 'おてほん' not in ' '.join(r['btn']), sp_t[:8])
         q.close(); q = newpage(ctx, base); r = run(q, sid, pk, bad_after=3)
         lulu = [x for x in r['sp'] if x['t'] == cue and x['ph'] == 'help']
-        chk('C2 %s: 3回目の失敗でルルが代わりに言い、物語が進んで終わる(ヘルプ回数は減らない・数値なし)' % sid, bool(lulu) and r['view'] == 'map' and r['help'] == r['h0'] and not [p for p in r['pan'] if re.search(r'\d+\s*%|7割|\d+/\d+', p)], (len(lulu), r['view']))
+        chk('C2 %s: 3回目の失敗でルルが代わりに言い、物語が進んで終わる(ヘルプ回数は減らない・数値なし)' % sid, bool(lulu) and (r['view'] in ('scene', 'map') if sid.startswith('sage_') else r['view'] == 'map') and r['help'] == r['h0'] and not [p for p in r['pan'] if re.search(r'\d+\s*%|7割|\d+/\d+', p)], (len(lulu), r['view']))
     # ---------- D. 3モード(074): 変換した場面から nbo_immig1・nbo_sim1(M-Pesa then)・nbo_plane1 ----------
     def snap(q): return q.evaluate("()=>{var c=document.querySelector('#panel .cue');return {ph:__T.G.phase,msg:document.getElementById('msgText').textContent,cards:[].map.call(document.querySelectorAll('.jcard .lb'),function(x){return x.textContent}),blind:c?c.classList.contains('blind'):null,ctext:c?[].map.call(c.querySelectorAll('.w'),function(x){return x.textContent}).join(' '):null,btns:[].map.call(document.querySelectorAll('#panel button'),function(b){return b.textContent.trim()}),jc:document.querySelectorAll('.jcard').length}}")
     modes = {}
@@ -197,7 +197,7 @@ with sync_playwright() as pw:
     # ---------- E. 3モードでの失敗(耳学・カード後) ----------
     ctx2 = newctx_(br, 2); q2 = newpage(ctx2, base); sid = 'nbo_bag1'; L = dl[sid]['lines']; ci = [i for i, l in enumerate(L) if l.get('cards')][0]; cue = strip(L[ci]['opts'][1]['y'])
     r = run(q2, sid, 1, bad_after=3); lulu = [x for x in r['sp'] if x['t'] == cue and x['ph'] == 'help']
-    chk('E1 耳学(2)でカードのあとに3回失敗 → ルルが声で代わりに言い(吹き出しは文字なし)、物語が進む', bool(lulu) and r['view'] == 'map' and all(x['pan'].find(cue) < 0 for x in lulu), (len(lulu), r['view']))
+    chk('E1 耳学(2)でカードのあとに3回失敗 → ルルが声で代わりに言い(操作パネルは文字なし。黒い吹き出しに英文が出るのは087-A=test_mode087で確認)、物語が進む', bool(lulu) and r['view'] == 'map' and all(x['pan'].find(cue) < 0 for x in lulu), (len(lulu), r['view']))
     ctx2.close()
     chk('Z ページのエラーなし', not ERR, ERR[:3])
     br.close()

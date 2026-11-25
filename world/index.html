@@ -135,6 +135,11 @@ button{font:inherit;color:inherit;cursor:pointer}
 .mopt small{display:block;font-size:12px;color:#9aa6c4;margin-top:1px}
 .mopt[aria-checked="true"] .cur{visibility:visible}
 .mopt[aria-checked="true"] b{color:#ffc72c}
+.mopt[hidden]{display:none}
+.mhbtn{display:block;margin:4px 0 2px 32px;background:none;border:2px solid #5b6690;border-radius:4px;color:#c8d0ea;font:inherit;font-size:13px;font-weight:700;padding:5px 12px;min-height:34px}
+.mhbtn:focus-visible{outline:2px solid #ffc72c;outline-offset:2px}
+.mhelp{margin:6px 0 2px;padding:8px 10px;border:2px solid #2a3358;border-radius:4px;background:#0f1630}
+.mhelp dl{margin:0}.mhelp dt{font-size:14px;font-weight:800;color:#ffc72c;margin-top:6px}.mhelp dt:first-child{margin-top:0}.mhelp dd{margin:1px 0 0;font-size:13px;line-height:1.45;color:#e6ebff}
 .mopt:focus-visible{outline:2px solid #ffc72c;outline-offset:-2px}
 .ask{font-size:16px;line-height:1.7;padding:6px 6px 4px;word-break:keep-all;overflow-wrap:anywhere}
 .row2{display:flex;gap:6px}
@@ -181,6 +186,17 @@ button{font:inherit;color:inherit;cursor:pointer}
     <button type="button" class="mopt" role="radio" data-m="0"><span class="cur">▶</span><span><b>カンペモード</b><small>文字のカンペを見て言う</small></span></button>
     <button type="button" class="mopt" role="radio" data-m="1"><span class="cur">▶</span><span><b>耳学＆カンペモード</b><small>相手は音だけ。自分の答えはカンペあり</small></span></button>
     <button type="button" class="mopt" role="radio" data-m="2"><span class="cur">▶</span><span><b>耳学モード</b><small>全部、音だけ。耳と口だけで旅する</small></span></button>
+    <button type="button" class="mopt" role="radio" data-m="3"><span class="cur">▶</span><span><b>耳学（サポートカンペ付き）</b><small>耳学モード。2回つまずいたら、3回目だけ文字</small></span></button>
+    <button type="button" class="mhbtn" id="mHelpBtn" aria-expanded="false" aria-controls="mHelp">モードの説明</button>
+    <div class="mhelp" id="mHelp" hidden>
+     <dl>
+      <dt>カンペモード</dt><dd>相手の言葉も、自分の言葉も、文字を見ながら言えます。</dd>
+      <dt>耳学＆カンペモード</dt><dd>相手の言葉は音だけ。自分の言葉は文字を見て言えます。</dd>
+      <dt>耳学モード</dt><dd>ぜんぶ音だけ。文字は出ません。ルルが代わりに言うときだけ、文字が出ます。</dd>
+      <dt>耳学（サポートカンペ付き）</dt><dd>基本は耳学モード。2回つまずいたら、3回目だけ文字が出ます。</dd>
+     </dl>
+     <button type="button" class="mhbtn" id="mHelpClose">とじる</button>
+    </div>
    </div>
   </div>
   <div class="cmdwin" id="cmdNarr" hidden>
@@ -1489,14 +1505,17 @@ function tone(f,t0,d,type,vol){var a=AC;if(!a)return;var o=a.createOscillator(),
 function jingle(){if(!ac())return;[[523.25,0],[659.25,.12],[783.99,.24],[1046.5,.36]].forEach(function(n){tone(n[0],n[1],.22,'square',.04)});[523.25,783.99,1046.5].forEach(function(f){tone(f,.36,.8,'triangle',.045)})}
 function blip(){if(!ac())return;tone(880,0,.08,'square',.035);tone(1318.5,.06,.1,'square',.035)}
 
-/* ---------- 3つのモード(タスク074): 保存は既存の kd_prefs_v1 の中の数値キー mode だけ(0=カンペ 1=耳学＆カンペ 2=耳学)。他のキーは触らない ---------- */
+/* ---------- 3つのモード(タスク074): 保存は既存の kd_prefs_v1 の中の数値キー mode だけ(0=カンペ 1=耳学＆カンペ 2=耳学 3=耳学(サポートカンペ付き。タスク087))。他のキーは触らない ---------- */
 var PREFKEY='kd_prefs_v1';
-function modeLoad(){try{var p=JSON.parse(localStorage.getItem(PREFKEY)||'null');var m=(p&&typeof p==='object')?p.mode:0;return (m===1||m===2)?m:0}catch(e){return 0}}
+function modeLoad(){try{var p=JSON.parse(localStorage.getItem(PREFKEY)||'null');var m=(p&&typeof p==='object')?p.mode:0;return (m===1||m===2||m===3)?m:0}catch(e){return 0}}
 function modeSave(m){var p=null;try{p=JSON.parse(localStorage.getItem(PREFKEY)||'null')}catch(e){}
  if(!p||typeof p!=='object'||Array.isArray(p))p={};p.mode=m;try{localStorage.setItem(PREFKEY,JSON.stringify(p))}catch(e){}}
 function modeShow(){var m=modeLoad();[].forEach.call(document.querySelectorAll('#mSel .mopt'),function(b){b.setAttribute('aria-checked',+b.getAttribute('data-m')===m?'true':'false')})}
 [].forEach.call(document.querySelectorAll('#mSel .mopt'),function(b){b.addEventListener('click',function(){blip();modeSave(+b.getAttribute('data-m'));modeShow()})});
 modeShow();
+(function(){var hb=document.getElementById('mHelpBtn'),hp=document.getElementById('mHelp'),hc=document.getElementById('mHelpClose');if(!hb||!hp)return;
+ function set(o){hp.hidden=!o;hb.hidden=!!o;hb.setAttribute('aria-expanded',o?'true':'false');[].forEach.call(document.querySelectorAll('#mSel .mopt'),function(x){x.hidden=!!o})}   /* 説明を開いているあいだは4つの選択肢を隠す(小さい画面で、はじめから・つづきからが画面の外に出ないように) */
+ hb.addEventListener('click',function(){blip();set(true)});hc.addEventListener('click',function(){blip();set(false);hb.focus()})})();
 
 /* ---------- オープニングの語り(タスク074): ゲームの説明は文字で出さず、日本語の音声ナレーションで語る ----------
    文案はキングの下書きが正本(句読点の調整のみ可)。文案はこの定数1か所、再生は playOpeningNarration() 1つ。
