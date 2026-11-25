@@ -36,10 +36,10 @@ def hooked_head(route):   # 変更前(HEAD)の tour/index.html。既存の場面
 
 ART = os.path.join(ROOT, 'tour/assets/art')
 CAMP = os.path.join(ART, 'camp')
-SPEC_WORDS = {'ill': ['pill', 'drill', 'hill', 'spill', 'gill', 'grill'], 'thr': ['three', 'throne', 'throb', 'thread', 'throat', 'throw']}
-SPEC_SENT = {'ill': 'Dan spilled ketchup on the grill.', 'thr': 'Pat threw three balls to his dog.'}
+SPEC_WORDS = {'ill': ['skill', 'drill', 'grill', 'chill', 'mill', 'pill'], 'thr': ['three', 'thrill', 'thriller', 'throw', 'through', 'three-point']}
+SPEC_SENT = {'ill': 'Drills build grill skills.', 'thr': 'The throw went through for three points!'}
 SPEC_MOUTH = {'ill': 'v3-i-160x128.png', 'thr': 'v3-th-160x128.png'}
-SPEC_CARD = {'ill': 'card-ill-v2.png', 'thr': 'card-thr-v2.png'}
+SPEC_CARD = {'ill': 'card-ill-v3.png', 'thr': 'card-thr-v3.png'}
 REPEAT = 'Repeat after me!'
 FORBID_JA = ['復習', 'テスト', '測定', '練習', '点数', 'スコア', '失敗', '回数']
 FORBID_EN = [r'\breview\b', r'\btest\b', r'\bpractice\b', r'\blesson\b', r'\bquiz\b', r'\bscore\b', r'\bpoints?\b', r'\bstudy\b', r'\bexam\b']
@@ -61,11 +61,12 @@ chk('1d ルルの素材の指定は1か所: camp.js・camp.css にファイル�
 
 # ---------- (2) 単語リスト ----------
 cards = camp_data.CARDS
+chk('2a2 ハイライト枠の座標が v3 の実測値(タスク080): CELL_X=(64,556)・CELL_Y=(380,708,1036)・CELL_W,H=460,300・SENT_BOX=(40,1400,1000,468)', (camp_data.CELL_X, camp_data.CELL_Y, (camp_data.CELL_W, camp_data.CELL_H), camp_data.SENT_BOX) == ((64, 556), (380, 708, 1036), (460, 300), (40, 1400, 1000, 468)))
 chk('2a camp_data のカードの単語・短文・口パーツ・画像が指示書どおり(順番もカードの並び)',
     [c['id'] for c in cards] == ['ill', 'thr'] and all(c['words'] == SPEC_WORDS[c['id']] and c['sentence'] == SPEC_SENT[c['id']] and c['mouth'] == SPEC_MOUTH[c['id']] and c['img'] == SPEC_CARD[c['id']] for c in cards))
 # 指示書zipが手元にあるとき(GASSHUKU_ZIP_DIR)だけ、素材とのバイト一致も照合する
 zp = os.environ.get('GASSHUKU_ZIP_DIR', '')
-if zp and os.path.exists(os.path.join(zp, 'card-ill-v2.png')):
+if zp and os.path.exists(os.path.join(zp, 'card-ill-v3.png')):
     same = all(open(os.path.join(zp, SPEC_CARD[k]), 'rb').read() == open(os.path.join(CAMP, SPEC_CARD[k]), 'rb').read() for k in SPEC_CARD)
     chk('2b2 カード画像が同梱の素材とバイト単位で同じ', same)
 
@@ -188,6 +189,8 @@ with sync_playwright() as pw:
     chk('5h クリア音は最後に1回(ドラクエ風)・本編の記録(save.seen)に camp_demo1 は入らない', st['jin'].count('clear') == 1 and not st['seen'], (st['jin'], st['seen']))
     # (4) 画面の文字
     alltxt = '\n'.join(st['texts'])
+    _toks = set(re.findall(r"[A-Za-z'-]+", ' '.join(list(SPEC_SENT.values()) + [w for ws in SPEC_WORDS.values() for w in ws])))
+    for _t in sorted(_toks, key=len, reverse=True): alltxt = re.sub(r'(?<![A-Za-z-])' + re.escape(_t) + r'(?![A-Za-z-])', '', alltxt)   # タスク080: 例文 'three points!'・単語 'three-point' の point は点数ではない(指示書の例文・単語)。カードの英語そのものは検査から外す
     ja = [w for w in FORBID_JA if w in alltxt]
     en = [w for w in FORBID_EN if re.search(w, alltxt, re.I)]
     nums = re.findall(r'\d+\s*/\s*\d+|\d+\s*%|\d+\s*(?:点|回|語)', alltxt)

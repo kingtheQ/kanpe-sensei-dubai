@@ -16,22 +16,22 @@ LULU_HIP = 146                    # 腰の高さ(上端から。これより上�
 
 CARD_DIR = 'camp/'                # tour/assets/art/camp/
 CARDS = [
-    dict(id='ill', img='card-ill-v2.png', mouth='v3-i-160x128.png', snd='-ill /ɪl/',
-         words=['pill', 'drill', 'hill', 'spill', 'gill', 'grill'],          # カードの並び(左上→右上→次の段…)
-         sentence='Dan spilled ketchup on the grill.',
+    dict(id='ill', img='card-ill-v3.png', mouth='v3-i-160x128.png', snd='-ill /ɪl/',
+         words=['skill', 'drill', 'grill', 'chill', 'mill', 'pill'],          # カードの並び(左上→右上→次の段…)
+         sentence='Drills build grill skills.',
          intro="Welcome to camp! I'm Macho Lulu. Let's make our mouths strong!"),
-    dict(id='thr', img='card-thr-v2.png', mouth='v3-th-160x128.png', snd='thr /θr/',
-         words=['three', 'throne', 'throb', 'thread', 'throat', 'throw'],
-         sentence='Pat threw three balls to his dog.',
+    dict(id='thr', img='card-thr-v3.png', mouth='v3-th-160x128.png', snd='thr /θr/',
+         words=['three', 'thrill', 'thriller', 'throw', 'through', 'three-point'],
+         sentence='The throw went through for three points!',
          intro="Next card! Stick your tongue out a little."),
 ]
 OUTRO = "Great work! Your mouth is getting strong. See you at camp!"
 REPEAT = "Repeat after me!"
 READY = "Ready?"
 
-# カード画像(1080×1920)の上の、単語のマスと短文の位置(カードの絵から実測。ハイライトの枠に使う)。左上x,y,幅,高さ
-CELL_X = (50, 553); CELL_Y = (464, 814, 1164); CELL_W, CELL_H = 478, 308
-SENT_BOX = (40, 1530, 1000, 330)
+# カード画像v3(1080×1920)の上の、単語のマスと短文の位置(タスク080: 生成スクリプトから実測。ハイライトの枠に使う)。左上x,y,幅,高さ
+CELL_X = (64, 556); CELL_Y = (380, 708, 1036); CELL_W, CELL_H = 460, 300
+SENT_BOX = (40, 1400, 1000, 468)
 
 
 def payload():
