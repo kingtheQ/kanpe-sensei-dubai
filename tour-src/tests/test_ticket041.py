@@ -40,7 +40,7 @@ with sync_playwright() as pw:
     ctx = br.new_context(viewport={'width': 390, 'height': 780}); ctx.add_init_script(INIT)
     p = ctx.new_page(); p.route('**/tour/index.html', hooked); p.goto(base + '/tour/index.html'); p.wait_for_timeout(2000)
     # (1) 全場面
-    vids = ['win_decl', 'win_c1', 'win_c2', 'win_c5', 'win_c7', 'win_c8', 'win_route', 'win_price_star', 'win_price_ow5', 'win_price_ow4',
+    vids = ['win_decl', 'win_c1', 'win_c2', 'win_c5', 'win_c7', 'win_c8', 'win_route', 'win_rules', 'win_count', 'win_price_star', 'win_price_ow5', 'win_price_ow4',
             'win_rb_star', 'win_rb_ow5', 'win_rb_ow4', 'win_name', 'ticket_star', 'ticket_ow']
     for v in vids:
         start(p, 0, v); p.wait_for_timeout(900)

@@ -1,7 +1,8 @@
 /* ===== 世界一周編: 窓口フロー(タスク012) =====
-   宣言 → 聞き取り5本 → 線を引く → おすすめ → 値段 → 読み上げ確認 → 名前の確認 → 搭乗券(既存 ticket_star / ticket_ow)
+   宣言 → 聞き取り5本 → 線を引く → おすすめ(いつもスター) → スターの決まり → ルートを数える → 値段 → 読み上げ確認 → 名前の確認 → 搭乗券(ticket_star だけ)
+   タスク088: 発券はスターに統一(1周目)。ow4/ow5・ticket_ow のデータは2周目用に残し、この流れからは行かない。
    設計の正本: docs/pm/deliverables/003・004・011。build.py が tour/index.html に差しこむ。 */
-var WSTEP=['win_decl','win_c1','win_c2','win_c5','win_c7','win_c8','win_route','win_rec','win_price','win_rb','win_name','win_pass'];
+var WSTEP=['win_decl','win_c1','win_c2','win_c5','win_c7','win_c8','win_route','win_rec','win_rules','win_count','win_price','win_rb','win_name','win_pass'];
 var ORD=['','first','second','third','fourth','fifth','sixth','seventh','eighth','ninth','tenth','eleventh','twelfth','thirteenth','fourteenth','fifteenth','sixteenth','seventeenth','eighteenth','nineteenth','twentieth','twenty first','twenty second','twenty third','twenty fourth','twenty fifth','twenty sixth','twenty seventh','twenty eighth','twenty ninth','thirtieth','thirty first'];
 var WSTOP={a:1,an:1,the:1,to:1,of:1,'in':1,on:1,at:1,and:1,or:1,'for':1,'with':1,from:1,as:1,is:1,am:1,are:1,be:1,it:1,that:1,'this':1,my:1,your:1,our:1,so:1};
 /* カンペの強調(＊): 冠詞・前置詞などのほかを太字にする(data 側の star() と同じ規則) */
@@ -18,14 +19,14 @@ function winStart(){
  if(!W.m||typeof W.m!=='object')W.m={};if(typeof W.step!=='number'||W.step<0||W.step>=WSTEP.length)W.step=0;
  storeSave();winRun()}
 function winVid(k){
- var W=save.win,tk=W.pick==='ow'?('ow'+(W.cont===4?4:5)):'star';
- if(k==='win_price')return 'win_price_'+tk;if(k==='win_rb')return 'win_rb_'+tk;if(k==='win_pass')return 'ticket_'+(W.pick==='ow'?'ow':'star');return k}
+ /* 088: どの分岐でも券はスター。save.win.pick が ow でも(古いセーブ・点検モード)、ここで無視する */
+ if(k==='win_price')return 'win_price_star';if(k==='win_rb')return 'win_rb_star';if(k==='win_pass')return 'ticket_star';return k}
 function winRun(){
  var W=save.win,k=WSTEP[W.step];if(!k){showMap();return}
  if(k==='win_decl'&&voiceNeedConsent()){winConsent();return}   /* 宣言の直前に、声を送ってよいかを一度だけ聞く(013 3-3) */
  if(k==='win_rec')winRecBuild();if(k==='win_decl')winDeclPrep();
  var vid=winVid(k),pl=PBY.ticket;
- if(k==='win_pass'){save.ticket=W.pick==='ow'?'ow':'star';W.done=1;storeSave();startVid(pl,vid,'hub');return}
+ if(k==='win_pass'){save.ticket='star';W.pick='star';W.done=1;storeSave();startVid(pl,vid,'hub');return}
  startVid(pl,vid,'win')}
 function winAfter(S){var W=save.win;W.step++;storeSave();winRun()}
 
@@ -64,18 +65,18 @@ function winMark(vid,o){
  var W=save.win;if(!W)return;if(!W.m)W.m={};delete W.m[vid];
  if(o.mt)W.m[vid]={t:o.mt,why:o.why||''};if(o.cont)W.cont=o.cont;if(o.tk)W.pick=o.tk;storeSave()}
 
-/* おすすめ: 印の多い券と理由。同数ならキングが▶で決める。印がなければスター(003 2-3) */
+/* おすすめ(088): 印の多い券の理由は聞いたうえで、最後はいつもスター。選ぶ分岐はなく、係員が「スターが合います」と寄せる */
 function winRecBuild(){
  var W=save.win,m=W.m||{},cnt={star:0,ow:0},why={star:[],ow:[]};
  Object.keys(m).forEach(function(k){var x=m[k];if(cnt[x.t]!=null){cnt[x.t]++;if(x.why)why[x.t].push(x.why)}});
- var NM={star:'Star Alliance',ow:'oneworld Explorer'},tie=cnt.star===cnt.ow&&cnt.star>0,none=cnt.star===0&&cnt.ow===0,lead=cnt.ow>cnt.star?'ow':'star',oth=lead==='ow'?'star':'ow',intro,ans;
- if(none){intro="You are still deciding, so I recommend Star Alliance. The rules are simple, and it has the most routes.";ans="Thank you. That makes sense."}
- else if(tie){intro="Your dreams point to two tickets. "+why.ow.slice(0,1).concat(why.star.slice(0,1)).join(' ')+" Both are good.";ans="Two tickets. I see."}
- else{intro="Let me look at your answers. "+why[lead].slice(0,2).join(' ')+" So I recommend "+NM[lead]+".";ans="Thank you. That makes sense."}
- var order=tie||none?['star','ow']:[lead,oth];
- function op(k){return {k:k,y:wst("I'll take "+NM[k]+", please."),jp:'',tk:k}}
+ var intro;
+ if(cnt.star===0&&cnt.ow===0)intro="You are still deciding, so I recommend Star Alliance. The rules are simple, and it has the most routes.";
+ else if(cnt.star>cnt.ow)intro="Let me look at your answers. "+why.star.slice(0,2).join(' ')+" So I recommend Star Alliance.";
+ else intro="Let me look at your answers. "+why.ow.slice(0,1).join(' ')+" oneworld is a good ticket for another trip. But your route goes one way, around the world, and home. Star Alliance fits your route best, and its rules are simple.";
  DLG.win_rec={who:'世界一周の窓口係',story:1,bg:'tdesk',sp:'desk_rtw',hero:'blue',lulu:'plain',nogold:1,inter:[],intro:'The Round the World desk.',win:1,auto:1,words:[],
-  lines:[{n:intro,jp:''},{y:wst(ans),jp:''},{n:"Which ticket will you take?",jp:'どちらの券にしますか。'},{y:'',jp:'',opts:order.map(op)}]}}
+  lines:[{n:intro,jp:''},{y:wst("Thank you. That makes sense."),jp:'ありがとうございます。なるほど。'},
+   {n:"Shall I prepare the Star Alliance ticket for you?",jp:'スターアライアンスの券を用意しましょうか。'},
+   {y:wst("Yes, please. I'll take Star Alliance."),jp:'はい、お願いします。スターアライアンスにします。'}]}}
 
 /* ---- 線を引く地図(窓口の壁): 西まわりに 羽田→ナイロビ→ロヴァニエミ→クスコ→ホノルル→羽田。もどる線は止まる ---- */
 var WM=/*WMAP*/[];

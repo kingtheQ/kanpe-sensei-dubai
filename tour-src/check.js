@@ -32,7 +32,7 @@ function startPA(from){
 function startWin(key){
  var i=WSTEP.indexOf(key);if(i<0)return;close();
  if(MODE!=='sage'&&MODES.sage){setMode('sage')}G.at='ticket';showMap();
- save.win={step:i,m:{},cont:5,pick:save.ticket==='ow'?'ow':'star'};storeSave();winRun()}
+ save.win={step:i,m:{},cont:5,pick:'star'};storeSave();winRun()}
 function openPlace(pl){close();var mk=modeOf(pl.id);if(mk&&MODE!==mk)setMode(mk);G.at=pl.id;showMap();enterPlace(pl.id)}
 function vids(p){var a=[],add=function(v){if(v&&a.indexOf(v)<0&&DLG[v])a.push(v)};(p.v||[]).forEach(add);if(p.tkv)Object.keys(p.tkv).forEach(function(k){p.tkv[k].forEach(add)});if(p.menu)p.menu.forEach(function(m){add(m[1])});return a}
 function sbtn(t,fn,on){var b=el('button',on?'on':'',t);b.type='button';b.addEventListener('click',fn);return b}

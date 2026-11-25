@@ -73,8 +73,8 @@ SAGE = [
  place('sage', '達人賢者', 'sage', 30, 28, '🧙', ['達人賢者', '旅のはじまりを聞く'], ['sage_1', 'sage_2', 'sage_3'],
        hub=True, hubBg='sage', hubHero='blue', hubEn='Welcome, travelers. What would you like to ask?',
        hubMsg='達人賢者の広間。', menu=[['Why go around the world?', 'sage_1'], ['Which ticket should we choose?', 'sage_2'], ['Tips for travel English', 'sage_3']]),
- place('ticket', 'チケットをえらぶ', 'tdesk', 70, 72, '🎫', ['航空券の窓口', '世界一周の窓口で相談して、券をえらぶ'], ['ticket_star', 'ticket_ow'],
-       hubMap=1, win=1)]   # 窓口フロー(winStart)へ。券は おすすめのあと ▶ で えらぶ
+ place('ticket', 'チケットをえらぶ', 'tdesk', 70, 72, '🎫', ['航空券の窓口', '世界一周の窓口で相談して、券をえらぶ'], ['ticket_star'],
+       hubMap=1, win=1)]   # 窓口フロー(winStart)へ。088: 券はスターに統一(ticket_ow のデータは2周目用に残し、ここからは行かない)
 ARR = [
  place('immig', '入国審査', 'info', 22, 16, '🛂', ['入国審査(Immigration)', 'eTA・目的・滞在日数・ホテル'], ['nbo_immig1', 'nbo_immig2']),
  place('bag', '手荷物受け取り', 'hall', 70, 36, '🧳', ['バゲージクレーム', 'スーツケース・レジ袋'], ['nbo_bag1', 'nbo_bag2']),

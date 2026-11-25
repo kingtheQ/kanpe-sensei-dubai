@@ -36,6 +36,34 @@ def OT(n, njp, opts, **kw):
     t.update(kw)
     return t
 
+
+# ---- スターの決まり(公式・確認日2026-11-25。タスク088) と 1周目のルート ----
+# 窓口で係員が一緒に数える。数字は下のルートから計算し、決まりを超えるルートならビルドを止める。
+RULE = dict(stops=15, moves=16, same_country=3, days_min=10, days_max=365, trip_days=30)
+NUMW = {3: 'three', 5: 'five', 10: 'ten', 13: 'thirteen', 15: 'fifteen', 16: 'sixteen', 30: 'thirty'}
+# 寄港(24時間以上の滞在)。出発地(羽田)は数えない。[(都市, 国)]
+ROUTE_STOPS = [('Nairobi', 'Kenya'), ('Doha', 'Qatar'), ('Rovaniemi', 'Finland'), ('Athens', 'Greece'), ('Rome', 'Italy'),
+               ('Zurich', 'Switzerland'), ('Frankfurt', 'Germany'), ('London', 'United Kingdom'), ('Lisbon', 'Portugal'),
+               ('New York', 'United States'), ('Honolulu', 'United States'), ('Sydney', 'Australia'),
+               ('Singapore', 'Singapore'), ('Bangkok', 'Thailand'), ('Guam', 'United States')]
+JPN = {'Nairobi': 'ナイロビ', 'Doha': 'ドーハ', 'Rovaniemi': 'ロヴァニエミ', 'Athens': 'アテネ', 'Rome': 'ローマ', 'Zurich': 'チューリッヒ',
+       'Frankfurt': 'フランクフルト', 'London': 'ロンドン', 'Lisbon': 'リスボン', 'New York': 'ニューヨーク', 'Honolulu': 'ホノルル',
+       'Sydney': 'シドニー', 'Singapore': 'シンガポール', 'Bangkok': 'バンコク', 'Guam': 'グアム'}
+ROUTE_RAIL = [('Rome', 'Zurich'), ('Zurich', 'Frankfurt'), ('Frankfurt', 'London')]   # 陸路(鉄道)の区間
+def route_facts():
+    from collections import Counter
+    city = ['Haneda'] + [c for c, _ in ROUTE_STOPS] + ['Haneda']
+    moves = len(city) - 1
+    rail = len(ROUTE_RAIL)
+    for a, b in ROUTE_RAIL:
+        assert city.index(a) + 1 == city.index(b), 'rail leg not on route: %s-%s' % (a, b)
+    cc = Counter(k for _, k in ROUTE_STOPS)
+    f = dict(stops=len(ROUTE_STOPS), moves=moves, rail=rail, flights=moves - rail, max_same=max(cc.values()),
+             us=[c for c, k in ROUTE_STOPS if k == 'United States'])
+    assert 2 <= f['stops'] <= RULE['stops'] and f['moves'] <= RULE['moves'] and f['max_same'] <= RULE['same_country'], f
+    assert RULE['days_min'] <= RULE['trip_days'] <= RULE['days_max']
+    return f
+
 # ---- 宣言文（011 の本文。70語・9文。まとまった1つの文として言う） ----
 DECL = ("This is my promise, Lulu. We will travel around the world together, and have fun every day. "
         "My body is healthy, my mind is calm. I eat good food, sleep well, and never push too hard. "
@@ -184,7 +212,52 @@ def add(D):
           "I see. The line only goes one way.", "なるほど。線は一方向にしか進めないのですね。", route=6),
     ], bg='rtmap')
 
-    # ---------- 値段（3通り） ----------
+
+    # ---------- スターの決まり(088)。券のおすすめのあと・値段の前 ----------
+    F = route_facts(); N = NUMW
+    scene(D, 'win_rules', [
+        T("Star Alliance has five simple rules. Rule one: you go the same way, and you come home to the country where you started.",
+          "スターアライアンスの決まりは5つ。1つ目：同じ向きに進んで、出発した国に帰ってきます。",
+          "The same way, and home to Japan.", "同じ向きに進んで、日本に帰ります。"),
+        T("Rule two: you can stop in %s places at most. A stop is a stay of twenty-four hours or more." % N[RULE['stops']],
+          "2つ目：寄港は%d回まで。寄港とは、24時間以上の滞在です。" % RULE['stops'],
+          "%s stops at most." % N[RULE['stops']].capitalize(), "寄港は%d回までですね。" % RULE['stops']),
+        T("Rule three: you can make %s moves at most. A flight is one move. A train ride is one move too." % N[RULE['moves']],
+          "3つ目：移動は%d回まで。飛行機で1回。鉄道に乗るのも1回です。" % RULE['moves'],
+          "%s moves. Trains count too." % N[RULE['moves']].capitalize(), "移動は%d回まで。鉄道も数えるのですね。" % RULE['moves']),
+        T("Rule four: you can visit the same country %s times at most." % N[RULE['same_country']],
+          "4つ目：同じ国には%d回まで寄れます。" % RULE['same_country'],
+          "%s times for one country." % N[RULE['same_country']].capitalize(), "1つの国に%d回まで。" % RULE['same_country']),
+        T("Rule five: the trip is ten days at least, and one year at most. Your trip is thirty days.",
+          "5つ目：旅の長さは10日から1年まで。あなたの旅は30日です。",
+          "Thirty days. That is fine.", "30日。大丈夫ですね。"),
+    ], intro='The Round the World desk. Star Alliance rules.')
+
+    # ---------- ルートを一緒に数える(088)。数字は route_facts() から ----------
+    stops = [c for c, _ in ROUTE_STOPS]
+    scene(D, 'win_count', [
+        T("Let's check your route together. First, the stops. %s." % ', '.join(stops[0:5]),
+          "あなたのルートをいっしょに確かめましょう。まず寄港地。" + '、'.join(JPN[c] for c in stops[0:5]) + "。",
+          "That is five stops.", "5か所です。"),
+        T("%s." % ', '.join(stops[5:10]), '、'.join(JPN[c] for c in stops[5:10]) + "。",
+          "Five more. Ten stops.", "あと5か所。10か所です。"),
+        T("%s." % ', '.join(stops[10:15]), '、'.join(JPN[c] for c in stops[10:15]) + "。",
+          "Five more. %s stops!" % N[F['stops']].capitalize(), "あと5か所。%dか所！" % F['stops']),
+        T("%s. That is the limit, and you are right on it. Now the moves. You have %s flights, and %s train rides: Rome to Zurich, Zurich to Frankfurt, and Frankfurt to London."
+          % (N[F['stops']].capitalize(), N[F['flights']], N[F['rail']]),
+          "%d回。ちょうど上限ですね。次は移動。飛行機が%d回、鉄道が%d回：ローマからチューリッヒ、チューリッヒからフランクフルト、フランクフルトからロンドン。" % (F['stops'], F['flights'], F['rail']),
+          "%s flights and %s trains. %s moves." % (N[F['flights']].capitalize(), N[F['rail']], N[F['moves']].capitalize()),
+          "飛行機%d回と鉄道%d回。移動は%d回です。" % (F['flights'], F['rail'], F['moves'])),
+        T("%s. Right on the limit again. Now the countries. You visit the United States %s times: %s, %s, and %s."
+          % (N[F['moves']].capitalize(), N[F['max_same']], F['us'][0], F['us'][1], F['us'][2]),
+          "%d回。これもちょうど上限。次は国。アメリカには%d回寄ります。%s、%s、%s。" % (F['moves'], F['max_same'], JPN[F['us'][0]], JPN[F['us'][1]], JPN[F['us'][2]]),
+          "%s times. That is the limit, too." % N[F['max_same']].capitalize(), "%d回。それも上限ですね。" % F['max_same']),
+        T("Last, your trip goes west, one way, and home to Japan. It is thirty days. Everything fits the rules. It is a good route!",
+          "最後に。旅は西へ、一方向に進んで、日本に帰ります。期間は30日。すべて決まりに合っています。いいルートです。",
+          "Everything fits. Thank you!", "すべて合っています。ありがとう。"),
+    ], intro='The Round the World desk. Your route.')
+
+    # ---------- 値段（3通り。発券で使うのは star だけ。ow は2周目用に残す） ----------
     for key in ('star', 'ow5', 'ow4'):
         words, num, _ = PRICE[key]
         scene(D, 'win_price_' + key, [
