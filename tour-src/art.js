@@ -251,6 +251,21 @@ ART.athshop={bg:'athens-street-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back'
 ART.athhotel={bg:'athens-hotel-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:640,by:752},king:{n:'hall-king-back',x:776,by:752},npcS:{a_front:{n:'w-front-man-suit-1',x:1010,by:752,sw:70}}}};
 ART.athck={bg:'athens-departure-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},clerk:{x:775,top:473,clip:595},npcS:{a_ck:'hexit-officer'},bubble:{x:775,y:433}}};
 ART.athdep={bg:'athens-departure-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{a_dep:{n:'o-front-officer-blue',x:1160,by:890,sw:70},a_gate:{n:'w-front-pilot-fa',x:1160,by:890,sw:80}}}};
+/* ローマ(タスク094 到着4・街3・出発3): 人なしの背景(1536×960・v2)。ふたりは後ろ姿(足もと y=884。ルルが左 x=700・キングが右 x=836。アテネと同じ大きさ)。相手の人物は既存の素材の流用。画像が読めないときは build.py の BGM(コード描画)にもどる。
+   到着(rome-arrival-v2): 左に手荷物の窓口(カウンター x40〜418・上面 y=524。係員はカウンターの向こう x=229・y=524 で切る)、中央〜右に「Nastro · Belt 12」のベルト(y568〜)。客引き・案内係・乗り場の係・運転手・窓口の人は、ふたりの右の床(y>713)に立つ。
+   街(rome-street-v2): 左がジェラテリア(戸口 x265〜378・y785〜858。店員は戸口の前 x=300・足もと y=860)・右がトラットリアの前の石畳(おみやげ屋の人 x=1180・足もと y=940)。ホテル(rome-hotel-v2)の3人は木の床(y≥876)に立つ(足もと y=900)。
+   出発(rome-departure-v2): 切符の窓口「Biglietti · TICKETS」(x678〜1025・窓の中の暗い面 y622〜745)に駅員が立つ(y=745 で切る・x=765)。発車標(x96〜1154・y52〜420)の右半分「Partenze」の中身は背景に描いていないので、別素材 rome-departure-board-strip.png(420×240・2コマ・1秒ごと)を (714,142) に重ねる(fx strip。行き先だけ・時刻は「--:--」・ホーム番号は出ない=テルミニでは発車の少し前に出る)。
+   車内の場面(rom_dep_train1)は、右のホーム(x≥1180・y≥690)に停まった電車のそばで、ふたりが乗客・車掌と話す。 */
+ART.rombag={bg:'rome-arrival-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},clerk:{x:229,top:402,clip:530},npcS:{m_bag:'hexit-officer'},bubble:{x:229,y:370}}};
+ART.rominfo={bg:'rome-arrival-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},people:[{id:'tout',n:'w-front-safari',x:1040,by:890,sw:90},{id:'info',n:'o-front-officer-blue',x:1250,by:880,sw:70}],npcS:{m_tout:{p:'tout'},m_info:{p:'info'}}}};
+ART.romtaxi={bg:'rome-arrival-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},people:[{id:'rank',n:'o-front-officer-blue',x:1040,by:890,sw:70},{id:'drv',n:'w-front-man-suit-1',x:1250,by:880,sw:70}],npcS:{m_rank:{p:'rank'},m_driver:{p:'drv'}}}};
+ART.romtrain={bg:'rome-arrival-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{m_rail:{n:'o-front-officer-green-1',x:1100,by:890,sw:70}}}};
+ART.romcafe={bg:'rome-street-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{m_gelato:{n:'w-front-man-dashiki',x:300,by:860,sw:90}}}};
+ART.romshop={bg:'rome-street-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{m_shop:{n:'t-woman-hijab-front',x:1180,by:940,sw:79}}}};
+ART.romhotel={bg:'rome-hotel-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:640,by:900},king:{n:'hall-king-back',x:776,by:900},npcS:{m_front:{n:'w-front-man-suit-1',x:1010,by:900,sw:70}}}};
+ART.romdtick={bg:'rome-departure-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},clerk:{x:765,top:620,clip:745},npcS:{m_tk:'hexit-officer'},bubble:{x:765,y:588}}};
+ART.romdplat={bg:'rome-departure-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},fx:[{k:'strip',img:'rome-departure-board-strip.png',x:714,y:142,fw:420,fh:240,n:2,every:1}],npcS:{m_board:{n:'o-front-officer-blue',x:1010,by:900,sw:70}}}};
+ART.romdtrain={bg:'rome-departure-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:1020,by:900},king:{n:'hall-king-back',x:1150,by:900},people:[{id:'pax',n:'t-backpacker-front',x:1290,by:905,sw:79},{id:'cond',n:'w-front-pilot-fa',x:1410,by:905,sw:80}],npcS:{m_pax:{p:'pax'},m_cond:{p:'cond'}}}};
 /* ロヴァニエミの到着ロビー(タスク065): 人なしの背景(1536×960。天窓の光が床に描く北極圏ラインが主役)に、オーロラの別素材(4コマ。1コマ1376×172)を左上(80,128)=窓帯の空の部分に重ねる。
    ふたりは後ろ姿で足もと y=884(ルルが左 x=700・キングが右 x=836。ラインの手前。配置の正本は同梱の rovaniemi-arrivals-preview.png)。
    話し相手(rvn_lobby1/2)は、ふたりの右(トロリーとウェルカム看板のあいだの床)に立つ。キャンバスの上から2番目の重ね(背景→オーロラ→人)。 */

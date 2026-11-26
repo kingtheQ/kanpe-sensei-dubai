@@ -128,6 +128,20 @@
 - 実機（マイク・音・見え方）は未確認。`pages.yml` が `tour/assets/` を公開に入れていない件は未確認のまま報告のみ。
 - 参考にしたURL：なし（素材は同梱パックのみ）。
 
+## 今回（11/26）タスク094でやったこと（ローマ全10場面）
+- **ローマ10場面**（`tour-src/rom_data.py`、`data.py` で `rom_data.add(D)`）。すべて新形式（flow2・conv・選択は場面に1回・カード式。失敗時は074の統一ルール）。生成物は `tour/rome/index.html`（`build.py` の MAIN_ROM）。
+  - 到着(4): rom_bag1 荷物が出てこない／rom_info1 客引きを断る／rom_taxi1 定額55ユーロの確認／rom_train1 レオナルド・エクスプレスの切符。背景 rome-arrival-v2。**入国審査の場面は無い（シェンゲン圏内）**。
+  - 街(3): rom_cafe1 ジェラテリア／rom_shop1 おみやげ屋／rom_hotel1 ホテル。背景 rome-street-v2・rome-hotel-v2。
+  - 出発(3): rom_dep_ticket1 窓口／rom_dep_platform1 発車標とホーム／rom_dep_train1 車内。背景 rome-departure-v2。**鉄道。チューリッヒは直通ではなくミラノで1回乗り換え**（台詞で「no direct train」「change in Milan」）。
+  - 発車標の中身は背景に描かれていないので、別素材 `rome-departure-board-strip.png`(2コマ、ミラノ行きのホーム欄が点滅)を `prep_rome_board.py` で作り、rom_dep_platform1 にだけ重ねる(art.js の fx strip)。時刻は「--:--」、ホームは「--」。チューリッヒの行は出さない。
+  - 数字は指示にあるものだけ：forty euros(客引き)・fifty-five euros(定額)・thirty minutes(空港電車)・about three hours(ローマ〜ミラノ、下調べで確認)・twelve(ベルトの番号、背景の看板どおり)。運賃・最終便・ホーム番号・商品の値段は入れていない。
+  - 場所：rombag/rominfo/romtaxi/romtrain・romcafe/romshop/romhotel・romdtick/romdplat/romdtrain。アテネの次の都市として世界マップ(AP/NEI)・旅の骨組みの GROUPS/PLACEGRP/MODEGRP/HOUR/THEME・IMPL(FCO)に追加。チェックモード `tour/rome/?check=1` から10場面すべて選べる。アテネのチェック画面に「ローマへ」のリンク。
+  - 人物の絵は既存の仮の絵を流用(話者ごとに声のピッチを変え、`cx` で切り替え)。
+- テスト：`tour-src/tests/test_rome094.py` を追加(10場面を最後まで通す・声の切替・発車標の画素・数字の許可表・世界マップ)。`test_rollout057_3.py` の S0 をローマ10場面ぶん(92)に直した。
+- **未決（PMへ）**：旅の骨組みの `LEGS`/`ROWS` にローマの便がまだない(アテネと同じ扱い)。ローマ空港の手荷物窓口の細部、ホーム番号が出る正確なタイミングは未確認。
+- **参考にしたURL**：`docs/sources.md` の「タスク094」に記載。
+- **ルール**：既存場面は変えていない。画面に「復習/テスト/測定」を出さない。未確認の数字は台詞に入れない。マイク・実機の見え方・実機の音は未確認。
+
 ## 今回（11/26）タスク090・091でやったこと（アテネ到着4＋街3＋出発3、マイク画像の差し替え）
 - **マイク**：`MICBIG_IMG` を同梱の `tour/assets/art/mic-large-v1.png` に差し替え（`window.js`）。表示のタイミング(`.on`)と箱の大きさ(84×119)は変更なし。正方形の絵は `object-fit:contain`(下そろえ)で収めた(`window.css`)。画像が読めないときは従来のコード描画(`declMicPix`)に戻る。
 - **アテネ10場面**（`tour-src/ath_data.py`、`data.py` の最後で `ath_data.add(D)`）。すべて新形式（flow2・conv・選択は場面に1回・カード式）。生成物は `tour/athens/index.html`（`build.py` の MAIN_ATH）。
