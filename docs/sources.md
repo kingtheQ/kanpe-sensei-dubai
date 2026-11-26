@@ -131,3 +131,12 @@
 - みやげ物(レーマー広場まわり): https://visitfrankfurt.travel/en/services/souvenirs
 - アップルワイン(Apfelwein)とベンベル(Bembel): https://www.glorious-food-glossary.com/cms/glossary/34-glossary-a/16483-apfelweinkrug.html
 - 運賃・商品の値段・時刻・ホーム番号は一次情報で確かめていないので、台詞と発車標の絵には入れていない。
+
+## タスク094（ローマ、2026-11-26確認）
+- ローマ・テルミニ駅の案内(ホーム番号は発車の少し前に発車標に出る。乗り換え・予約の注意): https://www.seat61.com/stations/rome-termini.htm ／ https://www.greatrail.com/us/expert-advice-inspiration/2019/november/navigating-termini-station/ (ホーム番号は発車の10〜15分前、別資料では20〜30分前と割れる)
+- ローマ→チューリッヒに直通は無く、ミラノで乗り換え(PMの下調べ rome-prep.md が参照): https://www.thetrainline.com/en-us/train-times/rome-to-zurich ／ https://www.rome2rio.com/s/Rome/Z%C3%BCrich-HB
+- 高速列車(Frecciarossa)は座席指定が必須、ローマ〜ミラノはおよそ3時間(複数の鉄道案内で一致。分単位は資料により違うため台詞は「about three hours」)。
+- 到着ホールの手荷物窓口(荷物が出ないときは空港を出る前に申し出る): https://www.ita-airways.com/en_it/fly-ita/airports/rome-fiumicino-airport/lost-and-found.html (到着エリアの手荷物窓口へ、空港を出る前に) ※窓口の場所の細部は未確認。
+- 定額タクシー55ユーロ・レオナルド・エクスプレスの所要約30分・客引きの40ユーロはPMの指示書による(一次情報では未確認)。運賃・最終便の時刻・ホーム番号・商品の値段は台詞に出していない。
+- 実機(マイク・音・見え方)は未確認。ホームの番号が出る正確なタイミングは資料により分数が違うため台詞に入れていない。
+

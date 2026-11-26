@@ -53,7 +53,8 @@ cnt_flow2 = sorted(k for k, v in dl.items() if v.get('flow2'))
 
 FRA10 = ['fra_arr1','fra_bakery1','fra_tram1','fra_info1','fra_cafe1','fra_shop1','fra_hotel1','fra_dep_board1','fra_dep_ticket1','fra_dep_train1']   # タスク097(フランクフルト)
 ATH10 = ['ath_cafe1','ath_checkin1','ath_depimmig1','ath_gate1','ath_hotel1','ath_immig1','ath_immig2','ath_shop1','ath_taxi1','ath_transit1']   # タスク090・091(アテネ・main で変換済み)
-chk('S0 flow2 の場面は nbo_java1 + 第1弾28 + 第2弾11 + 第3弾32 + アテネ10 + フランクフルト10 = 92(ロヴァニエミ・イベント・窓口には付いていない)', cnt_flow2 == sorted(SCN + FIRST + SECOND + ['nbo_java1'] + ATH10 + FRA10), len(cnt_flow2))
+ROM10 = ['rom_bag1','rom_info1','rom_taxi1','rom_train1','rom_cafe1','rom_shop1','rom_hotel1','rom_dep_ticket1','rom_dep_platform1','rom_dep_train1']   # タスク094(ローマ・新形式で作成)
+chk('S0 flow2 の場面は nbo_java1 + 第1弾28 + 第2弾11 + 第3弾32 + アテネ10 + ローマ10 + フランクフルト10 = 102(ロヴァニエミ・イベント・窓口には付いていない)', cnt_flow2 == sorted(SCN + FIRST + SECOND + ['nbo_java1'] + ATH10 + ROM10 + FRA10), len(cnt_flow2))
 for sid in SCN:
     d_ = dl[sid]; L = d_['lines']; cards = [i for i, l in enumerate(L) if l.get('cards')]
     opts = L[cards[0]]['opts'] if cards else []

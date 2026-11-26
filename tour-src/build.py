@@ -195,6 +195,23 @@ ADEP = [
  place('agate', '搭乗口', 'hall', 28, 78, '🛫', ['搭乗口', '時刻と搭乗口の変更を確かめる'], ['ath_gate1'], seq=1)]
 ATH_IDS = [i for p in AARR + ACITY + ADEP for i in p['v']]
 
+# ローマ(タスク094 到着4・街3・出発3)。到着は4か所(入国審査なし=シェンゲン圏内)、街は3か所、出発は3か所(鉄道。順に開く=seq)。
+# 背景はどれも実画(art.js の romXXX。到着=rome-arrival / 街=rome-street・rome-hotel / 出発=rome-departure。発車標の中身は別素材)。
+# ホテル・店の名前は指示書に無いので出さない(PM確認の点)。運賃・時刻・ホーム番号・商品の値段は台詞にも説明にも出さない。
+MARR = [
+ place('mbag', '手荷物の窓口', 'hall', 24, 16, '🧳', ['バゲージクレーム', 'ベルトの番号・荷物が出てこないとき'], ['rom_bag1']),
+ place('minfo', '到着ロビー', 'info', 72, 36, '🙅', ['到着ロビー', '客引きを断って、案内所へ'], ['rom_info1']),
+ place('mtaxi', 'タクシー乗り場', 'hall', 28, 58, '🚕', ['正規のタクシー乗り場', '定額かどうかを確かめて乗る'], ['rom_taxi1']),
+ place('mtrain', '空港駅の窓口', 'info', 72, 80, '🚆', ['空港駅の切符売り場', 'レオナルド・エクスプレスの切符'], ['rom_train1'])]
+MCITY = [
+ place('mcafe', 'ジェラテリア', 'cafe', 24, 18, '🍦', ['ジェラテリア', 'コーンかカップか・2つの味'], ['rom_cafe1']),
+ place('mshop', 'おみやげ屋', 'souk', 72, 46, '🛍️', ['おみやげ屋', '値段と大きさを聞く'], ['rom_shop1']),
+ place('mhotel', 'ホテル', 'hotel', 28, 76, '🏨', ['ホテル', 'チェックインと朝食'], ['rom_hotel1'])]
+MDEP = [
+ place('mdtick', '切符の窓口', 'info', 24, 16, '🎫', ['テルミニ駅の切符の窓口', 'チューリッヒ行き・ミラノで乗り換え'], ['rom_dep_ticket1'], seq=1),
+ place('mdplat', '発車標とホーム', 'hall', 72, 46, '📟', ['発車標とホーム', '発車標の見方・ホームの番号'], ['rom_dep_platform1'], seq=1),
+ place('mdtrain', '車内', 'hall', 28, 78, '🚄', ['ミラノ行きの電車の中', '席を探す・荷物・車掌'], ['rom_dep_train1'], seq=1)]
+ROM_IDS = [i for p in MARR + MCITY + MDEP for i in p['v']]
 # フランクフルト(タスク097 到着4場面＋街3場面＋出発3場面)。鉄道の旅(到着=チューリッヒからのICE・出発=ブリュッセル乗りかえでロンドンへ)。入国審査の場面は作らない。
 # 背景は実画4枚(art.js の frafarr ほか)。到着=frankfurt-arrival-v1(ベーカリー・案内所・トラム乗り場・案内係。出発の発車標の場面も同じ背景) / 街=frankfurt-street-v1・frankfurt-hotel-v1 / 出発=frankfurt-departure-v1。
 # ホテル・店の名前は出さない。値段・正確な発車時刻・ホーム番号・トラムの路線番号は台詞にも説明にも出さない。
@@ -681,6 +698,56 @@ MODES={arr:{p:PLACES_AARR,b:'🛬 到着',h:'アテネに到着<small>アテネ�
  city:{p:PLACES_ACITY,b:'🏛 街',h:'アテネの街<small>タベルナ・おみやげ屋・ホテル</small>',snd:'ath'},
  dep:{p:PLACES_ADEP,b:'🛫 出発',h:'アテネから出発<small>チェックインから搭乗口まで</small>',snd:'ath'}};
 worldAt('athens');
+"""
+
+# ---------- ローマ(タスク094)の話者・背景・ページの枠 ----------
+# 話者: 陽気で声が大きく、身ぶりが大きい。急いでいても頼めば世話を焼いてくれる(PM指示)。ピッチはほかの空港の係員とずらす。絵は art.js の romXXX(既存の人物素材の流用)
+SPM = r"""
+SP.m_bag={pitch:1,m:[[trav({hair:'cap'}),P(5,{o:'#2f6a4a',p:'#2a2a33',h:'#241a14'})]]};
+SP.m_tout={pitch:.84,m:[[trav({hair:'curly'}),P(3,{o:'#c9701a',p:'#2a2a33',h:'#241a14'})]]};
+SP.m_info={pitch:1.12,m:[[trav({hair:'long'}),P(4,{o:'#1f5a8a',p:'#2a2a33',h:'#5a3a24'})]]};
+SP.m_rank={pitch:.9,m:[[trav({hair:'cap'}),P(5,{o:'#2b3a5a',p:'#2b2b33',h:'#241a14'})]]};
+SP.m_driver={pitch:.96,m:[[trav({}),P(5,{o:'#e8e4d8',p:'#14141a',h:'#3b2a1f'})]]};
+SP.m_rail={pitch:1.1,m:[[trav({hair:'long'}),P(4,{o:'#2f6a4a',p:'#2a2a33',h:'#a07a4a'})]]};
+SP.m_gelato={pitch:1.05,m:[[trav({}),P(1,{o:'#f4f0e6',p:'#2a2a33',h:'#241a14'})]]};
+SP.m_shop={pitch:1.14,m:[[trav({hair:'curly'}),P(2,{o:'#a02a2a',p:'#2a2a33',h:'#5a3a24'})]]};
+SP.m_front={pitch:1.08,m:[[trav({hair:'long'}),P(5,{o:'#5c1a2a',p:'#2a2a33',h:'#c9a45a'})]]};
+SP.m_tk={pitch:.92,m:[[trav({hair:'cap'}),P(4,{o:'#c8182a',p:'#2a2a33',h:'#241a14'})]]};
+SP.m_board={pitch:1.18,m:[[trav({hair:'long'}),P(4,{o:'#2b3a5a',p:'#2b2b33',h:'#241a14'})]]};
+SP.m_pax={pitch:.98,m:[[trav({}),P(2,{o:'#3a5a8a',p:'#2a2a33',h:'#14141a',pack:1})]]};
+SP.m_cond={pitch:.88,m:[[trav({hair:'cap'}),P(5,{o:'#8a1538',p:'#2a2a33',h:'#241a14'})]]};
+"""
+# 背景のコード描画は、実画(art.js)が読めないときの保険だけ(色の面と場所の名前)
+BGM = r"""
+function mFlat(top,floor,txt){R(top,0,0,VW,98);R(floor,0,98,VW,52);T(txt,160,56,9,'#7a1a2a')}
+BGS.mbag=function(){mFlat('#ddd8c8','#bbb8b0','BAGGAGE')};
+BGS.minfo=function(){mFlat('#ddd8c8','#bbb8b0','ARRIVI')};
+BGS.mtaxi=function(){mFlat('#ddd8c8','#bbb8b0','TAXI')};
+BGS.mtrain=function(){mFlat('#ddd8c8','#bbb8b0','TRENO')};
+BGS.mcafe=function(){mFlat('#bfe0f4','#9a948a','GELATERIA')};
+BGS.mshop=function(){mFlat('#bfe0f4','#9a948a','SOUVENIR')};
+BGS.mhotel=function(){mFlat('#f0e8d6','#a87b50','HOTEL')};
+BGS.mdtick=function(){mFlat('#e8dfc8','#80786f','BIGLIETTI')};
+BGS.mdplat=function(){mFlat('#e8dfc8','#80786f','PARTENZE')};
+BGS.mdtrain=function(){mFlat('#e8dfc8','#80786f','TRENO')};
+"""
+MAIN_ROM = r"""
+/* ===== 世界一周編: ローマ(到着4場面・街3場面・出発3場面=タスク094。入国審査なし・出発は鉄道) ===== */
+var TOURDLG=%(dlg)s;
+for(var _k in TOURDLG)DLG[_k]=TOURDLG[_k];
+%(sp)s
+%(bg)s
+%(world)s
+%(voice)s
+%(ev)s
+var PLACES_MARR=%(arr)s,PLACES_MCITY=%(city)s,PLACES_MDEP=%(dep)s;
+PLACES_AIR=PLACES_MARR;   /* 世界マップのクリアの印: 到着の場所を全部(各1つ以上)あそんだら */
+PLACES_MARR.concat(PLACES_MCITY,PLACES_MDEP).forEach(function(p){PBY[p.id]=p});
+var TOUR_IDS=%(ids)s;
+MODES={arr:{p:PLACES_MARR,b:'🛬 到着',h:'ローマに到着<small>フィウミチーノ空港</small>',snd:'rom'},
+ city:{p:PLACES_MCITY,b:'🏛 街',h:'ローマの街<small>ジェラテリア・おみやげ屋・ホテル</small>',snd:'rom'},
+ dep:{p:PLACES_MDEP,b:'🚄 出発',h:'ローマから出発<small>テルミニ駅から電車へ</small>',snd:'rom'}};
+worldAt('rome');
 """
 
 # ---------- フランクフルト(タスク097)の話者・背景・ページの枠 ----------
@@ -1194,7 +1261,7 @@ print('missing IPA (all):', missing)
 # ---------- アテネ(tour/athens/index.html。タスク090 到着・タスク091 街と出発) ----------
 da = sub('ath_')
 main = MAIN_ATH % dict(dlg=J(da), sp=SPA, bg=BGA, world=WORLDJS, voice=VOICEJS, ev=EVJS, arr=J(AARR), city=J(ACITY), dep=J(ADEP), ids=J(ATH_IDS))
-main += _rd('check.js').replace('__OTHER_HREF__', '../rovaniemi/?check=1').replace('__OTHER_LABEL__', 'ロヴァニエミ').replace('/*CHKX*/', "var a3=el('a','b','フランクフルトへ(点検モードのまま)');a3.href='../frankfurt/?check=1';r2.appendChild(a3);")
+main += _rd('check.js').replace('__OTHER_HREF__', '../rovaniemi/?check=1').replace('__OTHER_LABEL__', 'ロヴァニエミ').replace('/*CHKX*/', "var a3=el('a','b','ローマへ(点検モードのまま)');a3.href='../rome/?check=1';r2.appendChild(a3);")
 main += art_js('../assets/art/', "function artIdFor(S){var v=String(S&&S.vid||'');if(v==='ath_immig1')return'athimm1';if(v==='ath_immig2')return'athimm2';if(v==='ath_taxi1')return'athtaxi';if(v==='ath_transit1')return'athmetro';if(v==='ath_cafe1')return'athcafe';if(v==='ath_shop1')return'athshop';if(v==='ath_hotel1')return'athhotel';if(v==='ath_checkin1')return'athck';if(v==='ath_depimmig1'||v==='ath_gate1')return'athdep';return null}")   # 実画: 到着(athens-arrival)・街(athens-street / athens-hotel)・出発(athens-departure)。読めないときは BGA(コード描画)にもどる
 o = ev_patches(common(src, 'Europe/Athens'))
 for _a, _b in SHARED: o = rep(o, _a, _b)
@@ -1226,10 +1293,46 @@ open(os.path.join(ROOT, 'tour', 'athens', 'index.html'), 'w', encoding='utf-8').
 print('athens built', len(o), 'bytes; dialogues', len(da), 'words', sum(len(v['words']) for v in da.values()))
 print('missing IPA (athens):', missing)
 
+# ---------- ローマ(tour/rome/index.html。タスク094 到着4・街3・出発3) ----------
+dm = sub('rom_')
+main = MAIN_ROM % dict(dlg=J(dm), sp=SPM, bg=BGM, world=WORLDJS, voice=VOICEJS, ev=EVJS, arr=J(MARR), city=J(MCITY), dep=J(MDEP), ids=J(ROM_IDS))
+main += _rd('check.js').replace('__OTHER_HREF__', '../athens/?check=1').replace('__OTHER_LABEL__', 'アテネ').replace('/*CHKX*/', "var a3=el('a','b','フランクフルトへ(点検モードのまま)');a3.href='../frankfurt/?check=1';r2.appendChild(a3);")
+_RID = {'rom_bag1': 'rombag', 'rom_info1': 'rominfo', 'rom_taxi1': 'romtaxi', 'rom_train1': 'romtrain', 'rom_cafe1': 'romcafe', 'rom_shop1': 'romshop',
+        'rom_hotel1': 'romhotel', 'rom_dep_ticket1': 'romdtick', 'rom_dep_platform1': 'romdplat', 'rom_dep_train1': 'romdtrain'}
+main += art_js('../assets/art/', "function artIdFor(S){var v=String(S&&S.vid||''),m=" + json.dumps(_RID) + ";return Object.prototype.hasOwnProperty.call(m,v)?m[v]:null}")   # 実画: 到着(rome-arrival)・街(rome-street / rome-hotel)・出発(rome-departure＋発車標の別素材)。読めないときは BGM(コード描画)にもどる
+o = ev_patches(common(src, 'Europe/Rome'))
+for _a, _b in SHARED: o = rep(o, _a, _b)
+o = rep(o, " if(!G.camp)addHelp(T)}", " if(!G.camp&&!G.scene.d.nohelp)addHelp(T)}")
+o = rep(o, '<title>カンペ先生 ドバイ編</title>', '<title>空港えいご物語 世界一周編 ローマ</title>')
+o = rep(o, SNOTE_OLD, SNOTE_NEW)
+o = rep(o, ".cue .heard.live{color:#8a7b55}", ".cue .heard.live{color:#8a7b55}\n" + VOICECSS)
+o = rep(o, "'../world/?map=1'", "'../../world/?map=1'", 2)
+o = rep(o, "worldMark('dubai')", "worldMark('rome')")   # 到着の場所を全部あそんだら印(PLACES_AIR=PLACES_MARR)
+o = rep(o, "Snd.go(MODE==='city'?'city':'map')", "Snd.go(MODES[MODE].snd)")
+# 客引き→案内係・乗り場の係→運転手・乗客→車掌のように、番ごとに話す人を替える(T.cx。タスク089 の宣言と同じ部品)
+o = rep(o, "S.turns.forEach(function(T,i){T.ctx=ctxAt(d,i);T.pitch=", "S.turns.forEach(function(T,i){T.ctx=ctxAt(d,i);if(T.cx)T.ctx=Object.assign({},T.ctx,T.cx);T.pitch=")
+# 最後の場面(車内)が終わったら世界マップへ(次の寄港地チューリッヒへ向かう土台)。チェックモードは同じページにもどる
+o = rep(o, "if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}showMap()}",
+        "if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}if(S.vid==='rom_dep_train1'){worldMark('rome');Snd.go(null);location.href=window.__CHK?'./?check=1':'../../world/?map=1';return}showMap();/*ROM_END*/}")
+# 音: 基本は静か。ゆっくりしたマンドリン風のつま弾き(ナポリ民謡ふうの短い音型)。シャカシャカした高い音は使わない
+o = rep(o, KBASE, KBASE +
+        "K.rom={bpm:function(){return 66},amb:function(){loopNoise(280,.5,.011,.07,.006,'lowpass')},"
+        "st:function(s,t,e){var KR=[64,67,69,67,64,62,64,60];if(s%4===0)pluck(hz(KR[(s>>2)%8]),t,e*3.2,ngt?.07:.1);"
+        "if(s%16===8)pluck(hz(KR[0]-12),t,e*5,.08);if(s%32===0)tone(hz(40),t,e*30,'sine',.06,.6)}};")
+o = rep(o, REC, record('ローマの'))
+o = trip_patches(o, 'rome')
+o = rep(o, "showMap();/*ROM_END*/}", "showMap()})}")
+o = rep(o, "g.fillStyle='#143fb0';g.fillRect(0,0,5,ch);g.fillRect(cw-5,0,5,ch)", "g.fillStyle='#8a1538';g.fillRect(0,0,5,ch);g.fillRect(cw-5,0,5,ch)")
+o = rep(o, "setMode('arr');\nvar phoQ", main + "\nsetMode('arr');if(!/[?&]pho=/.test(location.search)&&!window.__CHK)TRIP.enter(function(){},'rome');\nvar phoQ")
+o = rep(o, '<head>', '<head><script>' + _rd('check_shim.js') + '</script>')   # タスク056
+os.makedirs(os.path.join(ROOT, 'tour', 'rome'), exist_ok=True)
+open(os.path.join(ROOT, 'tour', 'rome', 'index.html'), 'w', encoding='utf-8').write(o)
+print('rome built', len(o), 'bytes; dialogues', len(dm), 'words', sum(len(v['words']) for v in dm.values()))
+print('missing IPA (rome):', missing)
 # ---------- フランクフルト(tour/frankfurt/index.html。タスク097 到着・街・出発) ----------
 df = sub('fra_')
 main = MAIN_FRA % dict(dlg=J(df), sp=SPF, bg=BGF, world=WORLDJS, voice=VOICEJS, ev=EVJS, arr=J(FARR), city=J(FCITY), dep=J(FDEP), ids=J(FRA_IDS))
-main += _rd('check.js').replace('__OTHER_HREF__', '../athens/?check=1').replace('__OTHER_LABEL__', 'アテネ')
+main += _rd('check.js').replace('__OTHER_HREF__', '../rome/?check=1').replace('__OTHER_LABEL__', 'ローマ')
 main += art_js('../assets/art/', "function artIdFor(S){var v=String(S&&S.vid||'');var m={fra_arr1:'frafarr',fra_bakery1:'frafbakery',fra_tram1:'fraftram',fra_info1:'frafinfo',fra_cafe1:'frafcafe',fra_shop1:'frafshop',fra_hotel1:'frafhotel',fra_dep_board1:'frafboard',fra_dep_ticket1:'frafticket',fra_dep_train1:'fraftrain'};return m[v]||null}")   # 実画: 到着=frankfurt-arrival-v1(発車標の中身は別素材)・街=frankfurt-street-v1 / frankfurt-hotel-v1・出発=frankfurt-departure-v1。読めないときは BGF(コード描画)にもどる
 o = ev_patches(common(src, 'Europe/Berlin'))
 for _a, _b in SHARED: o = rep(o, _a, _b)

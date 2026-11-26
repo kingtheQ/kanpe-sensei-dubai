@@ -1414,8 +1414,9 @@ var TRIP=(function(){
   IAH:{id:'houston',n:'ヒューストン',en:'Houston',lon:-95.34,lat:29.98},GUM:{id:'guam',n:'グアム',en:'Guam',lon:144.80,lat:13.48},
   NRT:{id:'narita',n:'成田',en:'Tokyo',lon:140.39,lat:35.77},
   ATH:{id:'athens',n:'アテネ',en:'Athens',lon:23.94,lat:37.94},
+  FCO:{id:'rome',n:'ローマ',en:'Rome',lon:12.25,lat:41.80},   /* 094: ローマ(アテネの次。出発は鉄道でミラノ乗り換え→チューリッヒ) */   /* 090: アテネ(1周目ルートのロヴァニエミの次。窓口の地図 window_data.ROUTE_STOPS と同じ) */
   FRA:{id:'frankfurt',n:'フランクフルト',en:'Frankfurt',lon:8.66,lat:50.11}};   /* 097: フランクフルト(1周目ルートのチューリッヒの次。鉄道の旅。座標は中央駅付近の公開座標) */   /* 090: アテネ(1周目ルートのロヴァニエミの次。窓口の地図 window_data.ROUTE_STOPS と同じ) */
- var IMPL={HND:1,NBO:1,DOH:1,RVN:1,ATH:1,FRA:1};   /* 065: ロヴァニエミ(到着まわり)。ヘルシンキは乗り継ぎだけ(chain が場面なしの区間をはさむ) */   /* 場面のある空港。ここ以外の行き先は、地図と券には出すが、行けない */
+ var IMPL={HND:1,NBO:1,DOH:1,RVN:1,ATH:1,FCO:1,FRA:1};   /* 065: ロヴァニエミ(到着まわり)。ヘルシンキは乗り継ぎだけ(chain が場面なしの区間をはさむ) */   /* 場面のある空港。ここ以外の行き先は、地図と券には出すが、行けない */
  function codeOf(apId){for(var k in AIRP)if(AIRP[k].id===apId)return k;return null}
  /* ---------- 券ごとの区間(会社は docs/world-tour-design.md の便の表。別切符は会社を書かない)。[出発,到着,会社,表の日,別切符] ---------- */
  var LEGS={
@@ -1499,6 +1500,9 @@ var TRIP=(function(){
   fra_arr:[['fra_arr1'],['fra_bakery1'],['fra_tram1'],['fra_info1']],   /* 097: フランクフルト到着(鉄道着。入国審査なし。最初の駅の場面→ベーカリー・市内切符・案内所) */
   fra_city:[['fra_cafe1'],['fra_shop1'],['fra_hotel1']],   /* 097: フランクフルトの街(カフェ・おみやげ屋・ホテル) */
   fra_dep:[['fra_dep_board1'],['fra_dep_ticket1'],['fra_dep_train1']],   /* 097: フランクフルトの出発(鉄道。発車標→窓口→ホームと車内。順に開く) */
+  rom_arr:[['rom_bag1'],['rom_info1'],['rom_taxi1'],['rom_train1']],   /* 094: ローマ到着(入国審査なし=シェンゲン圏内。荷物・客引き・タクシー・空港電車) */
+  rom_city:[['rom_cafe1'],['rom_shop1'],['rom_hotel1']],   /* 094: ローマの街(ジェラテリア・おみやげ屋・ホテル) */
+  rom_dep:[['rom_dep_ticket1'],['rom_dep_platform1'],['rom_dep_train1']],   /* 094: ローマの出発(鉄道。切符の窓口→発車標とホーム→車内。順に開く。ミラノで1回乗り換え) */
   doh_dep:[['doh_dep_checkin','doh_dep_passport'],['doh_dep_bear'],['doh_dep_train'],['doh_dep_orchard','doh_dep_lounge'],['doh_dep_gate','doh_dep_plane']]};
  /* 場所の名前(各ページの place id) → まとまり。鍵(ロック)と、タブの開きに使う */
  var PLACEGRP={hreturn:'hnd_ret',hcheckin:'hnd_dep',hsec:'hnd_dep',hexit:'hnd_dep',hgate:'hnd_dep',hboard:'hnd_dep',hplane:'hnd_dep',immig:'nbo_arr',bag:'nbo_arr',sim:'nbo_arr',taxi:'nbo_arr',market:'nbo_market',safari:'nbo_safari',java:'nbo_air',art:'nbo_air',lounge:'nbo_air',duty:'nbo_air',
@@ -1508,8 +1512,9 @@ var TRIP=(function(){
   rimmig:'rvn_arr',rbag:'rvn_arr',rlobby:'rvn_arr',rwifi:'rvn_arr',rbus:'rvn_arr',
   rvil:'rvn_stay',rpost:'rvn_stay',rsanta:'rvn_stay',rrein:'rvn_stay',rhotel:'rvn_night',rchk:'rvn_dep',rsec:'rvn_dep',rshop:'rvn_dep',rahk:'rvn_dep',rgate:'rvn_dep',
   aimmig:'ath_arr',ataxi:'ath_arr',ametro:'ath_arr',acafe:'ath_city',ashop:'ath_city',ahotel:'ath_city',acheck:'ath_dep',adepimm:'ath_dep',agate:'ath_dep',
-  farr:'fra_arr',fbakery:'fra_arr',ftram:'fra_arr',finfo:'fra_arr',fcafe:'fra_city',fshop:'fra_city',fhotel:'fra_city',fboard:'fra_dep',fticket:'fra_dep',ftrain:'fra_dep'};
- var MODEGRP={hret:{tour:'hnd_ret'},hdep:{tour:'hnd_dep'},arr:{tour:'nbo_arr',doha:'doh_arr',rovaniemi:'rvn_arr',athens:'ath_arr',frankfurt:'fra_arr'},stay:{tour:['nbo_market','nbo_safari'],rovaniemi:['rvn_stay','rvn_night']},air:{tour:'nbo_air'},dep:{tour:'nbo_dep',doha:'doh_dep',rovaniemi:'rvn_dep',athens:'ath_dep',frankfurt:'fra_dep'},city:{doha:'doh_city',athens:'ath_city',frankfurt:'fra_city'},sage:{tour:'hnd'}};
+  farr:'fra_arr',fbakery:'fra_arr',ftram:'fra_arr',finfo:'fra_arr',fcafe:'fra_city',fshop:'fra_city',fhotel:'fra_city',fboard:'fra_dep',fticket:'fra_dep',ftrain:'fra_dep',
+  mbag:'rom_arr',minfo:'rom_arr',mtaxi:'rom_arr',mtrain:'rom_arr',mcafe:'rom_city',mshop:'rom_city',mhotel:'rom_city',mdtick:'rom_dep',mdplat:'rom_dep',mdtrain:'rom_dep'};
+ var MODEGRP={hret:{tour:'hnd_ret'},hdep:{tour:'hnd_dep'},arr:{tour:'nbo_arr',doha:'doh_arr',rovaniemi:'rvn_arr',athens:'ath_arr',rome:'rom_arr',frankfurt:'fra_arr'},stay:{tour:['nbo_market','nbo_safari'],rovaniemi:['rvn_stay','rvn_night']},air:{tour:'nbo_air'},dep:{tour:'nbo_dep',doha:'doh_dep',rovaniemi:'rvn_dep',athens:'ath_dep',rome:'rom_dep',frankfurt:'fra_dep'},city:{doha:'doh_city',athens:'ath_city',rome:'rom_city',frankfurt:'fra_city'},sage:{tour:'hnd'}};
  /* お金の1行(場面の台詞に出る値段。円に直すレートは架空で固定)。タクシーとメトロは台詞に値段がないので、架空の値段 */
  var MONEY={nbo_sim1:['sim',1000,'KES'],nbo_taxi1:['taxi',3000,'KES'],nbo_java1:['coffee',800,'KES'],nbo_market:['gift',1500,'KES'],nbo_duty1:['duty',24,'USD'],
   doh_sim1:['sim',30,'QAR'],doh_taxi:['taxi',55,'QAR'],doh_metro:['metro',6,'QAR'],doh_city_t1:['tea',2,'QAR'],doh_city_s1:['gift',10,'QAR'],
@@ -1528,7 +1533,8 @@ var TRIP=(function(){
   rimmig:'dair',rbag:'dair',rlobby:'dair',rwifi:'dair',rbus:'night',
   rvil:'street',rpost:'hotel',rsanta:'hotel',rrein:'street',rhotel:'night',rchk:'dair',rsec:'dair',rshop:'dair',rahk:'dair',rgate:'dair',
   aimmig:'dair',ataxi:'street',ametro:'dair',acafe:'souq',ashop:'souq',ahotel:'hotel',acheck:'dair',adepimm:'dair',agate:'dair',
-  farr:'dair',fbakery:'dair',ftram:'street',finfo:'dair',fcafe:'souq',fshop:'souq',fhotel:'hotel',fboard:'dair',fticket:'dair',ftrain:'dair'};
+  farr:'dair',fbakery:'dair',ftram:'street',finfo:'dair',fcafe:'souq',fshop:'souq',fhotel:'hotel',fboard:'dair',fticket:'dair',ftrain:'dair',
+  mbag:'dair',minfo:'dair',mtaxi:'street',mtrain:'dair',mcafe:'souq',mshop:'souq',mhotel:'hotel',mdtick:'dair',mdplat:'dair',mdtrain:'dair'};
 
  /* ---------- 場面の現地時刻(タスク032 / 020-3) ----------
     旅の中の場面は、いまの本当の時計でなく「旅の中の現地時刻」で昼夜を決める。
@@ -1548,7 +1554,8 @@ var TRIP=(function(){
   rvil:13,rpost:14,rsanta:15,rrein:16,rhotel:21,                /* ロヴァニエミの滞在(072): 村=昼すぎ・郵便局・サンタ・トナカイは午後(台本: Good afternoon)・ホテルは夜(台本: Good evening)。物語の時刻 */
   rchk:12,rsec:13,rshop:13,rahk:14,rgate:15,
   aimmig:14,ataxi:15,ametro:15,acafe:13,ashop:16,ahotel:19,acheck:9,adepimm:10,agate:10,
-  farr:15,fbakery:15,ftram:15,finfo:16,fcafe:14,fshop:16,fhotel:19,fboard:8,fticket:8,ftrain:9};   /* アテネ(090・091。物語の時刻で、実在の便の時刻ではない。ホテルは夕方(台本: Good evening)・出発は翌朝) */
+  farr:15,fbakery:15,ftram:15,finfo:16,fcafe:14,fshop:16,fhotel:19,fboard:8,fticket:8,ftrain:9,
+  mbag:11,minfo:11,mtaxi:12,mtrain:12,mcafe:15,mshop:16,mhotel:19,mdtick:9,mdplat:10,mdtrain:11};   /* ローマ(094。物語の時刻で、実在の便・電車の時刻ではない。ホテルは夕方(台本: Buonasera)・出発は翌朝) */   /* アテネ(090・091。物語の時刻で、実在の便の時刻ではない。ホテルは夕方(台本: Good evening)・出発は翌朝) */
  //                  /* ロヴァニエミの出発(072。台本: Good afternoon) */      /* ロヴァニエミ到着(065。物語の時刻で、実在の便の時刻ではない。夜の便・深夜の到着=021 の R1〜R4) */ /* ドーハ出発(台本: Good afternoon) */
  /* 券ごとの上書き: スターのナイロビ着は 01:25(夜)。台本のあいさつは朝のまま(夜版の台本は未作成) */
  var HOUR_TK={star:{immig:1,bag:2,sim:2,taxi:3}};
@@ -4286,7 +4293,7 @@ function build(){
  pan.appendChild(el('h3','','ページ'));
  var r2=el('div','row'),a=el('a','b',OTHER_LABEL+'へ(点検モードのまま)');a.href=OTHER_HREF;r2.appendChild(a);
  var a2=el('a','b','通常モードで開く');a2.href=location.pathname;r2.appendChild(a2);
- var a3=el('a','b','フランクフルトへ(点検モードのまま)');a3.href='../frankfurt/?check=1';r2.appendChild(a3);
+ var a3=el('a','b','ローマへ(点検モードのまま)');a3.href='../rome/?check=1';r2.appendChild(a3);
  r2.appendChild(sbtn('専用の記録を消す',function(){if(window.__chkReset)window.__chkReset();location.reload()}));
  pan.appendChild(r2);
  Object.keys(MODES).forEach(function(k){
@@ -4563,6 +4570,21 @@ ART.athshop={bg:'athens-street-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back'
 ART.athhotel={bg:'athens-hotel-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:640,by:752},king:{n:'hall-king-back',x:776,by:752},npcS:{a_front:{n:'w-front-man-suit-1',x:1010,by:752,sw:70}}}};
 ART.athck={bg:'athens-departure-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},clerk:{x:775,top:473,clip:595},npcS:{a_ck:'hexit-officer'},bubble:{x:775,y:433}}};
 ART.athdep={bg:'athens-departure-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{a_dep:{n:'o-front-officer-blue',x:1160,by:890,sw:70},a_gate:{n:'w-front-pilot-fa',x:1160,by:890,sw:80}}}};
+/* ローマ(タスク094 到着4・街3・出発3): 人なしの背景(1536×960・v2)。ふたりは後ろ姿(足もと y=884。ルルが左 x=700・キングが右 x=836。アテネと同じ大きさ)。相手の人物は既存の素材の流用。画像が読めないときは build.py の BGM(コード描画)にもどる。
+   到着(rome-arrival-v2): 左に手荷物の窓口(カウンター x40〜418・上面 y=524。係員はカウンターの向こう x=229・y=524 で切る)、中央〜右に「Nastro · Belt 12」のベルト(y568〜)。客引き・案内係・乗り場の係・運転手・窓口の人は、ふたりの右の床(y>713)に立つ。
+   街(rome-street-v2): 左がジェラテリア(戸口 x265〜378・y785〜858。店員は戸口の前 x=300・足もと y=860)・右がトラットリアの前の石畳(おみやげ屋の人 x=1180・足もと y=940)。ホテル(rome-hotel-v2)の3人は木の床(y≥876)に立つ(足もと y=900)。
+   出発(rome-departure-v2): 切符の窓口「Biglietti · TICKETS」(x678〜1025・窓の中の暗い面 y622〜745)に駅員が立つ(y=745 で切る・x=765)。発車標(x96〜1154・y52〜420)の右半分「Partenze」の中身は背景に描いていないので、別素材 rome-departure-board-strip.png(420×240・2コマ・1秒ごと)を (714,142) に重ねる(fx strip。行き先だけ・時刻は「--:--」・ホーム番号は出ない=テルミニでは発車の少し前に出る)。
+   車内の場面(rom_dep_train1)は、右のホーム(x≥1180・y≥690)に停まった電車のそばで、ふたりが乗客・車掌と話す。 */
+ART.rombag={bg:'rome-arrival-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},clerk:{x:229,top:402,clip:530},npcS:{m_bag:'hexit-officer'},bubble:{x:229,y:370}}};
+ART.rominfo={bg:'rome-arrival-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},people:[{id:'tout',n:'w-front-safari',x:1040,by:890,sw:90},{id:'info',n:'o-front-officer-blue',x:1250,by:880,sw:70}],npcS:{m_tout:{p:'tout'},m_info:{p:'info'}}}};
+ART.romtaxi={bg:'rome-arrival-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},people:[{id:'rank',n:'o-front-officer-blue',x:1040,by:890,sw:70},{id:'drv',n:'w-front-man-suit-1',x:1250,by:880,sw:70}],npcS:{m_rank:{p:'rank'},m_driver:{p:'drv'}}}};
+ART.romtrain={bg:'rome-arrival-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{m_rail:{n:'o-front-officer-green-1',x:1100,by:890,sw:70}}}};
+ART.romcafe={bg:'rome-street-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{m_gelato:{n:'w-front-man-dashiki',x:300,by:860,sw:90}}}};
+ART.romshop={bg:'rome-street-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{m_shop:{n:'t-woman-hijab-front',x:1180,by:940,sw:79}}}};
+ART.romhotel={bg:'rome-hotel-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:640,by:900},king:{n:'hall-king-back',x:776,by:900},npcS:{m_front:{n:'w-front-man-suit-1',x:1010,by:900,sw:70}}}};
+ART.romdtick={bg:'rome-departure-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},clerk:{x:765,top:620,clip:745},npcS:{m_tk:'hexit-officer'},bubble:{x:765,y:588}}};
+ART.romdplat={bg:'rome-departure-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},fx:[{k:'strip',img:'rome-departure-board-strip.png',x:714,y:142,fw:420,fh:240,n:2,every:1}],npcS:{m_board:{n:'o-front-officer-blue',x:1010,by:900,sw:70}}}};
+ART.romdtrain={bg:'rome-departure-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:1020,by:900},king:{n:'hall-king-back',x:1150,by:900},people:[{id:'pax',n:'t-backpacker-front',x:1290,by:905,sw:79},{id:'cond',n:'w-front-pilot-fa',x:1410,by:905,sw:80}],npcS:{m_pax:{p:'pax'},m_cond:{p:'cond'}}}};
 /* ロヴァニエミの到着ロビー(タスク065): 人なしの背景(1536×960。天窓の光が床に描く北極圏ラインが主役)に、オーロラの別素材(4コマ。1コマ1376×172)を左上(80,128)=窓帯の空の部分に重ねる。
    ふたりは後ろ姿で足もと y=884(ルルが左 x=700・キングが右 x=836。ラインの手前。配置の正本は同梱の rovaniemi-arrivals-preview.png)。
    話し相手(rvn_lobby1/2)は、ふたりの右(トロリーとウェルカム看板のあいだの床)に立つ。キャンバスの上から2番目の重ね(背景→オーロラ→人)。 */
