@@ -251,6 +251,21 @@ ART.athshop={bg:'athens-street-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back'
 ART.athhotel={bg:'athens-hotel-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:640,by:752},king:{n:'hall-king-back',x:776,by:752},npcS:{a_front:{n:'w-front-man-suit-1',x:1010,by:752,sw:70}}}};
 ART.athck={bg:'athens-departure-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},clerk:{x:775,top:473,clip:595},npcS:{a_ck:'hexit-officer'},bubble:{x:775,y:433}}};
 ART.athdep={bg:'athens-departure-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{a_dep:{n:'o-front-officer-blue',x:1160,by:890,sw:70},a_gate:{n:'w-front-pilot-fa',x:1160,by:890,sw:80}}}};
+/* チューリッヒ(タスク096 到着4・街3・出発3): 人なしの背景(1536×960)。到着も出発も鉄道(Zürich HB)。ふたりは後ろ姿(足もと y=884。ルルが左 x=700・キングが右 x=836。アテネと同じ大きさ)。
+   相手の人物は既存の素材の流用(チューリッヒ専用の人物素材はまだ無い)。画像が読めないときは build.py の BGZ(コード描画)にもどる。
+   到着(zurich-arrival-v1): 床は y=712〜。相手はふたりの右の床に立つ。発車標(zur_dep_board1)は fx の still(zurich-board-fra-v1.png=フランクフルト行きの1行。Fernverkehr の最初の行 x=232,y=226 に重ねる。時刻は出さない)。
+   街(zurich-street-v1): トラム乗り場(zur_tram1)・カフェ(右の手前のテーブル)・おみやげ屋(左のキオスクの前)。ホテル(zurich-hotel-v1)は部屋の床(ラグの上 y≈925)。
+   出発(zurich-departure-v1): ホームホール。床は y=660〜。窓口の係員と、列車の中の乗客・車掌(zur_dep_train1)はふたりの右に立つ。 */
+ART.zurarr1={bg:'zurich-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{z_info:{n:'o-front-officer-blue',x:1040,by:890,sw:70}}}};
+ART.zurlock={bg:'zurich-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{z_locker:{n:'o-front-officer-green-1',x:1040,by:890,sw:70}}}};
+ART.zurtram={bg:'zurich-street-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{z_tram:{n:'o-front-officer-blue',x:1040,by:890,sw:70}}}};
+ART.zurinfo={bg:'zurich-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{z_info2:{n:'o-front-woman-blonde-suit',x:1040,by:890,sw:70}}}};
+ART.zurcafe={bg:'zurich-street-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{z_waiter:{n:'w-front-man-suit-1',x:1130,by:880,sw:70}}}};
+ART.zurshop={bg:'zurich-street-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{z_shop:{n:'o-front-woman-blonde-suit',x:300,by:800,sw:70}}}};
+ART.zurhotel={bg:'zurich-hotel-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:470,by:925},king:{n:'hall-king-back',x:606,by:925},npcS:{z_front:{n:'w-front-man-suit-1',x:1010,by:925,sw:70}}}};
+ART.zurboard={bg:'zurich-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},fx:[{k:'still',img:'zurich-board-fra-v1.png',x:232,y:226}],npcS:{z_board:{n:'o2-front-officer-blue',x:1040,by:890,sw:70}}}};
+ART.zurticket={bg:'zurich-departure-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{z_window:{n:'o-front-woman-blonde-suit',x:1040,by:890,sw:70}}}};
+ART.zurtrain={bg:'zurich-departure-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{z_pass:{n:'w-front-safari',x:1040,by:890,sw:80},z_conductor:{n:'o-front-officer-green-1',x:1160,by:890,sw:70}}}};
 /* ロヴァニエミの到着ロビー(タスク065): 人なしの背景(1536×960。天窓の光が床に描く北極圏ラインが主役)に、オーロラの別素材(4コマ。1コマ1376×172)を左上(80,128)=窓帯の空の部分に重ねる。
    ふたりは後ろ姿で足もと y=884(ルルが左 x=700・キングが右 x=836。ラインの手前。配置の正本は同梱の rovaniemi-arrivals-preview.png)。
    話し相手(rvn_lobby1/2)は、ふたりの右(トロリーとウェルカム看板のあいだの床)に立つ。キャンバスの上から2番目の重ね(背景→オーロラ→人)。 */
@@ -677,10 +692,10 @@ var AMB={
  sea:{src:'',vol:.10,note:'海ぞい: 波'}};
 /* 場面の音の名前(場所の snd) → カテゴリ */
 var AMBSND={info:'airport',hall:'airport',tdesk:'airport',map:'airport',nbo:'airport',doh:'airport',cafe:'cafe',costa:'cafe',mall:'cafe',s34:'cafe',
- rvn:'airport',ath:'airport',ahlan:'lounge',hotel:'hotel',room:'hotel',home:'hotel',sage:'hotel',vault:'hotel',mosque:'hotel',atop:'cabin',souk:'street',city:'street',dohc:'street',
+ rvn:'airport',ath:'airport',zur:'airport',ahlan:'lounge',hotel:'hotel',room:'hotel',home:'hotel',sage:'hotel',vault:'hotel',mosque:'hotel',atop:'cabin',souk:'street',city:'street',dohc:'street',
  beach:'sea',marina:'sea',fountain:'outdoor',safari:'outdoor'};
 /* 背景の名前 → カテゴリ(場所の音と食いちがうとき、こちらが先) */
-var AMBBG={taxi:'outdoor',dtaxi:'outdoor',rbus:'outdoor',ataxi:'outdoor',acafe:'street',ashop:'street',ahotel:'hotel',cabinQ:'cabin',cabin:'cabin',chotel:'hotel',cbreak:'hotel'};
+var AMBBG={taxi:'outdoor',dtaxi:'outdoor',rbus:'outdoor',ataxi:'outdoor',acafe:'street',ashop:'street',ahotel:'hotel',ztram:'outdoor',zcafe:'street',zshop:'street',zhotel:'hotel',cabinQ:'cabin',cabin:'cabin',chotel:'hotel',cbreak:'hotel'};
 var ambEl=null,ambCat=null,ambDuck=false;
 function ambOn(){try{return localStorage.getItem('kd_snd')!=='off'}catch(e){return true}}
 function ambApply(){var c=ambCat&&AMB[ambCat];

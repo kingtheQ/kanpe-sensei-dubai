@@ -17,8 +17,9 @@ var TRIP=(function(){
   ADD:{id:'addis',n:'アディスアベバ',en:'Addis Ababa',lon:38.80,lat:8.98},BOG:{id:'bogota',n:'ボゴタ',en:'Bogota',lon:-74.15,lat:4.70},
   IAH:{id:'houston',n:'ヒューストン',en:'Houston',lon:-95.34,lat:29.98},GUM:{id:'guam',n:'グアム',en:'Guam',lon:144.80,lat:13.48},
   NRT:{id:'narita',n:'成田',en:'Tokyo',lon:140.39,lat:35.77},
-  ATH:{id:'athens',n:'アテネ',en:'Athens',lon:23.94,lat:37.94}};   /* 090: アテネ(1周目ルートのロヴァニエミの次。窓口の地図 window_data.ROUTE_STOPS と同じ) */
- var IMPL={HND:1,NBO:1,DOH:1,RVN:1,ATH:1};   /* 065: ロヴァニエミ(到着まわり)。ヘルシンキは乗り継ぎだけ(chain が場面なしの区間をはさむ) */   /* 場面のある空港。ここ以外の行き先は、地図と券には出すが、行けない */
+  ATH:{id:'athens',n:'アテネ',en:'Athens',lon:23.94,lat:37.94},
+  ZRH:{id:'zurich',n:'チューリッヒ',en:'Zurich',lon:8.54,lat:47.38}};   /* 096: チューリッヒ(中央駅。ローマからミラノ乗り換えの鉄道で着き、フランクフルトへ直通ICE。座標は市の中心) */   /* 090: アテネ(1周目ルートのロヴァニエミの次。窓口の地図 window_data.ROUTE_STOPS と同じ) */
+ var IMPL={HND:1,NBO:1,DOH:1,RVN:1,ATH:1,ZRH:1};   /* 065: ロヴァニエミ(到着まわり)。ヘルシンキは乗り継ぎだけ(chain が場面なしの区間をはさむ) */   /* 場面のある空港。ここ以外の行き先は、地図と券には出すが、行けない */
  function codeOf(apId){for(var k in AIRP)if(AIRP[k].id===apId)return k;return null}
  /* ---------- 券ごとの区間(会社は docs/world-tour-design.md の便の表。別切符は会社を書かない)。[出発,到着,会社,表の日,別切符] ---------- */
  var LEGS={
@@ -99,6 +100,9 @@ var TRIP=(function(){
   ath_arr:[['ath_immig1','ath_immig2'],['ath_taxi1'],['ath_transit1']],   /* 090: アテネ到着(入国審査は2場面を順に。どちらか1本で場所は終わり) */
   ath_city:[['ath_cafe1'],['ath_shop1'],['ath_hotel1']],   /* 091: アテネの街(タベルナ・おみやげ屋・ホテル) */
   ath_dep:[['ath_checkin1'],['ath_depimmig1'],['ath_gate1']],   /* 091: アテネの出発(チェックイン→出国審査の列→搭乗口。順に開く) */
+  zur_arr:[['zur_arr1'],['zur_locker1'],['zur_tram1'],['zur_info1']],   /* 096: チューリッヒ到着(鉄道・審査なし。ローマ出発 rom_dep_* の次) */
+  zur_city:[['zur_cafe1'],['zur_shop1'],['zur_hotel1']],   /* 096: チューリッヒの街(カフェ・おみやげ屋・ホテル) */
+  zur_dep:[['zur_dep_board1'],['zur_dep_ticket1'],['zur_dep_train1']],   /* 096: チューリッヒの出発(発車標→窓口→ホームと車内。フランクフルト行き直通。順に開く) */
   doh_dep:[['doh_dep_checkin','doh_dep_passport'],['doh_dep_bear'],['doh_dep_train'],['doh_dep_orchard','doh_dep_lounge'],['doh_dep_gate','doh_dep_plane']]};
  /* 場所の名前(各ページの place id) → まとまり。鍵(ロック)と、タブの開きに使う */
  var PLACEGRP={hreturn:'hnd_ret',hcheckin:'hnd_dep',hsec:'hnd_dep',hexit:'hnd_dep',hgate:'hnd_dep',hboard:'hnd_dep',hplane:'hnd_dep',immig:'nbo_arr',bag:'nbo_arr',sim:'nbo_arr',taxi:'nbo_arr',market:'nbo_market',safari:'nbo_safari',java:'nbo_air',art:'nbo_air',lounge:'nbo_air',duty:'nbo_air',
@@ -107,8 +111,9 @@ var TRIP=(function(){
   dcounter:'doh_dep',dsouth:'doh_dep',dtrain:'doh_dep',dnorth:'doh_dep',dgate:'doh_dep',
   rimmig:'rvn_arr',rbag:'rvn_arr',rlobby:'rvn_arr',rwifi:'rvn_arr',rbus:'rvn_arr',
   rvil:'rvn_stay',rpost:'rvn_stay',rsanta:'rvn_stay',rrein:'rvn_stay',rhotel:'rvn_night',rchk:'rvn_dep',rsec:'rvn_dep',rshop:'rvn_dep',rahk:'rvn_dep',rgate:'rvn_dep',
-  aimmig:'ath_arr',ataxi:'ath_arr',ametro:'ath_arr',acafe:'ath_city',ashop:'ath_city',ahotel:'ath_city',acheck:'ath_dep',adepimm:'ath_dep',agate:'ath_dep'};
- var MODEGRP={hret:{tour:'hnd_ret'},hdep:{tour:'hnd_dep'},arr:{tour:'nbo_arr',doha:'doh_arr',rovaniemi:'rvn_arr',athens:'ath_arr'},stay:{tour:['nbo_market','nbo_safari'],rovaniemi:['rvn_stay','rvn_night']},air:{tour:'nbo_air'},dep:{tour:'nbo_dep',doha:'doh_dep',rovaniemi:'rvn_dep',athens:'ath_dep'},city:{doha:'doh_city',athens:'ath_city'},sage:{tour:'hnd'}};
+  aimmig:'ath_arr',ataxi:'ath_arr',ametro:'ath_arr',acafe:'ath_city',ashop:'ath_city',ahotel:'ath_city',acheck:'ath_dep',adepimm:'ath_dep',agate:'ath_dep',
+  zarr:'zur_arr',zlock:'zur_arr',ztram:'zur_arr',zinfo:'zur_arr',zcafe:'zur_city',zshop:'zur_city',zhotel:'zur_city',zboard:'zur_dep',zticket:'zur_dep',ztrain:'zur_dep'};
+ var MODEGRP={hret:{tour:'hnd_ret'},hdep:{tour:'hnd_dep'},arr:{tour:'nbo_arr',doha:'doh_arr',rovaniemi:'rvn_arr',athens:'ath_arr',zurich:'zur_arr'},stay:{tour:['nbo_market','nbo_safari'],rovaniemi:['rvn_stay','rvn_night']},air:{tour:'nbo_air'},dep:{tour:'nbo_dep',doha:'doh_dep',rovaniemi:'rvn_dep',athens:'ath_dep',zurich:'zur_dep'},city:{doha:'doh_city',athens:'ath_city',zurich:'zur_city'},sage:{tour:'hnd'}};
  /* お金の1行(場面の台詞に出る値段。円に直すレートは架空で固定)。タクシーとメトロは台詞に値段がないので、架空の値段 */
  var MONEY={nbo_sim1:['sim',1000,'KES'],nbo_taxi1:['taxi',3000,'KES'],nbo_java1:['coffee',800,'KES'],nbo_market:['gift',1500,'KES'],nbo_duty1:['duty',24,'USD'],
   doh_sim1:['sim',30,'QAR'],doh_taxi:['taxi',55,'QAR'],doh_metro:['metro',6,'QAR'],doh_city_t1:['tea',2,'QAR'],doh_city_s1:['gift',10,'QAR'],
@@ -126,7 +131,8 @@ var TRIP=(function(){
   calley:'souq',chotel:'hotel',csouq:'souq',crest:'souq',cbreak:'hotel',ccorn:'sea',night:'night',nap:'night',
   rimmig:'dair',rbag:'dair',rlobby:'dair',rwifi:'dair',rbus:'night',
   rvil:'street',rpost:'hotel',rsanta:'hotel',rrein:'street',rhotel:'night',rchk:'dair',rsec:'dair',rshop:'dair',rahk:'dair',rgate:'dair',
-  aimmig:'dair',ataxi:'street',ametro:'dair',acafe:'souq',ashop:'souq',ahotel:'hotel',acheck:'dair',adepimm:'dair',agate:'dair'};
+  aimmig:'dair',ataxi:'street',ametro:'dair',acafe:'souq',ashop:'souq',ahotel:'hotel',acheck:'dair',adepimm:'dair',agate:'dair',
+  zarr:'dair',zlock:'dair',ztram:'street',zinfo:'dair',zcafe:'street',zshop:'souq',zhotel:'hotel',zboard:'dair',zticket:'dair',ztrain:'dair'};
 
  /* ---------- 場面の現地時刻(タスク032 / 020-3) ----------
     旅の中の場面は、いまの本当の時計でなく「旅の中の現地時刻」で昼夜を決める。
@@ -145,7 +151,8 @@ var TRIP=(function(){
   rimmig:23,rbag:23,rlobby:23,rwifi:23,rbus:23,
   rvil:13,rpost:14,rsanta:15,rrein:16,rhotel:21,                /* ロヴァニエミの滞在(072): 村=昼すぎ・郵便局・サンタ・トナカイは午後(台本: Good afternoon)・ホテルは夜(台本: Good evening)。物語の時刻 */
   rchk:12,rsec:13,rshop:13,rahk:14,rgate:15,
-  aimmig:14,ataxi:15,ametro:15,acafe:13,ashop:16,ahotel:19,acheck:9,adepimm:10,agate:10};   /* アテネ(090・091。物語の時刻で、実在の便の時刻ではない。ホテルは夕方(台本: Good evening)・出発は翌朝) */
+  aimmig:14,ataxi:15,ametro:15,acafe:13,ashop:16,ahotel:19,acheck:9,adepimm:10,agate:10,
+  zarr:14,zlock:14,ztram:15,zinfo:15,zcafe:16,zshop:17,zhotel:19,zboard:9,zticket:9,ztrain:10};   /* チューリッヒ(096。物語の時刻で、実在の便の時刻ではない。ホテルは夕方(台本: Good evening)・出発は翌朝) */   /* アテネ(090・091。物語の時刻で、実在の便の時刻ではない。ホテルは夕方(台本: Good evening)・出発は翌朝) */
  //                  /* ロヴァニエミの出発(072。台本: Good afternoon) */      /* ロヴァニエミ到着(065。物語の時刻で、実在の便の時刻ではない。夜の便・深夜の到着=021 の R1〜R4) */ /* ドーハ出発(台本: Good afternoon) */
  /* 券ごとの上書き: スターのナイロビ着は 01:25(夜)。台本のあいさつは朝のまま(夜版の台本は未作成) */
  var HOUR_TK={star:{immig:1,bag:2,sim:2,taxi:3}};

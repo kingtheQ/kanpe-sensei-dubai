@@ -519,6 +519,10 @@ rvn_stay_data.add(D)
 import ath_data
 ath_data.add(D)
 
+# ---- チューリッヒ(タスク096 到着4場面・街3場面・出発3場面): 新形式(flow2・日本語カード)。鉄道の到着と出発 ----
+import zur_data
+zur_data.add(D)
+
 # ---- 英会話カフェ(タスク068・試作): ナイロビの小さな英会話カフェで先生と予行練習。チェックモードからだけ入る ----
 import eikaiwa_data
 eikaiwa_data.add(D)

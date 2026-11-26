@@ -195,6 +195,24 @@ ADEP = [
  place('agate', '搭乗口', 'hall', 28, 78, '🛫', ['搭乗口', '時刻と搭乗口の変更を確かめる'], ['ath_gate1'], seq=1)]
 ATH_IDS = [i for p in AARR + ACITY + ADEP for i in p['v']]
 
+# チューリッヒ(タスク096)。到着4か所・街3か所・出発3か所。到着も出発も鉄道(Zürich HB)なので入国審査・出国審査・搭乗口は無い。
+# 背景はどれも実画(art.js の zurarr1 ほか。到着=zurich-arrival / 街=zurich-street・zurich-hotel / 出発=zurich-departure)。発車標の中身は別素材(zurich-board-fra-v1.png)。
+# ホテル・店の名前は指示書に無いので出さない(PM確認の点)。値段・ホームの番号・正確な発車時刻は台詞にも説明にも出さない。
+ZARR = [
+ place('zarr', '駅に着く', 'info', 24, 14, '🚉', ['チューリッヒ中央駅', '大ホールで大時計と発車標を見る'], ['zur_arr1']),
+ place('zlock', 'コインロッカー', 'hall', 72, 34, '🧳', ['コインロッカー', '大きい荷物を預ける'], ['zur_locker1']),
+ place('ztram', 'トラムの切符', 'hall', 28, 56, '🚋', ['トラム乗り場', '切符の買い方と、ホテルへ行くトラム'], ['zur_tram1']),
+ place('zinfo', '案内所', 'info', 72, 78, 'ℹ️', ['案内所', '明日のホームと駅の出口をたずねる'], ['zur_info1'])]
+ZCITY = [
+ place('zcafe', 'カフェ', 'cafe', 24, 18, '☕', ['バンホフ通りのカフェ', 'エスプレッソと水・高さにびっくり'], ['zur_cafe1']),
+ place('zshop', 'おみやげ屋', 'souk', 72, 46, '🍫', ['おみやげ屋', 'スイスチョコと小さい時計'], ['zur_shop1']),
+ place('zhotel', 'ホテル', 'hotel', 28, 76, '🏨', ['ホテル', 'チェックインと朝食'], ['zur_hotel1'])]
+ZDEP = [
+ place('zboard', '発車標', 'info', 24, 16, '📋', ['大きな発車標', 'フランクフルト行きのホームを読む'], ['zur_dep_board1']),
+ place('zticket', '切符の窓口', 'info', 72, 46, '🎫', ['切符の窓口', '時刻と席・直通かどうか'], ['zur_dep_ticket1']),
+ place('ztrain', 'ホームと車内', 'hall', 28, 78, '🚆', ['ホームと車内', '席を探して、車掌に切符を見せる'], ['zur_dep_train1'])]
+ZUR_IDS = [i for p in ZARR + ZCITY + ZDEP for i in p['v']]
+
 SPJS = r"""
 SP.sage={pitch:.8,m:[[trav({}),P(4,{o:'#5a3a8a',p:'#3a2a5a',h:'#d9d4c6'})]]};
 SP.desk_star={pitch:1.2,m:[[trav({hair:'long'}),P(1,{o:'#c8182a',p:'#2a2a33',h:'#241a14'})]]};
@@ -665,6 +683,54 @@ MODES={arr:{p:PLACES_AARR,b:'🛬 到着',h:'アテネに到着<small>アテネ�
 worldAt('athens');
 """
 
+# ---------- チューリッヒ(タスク096)の話者・背景・ページの枠 ----------
+# 話者: 正確でてきぱき。少しそっけないが、頼めばきちんと教えてくれる(096指示書)。ピッチは ナイロビ・ドーハ・ロヴァニエミ・アテネの係員とずらす。絵は art.js の zurXXX(既存の人物素材を流用)
+SPZ = r"""
+SP.z_info={pitch:1.0,m:[[trav({}),P(5,{o:'#2b3a5a',p:'#2b2b33',h:'#4a3a2a'})]]};
+SP.z_locker={pitch:.88,m:[[trav({hair:'cap'}),P(2,{o:'#2a5a3a',p:'#2b2b33',h:'#3b2a1f'})]]};
+SP.z_tram={pitch:.96,m:[[trav({}),P(4,{o:'#1f5aa8',p:'#2a2a33',h:'#5a3a24'})]]};
+SP.z_info2={pitch:1.18,m:[[trav({hair:'long'}),P(5,{o:'#3a3a4a',p:'#2a2a33',h:'#c9a45a'})]]};
+SP.z_waiter={pitch:.92,m:[[trav({}),P(1,{o:'#f0ece0',p:'#2a2a33',h:'#241a14'})]]};
+SP.z_shop={pitch:1.12,m:[[trav({hair:'long'}),P(2,{o:'#8a2a3a',p:'#2a2a33',h:'#5a3a24'})]]};
+SP.z_front={pitch:.98,m:[[trav({}),P(5,{o:'#2a2a3a',p:'#2a2a33',h:'#3b2a1f'})]]};
+SP.z_board={pitch:1.04,m:[[trav({hair:'cap'}),P(4,{o:'#1b3a6a',p:'#2b2b33',h:'#241a14'})]]};
+SP.z_window={pitch:1.14,m:[[trav({hair:'long'}),P(5,{o:'#c8182a',p:'#2a2a33',h:'#241a14'})]]};
+SP.z_pass={pitch:1.08,m:[[trav({hair:'curly'}),P(3,{o:'#6a8a5a',p:'#2a2a33',h:'#a07a4a'})]]};
+SP.z_conductor={pitch:.9,m:[[trav({hair:'cap'}),P(4,{o:'#c8182a',p:'#2b2b33',h:'#3b2a1f'})]]};
+"""
+# 背景のコード描画は、実画(art.js)が読めないときの保険だけ(色の面と場所の名前)
+BGZ = r"""
+function zFlat(top,floor,txt){R(top,0,0,VW,98);R(floor,0,98,VW,52);T(txt,160,56,9,'#173a6a')}
+BGS.zarr=function(){zFlat('#a8a8a4','#54565c','ZUERICH HB')};
+BGS.zlock=function(){zFlat('#a8a8a4','#54565c','LOCKER')};
+BGS.ztram=function(){zFlat('#cfe3f4','#adaaa4','TRAM')};
+BGS.zinfo=function(){zFlat('#a8a8a4','#54565c','INFO')};
+BGS.zcafe=function(){zFlat('#cfe3f4','#adaaa4','CAFE')};
+BGS.zshop=function(){zFlat('#cfe3f4','#adaaa4','SHOP')};
+BGS.zhotel=function(){zFlat('#ece6da','#ad9270','HOTEL')};
+BGS.zboard=function(){zFlat('#a8a8a4','#54565c','GLEIS')};
+BGS.zticket=function(){zFlat('#a9c9e0','#54565c','TICKET')};
+BGS.ztrain=function(){zFlat('#a9c9e0','#54565c','GLEIS')};
+"""
+MAIN_ZUR = r"""
+/* ===== 世界一周編: チューリッヒ(到着4場面・街3場面・出発3場面=タスク096。到着も出発も鉄道) ===== */
+var TOURDLG=%(dlg)s;
+for(var _k in TOURDLG)DLG[_k]=TOURDLG[_k];
+%(sp)s
+%(bg)s
+%(world)s
+%(voice)s
+%(ev)s
+var PLACES_ZARR=%(arr)s,PLACES_ZCITY=%(city)s,PLACES_ZDEP=%(dep)s;
+PLACES_AIR=PLACES_ZARR;   /* 世界マップのクリアの印: 到着の場所を全部(各1つ以上)あそんだら */
+PLACES_ZARR.concat(PLACES_ZCITY,PLACES_ZDEP).forEach(function(p){PBY[p.id]=p});
+var TOUR_IDS=%(ids)s;
+MODES={arr:{p:PLACES_ZARR,b:'🚉 到着',h:'チューリッヒに到着<small>チューリッヒ中央駅</small>',snd:'zur'},
+ city:{p:PLACES_ZCITY,b:'🏙 街',h:'チューリッヒの街<small>カフェ・おみやげ屋・ホテル</small>',snd:'zur'},
+ dep:{p:PLACES_ZDEP,b:'🚆 出発',h:'チューリッヒから出発<small>発車標から車内まで</small>',snd:'zur'}};
+worldAt('zurich');
+"""
+
 # ---------- 窓口の地図(線を引く): 多角形から 92x16 の陸地ビットマップを作る ----------
 def wmap_rows():
     polys = [
@@ -1128,7 +1194,7 @@ print('missing IPA (all):', missing)
 # ---------- アテネ(tour/athens/index.html。タスク090 到着・タスク091 街と出発) ----------
 da = sub('ath_')
 main = MAIN_ATH % dict(dlg=J(da), sp=SPA, bg=BGA, world=WORLDJS, voice=VOICEJS, ev=EVJS, arr=J(AARR), city=J(ACITY), dep=J(ADEP), ids=J(ATH_IDS))
-main += _rd('check.js').replace('__OTHER_HREF__', '../rovaniemi/?check=1').replace('__OTHER_LABEL__', 'ロヴァニエミ')
+main += _rd('check.js').replace('__OTHER_HREF__', '../rovaniemi/?check=1').replace('__OTHER_LABEL__', 'ロヴァニエミ').replace('/*CHKX*/', "var a3=el('a','b','チューリッヒへ(点検モードのまま)');a3.href='../zurich/?check=1';r2.appendChild(a3);")
 main += art_js('../assets/art/', "function artIdFor(S){var v=String(S&&S.vid||'');if(v==='ath_immig1')return'athimm1';if(v==='ath_immig2')return'athimm2';if(v==='ath_taxi1')return'athtaxi';if(v==='ath_transit1')return'athmetro';if(v==='ath_cafe1')return'athcafe';if(v==='ath_shop1')return'athshop';if(v==='ath_hotel1')return'athhotel';if(v==='ath_checkin1')return'athck';if(v==='ath_depimmig1'||v==='ath_gate1')return'athdep';return null}")   # 実画: 到着(athens-arrival)・街(athens-street / athens-hotel)・出発(athens-departure)。読めないときは BGA(コード描画)にもどる
 o = ev_patches(common(src, 'Europe/Athens'))
 for _a, _b in SHARED: o = rep(o, _a, _b)
@@ -1159,6 +1225,41 @@ os.makedirs(os.path.join(ROOT, 'tour', 'athens'), exist_ok=True)
 open(os.path.join(ROOT, 'tour', 'athens', 'index.html'), 'w', encoding='utf-8').write(o)
 print('athens built', len(o), 'bytes; dialogues', len(da), 'words', sum(len(v['words']) for v in da.values()))
 print('missing IPA (athens):', missing)
+
+# ---------- チューリッヒ(tour/zurich/index.html。タスク096 到着・街・出発。アテネの作りと同じ) ----------
+dz = sub('zur_')
+main = MAIN_ZUR % dict(dlg=J(dz), sp=SPZ, bg=BGZ, world=WORLDJS, voice=VOICEJS, ev=EVJS, arr=J(ZARR), city=J(ZCITY), dep=J(ZDEP), ids=J(ZUR_IDS))
+main += _rd('check.js').replace('__OTHER_HREF__', '../athens/?check=1').replace('__OTHER_LABEL__', 'アテネ')
+main += art_js('../assets/art/', "function artIdFor(S){var v=String(S&&S.vid||'');var m={zur_arr1:'zurarr1',zur_locker1:'zurlock',zur_tram1:'zurtram',zur_info1:'zurinfo',zur_cafe1:'zurcafe',zur_shop1:'zurshop',zur_hotel1:'zurhotel',zur_dep_board1:'zurboard',zur_dep_ticket1:'zurticket',zur_dep_train1:'zurtrain'};return Object.prototype.hasOwnProperty.call(m,v)?m[v]:null}")   # 実画: 到着(zurich-arrival)・街(zurich-street / zurich-hotel)・出発(zurich-departure)。発車標は zurich-board-fra-v1.png を重ねる。読めないときは BGZ(コード描画)にもどる
+o = ev_patches(common(src, 'Europe/Zurich'))
+for _a, _b in SHARED: o = rep(o, _a, _b)
+o = rep(o, " if(!G.camp)addHelp(T)}", " if(!G.camp&&!G.scene.d.nohelp)addHelp(T)}")
+o = rep(o, '<title>カンペ先生 ドバイ編</title>', '<title>空港えいご物語 世界一周編 チューリッヒ</title>')
+o = rep(o, SNOTE_OLD, SNOTE_NEW)
+o = rep(o, ".cue .heard.live{color:#8a7b55}", ".cue .heard.live{color:#8a7b55}\n" + VOICECSS)
+o = rep(o, "'../world/?map=1'", "'../../world/?map=1'", 2)
+o = rep(o, "worldMark('dubai')", "worldMark('zurich')")   # 到着の場所を全部あそんだら印(PLACES_AIR=PLACES_ZARR)
+o = rep(o, "Snd.go(MODE==='city'?'city':'map')", "Snd.go(MODES[MODE].snd)")
+# 話す人を番ごとに替える(T.cx。例: となりの乗客→車掌。タスク089 の宣言と同じ部品)
+o = rep(o, "S.turns.forEach(function(T,i){T.ctx=ctxAt(d,i);T.pitch=", "S.turns.forEach(function(T,i){T.ctx=ctxAt(d,i);if(T.cx)T.ctx=Object.assign({},T.ctx,T.cx);T.pitch=")
+# 最後の場面(ホームと車内)が終わったら世界マップへ(次の寄港地へ向かう土台)。チェックモードは同じページにもどる
+o = rep(o, "if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}showMap()}",
+        "if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}if(S.vid==='zur_dep_train1'){worldMark('zurich');Snd.go(null);location.href=window.__CHK?'./?check=1':'../../world/?map=1';return}showMap();/*ZUR_END*/}")
+# 音: 基本は静か。山の国らしい、ゆっくりした 澄んだ つま弾き(シャカシャカした高い音は使わない)
+o = rep(o, KBASE, KBASE +
+        "K.zur={bpm:function(){return 56},amb:function(){loopNoise(260,.5,.010,.06,.005,'lowpass')},"
+        "st:function(s,t,e){var KZ=[60,64,67,72,67,64,62,60];if(s%4===0)pluck(hz(KZ[(s>>2)%8]),t,e*3.8,ngt?.06:.09);"
+        "if(s%16===8)pluck(hz(KZ[0]-12),t,e*5,.07);if(s%32===0)tone(hz(36),t,e*30,'sine',.05,.6)}};")
+o = rep(o, REC, record('チューリッヒの'))
+o = trip_patches(o, 'zurich')
+o = rep(o, "showMap();/*ZUR_END*/}", "showMap()})}")
+o = rep(o, "g.fillStyle='#143fb0';g.fillRect(0,0,5,ch);g.fillRect(cw-5,0,5,ch)", "g.fillStyle='#d8202a';g.fillRect(0,0,5,ch);g.fillRect(cw-5,0,5,ch)")   # 地図の左右のふち: スイスの赤
+o = rep(o, "setMode('arr');\nvar phoQ", main + "\nsetMode('arr');if(!/[?&]pho=/.test(location.search)&&!window.__CHK)TRIP.enter(function(){},'zurich');\nvar phoQ")
+o = rep(o, '<head>', '<head><script>' + _rd('check_shim.js') + '</script>')   # タスク056
+os.makedirs(os.path.join(ROOT, 'tour', 'zurich'), exist_ok=True)
+open(os.path.join(ROOT, 'tour', 'zurich', 'index.html'), 'w', encoding='utf-8').write(o)
+print('zurich built', len(o), 'bytes; dialogues', len(dz), 'words', sum(len(v['words']) for v in dz.values()))
+print('missing IPA (zurich):', missing)
 
 # ---------- 終わりの場面(tour/ending/index.html): 旅の一か月後のリビングで、アルバムの白いページを埋める ----------
 import window_data

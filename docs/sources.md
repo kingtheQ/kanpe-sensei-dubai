@@ -123,3 +123,4 @@
 - 同 EES開始の案内(2025-10-12開始): https://www.mfa.gr/missionsabroad/en/ireland-en/news/greece-to-start-using-eu-digital-entryexit-system-on-12-october-2025.html
 - 定額タクシー(昼間の中心部まで40ユーロ)と「日本のパスポートは自動ゲートでなく窓口」はPMの指示書による(一次情報では未確認)。地下鉄の空港用切符の金額は資料が割れているため台詞に出さない。
 
+- チューリッヒ→フランクフルトの直通ICE（約4時間）: 時刻表サイト2つ（Omio・Trainline）の一致による。PM確認日2026-11-26（zurich-prep.md）。SBB／DBの公式ページは未確認のため、正確な時刻は台詞・表示に出さない（タスク096）。

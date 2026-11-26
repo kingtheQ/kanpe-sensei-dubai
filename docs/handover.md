@@ -403,3 +403,12 @@
 - 内容と決定は `docs/pm/DECISIONS.md` の2026-11-26。窓口の流れ・マイク・地図の区間番号・再訪の飛ばし方は `tour-src/window.js`（WSTEP・declMic）、台本は `tour-src/window_data.py`（win_decl・win_c1・win_route・win_back）、地図の絵は `tour-src/art.js`（ticket の route）。
 - 参考にしたURL：なし（スターアライアンスの決まりの数字は088で確認済みのものをそのまま使用。確認日2026-11-25）。
 - PMに確認したいこと：win_c8・win_rec も1周目から外した（流れの図に無かったため）。マイクの素材（PM作成）が来たら `MICBIG_IMG` に入れる。実機のマイクの動きは未確認。
+
+## タスク096（2026-11-26）チューリッヒ10場面（到着4・街3・出発3）
+- 前提：到着も出発も鉄道（チューリッヒ中央駅）。到着はローマ発・ミラノ乗り換え。出発はフランクフルト行き直通ICE（乗り換えなし・約4時間。時刻表サイト2つの一致）。シェンゲン圏内なので入国審査の場面は無い。
+- 場面：`tour-src/zur_data.py`（zur_arr1/locker1/tram1/info1・cafe1/shop1/hotel1・dep_board1/dep_ticket1/dep_train1）。新形式（flow2・選択は場面に1回・日本語カード）。台詞に数字・値段・時刻・ホーム番号・トラム番号・店名は出さない（例外：切符の窓口の four hours）。生成物は `tour/zurich/index.html`。
+- 背景：`tour/assets/art/zurich-{arrival,street,hotel,departure}-v1.png`（PM制作・1536×960）。配置は `tour-src/art.js` の `ART.zur*`。
+- 発車標の別素材：`zurich-board-fra-v1.png`（432×44。`tour-src/art/prep_096.py` で生成）を zur_dep_board1 の絵だけに still で重ねる（x=232,y=226）。行き先「Frankfurt (Main) Hbf」とホーム番号9のみ・発車時刻なし。**番号9は物語の中の架空**（背景の9番線の灰色の列車に合わせた。台詞には出さない）。
+- つなぎ：旅の骨組み（`trip.js` の AIRP/IMPL/GROUPS/PLACEGRP/MODEGRP/HOUR/THEME）・世界マップ（AP に zurich）・チェックモード（アテネ⇄チューリッヒのリンク、タブは到着4・街3・出発3）。**ローマ(094)がmainに入っていないため `NEI` は `zurich:[]`**。094のマージ時に `rome:[…,'zurich']`・`zurich:['rome']` の2行と、ローマのチェックモードからのリンクを足してつなぐ。LEGS/ROWS（日ごとの表）にはアテネ同様まだ入れていない（PM確認待ち）。
+- 確認：`python3 tour-src/tests/test_zurich096.py`。未確認：実機のマイク・声・見え方。店名・ホテル名は出していない（PM確認の点）。
+- 参考にしたURL：時刻表（Omio・Trainline）の直通確認は zurich-prep.md（PM・確認日2026-11-26）。公式（SBB/DB）は未確認。
