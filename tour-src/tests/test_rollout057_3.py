@@ -49,11 +49,12 @@ with contextlib.redirect_stdout(buf):
 print(json.dumps(g['dl'], ensure_ascii=False))
 """ % (os.path.join(ROOT, 'tour-src'), os.path.join(ROOT, 'tour-src/build.py'))], capture_output=True, text=True, cwd=ROOT)
 dl = json.loads(j.stdout.strip().split('\n')[-1])
-cnt_flow2 = sorted(k for k, v in dl.items() if v.get('flow2'))
+cnt_flow2 = sorted(k for k, v in dl.items() if v.get('flow2') and not k.startswith('rvn_'))   # ロヴァニエミ(095=057第4弾)は test_rollout057_4.py
 
+FRA10 = ['fra_arr1','fra_bakery1','fra_tram1','fra_info1','fra_cafe1','fra_shop1','fra_hotel1','fra_dep_board1','fra_dep_ticket1','fra_dep_train1']   # タスク097(フランクフルト)
 ATH10 = ['ath_cafe1','ath_checkin1','ath_depimmig1','ath_gate1','ath_hotel1','ath_immig1','ath_immig2','ath_shop1','ath_taxi1','ath_transit1']   # タスク090・091(アテネ・main で変換済み)
 ROM10 = ['rom_bag1','rom_info1','rom_taxi1','rom_train1','rom_cafe1','rom_shop1','rom_hotel1','rom_dep_ticket1','rom_dep_platform1','rom_dep_train1']   # タスク094(ローマ・新形式で作成)
-chk('S0 flow2 の場面は nbo_java1 + 第1弾28 + 第2弾11 + 第3弾32 + アテネ10 + ローマ10 = 92(ロヴァニエミ・イベント・窓口には付いていない)', cnt_flow2 == sorted(SCN + FIRST + SECOND + ['nbo_java1'] + ATH10 + ROM10), len(cnt_flow2))
+chk('S0 flow2 の場面は nbo_java1 + 第1弾28 + 第2弾11 + 第3弾32 + アテネ10 + ローマ10 + フランクフルト10 = 102(イベント・窓口には付いていない。ロヴァニエミ30場面は第4弾=095でこの一覧の外)', cnt_flow2 == sorted(SCN + FIRST + SECOND + ['nbo_java1'] + ATH10 + ROM10 + FRA10), len(cnt_flow2))
 for sid in SCN:
     d_ = dl[sid]; L = d_['lines']; cards = [i for i, l in enumerate(L) if l.get('cards')]
     opts = L[cards[0]]['opts'] if cards else []
@@ -79,7 +80,7 @@ VV = event_data.VARIANTS + doha_data.VARIANTS
 chk('S3d VARIANTS(持ち越しの差しかえ)の参照は壊れていない(build.py の assert が通っている・相手の台詞の行が残る)・差しかえが付く行と種の場面は旧台本のまま', all(v[0] in dl and 'n' in dl[v[0]]['lines'][2 * v[1]] for v in VV) and all([[i // 2, [x['s'] for x in l['vr']]] for i, l in enumerate(dl[s]['lines']) if l.get('vr')] == OLD[s]['vr'] for s in SCN), len(VV))
 chk('S3e 持ち越しで y(自分の答え)を差しかえるターンに、カードを置いていない(差しかえが効かなくなるため)。カードと重なるのは、相手の台詞だけを差しかえる doh_bag2 の1番目だけ', not any(v[5] and v[0] in CARD_AT and CARD_AT[v[0]] == v[1] for v in VV) and [(v[0], v[1]) for v in VV if v[0] in CARD_AT and CARD_AT[v[0]] == v[1]] == [('doh_bag2', 0)], [(v[0], v[1]) for v in VV if v[0] in CARD_AT and CARD_AT[v[0]] == v[1]])
 chk('S3f 差しかえ(VARIANTS)が入る場面は、旧台本と同じ数・同じ位置', sorted((v[0], v[1], v[2]) for v in VV if v[0] in CARD_AT) == sorted((s, i, seed) for s in SCN for i, ss in OLD[s]['vr'] for seed in ss), len([v for v in VV if v[0] in CARD_AT]))
-chk('S4 窓口・ロヴァニエミ・イベント(nbo_ev_/doh_ev_/hnd_ev_)・英会話カフェ・合宿の場面は変えていない(flow2 なし)', not any(dl[k].get('flow2') for k in dl if k.startswith(('win_', 'ticket_', 'rvn_', 'nbo_ev_', 'doh_ev_', 'hnd_ev_', 'nbo_eikaiwa', 'camp'))))
+chk('S4 窓口・イベント(nbo_ev_/doh_ev_/hnd_ev_)・英会話カフェ・合宿の場面は変えていない(flow2 なし)', not any(dl[k].get('flow2') for k in dl if k.startswith(('win_', 'ticket_', 'nbo_ev_', 'doh_ev_', 'hnd_ev_', 'nbo_eikaiwa', 'camp'))))
 # ---------------- 動作 ----------------
 HOOK = "requestAnimationFrame(frame);\n})();"
 def hooked(route):

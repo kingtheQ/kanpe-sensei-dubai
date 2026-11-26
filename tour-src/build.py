@@ -229,6 +229,23 @@ ZDEP = [
  place('zticket', '切符の窓口', 'info', 72, 46, '🎫', ['切符の窓口', '時刻と席・直通かどうか'], ['zur_dep_ticket1']),
  place('ztrain', 'ホームと車内', 'hall', 28, 78, '🚆', ['ホームと車内', '席を探して、車掌に切符を見せる'], ['zur_dep_train1'])]
 ZUR_IDS = [i for p in ZARR + ZCITY + ZDEP for i in p['v']]
+# フランクフルト(タスク097 到着4場面＋街3場面＋出発3場面)。鉄道の旅(到着=チューリッヒからのICE・出発=ブリュッセル乗りかえでロンドンへ)。入国審査の場面は作らない。
+# 背景は実画4枚(art.js の frafarr ほか)。到着=frankfurt-arrival-v1(ベーカリー・案内所・トラム乗り場・案内係。出発の発車標の場面も同じ背景) / 街=frankfurt-street-v1・frankfurt-hotel-v1 / 出発=frankfurt-departure-v1。
+# ホテル・店の名前は出さない。値段・正確な発車時刻・ホーム番号・トラムの路線番号は台詞にも説明にも出さない。
+FARR = [
+ place('farr', '駅に着く', 'hall', 24, 16, '🚉', ['フランクフルト中央駅', '大きな発車標と時計・ホテルへの行き方'], ['fra_arr1'], seq=1),
+ place('fbakery', 'ベーカリー', 'cafe', 72, 32, '🥨', ['駅のベーカリー', 'プレッツェルとコーヒー・持ち帰り'], ['fra_bakery1']),
+ place('ftram', '市内切符', 'info', 28, 56, '🚋', ['トラム乗り場', '市内切符の買い方と、トラムの選び方'], ['fra_tram1']),
+ place('finfo', '案内所', 'info', 72, 78, 'ℹ️', ['案内所(ReiseZentrum)', 'ロンドン行きの確かめ方・出口の場所'], ['fra_info1'])]
+FCITY = [
+ place('fcafe', 'カフェ', 'cafe', 24, 18, '🌭', ['レーマー広場のカフェ', 'フランクフルターとりんごジュース'], ['fra_cafe1']),
+ place('fshop', 'おみやげ屋', 'souk', 72, 46, '🏺', ['おみやげ屋', 'りんご酒用の水差し「ベンペル」'], ['fra_shop1']),
+ place('fhotel', 'ホテル', 'hotel', 28, 76, '🏨', ['ホテル', 'チェックインと朝食'], ['fra_hotel1'])]
+FDEP = [
+ place('fboard', '発車標', 'hall', 24, 16, '🪧', ['大きな発車標', 'ブリュッセル行きのICEを探す'], ['fra_dep_board1'], seq=1),
+ place('fticket', '窓口', 'info', 72, 46, '🎫', ['窓口(ReiseZentrum)', '切符の鉄道区間・座席・乗りかえ'], ['fra_dep_ticket1'], seq=1),
+ place('ftrain', 'ホームと車内', 'hall', 28, 78, '🚆', ['ホームと車内', '席を探す・荷物・車掌に切符を見せる'], ['fra_dep_train1'], seq=1)]
+FRA_IDS = [i for p in FARR + FCITY + FDEP for i in p['v']]
 
 SPJS = r"""
 SP.sage={pitch:.8,m:[[trav({}),P(4,{o:'#5a3a8a',p:'#3a2a5a',h:'#d9d4c6'})]]};
@@ -798,6 +815,54 @@ MODES={arr:{p:PLACES_ZARR,b:'🚉 到着',h:'チューリッヒに到着<small>�
 worldAt('zurich');
 """
 
+# ---------- フランクフルト(タスク097)の話者・背景・ページの枠 ----------
+# 話者: きっちり正確で愛想は少なめ。聞けば要点を順番に教えてくれる(PM指示)。アテネ(声が大きい・身ぶり)より、ピッチを落ち着かせる。絵は art.js の fra〜(既存の人物素材を流用)。
+SPF = r"""
+SP.f_guide={pitch:.95,m:[[trav({hair:'cap'}),P(5,{o:'#8a1f2a',p:'#2b2b33',h:'#3b2a1f'})]]};
+SP.f_baker={pitch:1.1,m:[[trav({hair:'long'}),P(3,{o:'#f0ece0',p:'#2a2a33',h:'#c9a45a'})]]};
+SP.f_tram={pitch:.9,m:[[trav({hair:'cap'}),P(4,{o:'#1f5a3a',p:'#2b2b33',h:'#241a14'})]]};
+SP.f_info={pitch:1.0,m:[[trav({}),P(5,{o:'#8a1f2a',p:'#2a2a33',h:'#5a3a24'})]]};
+SP.f_waiter={pitch:.96,m:[[trav({}),P(1,{o:'#f4f0e6',p:'#1b1b22',h:'#241a14'})]]};
+SP.f_shop={pitch:1.12,m:[[trav({hair:'long'}),P(2,{o:'#5a4a8a',p:'#2a2a33',h:'#a07a4a'})]]};
+SP.f_front={pitch:1.06,m:[[trav({hair:'long'}),P(5,{o:'#2a2a33',p:'#2a2a33',h:'#241a14'})]]};
+SP.f_board={pitch:1.02,m:[[trav({hair:'cap'}),P(5,{o:'#8a1f2a',p:'#2b2b33',h:'#5a3a24'})]]};
+SP.f_ticket={pitch:.92,m:[[trav({}),P(4,{o:'#8a1f2a',p:'#2a2a33',h:'#3b2a1f'})]]};
+SP.f_conductor={pitch:.88,m:[[trav({hair:'cap'}),P(5,{o:'#8a1f2a',p:'#2b2b33',h:'#241a14'})]]};
+SP.f_pax={pitch:1.14,m:[[trav({hair:'curly'}),P(2,{o:'#3a6a4a',p:'#2a2a33',h:'#a07a4a'})]]};
+"""
+# 背景のコード描画は、実画(art.js)が読めないときの保険だけ(色の面と場所の名前)
+BGF = r"""
+function fFlat(top,floor,txt){R(top,0,0,VW,98);R(floor,0,98,VW,52);T(txt,160,56,9,'#173a6a')}
+BGS.farr=function(){fFlat('#ece6d4','#d9cfb6','FRANKFURT HBF')};
+BGS.fbakery=function(){fFlat('#ece6d4','#d9cfb6','BAECKEREI')};
+BGS.ftram=function(){fFlat('#ece6d4','#d9cfb6','TRAM')};
+BGS.finfo=function(){fFlat('#ece6d4','#d9cfb6','REISEZENTRUM')};
+BGS.fcafe=function(){fFlat('#cfe3f4','#d3c7ad','KAFFEE')};
+BGS.fshop=function(){fFlat('#cfe3f4','#d3c7ad','SOUVENIRS')};
+BGS.fhotel=function(){fFlat('#f0e8d6','#a87b50','HOTEL')};
+BGS.fboard=function(){fFlat('#ece6d4','#d9cfb6','ABFAHRT')};
+BGS.fticket=function(){fFlat('#ece6d4','#d9cfb6','REISEZENTRUM')};
+BGS.ftrain=function(){fFlat('#ece6d4','#d9cfb6','GLEIS')};
+"""
+MAIN_FRA = r"""
+/* ===== 世界一周編: フランクフルト(到着4場面・街3場面・出発3場面=タスク097。鉄道の旅) ===== */
+var TOURDLG=%(dlg)s;
+for(var _k in TOURDLG)DLG[_k]=TOURDLG[_k];
+%(sp)s
+%(bg)s
+%(world)s
+%(voice)s
+%(ev)s
+var PLACES_FARR=%(arr)s,PLACES_FCITY=%(city)s,PLACES_FDEP=%(dep)s;
+PLACES_AIR=PLACES_FARR;   /* 世界マップのクリアの印: 到着の場所を全部(各1つ以上)あそんだら */
+PLACES_FARR.concat(PLACES_FCITY,PLACES_FDEP).forEach(function(p){PBY[p.id]=p});
+var TOUR_IDS=%(ids)s;
+MODES={arr:{p:PLACES_FARR,b:'🚉 到着',h:'フランクフルトに到着<small>中央駅(Frankfurt Hbf)</small>',snd:'fra'},
+ city:{p:PLACES_FCITY,b:'🏛 街',h:'フランクフルトの街<small>カフェ・おみやげ屋・ホテル</small>',snd:'fra'},
+ dep:{p:PLACES_FDEP,b:'🚆 出発',h:'フランクフルトから出発<small>発車標からホームまで</small>',snd:'fra'}};
+worldAt('frankfurt');
+"""
+
 # ---------- 窓口の地図(線を引く): 多角形から 92x16 の陸地ビットマップを作る ----------
 def wmap_rows():
     polys = [
@@ -1332,7 +1397,7 @@ print('missing IPA (rome):', missing)
 # ---------- チューリッヒ(tour/zurich/index.html。タスク096 到着・街・出発。アテネの作りと同じ) ----------
 dz = sub('zur_')
 main = MAIN_ZUR % dict(dlg=J(dz), sp=SPZ, bg=BGZ, world=WORLDJS, voice=VOICEJS, ev=EVJS, arr=J(ZARR), city=J(ZCITY), dep=J(ZDEP), ids=J(ZUR_IDS))
-main += _rd('check.js').replace('__OTHER_HREF__', '../rome/?check=1').replace('__OTHER_LABEL__', 'ローマ')
+main += _rd('check.js').replace('__OTHER_HREF__', '../rome/?check=1').replace('__OTHER_LABEL__', 'ローマ').replace('/*CHKX*/', "var a3=el('a','b','フランクフルトへ(点検モードのまま)');a3.href='../frankfurt/?check=1';r2.appendChild(a3);")
 main += art_js('../assets/art/', "function artIdFor(S){var v=String(S&&S.vid||'');var m={zur_arr1:'zurarr1',zur_locker1:'zurlock',zur_tram1:'zurtram',zur_info1:'zurinfo',zur_cafe1:'zurcafe',zur_shop1:'zurshop',zur_hotel1:'zurhotel',zur_dep_board1:'zurboard',zur_dep_ticket1:'zurticket',zur_dep_train1:'zurtrain'};return Object.prototype.hasOwnProperty.call(m,v)?m[v]:null}")   # 実画: 到着(zurich-arrival)・街(zurich-street / zurich-hotel)・出発(zurich-departure)。発車標は zurich-board-fra-v1.png を重ねる。読めないときは BGZ(コード描画)にもどる
 o = ev_patches(common(src, 'Europe/Zurich'))
 for _a, _b in SHARED: o = rep(o, _a, _b)
@@ -1363,6 +1428,41 @@ os.makedirs(os.path.join(ROOT, 'tour', 'zurich'), exist_ok=True)
 open(os.path.join(ROOT, 'tour', 'zurich', 'index.html'), 'w', encoding='utf-8').write(o)
 print('zurich built', len(o), 'bytes; dialogues', len(dz), 'words', sum(len(v['words']) for v in dz.values()))
 print('missing IPA (zurich):', missing)
+
+# ---------- フランクフルト(tour/frankfurt/index.html。タスク097 到着・街・出発) ----------
+df = sub('fra_')
+main = MAIN_FRA % dict(dlg=J(df), sp=SPF, bg=BGF, world=WORLDJS, voice=VOICEJS, ev=EVJS, arr=J(FARR), city=J(FCITY), dep=J(FDEP), ids=J(FRA_IDS))
+main += _rd('check.js').replace('__OTHER_HREF__', '../zurich/?check=1').replace('__OTHER_LABEL__', 'チューリッヒ')
+main += art_js('../assets/art/', "function artIdFor(S){var v=String(S&&S.vid||'');var m={fra_arr1:'frafarr',fra_bakery1:'frafbakery',fra_tram1:'fraftram',fra_info1:'frafinfo',fra_cafe1:'frafcafe',fra_shop1:'frafshop',fra_hotel1:'frafhotel',fra_dep_board1:'frafboard',fra_dep_ticket1:'frafticket',fra_dep_train1:'fraftrain'};return m[v]||null}")   # 実画: 到着=frankfurt-arrival-v1(発車標の中身は別素材)・街=frankfurt-street-v1 / frankfurt-hotel-v1・出発=frankfurt-departure-v1。読めないときは BGF(コード描画)にもどる
+o = ev_patches(common(src, 'Europe/Berlin'))
+for _a, _b in SHARED: o = rep(o, _a, _b)
+o = rep(o, " if(!G.camp)addHelp(T)}", " if(!G.camp&&!G.scene.d.nohelp)addHelp(T)}")
+o = rep(o, '<title>カンペ先生 ドバイ編</title>', '<title>空港えいご物語 世界一周編 フランクフルト</title>')
+o = rep(o, SNOTE_OLD, SNOTE_NEW)
+o = rep(o, ".cue .heard.live{color:#8a7b55}", ".cue .heard.live{color:#8a7b55}\n" + VOICECSS)
+o = rep(o, "'../world/?map=1'", "'../../world/?map=1'", 2)
+o = rep(o, "worldMark('dubai')", "worldMark('frankfurt')")   # 到着の場所を全部あそんだら印(PLACES_AIR=PLACES_FARR)
+o = rep(o, "Snd.go(MODE==='city'?'city':'map')", "Snd.go(MODES[MODE].snd)")
+# 番ごとに話す人を替える(T.cx。ホームと車内: となりの乗客→車掌。アテネと同じ部品)
+o = rep(o, "S.turns.forEach(function(T,i){T.ctx=ctxAt(d,i);T.pitch=", "S.turns.forEach(function(T,i){T.ctx=ctxAt(d,i);if(T.cx)T.ctx=Object.assign({},T.ctx,T.cx);T.pitch=")
+# 最後の場面(ホームと車内)が終わったら世界マップへ(次の寄港地ロンドンへ向かう土台)。チェックモードは同じページにもどる
+o = rep(o, "if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}showMap()}",
+        "if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}if(S.vid==='fra_dep_train1'){worldMark('frankfurt');Snd.go(null);location.href=window.__CHK?'./?check=1':'../../world/?map=1';return}showMap();/*FRA_END*/}")
+# 音: 基本は静か。ゆっくりした、やわらかい弦のつま弾き(アコーディオンの代わりに低めの音)。シャカシャカした高い音は使わない
+o = rep(o, KBASE, KBASE +
+        "K.fra={bpm:function(){return 58},amb:function(){loopNoise(280,.5,.011,.065,.006,'lowpass')},"
+        "st:function(s,t,e){var KF=[60,62,64,67,65,64,62,60];if(s%4===0)pluck(hz(KF[(s>>2)%8]),t,e*3.4,ngt?.065:.095);"
+        "if(s%16===8)pluck(hz(KF[0]-12),t,e*5,.08);if(s%32===0)tone(hz(36),t,e*30,'sine',.06,.6)}};")
+o = rep(o, REC, record('フランクフルトの'))
+o = trip_patches(o, 'frankfurt')
+o = rep(o, "showMap();/*FRA_END*/}", "showMap()})}")
+o = rep(o, "g.fillStyle='#143fb0';g.fillRect(0,0,5,ch);g.fillRect(cw-5,0,5,ch)", "g.fillStyle='#8a1f2a';g.fillRect(0,0,5,ch);g.fillRect(cw-5,0,5,ch)")
+o = rep(o, "setMode('arr');\nvar phoQ", main + "\nsetMode('arr');if(!/[?&]pho=/.test(location.search)&&!window.__CHK)TRIP.enter(function(){},'frankfurt');\nvar phoQ")
+o = rep(o, '<head>', '<head><script>' + _rd('check_shim.js') + '</script>')   # タスク056
+os.makedirs(os.path.join(ROOT, 'tour', 'frankfurt'), exist_ok=True)
+open(os.path.join(ROOT, 'tour', 'frankfurt', 'index.html'), 'w', encoding='utf-8').write(o)
+print('frankfurt built', len(o), 'bytes; dialogues', len(df), 'words', sum(len(v['words']) for v in df.values()))
+print('missing IPA (frankfurt):', missing)
 
 # ---------- 終わりの場面(tour/ending/index.html): 旅の一か月後のリビングで、アルバムの白いページを埋める ----------
 import window_data

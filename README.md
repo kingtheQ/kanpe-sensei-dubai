@@ -23,6 +23,7 @@
 - `tour/` : 世界一周編 賢者・窓口・ナイロビ(到着・空港・出発)。機内の会話を終えると、世界マップの飛ぶ画面をはさんでドーハへ。
 - `tour/doha/` : 世界一周編 ドーハ(到着)。
 - `tour/rovaniemi/` : 世界一周編 ロヴァニエミ(到着)。
+- `tour/frankfurt/` : 世界一周編 フランクフルト(鉄道の到着・街・出発の10場面。入国審査なし)。`tour/athens/` の次。
 - `tour/rome/` : 世界一周編 ローマ(到着4・街3・出発3の10場面。入国審査なし、出発は鉄道)。発車標の中身は背景に描かず別素材(`tour/assets/art/rome-departure-board-strip.png`、`python3 -I tour-src/art/prep_rome_board.py` で生成)を重ねる。点検: `tour/rome/?check=1`、テスト: `tour-src/tests/test_rome094.py`。
 
 ## 実機の点検用「チェックモード」

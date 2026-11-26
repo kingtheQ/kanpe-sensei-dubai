@@ -97,7 +97,7 @@ with sync_playwright() as pw:
     br.close()
 wd = open(os.path.join(ROOT, 'world/index.html'), encoding='utf-8').read()
 chk('世界地図: チューリッヒの点(url ../tour/zurich/)がある・既存のアテネ(ロヴァニエミからの道)は変えていない', "zurich:{n:'チューリッヒ'" in wd and "url:'../tour/zurich/'" in wd and "rovaniemi:['doha','athens']" in wd and "athens:['rovaniemi','rome']" in wd)
-chk('世界地図: ローマの次にチューリッヒ(rome:[athens,zurich]・zurich:[rome])。アテネ→ローマは変えていない', "rome:['athens','zurich']" in wd and "zurich:['rome']" in wd and "athens:['rovaniemi','rome']" in wd)
+chk('世界地図: ローマ→チューリッヒ→フランクフルト(rome:[athens,zurich]・zurich:[rome,frankfurt]・frankfurt:[zurich])。アテネ→ローマは変えていない', "rome:['athens','zurich']" in wd and "zurich:['rome','frankfurt']" in wd and "frankfurt:['zurich']" in wd and "athens:['rovaniemi','rome']" in wd)
 tj = open(os.path.join(ROOT, 'tour-src/trip.js'), encoding='utf-8').read()
 chk('旅の骨組み: ZRH を空港に・IMPL に入れた', "ZRH:{id:'zurich'" in tj and re.search(r"var IMPL=\{[^}]*ZRH:1", tj) is not None)
 chk('旅の骨組み: まとまり zur_arr/zur_city/zur_dep が10場面すべて', all("'%s'" % v in tj for v in ALL) and "zur_arr:[['zur_arr1'],['zur_locker1'],['zur_tram1'],['zur_info1']]" in tj)

@@ -123,6 +123,15 @@
 - 同 EES開始の案内(2025-10-12開始): https://www.mfa.gr/missionsabroad/en/ireland-en/news/greece-to-start-using-eu-digital-entryexit-system-on-12-october-2025.html
 - 定額タクシー(昼間の中心部まで40ユーロ)と「日本のパスポートは自動ゲートでなく窓口」はPMの指示書による(一次情報では未確認)。地下鉄の空港用切符の金額は資料が割れているため台詞に出さない。
 
+
+## タスク097（フランクフルト、2026-11-26確認）
+- フランクフルト→ブリュッセルはICE、ブリュッセルでユーロスターに乗り換え(ロンドン直通なし): https://www.deutschebahn.com/en/presse/press_releases/Record-ridership-on-the-ICE-to-Brussels-over-1-million-passengers-to-be-transported-this-year--9140558
+- ユーロスター 乗り換え案内: https://www.eurostar.com/uk-en/train/germany/london-to-cologne ／ https://www.eurostar.com/us-en/travel-info/connecting-train
+- フランクフルト中央駅 DBレイゼツェントルム(窓口): https://www.bahnhof.de/en/frankfurt-main-hbf/travelling/db-reisezentrum
+- みやげ物(レーマー広場まわり): https://visitfrankfurt.travel/en/services/souvenirs
+- アップルワイン(Apfelwein)とベンベル(Bembel): https://www.glorious-food-glossary.com/cms/glossary/34-glossary-a/16483-apfelweinkrug.html
+- 運賃・商品の値段・時刻・ホーム番号は一次情報で確かめていないので、台詞と発車標の絵には入れていない。
+
 ## タスク094（ローマ、2026-11-26確認）
 - ローマ・テルミニ駅の案内(ホーム番号は発車の少し前に発車標に出る。乗り換え・予約の注意): https://www.seat61.com/stations/rome-termini.htm ／ https://www.greatrail.com/us/expert-advice-inspiration/2019/november/navigating-termini-station/ (ホーム番号は発車の10〜15分前、別資料では20〜30分前と割れる)
 - ローマ→チューリッヒに直通は無く、ミラノで乗り換え(PMの下調べ rome-prep.md が参照): https://www.thetrainline.com/en-us/train-times/rome-to-zurich ／ https://www.rome2rio.com/s/Rome/Z%C3%BCrich-HB

@@ -426,3 +426,14 @@
 - つなぎ：旅の骨組み（`trip.js` の AIRP/IMPL/GROUPS/PLACEGRP/MODEGRP/HOUR/THEME）・世界マップ（`rome:['athens','zurich']`・`zurich:['rome']`。ローマ(094)の次がチューリッヒ）・チェックモード（ローマ⇄チューリッヒのリンク、タブは到着4・街3・出発3）。LEGS/ROWS（日ごとの表）にはアテネ・ローマ同様まだ入れていない（PM確認待ち）。
 - 確認：`python3 tour-src/tests/test_zurich096.py`。未確認：実機のマイク・声・見え方。店名・ホテル名は出していない（PM確認の点）。
 - 参考にしたURL：時刻表（Omio・Trainline）の直通確認は zurich-prep.md（PM・確認日2026-11-26）。公式（SBB/DB）は未確認。
+
+## 今回（11/26）タスク097でやったこと（フランクフルト10場面）
+- **10場面**（`tour-src/fra_data.py`、`data.py` で `fra_data.add(D)`）。新形式（flow2・conv・選択は場面に1回・カード式）。到着4(fra_arr1・fra_bakery1・fra_tram1・fra_info1)・街3(fra_cafe1・fra_shop1・fra_hotel1)・出発3(fra_dep_board1・fra_dep_ticket1・fra_dep_train1)。鉄道で着いて鉄道で出る。入国審査なし。
+- ロンドンは直通でなく、ブリュッセルまでICE→ユーロスターで乗り換え(info1・出発3場面)。りんご酒は聞くだけ、頼むのはりんごジュース(cafe1)。台詞に数字・€・$なし。
+- **発車標**：背景に中身がないので、別素材 `tour/assets/art/frankfurt-board-rows-strip.png`(2692×118・2コマ)を `tour-src/art/prep_frankfurt097.py` で作り、`ART.frafboard.strips` で重ねた。時刻は「--:--」、ホームは「-」(未確認の数字を入れない)。
+- 生成：`tour/frankfurt/`(`build.py`)。チェックモード `tour/frankfurt/?check=1` で10場面すべて選べる。アテネのチェック画面に「フランクフルトへ」のリンク。
+- **096との接続(未)**：チューリッヒ(096)がmainにないので、世界マップにフランクフルトの点だけ追加(`NEI frankfurt:[]`、道なし)。096が入ったら `zurich↔frankfurt` の道と旅の骨組み(`LEGS`/`ROWS`)を足す。
+- 人物の絵は既存の仮の絵の流用(話者ごとに `cx` で切り替え)。実機(マイク・音・見え方)は未確認。
+- テスト：`tour-src/tests/test_frankfurt097.py` を追加。`test_rollout057_3.py` のflow2場面数をフランクフルト10を含めて92に更新。
+- 参考にしたURL：`docs/sources.md` の「タスク097」。
+

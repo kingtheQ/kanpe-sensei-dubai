@@ -519,6 +519,9 @@ rvn_stay_data.add(D)
 import ath_data
 ath_data.add(D)
 
+# ---- フランクフルト(タスク097 到着4場面・街3場面・出発3場面): 新形式(flow2・日本語カード)。鉄道の旅(入国審査なし) ----
+import fra_data
+fra_data.add(D)
 # ---- ローマ(タスク094 到着4場面・街3場面・出発3場面): 新形式(flow2・日本語カード)。入国審査なし・出発は鉄道(ミラノ乗り換え) ----
 import rom_data
 rom_data.add(D)

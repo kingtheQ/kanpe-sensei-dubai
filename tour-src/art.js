@@ -303,6 +303,21 @@ ART.dalley={bg:'doha-souq-alley-v1.png',mode:'wide',base:856,lulu:700,king:806,s
  strips:[{img:'doha-souq-alley-lanterns-strip.png',x:0,y:0,n:2,fw:1536,fh:960,step:1},{img:'doha-souq-alley-cloth-strip.png',x:0,y:0,n:2,fw:1536,fh:960,step:.8}]};
 ART.dsouq={bg:'doha-souq-square-v1.png',mode:'wide',base:836,lulu:660,king:770,suit:0,nosuit:1,npc:{x:980,px:9},fx:'',
  strips:[{img:'doha-souq-square-cloth-strip.png',x:0,y:452,n:2,fw:1536,fh:176,step:.8},{img:'doha-souq-square-birds-strip.png',x:0,y:36,n:2,fw:1536,fh:120,step:.4}]};
+/* フランクフルト(タスク097): 背景は PM 制作の v1(実写真を下絵に描き直した版。1536×960・人なし・2px粒)。ふたりは後ろ姿で足もと y=884(ルル x=700・キング x=836。アテネと同じ)。相手は、ふたりの近くの床に立つ。
+   到着=frankfurt-arrival-v1(Hbf大ホール。大発車標 x96〜1442・y224〜410、案内板 y436〜480、ベーカリー x352〜714・y600〜720、KIOSK x840〜1042、床 y≥720)。
+   frafbakery の店員はベーカリーの前(x560・足もと y800)、frafinfo は「ReiseZentrum」の案内板の下(x1000)、fraftram・frafarr・frafboard はふたりの右。
+   frafboard=大発車標の行の中身は背景に描いていないので、別素材 frankfurt-board-rows-strip.png(2コマ・1346×118・(96,224)・1秒ごと。ブリュッセル行きの2行目が光る。時刻とホームは「--:--」「-」=未確認の数字は出さない。作り方 tour-src/art/prep_frankfurt097.py)を重ねる。
+   街=frankfurt-street-v1(カフェ=左の黄色いパラソル x130〜300・おみやげ屋=「Souvenirs」の戸口 x585〜625)・frankfurt-hotel-v1(窓・ベッド y736〜・右のテーブル)。出発=frankfurt-departure-v1(トレインシェッド。ICE=左 x344〜630・赤い近郊列車=右 x1128〜1350)。 */
+ART.frafarr={bg:'frankfurt-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{f_guide:{n:'o-front-officer-blue',x:1100,by:890,sw:70}}}};
+ART.frafbakery={bg:'frankfurt-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{f_baker:{n:'t-woman-hijab-front',x:560,by:800,sw:79}}}};
+ART.fraftram={bg:'frankfurt-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{f_tram:{n:'t-man-dashiki-front',x:1100,by:890,sw:79}}}};
+ART.frafinfo={bg:'frankfurt-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{f_info:{n:'w-front-man-suit-1',x:1000,by:890,sw:70}}}};
+ART.frafboard={bg:'frankfurt-arrival-v1.png',mode:'wide',strips:[{img:'frankfurt-board-rows-strip.png',x:96,y:224,n:2,fw:1346,fh:118,step:1}],dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{f_board:{n:'o-front-officer-blue',x:1100,by:890,sw:70}}}};
+ART.frafcafe={bg:'frankfurt-street-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{f_waiter:{n:'w-front-man-suit-1',x:230,by:790,sw:70}}}};
+ART.frafshop={bg:'frankfurt-street-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{f_shop:{n:'t-woman-hijab-front',x:560,by:790,sw:79}}}};
+ART.frafhotel={bg:'frankfurt-hotel-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:640,by:884},king:{n:'hall-king-back',x:776,by:884},npcS:{f_front:{n:'w-front-man-suit-1',x:1010,by:884,sw:70}}}};
+ART.frafticket={bg:'frankfurt-departure-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{f_ticket:{n:'w-front-man-suit-1',x:1000,by:890,sw:70}}}};
+ART.fraftrain={bg:'frankfurt-departure-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{f_pax:{n:'t-backpacker-front',x:1010,by:890,sw:79},f_conductor:{n:'w-front-pilot-fa',x:1010,by:890,sw:80}}}};
 /*ARTSEL*/
 function artImg(n){var i=ARTI[n];if(!i){i=ARTI[n]=new Image();i.onerror=function(){i.bad=1};i.src=ARTBASE+n}return i}
 function artShow(on){if(ARTSHOW===on)return;ARTSHOW=on;cv.hidden=!!on;cvA.hidden=!on}
@@ -710,7 +725,7 @@ var AMBSND={info:'airport',hall:'airport',tdesk:'airport',map:'airport',nbo:'air
  rvn:'airport',ath:'airport',zur:'airport',ahlan:'lounge',hotel:'hotel',room:'hotel',home:'hotel',sage:'hotel',vault:'hotel',mosque:'hotel',atop:'cabin',souk:'street',city:'street',dohc:'street',
  beach:'sea',marina:'sea',fountain:'outdoor',safari:'outdoor'};
 /* 背景の名前 → カテゴリ(場所の音と食いちがうとき、こちらが先) */
-var AMBBG={taxi:'outdoor',dtaxi:'outdoor',rbus:'outdoor',ataxi:'outdoor',acafe:'street',ashop:'street',ahotel:'hotel',ztram:'outdoor',zcafe:'street',zshop:'street',zhotel:'hotel',cabinQ:'cabin',cabin:'cabin',chotel:'hotel',cbreak:'hotel'};
+var AMBBG={taxi:'outdoor',dtaxi:'outdoor',rbus:'outdoor',ataxi:'outdoor',acafe:'street',ashop:'street',ahotel:'hotel',ztram:'outdoor',zcafe:'street',zshop:'street',zhotel:'hotel',fcafe:'street',fshop:'street',fhotel:'hotel',cabinQ:'cabin',cabin:'cabin',chotel:'hotel',cbreak:'hotel'};
 var ambEl=null,ambCat=null,ambDuck=false;
 function ambOn(){try{return localStorage.getItem('kd_snd')!=='off'}catch(e){return true}}
 function ambApply(){var c=ambCat&&AMB[ambCat];

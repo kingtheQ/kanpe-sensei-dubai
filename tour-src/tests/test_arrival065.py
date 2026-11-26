@@ -33,33 +33,45 @@ ARR_IDS = ['rvn_immig1', 'rvn_immig2', 'rvn_bag1', 'rvn_bag2', 'rvn_lobby1', 'rv
 SC = [x for x in data.D if x['id'] in ARR_IDS]   # 072 で滞在・夜・出発の20本が増えたので、到着の10本だけを対象にする(滞在・夜・出発は test_rovaniemi072.py)
 ids = [x['id'] for x in SC]
 chk('場面は10本(5場所×2)', ids == ['rvn_immig1', 'rvn_immig2', 'rvn_bag1', 'rvn_bag2', 'rvn_lobby1', 'rvn_lobby2', 'rvn_wifi1', 'rvn_wifi2', 'rvn_bus1', 'rvn_bus2'], ids)
+def flat(p):
+    """dict ターン(カード=opts / 固定文に戻した分かれ目=y と rep)の英文を全部並べる(タスク095: 分かれ目は1か所だけカードになり、もう1か所は固定文)"""
+    o = [p['n']]
+    if p.get('y'): o.append(p['y'])
+    if p.get('rep'): o.append(p['rep'][0])
+    for q in p.get('opts', []): o += [q['y'], q['rep'][0]]
+    return o
+def jpflat(p):
+    o = [p['njp'], p.get('yjp', '')]
+    if p.get('rep'): o.append(p['rep'][1])
+    for q in p.get('opts', []): o += [q['jp'], q['rep'][1]]
+    return o
 alltext = []
 for x in SC:
     ps = x['pairs']
     chk('%s: 5往復' % x['id'], len(ps) == 5, len(ps))
-    forks = [p for p in ps if isinstance(p, dict)]
-    chk('%s: 分かれ目が2つ(3択・聞き取れた返事と聞き違えた返事がある)' % x['id'], len(forks) == 2 and all(len(p['opts']) == 3 and 1 <= sum(1 for o in p['opts'] if o.get('ok')) <= 2 and any(not o.get('ok') for o in p['opts']) for p in forks))
+    forks = [p for p in ps if isinstance(p, dict) and p.get('opts')]   # タスク095: 分かれ目は2か所→カード1か所(もう1か所は rep 付きの固定文 T)
+    chk('%s: 選ぶのは1か所だけ(日本語の単語カード2枚・cards=1)・もう1か所の分かれ目は固定文に戻っている' % x['id'], len(forks) == 1 and forks[0].get('cards') == 1 and len(forks[0]['opts']) == 2 and all(o.get('card') and o.get('ico') and o['rep'][0] for o in forks[0]['opts']) and sum(1 for p in ps if isinstance(p, dict) and not p.get('opts')) == 1)
     ws = [w[0] for w in x['words']]
     chk('%s: 語は5つ・fork の語が語リストにある' % x['id'], len(ws) == 5 and all(w in ws for p in forks for w in p['fork']['tw']), ws)
-    chk('%s: conv=1(単語バトルを出さない)' % x['id'], x.get('conv') == 1)
+    chk('%s: conv=1・flow2=1(単語バトル・Meaning!を出さない・新しい会話の流れ)' % x['id'], x.get('conv') == 1 and x.get('flow2') == 1)
     jp = []
     for p in ps:
         if isinstance(p, dict):
-            jp += [p['njp'], p.get('yjp', '')] + [o['jp'] for o in p['opts']] + [o['rep'][1] for o in p['opts']]
+            jp += jpflat(p)
         else:
             jp += [p[1], p[3]]
     jp += [w[1] for w in x['words']]
     chk('%s: 日本語訳は出さない(台詞・返事・語の日本語はすべて空)' % x['id'], all(j == '' for j in jp))
     for p in ps:
         if isinstance(p, dict):
-            alltext += [p['n']] + [o['y'] for o in p['opts']] + [o['rep'][0] for o in p['opts']]
+            alltext += flat(p)
         else:
             alltext += [p[0], p[2]]
 T = ' '.join(alltext)
 def scene_text(x):
     o = []
     for p in x['pairs']:
-        o += ([p['n']] + [q['y'] for q in p['opts']] + [q['rep'][0] for q in p['opts']]) if isinstance(p, dict) else [p[0], p[2]]
+        o += flat(p) if isinstance(p, dict) else [p[0], p[2]]
     return ' '.join(o).replace('*', '')
 chk('実在情報: Wi-Fi名 "Rovaniemi Airport Free Wi-Fi" が wifi1・wifi2 の両方にある(つづりどおり)', all('Rovaniemi Airport Free Wi-Fi' in scene_text(x) for x in SC if x['id'] in ('rvn_wifi1', 'rvn_wifi2')))
 chk('実在情報: バス8番・Airport Express・サンタクロース村・2〜3km が bus にある', all(k in T for k in ['bus number eight', 'Airport Express', 'Santa Claus Village', 'two or three kilometers']))
@@ -193,7 +205,8 @@ with sync_playwright() as pw:
     # 分かれ目: 2つ目の台詞で▶の返事が3つ出る(英語のみ)
     pg = newpage(br, seed(5, 10, 10)); dismiss(pg)
     play(pg, 'rwifi', 'rvn_wifi1'); pg.wait_for_timeout(2500)
-    chk('wifi1: 2番目の台詞に分かれ目(3つの返事)が入っている', pg.evaluate("(function(){var L=__T.G.scene.d.lines;return L[3].opts&&L[3].opts.length===3&&L[3].opts.every(function(o){return /^[\\x00-\\x7f*]+$/.test(o.y)})})()"))
+    chk('wifi1: 4番目の台詞(カードのターン)だけ日本語の単語カード2枚(cards=1・英語の返事は見本として持つ)・2番目の台詞は固定文に戻っている(タスク095)' ,
+        pg.evaluate("(function(){var L=__T.G.scene.d.lines;return !L[3].opts&&!!L[3].y&&!!L[3].rep&&L[7].cards===1&&L[7].opts.length===2&&L[7].opts.every(function(o){return !!o.card&&/^[\\x00-\\x7f*]+$/.test(o.y)})})()"))
     pg.context.close()
 
     # ---------------- (6) 世界マップ ----------------
