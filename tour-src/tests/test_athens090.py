@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""タスク090・091の動作確認(ヘッドレス)。使い方: python3 tour-src/tests/test_athens090.py
+"""タスク090・091・093(背景 v1→v2 差し替え)の動作確認(ヘッドレス)。使い方: python3 tour-src/tests/test_athens090.py
 アテネ10場面(到着4・街3・出発3)・マイク画像の差し替え・チェックモード・世界地図・旅の骨組みの表。
 マイク・実機の見え方・実機の音は確認できない。"""
 import os, sys, re, json, threading, http.server, socketserver
@@ -13,8 +13,21 @@ def chk(n, ok, v=''):
     if not ok: bad.append(n)
 ARR = ['ath_immig1', 'ath_immig2', 'ath_taxi1', 'ath_transit1']; CITY = ['ath_cafe1', 'ath_shop1', 'ath_hotel1']; DEP = ['ath_checkin1', 'ath_depimmig1', 'ath_gate1']
 ALL = ARR + CITY + DEP
-for n, sz in [('athens-arrival-v1.png', None), ('athens-street-v1.png', None), ('athens-hotel-v1.png', None), ('athens-departure-v1.png', None), ('mic-large-v1.png', None)]:
+for n, sz in [('athens-arrival-v2.png', None), ('athens-street-v2.png', None), ('athens-hotel-v2.png', None), ('athens-departure-v2.png', None), ('mic-large-v1.png', None)]:
     p = os.path.join(ROOT, 'tour/assets/art', n); chk('素材 %s がある' % n, os.path.exists(p) and Image.open(p).size[0] > 0, Image.open(p).size if os.path.exists(p) else '')
+for n in ['arrival', 'street', 'hotel', 'departure']:
+    chk('093: athens-%s-v2.png は 1536x960' % n, Image.open(os.path.join(ROOT, 'tour/assets/art/athens-%s-v2.png' % n)).size == (1536, 960))
+ath = open(os.path.join(ROOT, 'tour/athens/index.html'), encoding='utf-8').read()
+BGMAP = {'athimm1': 'arrival', 'athimm2': 'arrival', 'athtaxi': 'arrival', 'athmetro': 'arrival', 'athcafe': 'street', 'athshop': 'street', 'athhotel': 'hotel', 'athck': 'departure', 'athdep': 'departure'}
+for k, n in BGMAP.items():
+    m = re.search(r"ART\.%s=\{bg:'([^']+)'" % k, ath)
+    chk('093: %s の背景は athens-%s-v2.png' % (k, n), m is not None and m.group(1) == 'athens-%s-v2.png' % n, m.group(1) if m else None)
+chk('093: 生成物に athens の v1 背景への参照が残っていない', re.search(r"athens-(arrival|street|hotel|departure)-v1", ath) is None)
+def art(k): return re.search(r"ART\.%s=\{[^\n]*" % k, ath).group(0)
+chk('093: 到着の係官はカウンター上面(y=585)で切る・x=769(8番窓口)', all('clerk:{x:769,' in art(k) and 'clip:585}' in art(k) for k in ['athimm1', 'athimm2']))
+chk('093: 出発の係員はカウンター上面(y=595)で切る', 'clip:595}' in art('athck'))
+chk('093: タベルナの店員は左(戸口 x30〜240)・おみやげ屋は右の壁ぎわ(x>1100)', re.search(r"a_waiter:\{[^}]*x:150,", art('athcafe')) is not None and re.search(r"a_shop:\{[^}]*x:1140,", art('athshop')) is not None)
+chk('093: ホテルの3人は一面のベッド(y745〜)の奥の縁(足もと y=752)', len(re.findall(r"by:752", art('athhotel'))) == 3)
 import data
 SC = {x['id']: x for x in data.D if x['id'] in ALL}
 chk('場面は10本', sorted(SC) == sorted(ALL), len(SC))

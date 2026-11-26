@@ -4642,18 +4642,18 @@ ART.nmarket={bg:'nairobi-market-v1.png',mode:'wide',dep:{shF:'rgba(3,10,21,.4)',
  fx:[{k:'strip',img:'nairobi-market-cloths-strip.png',x:704,y:326,fw:112,fh:168,n:2,every:1.4}]}};
 /* アテネ(タスク090 到着 / タスク091 街・出発): 人なしの背景(1536×960)。ふたりは後ろ姿(足もと y=884。ルルが左 x=700・キングが右 x=836。ロヴァニエミと同じ大きさ)。
    相手の人物は既存の素材の流用(アテネ専用の人物素材はまだ無い)。画像が読めないときは build.py の BGA(コード描画)にもどる。
-   到着(athens-arrival-v1): 窓口は3つ(ガラス帯 y464〜648・中央の窓口 x=769)。入国審査の係官は窓口の中(頭〜カウンターの高さ y=648 で切る)。客引きと運転手・地下鉄の係員は、ふたりの右の床に立つ(客引き=話し相手が替わるので同じ画面に2人)。
-   街(athens-street-v1): 右にタベルナ(戸口 x1056〜1170)・左の家(戸口 x236〜306)。店員はその戸口の前の石畳。ホテル(athens-hotel-v1)は部屋の床(ラグの上)。
-   出発(athens-departure-v1): カウンターは3つ(中央 x=768・天板 y=612)。チェックインの係員はカウンターの向こう(y=612 で切る)。出国審査の列と搭乗口の係員は、ふたりの右に立つ。 */
-ART.athimm1={bg:'athens-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},clerk:{x:769,top:522,clip:648},npcS:{a_officer:'hexit-officer'},bubble:{x:769,y:480}}};
-ART.athimm2={bg:'athens-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},clerk:{x:769,top:512,clip:648},npcS:{a_officer2:'o-front-officer-blue'},bubble:{x:769,y:480}}};
-ART.athtaxi={bg:'athens-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},people:[{id:'tout',n:'w-front-safari',x:1040,by:890,sw:90},{id:'drv',n:'w-front-man-suit-1',x:1250,by:850,sw:70}],npcS:{a_tout:{p:'tout'},a_driver:{p:'drv'}}}};
-ART.athmetro={bg:'athens-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{a_metro:{n:'o-front-officer-blue',x:1040,by:890,sw:70}}}};
-ART.athcafe={bg:'athens-street-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{a_waiter:{n:'w-front-man-dashiki',x:1112,by:800,sw:90}}}};
-ART.athshop={bg:'athens-street-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{a_shop:{n:'t-woman-hijab-front',x:271,by:780,sw:79}}}};
-ART.athhotel={bg:'athens-hotel-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:640,by:900},king:{n:'hall-king-back',x:776,by:900},npcS:{a_front:{n:'w-front-man-suit-1',x:1010,by:900,sw:70}}}};
-ART.athck={bg:'athens-departure-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},clerk:{x:768,top:490,clip:612},npcS:{a_ck:'hexit-officer'},bubble:{x:768,y:450}}};
-ART.athdep={bg:'athens-departure-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{a_dep:{n:'o-front-officer-blue',x:1160,by:890,sw:70},a_gate:{n:'w-front-pilot-fa',x:1160,by:890,sw:80}}}};
+   到着(athens-arrival-v2・093で v1→v2): 窓口は5つ(6〜10番。ガラス y432〜585・カウンター上面 y=585・中央=8番 x=769)。入国審査の係官は窓口の中(頭〜カウンターの高さ y=585 で切る)。客引きと運転手・地下鉄の係員は、ふたりの右の床に立つ(客引き=話し相手が替わるので同じ画面に2人)。
+   街(athens-street-v2): 左がタベルナ(戸口 x30〜240・y660〜880・メニュー板 y775〜)・右がおみやげの壁(x1212〜)。店員は戸口の前(x150・足もと y775)、おみやげ屋の人は右の壁ぎわの石畳(x1140・足もと y915)。ホテル(athens-hotel-v2)は手前が一面のベッド(y745〜)なので、3人はベッドの奥の縁(足もと y=752)に立つ。
+   出発(athens-departure-v2): 受付は1本(カウンター上面 y=595・看板の隙間 x=775)。チェックインの係員は看板「123」と「eTicket」の間でカウンターの向こう(y=595 で切る)。出国審査の列と搭乗口の係員は、ふたりの右に立つ。 */
+ART.athimm1={bg:'athens-arrival-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},clerk:{x:769,top:459,clip:585},npcS:{a_officer:'hexit-officer'},bubble:{x:769,y:417}}};
+ART.athimm2={bg:'athens-arrival-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},clerk:{x:769,top:449,clip:585},npcS:{a_officer2:'o-front-officer-blue'},bubble:{x:769,y:417}}};
+ART.athtaxi={bg:'athens-arrival-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},people:[{id:'tout',n:'w-front-safari',x:1040,by:890,sw:90},{id:'drv',n:'w-front-man-suit-1',x:1250,by:850,sw:70}],npcS:{a_tout:{p:'tout'},a_driver:{p:'drv'}}}};
+ART.athmetro={bg:'athens-arrival-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{a_metro:{n:'o-front-officer-blue',x:1040,by:890,sw:70}}}};
+ART.athcafe={bg:'athens-street-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{a_waiter:{n:'w-front-man-dashiki',x:150,by:775,sw:90}}}};
+ART.athshop={bg:'athens-street-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{a_shop:{n:'t-woman-hijab-front',x:1140,by:915,sw:79}}}};
+ART.athhotel={bg:'athens-hotel-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:640,by:752},king:{n:'hall-king-back',x:776,by:752},npcS:{a_front:{n:'w-front-man-suit-1',x:1010,by:752,sw:70}}}};
+ART.athck={bg:'athens-departure-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},clerk:{x:775,top:473,clip:595},npcS:{a_ck:'hexit-officer'},bubble:{x:775,y:433}}};
+ART.athdep={bg:'athens-departure-v2.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{a_dep:{n:'o-front-officer-blue',x:1160,by:890,sw:70},a_gate:{n:'w-front-pilot-fa',x:1160,by:890,sw:80}}}};
 /* ロヴァニエミの到着ロビー(タスク065): 人なしの背景(1536×960。天窓の光が床に描く北極圏ラインが主役)に、オーロラの別素材(4コマ。1コマ1376×172)を左上(80,128)=窓帯の空の部分に重ねる。
    ふたりは後ろ姿で足もと y=884(ルルが左 x=700・キングが右 x=836。ラインの手前。配置の正本は同梱の rovaniemi-arrivals-preview.png)。
    話し相手(rvn_lobby1/2)は、ふたりの右(トロリーとウェルカム看板のあいだの床)に立つ。キャンバスの上から2番目の重ね(背景→オーロラ→人)。 */
