@@ -1,0 +1,842 @@
+{
+"rvn_immig1": {
+"npc": [
+"Good evening. Welcome to",
+"Thank you. Why are you v",
+"Is this your first time ",
+"How long will you stay?",
+"Thank you. That is all. "
+],
+"who": "入国審査の係官",
+"bg": "rimmig",
+"sp": "r_officer",
+"intro": "ロヴァニエミ空港。係官は口数が少なく、まっすぐ話す。",
+"kind": null,
+"lvis": null,
+"nohelp": null,
+"inter": [],
+"keep": null,
+"words": [
+"passport",
+"visit",
+"sightseeing",
+"stay",
+"warm"
+],
+"vr": [],
+"conv": 1,
+"flow2": null
+},
+"rvn_immig2": {
+"npc": [
+"Next, please. Good eveni",
+"Do you have a return tic",
+"Where will you sleep ton",
+"I see. Do you have any f",
+"All good. Welcome to Rov"
+],
+"who": "入国審査の係官",
+"bg": "rimmig",
+"sp": "r_officer2",
+"intro": "となりの窓口。こんどは、すこし落ち着いた声の係官。",
+"kind": null,
+"lvis": null,
+"nohelp": null,
+"inter": [],
+"keep": null,
+"words": [
+"ticket",
+"hotel",
+"booking",
+"plant",
+"snacks"
+],
+"vr": [],
+"conv": 1,
+"flow2": null
+},
+"rvn_bag1": {
+"npc": [
+"Good evening. Are you lo",
+"The belt is over there. ",
+"The carts are by the wal",
+"Outside, yes. There is s",
+"There is your bag, by th"
+],
+"who": "手荷物の係員",
+"bg": "rbag",
+"sp": "r_bag",
+"intro": "手荷物受け取り。係員が、ベルトの前で静かに待っている。",
+"kind": null,
+"lvis": null,
+"nohelp": null,
+"inter": [],
+"keep": null,
+"words": [
+"suitcase",
+"cart",
+"slippery",
+"boots",
+"snow"
+],
+"vr": [],
+"conv": 1,
+"flow2": null
+},
+"rvn_bag2": {
+"npc": [
+"Excuse me. Is that your ",
+"In Rovaniemi at night, y",
+"We came for the skis. An",
+"Ah, the lights. Nobody c",
+"There is my family. Enjo"
+],
+"who": "同じ便の旅行者",
+"bg": "rbag",
+"sp": "r_skier",
+"intro": "ベルトの前。スキー板を持った旅行者が、キングのうすいコートを見ている。",
+"kind": null,
+"lvis": null,
+"nohelp": null,
+"inter": [],
+"keep": null,
+"words": [
+"coat",
+"hat",
+"gloves",
+"scarf",
+"wait"
+],
+"vr": [],
+"conv": 1,
+"flow2": null
+},
+"rvn_lobby1": {
+"npc": [
+"Welcome to Rovaniemi Air",
+"That is the Arctic Circl",
+"Look down. There is a sm",
+"The Arctic Circle moves ",
+"Look at the window. The "
+],
+"who": "到着ロビーの旅行者",
+"bg": "rlobby",
+"sp": "r_greeter",
+"intro": "到着ロビー。天窓の光が、床に細い線を引いている。",
+"kind": null,
+"lvis": null,
+"nohelp": null,
+"inter": [],
+"keep": null,
+"words": [
+"welcome",
+"circle",
+"skylight",
+"line",
+"year"
+],
+"vr": [],
+"conv": 1,
+"flow2": null
+},
+"rvn_lobby2": {
+"npc": [
+"Good evening. You are st",
+"Yes. Lapland. The sun is",
+"Do you have a place to s",
+"Then please go out and l",
+"Enjoy Rovaniemi. And rem"
+],
+"who": "空港の職員",
+"bg": "rlobby",
+"sp": "r_local",
+"intro": "到着ロビーの奥。年配の職員が、ゆっくりと床の線のほうへ歩いてくる。",
+"kind": null,
+"lvis": null,
+"nohelp": null,
+"inter": [],
+"keep": null,
+"words": [
+"Lapland",
+"dark",
+"quiet",
+"sky",
+"slow"
+],
+"vr": [],
+"conv": 1,
+"flow2": null
+},
+"rvn_wifi1": {
+"npc": [
+"Good evening. How can I ",
+"Yes. Open your phone set",
+"Do you see it on your li",
+"Good. When it says conne",
+"Is there anything else? "
+],
+"who": "案内カウンターの係員",
+"bg": "rwifi",
+"sp": "r_info",
+"intro": "到着ロビーの案内カウンター。ネットにつなぎたいけれど、どれを選ぶのか分からない。",
+"kind": null,
+"lvis": null,
+"nohelp": null,
+"inter": [],
+"keep": null,
+"words": [
+"free",
+"Wi-Fi",
+"settings",
+"connected",
+"message"
+],
+"vr": [],
+"conv": 1,
+"flow2": null
+},
+"rvn_wifi2": {
+"npc": [
+"Excuse me. Do you know t",
+"Thank you. I tried, but ",
+"Oh, it is working now! I",
+"Where are you going now?",
+"Have a good stay. And th"
+],
+"who": "となりの旅行者",
+"bg": "rwifi",
+"sp": "r_wifi",
+"intro": "ロビーのベンチ。となりの旅行者も、スマホの画面と にらめっこしている。",
+"kind": null,
+"lvis": null,
+"nohelp": null,
+"inter": [],
+"keep": null,
+"words": [
+"name",
+"working",
+"hotel",
+"messages",
+"lost"
+],
+"vr": [],
+"conv": 1,
+"flow2": null
+},
+"rvn_bus1": {
+"npc": [
+"Good evening. Are you wa",
+"The Airport Express goes",
+"It is only about two or ",
+"In the snow, at night? I",
+"Look, the lights are com"
+],
+"who": "バス乗り場の旅行者",
+"bg": "rbus",
+"sp": "r_stop",
+"intro": "空港の外。雪の夜のバス乗り場で、旅行者がバスを待っている。",
+"kind": null,
+"lvis": null,
+"nohelp": null,
+"inter": [],
+"keep": null,
+"words": [
+"bus",
+"eight",
+"kilometer",
+"walk",
+"village"
+],
+"vr": [],
+"conv": 1,
+"flow2": null
+},
+"rvn_bus2": {
+"npc": [
+"Good evening. Where are ",
+"Yes. This is the Airport",
+"Please sit anywhere. Put",
+"Yes, it is free. Some pe",
+"We will go soon. Sit bac"
+],
+"who": "バスの運転手",
+"bg": "rbus",
+"sp": "r_driver",
+"intro": "バスが止まった。運転手が、ドアを開けて待っている。",
+"kind": null,
+"lvis": null,
+"nohelp": null,
+"inter": [],
+"keep": null,
+"words": [
+"express",
+"village",
+"seat",
+"window",
+"snow"
+],
+"vr": [],
+"conv": 1,
+"flow2": null
+},
+"rvn_village1": {
+"npc": [
+"Good afternoon. Welcome ",
+"Yes. At the airport, the",
+"How does it feel? Is it ",
+"The sky is big, and the ",
+"That is the way. Enjoy t"
+],
+"who": "村の案内の人",
+"bg": "rvil",
+"sp": "r_vguide",
+"intro": "サンタクロース村の広場。足もとに、細い光の線が通っている。",
+"kind": null,
+"lvis": null,
+"nohelp": null,
+"inter": [],
+"keep": null,
+"words": [
+"Arctic",
+"line",
+"step",
+"tower",
+"village"
+],
+"vr": [],
+"conv": 1,
+"flow2": null
+},
+"rvn_village2": {
+"npc": [
+"Hello. You look a little",
+"That log house, Roosevel",
+"And the red house over t",
+"It does. What do you wan",
+"Enjoy the village. It is"
+],
+"who": "村で働く人",
+"bg": "rvil",
+"sp": "r_vwoman",
+"intro": "広場のベンチのそば。ここで働く人が、ふたりに声をかける。",
+"kind": null,
+"lvis": null,
+"nohelp": null,
+"inter": [],
+"keep": null,
+"words": [
+"old",
+"cottage",
+"red",
+"mail",
+"afternoon"
+],
+"vr": [],
+"conv": 1,
+"flow2": null
+},
+"rvn_post1": {
+"npc": [
+"Good afternoon. Do you w",
+"Good. This is Santa Clau",
+"Please write it at the t",
+"When you are ready, I ca",
+"Put the card in the box "
+],
+"who": "郵便局の係員",
+"bg": "rpost",
+"sp": "r_postclerk",
+"intro": "サンタクロース村の郵便局。丸太の壁と暖炉。窓口の人が、まっすぐこちらを見ている。",
+"kind": null,
+"lvis": null,
+"nohelp": null,
+"inter": [],
+"keep": null,
+"words": [
+"postcard",
+"postmark",
+"message",
+"Christmas",
+"yellow"
+],
+"vr": [],
+"conv": 1,
+"flow2": null
+},
+"rvn_post2": {
+"npc": [
+"Excuse me. Do you have a",
+"Thank you. I am writing ",
+"The fire is warm, and th",
+"Do you know what to writ",
+"Thank you for the pen. N"
+],
+"who": "手紙を書いている旅行者",
+"bg": "rpost",
+"sp": "r_poststand",
+"intro": "郵便局のテーブル。手紙を書いている旅行者が、ペンを探している。",
+"kind": null,
+"lvis": null,
+"nohelp": null,
+"inter": [],
+"keep": null,
+"words": [
+"pen",
+"letter",
+"fire",
+"thank",
+"wish"
+],
+"vr": [],
+"conv": 1,
+"flow2": null
+},
+"rvn_santa1": {
+"npc": [
+"Ho ho ho. Come in, come ",
+"I am here every day, and",
+"And what are you doing o",
+"Around the world! Then y",
+"Thank you for coming. Ta"
+],
+"who": "サンタクロース",
+"bg": "rsanta",
+"sp": "r_santa",
+"intro": "サンタクロース・オフィス。あたたかい笑い声がして、サンタが顔を上げる。",
+"kind": null,
+"lvis": null,
+"nohelp": null,
+"inter": [],
+"keep": null,
+"words": [
+"office",
+"free",
+"Japan",
+"health",
+"safe"
+],
+"vr": [],
+"conv": 1,
+"flow2": null
+},
+"rvn_santa2": {
+"npc": [
+"Ho ho ho. Back again? Pl",
+"Of course. Ask me anythi",
+"Now, my question. What w",
+"Ha ha. Thank you. Tonigh",
+"Go well, my friends. And"
+],
+"who": "サンタクロース",
+"bg": "rsanta",
+"sp": "r_santa",
+"intro": "サンタクロース・オフィスの奥。いすのそばで、サンタが静かに待っている。",
+"kind": null,
+"lvis": null,
+"nohelp": null,
+"inter": [],
+"keep": null,
+"words": [
+"reindeer",
+"moment",
+"promise",
+"lights",
+"kind"
+],
+"vr": [],
+"conv": 1,
+"flow2": null
+},
+"rvn_reindeer1": {
+"npc": [
+"Good afternoon. Would yo",
+"Come this way, slowly. T",
+"This one is the oldest. ",
+"In winter she pulls a sl",
+"Thank you for being so q"
+],
+"who": "トナカイの世話をする人",
+"bg": "rrein",
+"sp": "r_herder",
+"intro": "雪の道のわき。トナカイの世話をする人が、手綱を持って待っている。",
+"kind": null,
+"lvis": null,
+"nohelp": null,
+"inter": [],
+"keep": null,
+"words": [
+"reindeer",
+"softly",
+"antlers",
+"sleigh",
+"snow"
+],
+"vr": [],
+"conv": 1,
+"flow2": null
+},
+"rvn_reindeer2": {
+"npc": [
+"Hello! Look, that reinde",
+"Yes! It is getting dark.",
+"We came to see the north",
+"Are you staying in the v",
+"Good luck with the sky. "
+],
+"who": "親子連れの旅行者",
+"bg": "rrein",
+"sp": "r_family",
+"intro": "柵のそば。親子連れの旅行者が、トナカイをじっと見ている。",
+"kind": null,
+"lvis": null,
+"nohelp": null,
+"inter": [],
+"keep": null,
+"words": [
+"kind",
+"nose",
+"cold",
+"tonight",
+"sky"
+],
+"vr": [],
+"conv": 1,
+"flow2": null
+},
+"rvn_hotel1": {
+"npc": [
+"Good evening. Did you ha",
+"A lucky day. Tonight is ",
+"Nobody can promise the l",
+"If you want to wait insi",
+"Good night. And good luc"
+],
+"who": "ホテルのフロントの人",
+"bg": "rhotel",
+"sp": "r_hfront",
+"intro": "ホテルのロビー。窓の外は、星の見える夜。フロントの人が、静かにこちらを見ている。",
+"kind": null,
+"lvis": null,
+"nohelp": null,
+"inter": [],
+"keep": null,
+"words": [
+"clear",
+"window",
+"sky",
+"luck",
+"night"
+],
+"vr": [],
+"conv": 1,
+"flow2": null
+},
+"rvn_hotel2": {
+"npc": [
+"Shh. Hello. Sorry. I am ",
+"Not yet. I have waited f",
+"Some people see the ligh",
+"Would you like a blanket",
+"If you see a green light"
+],
+"who": "夜のロビーの旅行者",
+"bg": "rhotel",
+"sp": "r_nguest",
+"intro": "ロビーの窓ぎわ。毛布を肩にかけた旅行者が、小さな声で話しかけてくる。",
+"kind": null,
+"lvis": null,
+"nohelp": null,
+"inter": [],
+"keep": null,
+"words": [
+"stars",
+"patient",
+"blanket",
+"deal",
+"together"
+],
+"vr": [],
+"conv": 1,
+"flow2": null
+},
+"rvn_checkin1": {
+"npc": [
+"Good afternoon. Welcome ",
+"Of course. Passports, pl",
+"Do you have a bag to che",
+"Thank you. Is there anyt",
+"Here are your boarding p"
+],
+"who": "チェックインの係員",
+"bg": "rchk",
+"sp": "r_ck1",
+"intro": "ロヴァニエミ空港の出発ホール。広くて新しいホールの、チェックインカウンター。",
+"kind": null,
+"lvis": null,
+"nohelp": null,
+"inter": [],
+"keep": null,
+"words": [
+"south",
+"passport",
+"suitcase",
+"glass",
+"flight"
+],
+"vr": [],
+"conv": 1,
+"flow2": null
+},
+"rvn_checkin2": {
+"npc": [
+"Hello. Next, please. Whe",
+"I see. Do you want a win",
+"Is this your only bag? D",
+"Please keep your passpor",
+"That is all. Safe travel"
+],
+"who": "となりのカウンターの係員",
+"bg": "rchk",
+"sp": "r_ck2",
+"intro": "となりのカウンター。落ち着いた声の係員が、ゆっくり話す。",
+"kind": null,
+"lvis": null,
+"nohelp": null,
+"inter": [],
+"keep": null,
+"words": [
+"aisle",
+"window",
+"backpack",
+"boarding",
+"travel"
+],
+"vr": [],
+"conv": 1,
+"flow2": null
+},
+"rvn_sec1": {
+"npc": [
+"Good afternoon. Please p",
+"Yes, your jacket, and an",
+"Please walk through the ",
+"Wait, please. Do you hav",
+"All clear. Please take y"
+],
+"who": "保安検査の係員",
+"bg": "rsec",
+"sp": "r_sec1",
+"intro": "保安検査場。係員が、トレイを指さしている。",
+"kind": null,
+"lvis": null,
+"nohelp": null,
+"inter": [],
+"keep": null,
+"words": [
+"tray",
+"jacket",
+"laptop",
+"bottle",
+"gate"
+],
+"vr": [],
+"conv": 1,
+"flow2": null
+},
+"rvn_sec2": {
+"npc": [
+"Excuse me. Is this your ",
+"I think it is a snow glo",
+"Thank you. Please put it",
+"Yes, that is right. Now,",
+"All good. Your snow glob"
+],
+"who": "保安検査の係員",
+"bg": "rsec",
+"sp": "r_sec2",
+"intro": "荷物がベルトを通っていく。係員が、画面をじっと見ている。",
+"kind": null,
+"lvis": null,
+"nohelp": null,
+"inter": [],
+"keep": null,
+"words": [
+"globe",
+"tray",
+"metal",
+"belt",
+"safe"
+],
+"vr": [],
+"conv": 1,
+"flow2": null
+},
+"rvn_shop1": {
+"npc": [
+"Welcome to Napapiirin La",
+"Then you are in the righ",
+"Take your time. Look aro",
+"It is a little wooden re",
+"A good choice. Please br"
+],
+"who": "ギフトショップの店員",
+"bg": "rshop",
+"sp": "r_shop1",
+"intro": "ギフトショップ Napapiirin Lahja。ラップランドの小さな贈りものが、棚にならんでいる。",
+"kind": null,
+"lvis": null,
+"nohelp": null,
+"inter": [],
+"keep": null,
+"words": [
+"gift",
+"small",
+"wooden",
+"counter",
+"shop"
+],
+"vr": [],
+"conv": 1,
+"flow2": null
+},
+"rvn_shop2": {
+"npc": [
+"Hello. Do you need help,",
+"Thank you. Look at the p",
+"Do you want a bag for yo",
+"Here you are. You are lu",
+"Safe travels. Come back "
+],
+"who": "ギフトショップの店員",
+"bg": "rshop",
+"sp": "r_shop2",
+"intro": "ギフトショップのレジのそば。落ち着いた声の店員が、棚をなおしている。",
+"kind": null,
+"lvis": null,
+"nohelp": null,
+"inter": [],
+"keep": null,
+"words": [
+"cards",
+"lovely",
+"last",
+"bag",
+"summer"
+],
+"vr": [],
+"conv": 1,
+"flow2": null
+},
+"rvn_ahkio1": {
+"npc": [
+"Welcome to Ahkio Kitchen",
+"Please sit anywhere. Our",
+"And to drink? Water, or ",
+"The soup will come soon.",
+"Enjoy your meal. Take yo"
+],
+"who": "レストランの店員",
+"bg": "rahk",
+"sp": "r_waiter1",
+"intro": "保安検査の先のレストラン、Ahkio Kitchen and Bar。クリーミーなサーモンスープの、いい香りがする。",
+"kind": null,
+"lvis": null,
+"nohelp": null,
+"inter": [],
+"keep": null,
+"words": [
+"table",
+"soup",
+"salmon",
+"bread",
+"creamy"
+],
+"vr": [],
+"conv": 1,
+"flow2": null
+},
+"rvn_ahkio2": {
+"npc": [
+"Excuse me. Are you going",
+"I was surprised, too, bu",
+"Please call the waiter. ",
+"Are you flying today? I ",
+"Enjoy the burger. And ha"
+],
+"who": "となりの席の旅行者",
+"bg": "rahk",
+"sp": "r_diner",
+"intro": "となりの席の旅行者が、ハンバーガーを食べながら、こちらを見ている。",
+"kind": null,
+"lvis": null,
+"nohelp": null,
+"inter": [],
+"keep": null,
+"words": [
+"reindeer",
+"burger",
+"meat",
+"fly",
+"waiter"
+],
+"vr": [],
+"conv": 1,
+"flow2": null
+},
+"rvn_gate1": {
+"npc": [
+"Good afternoon. This is ",
+"Yes, so far. Please sit ",
+"Is this your first time ",
+"I am glad. What was your",
+"Please come back soon. G"
+],
+"who": "ゲートの係員",
+"bg": "rgate",
+"sp": "r_gate1",
+"intro": "出発ゲート。大きな窓の向こうは、雪と夜のはじまりの空。係員がゆっくり話しかけてくる。",
+"kind": null,
+"lvis": null,
+"nohelp": null,
+"inter": [],
+"keep": null,
+"words": [
+"gate",
+"board",
+"village",
+"quiet",
+"memory"
+],
+"vr": [],
+"conv": 1,
+"flow2": null
+},
+"rvn_gate2": {
+"npc": [
+"Good afternoon. Boarding",
+"Thank you. And your pass",
+"You are all set. Please ",
+"One more thing. Did you ",
+"Safe flight! And remembe"
+],
+"who": "ゲートの係員",
+"bg": "rgate",
+"sp": "r_gate2",
+"intro": "アナウンスが鳴った。ゲートの係員が、搭乗券を受け取っている。",
+"kind": null,
+"lvis": null,
+"nohelp": null,
+"inter": [],
+"keep": null,
+"words": [
+"passport",
+"boarding",
+"green",
+"lucky",
+"north"
+],
+"vr": [],
+"conv": 1,
+"flow2": null
+}
+}
