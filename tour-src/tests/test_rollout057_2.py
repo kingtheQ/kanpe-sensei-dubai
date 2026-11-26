@@ -44,7 +44,7 @@ with contextlib.redirect_stdout(buf):
 print(json.dumps(g['dl'], ensure_ascii=False))
 """ % (os.path.join(ROOT, 'tour-src'), os.path.join(ROOT, 'tour-src/build.py'))], capture_output=True, text=True, cwd=ROOT)
 dl = json.loads(j.stdout.strip().split('\n')[-1])
-cnt_flow2 = sorted(k for k, v in dl.items() if v.get('flow2') and not k.startswith('ath_'))   # アテネ(090・091)は新形式の別の弾
+cnt_flow2 = sorted(k for k, v in dl.items() if v.get('flow2') and not k.startswith(('ath_', 'rom_', 'zur_')))   # アテネ(090・091)・ローマ(094)・チューリッヒ(096)は新形式の別の弾
 
 DOH3 = ['doh_immig1','doh_immig2','doh_bag1','doh_bag2','doh_sim1','doh_sim2','doh_taxi','doh_metro','doh_city_t1','doh_city_t2','doh_city_t3','doh_city_h1','doh_city_h2','doh_city_h3','doh_city_h4','doh_city_s1','doh_city_s2','doh_city_s3','doh_city_r1','doh_city_r2','doh_city_r3','doh_city_c1','doh_city_c2','doh_city_c3','doh_dep_checkin','doh_dep_passport','doh_dep_bear','doh_dep_train','doh_dep_orchard','doh_dep_lounge','doh_dep_gate','doh_dep_plane']   # タスク092(第3弾)
 chk('S0 flow2 の場面は nbo_java1 + 第1弾28 + 第2弾11 + 第3弾のドーハ32 = 72(ロヴァニエミ・イベントには付いていない)', cnt_flow2 == sorted(SCN + FIRST + ['nbo_java1'] + DOH3), len(cnt_flow2))
