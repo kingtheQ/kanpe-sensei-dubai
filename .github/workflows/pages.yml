@@ -22,7 +22,7 @@ jobs:
         with:
           enablement: true
       - run: mkdir -p _site/guam _site/world _site/dubai _site/tour/doha _site/tour/rovaniemi _site/tour/ending && cp index.html _site/ && cp dubai/index.html _site/dubai/ && cp guam/index.html _site/guam/ && cp world/index.html _site/world/ && cp tour/index.html _site/tour/ && cp tour/doha/index.html _site/tour/doha/ && cp tour/rovaniemi/index.html _site/tour/rovaniemi/ && cp tour/ending/index.html _site/tour/ending/ && mkdir -p _site/relay-check && cp relay/check.html _site/relay-check/index.html
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: _site
       - id: d
