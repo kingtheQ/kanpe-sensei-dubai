@@ -124,6 +124,18 @@
 - 定額タクシー(昼間の中心部まで40ユーロ)と「日本のパスポートは自動ゲートでなく窓口」はPMの指示書による(一次情報では未確認)。地下鉄の空港用切符の金額は資料が割れているため台詞に出さない。
 
 
+## タスク101（ホノルル、2026-11-27確認）
+- 農産物申告書(植物と動物の申告書)は機内で配られ着陸前に乗務員が集める。申告する物は荷物受取エリアの出口近くの農業検査カウンターで検査(ハワイ州農務局): https://hdoa.hawaii.gov/pi/?p=50
+- ホノルル空港の公式案内(植物・動物・農産物の申告。申告書は機内で配布): https://airports.hawaii.gov/hnl/?p=26
+- デジタル申告「Akamai Arrival」(2025-03-01から試行)。2026年11月時点で紙とデジタルのどちらが標準かは未確認のため、台詞は「this form」で通し紙/画面を言わない: https://akamaiarrival.hawaii.gov/
+- 空港からワイキキへの市バス(W Line。バス停はレイスタンドの東側。荷物は座席の下・足もと・ひざに収まるものだけ): https://airports.hawaii.gov/hnl/?p=4024 ／ https://www.thebus.org/howtoride/BusRegulations.asp
+- ワイキキ・トロリーは観光用の乗り降り自由バスで、空港には行かない: https://waikikitrolley.com/?lang=ja
+- 鉄道スカイラインの空港駅は2025-10-16に開業。ワイキキにはまだ届かない(カカアコまでの延伸は2031年予定。台詞に年は出さない): honolulu.gov 交通局の案内。※PMメモの「電車はない街」とは食いちがうため、公式の新しい事実に合わせた(要PM確認)。
+- TSA: 靴を脱ぐ決まりは2025年7月に全国で終了(係員に言われたら従う)。ノートPCは通常レーンでは出して別のトレーへ: https://www.tsa.gov/travel/security-screening/whatcanibring/items/laptops ／ 新型CTレーンは入れたままでよい(導入は途中でレーンにより違う。2026年の導入状況: https://www.mightytravels.com/2026/07/tsa-new-ct-scanners-let-you-keep-laptops-and-liquids-in-your-bag/ ※二次情報)。
+- シェイブアイス(細かく削った柔らかい氷にシロップがしみる／スノーコーンは砕いた氷でシロップが沈む／レインボーは3色／スノーキャップ=練乳): Matador Network・Wikipedia(二次情報)。
+- ホテルのチェックイン(パスポート確認と、追加料金用のカード): Hilton・Hyatt の公式FAQ。
+- 運賃・チップの割合・商品や食事の値段・出発時刻・ゲート/ベルト番号・バスの路線番号・航空会社名・便名・店名・ホテル名は、台詞にも絵にも入れていない。案内板の行き先(Los Angeles・Tokyo・Sydney・Auckland)は板の見た目の例で、実在の便を示さない。
+
 ## タスク097（フランクフルト、2026-11-26確認）
 - フランクフルト→ブリュッセルはICE、ブリュッセルでユーロスターに乗り換え(ロンドン直通なし): https://www.deutschebahn.com/en/presse/press_releases/Record-ridership-on-the-ICE-to-Brussels-over-1-million-passengers-to-be-transported-this-year--9140558
 - ユーロスター 乗り換え案内: https://www.eurostar.com/uk-en/train/germany/london-to-cologne ／ https://www.eurostar.com/us-en/travel-info/connecting-train

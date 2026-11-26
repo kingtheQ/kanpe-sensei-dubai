@@ -318,6 +318,18 @@ ART.frafshop={bg:'frankfurt-street-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-b
 ART.frafhotel={bg:'frankfurt-hotel-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:640,by:884},king:{n:'hall-king-back',x:776,by:884},npcS:{f_front:{n:'w-front-man-suit-1',x:1010,by:884,sw:70}}}};
 ART.frafticket={bg:'frankfurt-departure-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{f_ticket:{n:'w-front-man-suit-1',x:1000,by:890,sw:70}}}};
 ART.fraftrain={bg:'frankfurt-departure-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{f_pax:{n:'t-backpacker-front',x:1010,by:890,sw:79},f_conductor:{n:'w-front-pilot-fa',x:1010,by:890,sw:80}}}};
+/* ホノルル(タスク101): 背景は PM 制作の v1(1536×960・人なし)。ふたりは後ろ姿(ルル左・キング右)。到着=honolulu-arrival-v1(レイスタンド x1130〜1290・Aloha 看板 x980〜1095・床 y≥660)・街=honolulu-street-v1(歩道 y≥855)・honolulu-hotel-v1(床 y≥776)・出発=honolulu-departure-v1(青い「WAIT TIMES」板 x72〜538・y112〜374・SECURITY x552〜786・Check-In 案内 x826〜1048・カウンター x1040〜1536・床 y≥660)。
+   honboard=青い板は保安検査の待ち時間板で行き先の欄がないので、板の中を「DEPARTURES」の表に描き直した別素材 honolulu-board-rows-strip.png(2コマ・1秒ごと。時刻とゲートは「--:--」「-」=未確認の数字は出さない。作り方 tour-src/art/prep_honolulu101.py)を重ねる。 */
+ART.honform={bg:'honolulu-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{h_agri:{n:'o-front-officer-green-1',x:1100,by:890,sw:70}}}};
+ART.honbag={bg:'honolulu-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{h_bagst:{n:'o-front-officer-green-2',x:1100,by:890,sw:70}}}};
+ART.honlei={bg:'honolulu-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{h_lei:{n:'t-woman-hijab-front',x:1210,by:800,sw:79}}}};
+ART.hontrolley={bg:'honolulu-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{h_bus:{n:'t-man-dashiki-front',x:1000,by:890,sw:79}}}};
+ART.honcafe={bg:'honolulu-street-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{h_ice:{n:'t-safari-front',x:1030,by:900,sw:79}}}};
+ART.honshop={bg:'honolulu-street-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{h_shop:{n:'t-woman-hijab-front',x:300,by:900,sw:79}}}};
+ART.honhotel={bg:'honolulu-hotel-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:470,by:884},king:{n:'hall-king-back',x:606,by:884},npcS:{h_front:{n:'o-front-woman-blonde-suit',x:1010,by:925,sw:70}}}};
+ART.honboard={bg:'honolulu-departure-v1.png',mode:'wide',strips:[{img:'honolulu-board-rows-strip.png',x:76,y:116,n:2,fw:458,fh:254,step:1}],dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{h_board:{n:'o-front-officer-blue',x:1100,by:890,sw:70}}}};
+ART.honticket={bg:'honolulu-departure-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{h_ticket:{n:'w-front-man-suit-1',x:1300,by:800,sw:70}}}};
+ART.hongate={bg:'honolulu-departure-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{h_tsa:{n:'o-front-officer-blue',x:670,by:780,sw:70}}}};
 /*ARTSEL*/
 function artImg(n){var i=ARTI[n];if(!i){i=ARTI[n]=new Image();i.onerror=function(){i.bad=1};i.src=ARTBASE+n}return i}
 function artShow(on){if(ARTSHOW===on)return;ARTSHOW=on;cv.hidden=!!on;cvA.hidden=!on}
@@ -722,10 +734,10 @@ var AMB={
  sea:{src:'',vol:.10,note:'海ぞい: 波'}};
 /* 場面の音の名前(場所の snd) → カテゴリ */
 var AMBSND={info:'airport',hall:'airport',tdesk:'airport',map:'airport',nbo:'airport',doh:'airport',cafe:'cafe',costa:'cafe',mall:'cafe',s34:'cafe',
- rvn:'airport',ath:'airport',zur:'airport',ahlan:'lounge',hotel:'hotel',room:'hotel',home:'hotel',sage:'hotel',vault:'hotel',mosque:'hotel',atop:'cabin',souk:'street',city:'street',dohc:'street',
+ rvn:'airport',ath:'airport',zur:'airport',hon:'airport',ahlan:'lounge',hotel:'hotel',room:'hotel',home:'hotel',sage:'hotel',vault:'hotel',mosque:'hotel',atop:'cabin',souk:'street',city:'street',dohc:'street',
  beach:'sea',marina:'sea',fountain:'outdoor',safari:'outdoor'};
 /* 背景の名前 → カテゴリ(場所の音と食いちがうとき、こちらが先) */
-var AMBBG={taxi:'outdoor',dtaxi:'outdoor',rbus:'outdoor',ataxi:'outdoor',acafe:'street',ashop:'street',ahotel:'hotel',ztram:'outdoor',zcafe:'street',zshop:'street',zhotel:'hotel',fcafe:'street',fshop:'street',fhotel:'hotel',cabinQ:'cabin',cabin:'cabin',chotel:'hotel',cbreak:'hotel'};
+var AMBBG={taxi:'outdoor',dtaxi:'outdoor',rbus:'outdoor',ataxi:'outdoor',acafe:'street',ashop:'street',ahotel:'hotel',ztram:'outdoor',zcafe:'street',zshop:'street',zhotel:'hotel',fcafe:'street',fshop:'street',fhotel:'hotel',hnstreet:'street',hnhotel:'hotel',cabinQ:'cabin',cabin:'cabin',chotel:'hotel',cbreak:'hotel'};
 var ambEl=null,ambCat=null,ambDuck=false;
 function ambOn(){try{return localStorage.getItem('kd_snd')!=='off'}catch(e){return true}}
 function ambApply(){var c=ambCat&&AMB[ambCat];

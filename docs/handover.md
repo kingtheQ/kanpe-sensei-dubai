@@ -427,6 +427,16 @@
 - 確認：`python3 tour-src/tests/test_zurich096.py`。未確認：実機のマイク・声・見え方。店名・ホテル名は出していない（PM確認の点）。
 - 参考にしたURL：時刻表（Omio・Trainline）の直通確認は zurich-prep.md（PM・確認日2026-11-26）。公式（SBB/DB）は未確認。
 
+## 今回（11/27）タスク101でやったこと（ホノルル10場面）
+- **10場面**（`tour-src/hon_data.py`、`data.py` で `hon_data.add(D)`）。新形式（flow2・conv・選択は場面に1回・カード式）。到着4(hnl_form1 農産物申告書／hnl_bag1 荷物が出ない／hnl_lei1 レイ／hnl_trolley1 ワイキキへ)・街3(hnl_cafe1 シェイブアイス／hnl_shop1 おみやげ屋／hnl_hotel1 ホテル)・出発3(hnl_dep_board1 案内板／hnl_dep_ticket1 チェックイン／hnl_dep_gate1 保安検査)。到着は国内線なので入国審査なし。出発はシドニー行きで出国審査なし。航空会社名・便名・店名・数字は出さない。
+- **案内板**：背景の青い板は保安検査の「WAIT TIMES」板で行き先の欄がないため、板の中を「DEPARTURES」の表に描き直した別素材 `tour/assets/art/honolulu-board-rows-strip.png`(916×254・2コマ・1秒ごと)を `tour-src/art/prep_honolulu101.py` で作り、`ART.honboard.strips` で重ねた。時刻「--:--」・ゲート「-」。Sydney の行が光る。
+- **事実の更新**：PMメモは「電車はない街」だが、スカイラインの空港駅は2025-10に開業済み(ワイキキにはまだ)。trolley1 の台詞はそれに合わせた。ワイキキ・トロリーは空港に行かない(観光用)。
+- 生成：`tour/honolulu/`(`build.py`)。チェックモード `tour/honolulu/?check=1` で10場面すべて選べる。フランクフルトのチェック画面にホノルルへのリンク、ホノルルからフランクフルトへのリンクを追加。
+- **100との接続(未)**：タスク100(ニューヨーク)がmainにないので、世界マップにホノルルの点だけ追加(`NEI honolulu:[]`・道なし)。ニューヨーク出発 nyc_dep_* の後につなぐのは100のあと。ROWS(30日表)・LEGS は触っていない。
+- 人物の絵は既存の仮の絵の流用。実機(マイク・音・見え方)は未確認。申告書が紙か画面かは未確認(台詞は「this form」)。
+- テスト：`tour-src/tests/test_honolulu101.py` を追加(68項目)。`test_rollout057_3.py` のflow2場面数にホノルル10を加えた。
+- 参考にしたURL：`docs/sources.md` の「タスク101」。
+
 ## 今回（11/26）タスク097でやったこと（フランクフルト10場面）
 - **10場面**（`tour-src/fra_data.py`、`data.py` で `fra_data.add(D)`）。新形式（flow2・conv・選択は場面に1回・カード式）。到着4(fra_arr1・fra_bakery1・fra_tram1・fra_info1)・街3(fra_cafe1・fra_shop1・fra_hotel1)・出発3(fra_dep_board1・fra_dep_ticket1・fra_dep_train1)。鉄道で着いて鉄道で出る。入国審査なし。
 - ロンドンは直通でなく、ブリュッセルまでICE→ユーロスターで乗り換え(info1・出発3場面)。りんご酒は聞くだけ、頼むのはりんごジュース(cafe1)。台詞に数字・€・$なし。

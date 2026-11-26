@@ -246,6 +246,22 @@ FDEP = [
  place('fticket', '窓口', 'info', 72, 46, '🎫', ['窓口(ReiseZentrum)', '切符の鉄道区間・座席・乗りかえ'], ['fra_dep_ticket1'], seq=1),
  place('ftrain', 'ホームと車内', 'hall', 28, 78, '🚆', ['ホームと車内', '席を探す・荷物・車掌に切符を見せる'], ['fra_dep_train1'], seq=1)]
 FRA_IDS = [i for p in FARR + FCITY + FDEP for i in p['v']]
+# ホノルル(タスク101 到着4場面＋街3場面＋出発3場面)。到着=ニューヨークからの国内線(入国審査なし・中心は農産物申告書)。出発=シドニー行き国際線(米国の出国審査なし)。
+# 背景は実画4枚(art.js の hon〜)。場所の id は羽田(hboard・hgate など)とぶつからないよう hn〜 にする。店名・ホテル名・航空会社名・便名は出さない。値段・番号・時刻の数字は台詞にも説明にも出さない。
+HARR = [
+ place('hnform', '農業検査', 'hall', 24, 16, '📝', ['農業検査のカウンター', '申告書と、果物・植物のチェック'], ['hnl_form1'], seq=1),
+ place('hnbag', '荷物受取', 'hall', 72, 32, '🧳', ['荷物受取エリア', 'ベルトと、荷物が出てこないとき'], ['hnl_bag1']),
+ place('hnlei', 'レイスタンド', 'cafe', 28, 56, '🌺', ['レイスタンド', '生花のレイを買う'], ['hnl_lei1']),
+ place('hntrolley', 'ワイキキへ', 'info', 72, 78, '🚌', ['乗り場', 'バスとシャトルでワイキキへ'], ['hnl_trolley1'])]
+HCITY = [
+ place('hncafe', 'シェイブアイス', 'cafe', 24, 18, '🍧', ['シェイブアイスの店', 'レインボーとスノーキャップ'], ['hnl_cafe1']),
+ place('hnshop', 'おみやげ屋', 'souk', 72, 46, '🎁', ['おみやげ屋', 'マカダミアナッツと小さいウクレレ'], ['hnl_shop1']),
+ place('hnhotel', 'ホテル', 'hotel', 28, 76, '🏨', ['ホテル', 'チェックインとラナイ'], ['hnl_hotel1'])]
+HDEP = [
+ place('hnboard', '出発案内', 'hall', 24, 16, '📋', ['大きな案内板', 'シドニー行きのゲートを探す'], ['hnl_dep_board1'], seq=1),
+ place('hnticket', 'チェックイン', 'info', 72, 46, '🎫', ['チェックイン・カウンター', '世界一周航空券と、預ける荷物'], ['hnl_dep_ticket1'], seq=1),
+ place('hngate', '保安検査', 'hall', 28, 78, '🛃', ['保安検査(TSA)', '靴・パソコン・ポケット'], ['hnl_dep_gate1'], seq=1)]
+HON_IDS = [i for p in HARR + HCITY + HDEP for i in p['v']]
 
 SPJS = r"""
 SP.sage={pitch:.8,m:[[trav({}),P(4,{o:'#5a3a8a',p:'#3a2a5a',h:'#d9d4c6'})]]};
@@ -844,6 +860,49 @@ BGS.fboard=function(){fFlat('#ece6d4','#d9cfb6','ABFAHRT')};
 BGS.fticket=function(){fFlat('#ece6d4','#d9cfb6','REISEZENTRUM')};
 BGS.ftrain=function(){fFlat('#ece6d4','#d9cfb6','GLEIS')};
 """
+# ---------- ホノルル(タスク101)の話者・背景・ページの枠 ----------
+# 話者: 明るくのんびり。急がせない(指示書)。ピッチはやや高め・ゆったり。
+SPH = r"""
+SP.h_agri={pitch:1.0,m:[[trav({hair:'cap'}),P(4,{o:'#2f7a4a',p:'#2b2b33',h:'#3b2a1f'})]]};
+SP.h_bagst={pitch:1.05,m:[[trav({}),P(3,{o:'#1f5a8a',p:'#2a2a33',h:'#241a14'})]]};
+SP.h_lei={pitch:1.14,m:[[trav({hair:'long'}),P(2,{o:'#d9467a',p:'#2a2a33',h:'#241a14'})]]};
+SP.h_bus={pitch:.98,m:[[trav({hair:'cap'}),P(5,{o:'#1f6a8a',p:'#2b2b33',h:'#5a3a24'})]]};
+SP.h_ice={pitch:1.1,m:[[trav({}),P(1,{o:'#f0b43a',p:'#2a2a33',h:'#a07a4a'})]]};
+SP.h_shop={pitch:1.12,m:[[trav({hair:'long'}),P(5,{o:'#2a9a8a',p:'#2a2a33',h:'#241a14'})]]};
+SP.h_front={pitch:1.04,m:[[trav({hair:'long'}),P(3,{o:'#e8e2d0',p:'#2a2a33',h:'#3b2a1f'})]]};
+SP.h_board={pitch:1.0,m:[[trav({hair:'cap'}),P(5,{o:'#1f5a8a',p:'#2b2b33',h:'#3b2a1f'})]]};
+SP.h_ticket={pitch:.98,m:[[trav({}),P(4,{o:'#1f5a8a',p:'#2a2a33',h:'#241a14'})]]};
+SP.h_tsa={pitch:.92,m:[[trav({hair:'cap'}),P(5,{o:'#2b3a5a',p:'#2b2b33',h:'#241a14'})]]};
+"""
+# 背景のコード描画は、実画(art.js)が読めないときの保険だけ(色の面と場所の名前)
+BGH = r"""
+function hFlat(top,floor,txt){R(top,0,0,VW,98);R(floor,0,98,VW,52);T(txt,160,56,9,'#173a6a')}
+BGS.hnarr=function(){hFlat('#e9f3f4','#d9d2bc','HONOLULU HNL')};
+BGS.hnstreet=function(){hFlat('#cfe9f4','#d3c7ad','WAIKIKI')};
+BGS.hnhotel=function(){hFlat('#f6eedc','#a87b50','HOTEL')};
+BGS.hnboard=function(){hFlat('#e9f3f4','#d9d2bc','DEPARTURES')};
+BGS.hnticket=function(){hFlat('#e9f3f4','#d9d2bc','CHECK-IN')};
+BGS.hngate=function(){hFlat('#e9f3f4','#d9d2bc','SECURITY')};
+"""
+MAIN_HON = r"""
+/* ===== 世界一周編: ホノルル(到着4場面・街3場面・出発3場面=タスク101。到着は国内線・出発はシドニー行き) ===== */
+var TOURDLG=%(dlg)s;
+for(var _k in TOURDLG)DLG[_k]=TOURDLG[_k];
+%(sp)s
+%(bg)s
+%(world)s
+%(voice)s
+%(ev)s
+var PLACES_HARR=%(arr)s,PLACES_HCITY=%(city)s,PLACES_HDEP=%(dep)s;
+PLACES_AIR=PLACES_HARR;   /* 世界マップのクリアの印: 到着の場所を全部(各1つ以上)あそんだら */
+PLACES_HARR.concat(PLACES_HCITY,PLACES_HDEP).forEach(function(p){PBY[p.id]=p});
+var TOUR_IDS=%(ids)s;
+MODES={arr:{p:PLACES_HARR,b:'🛬 到着',h:'ホノルルに到着<small>ダニエル・K・イノウエ国際空港(HNL)</small>',snd:'hon'},
+ city:{p:PLACES_HCITY,b:'🌴 街',h:'ホノルルの街<small>シェイブアイス・おみやげ屋・ホテル</small>',snd:'hon'},
+ dep:{p:PLACES_HDEP,b:'🛫 出発',h:'ホノルルから出発<small>案内板からチェックインと保安検査まで</small>',snd:'hon'}};
+worldAt('honolulu');
+"""
+
 MAIN_FRA = r"""
 /* ===== 世界一周編: フランクフルト(到着4場面・街3場面・出発3場面=タスク097。鉄道の旅) ===== */
 var TOURDLG=%(dlg)s;
@@ -1432,7 +1491,7 @@ print('missing IPA (zurich):', missing)
 # ---------- フランクフルト(tour/frankfurt/index.html。タスク097 到着・街・出発) ----------
 df = sub('fra_')
 main = MAIN_FRA % dict(dlg=J(df), sp=SPF, bg=BGF, world=WORLDJS, voice=VOICEJS, ev=EVJS, arr=J(FARR), city=J(FCITY), dep=J(FDEP), ids=J(FRA_IDS))
-main += _rd('check.js').replace('__OTHER_HREF__', '../zurich/?check=1').replace('__OTHER_LABEL__', 'チューリッヒ')
+main += _rd('check.js').replace('__OTHER_HREF__', '../zurich/?check=1').replace('__OTHER_LABEL__', 'チューリッヒ').replace('/*CHKX*/', "var a3=el('a','b','ホノルルへ(点検モードのまま)');a3.href='../honolulu/?check=1';r2.appendChild(a3);")
 main += art_js('../assets/art/', "function artIdFor(S){var v=String(S&&S.vid||'');var m={fra_arr1:'frafarr',fra_bakery1:'frafbakery',fra_tram1:'fraftram',fra_info1:'frafinfo',fra_cafe1:'frafcafe',fra_shop1:'frafshop',fra_hotel1:'frafhotel',fra_dep_board1:'frafboard',fra_dep_ticket1:'frafticket',fra_dep_train1:'fraftrain'};return m[v]||null}")   # 実画: 到着=frankfurt-arrival-v1(発車標の中身は別素材)・街=frankfurt-street-v1 / frankfurt-hotel-v1・出発=frankfurt-departure-v1。読めないときは BGF(コード描画)にもどる
 o = ev_patches(common(src, 'Europe/Berlin'))
 for _a, _b in SHARED: o = rep(o, _a, _b)
@@ -1463,6 +1522,40 @@ os.makedirs(os.path.join(ROOT, 'tour', 'frankfurt'), exist_ok=True)
 open(os.path.join(ROOT, 'tour', 'frankfurt', 'index.html'), 'w', encoding='utf-8').write(o)
 print('frankfurt built', len(o), 'bytes; dialogues', len(df), 'words', sum(len(v['words']) for v in df.values()))
 print('missing IPA (frankfurt):', missing)
+
+# ---------- ホノルル(tour/honolulu/index.html。タスク101 到着・街・出発。フランクフルトの作りと同じ) ----------
+dh = sub('hnl_')
+main = MAIN_HON % dict(dlg=J(dh), sp=SPH, bg=BGH, world=WORLDJS, voice=VOICEJS, ev=EVJS, arr=J(HARR), city=J(HCITY), dep=J(HDEP), ids=J(HON_IDS))
+main += _rd('check.js').replace('__OTHER_HREF__', '../frankfurt/?check=1').replace('__OTHER_LABEL__', 'フランクフルト')
+main += art_js('../assets/art/', "function artIdFor(S){var v=String(S&&S.vid||'');var m={hnl_form1:'honform',hnl_bag1:'honbag',hnl_lei1:'honlei',hnl_trolley1:'hontrolley',hnl_cafe1:'honcafe',hnl_shop1:'honshop',hnl_hotel1:'honhotel',hnl_dep_board1:'honboard',hnl_dep_ticket1:'honticket',hnl_dep_gate1:'hongate'};return Object.prototype.hasOwnProperty.call(m,v)?m[v]:null}")   # 実画: 到着=honolulu-arrival-v1・街=honolulu-street-v1 / honolulu-hotel-v1・出発=honolulu-departure-v1(案内板の中身は別素材 honolulu-board-rows-strip.png)。読めないときは BGH(コード描画)にもどる
+o = ev_patches(common(src, 'Pacific/Honolulu'))
+for _a, _b in SHARED: o = rep(o, _a, _b)
+o = rep(o, " if(!G.camp)addHelp(T)}", " if(!G.camp&&!G.scene.d.nohelp)addHelp(T)}")
+o = rep(o, '<title>カンペ先生 ドバイ編</title>', '<title>空港えいご物語 世界一周編 ホノルル</title>')
+o = rep(o, SNOTE_OLD, SNOTE_NEW)
+o = rep(o, ".cue .heard.live{color:#8a7b55}", ".cue .heard.live{color:#8a7b55}\n" + VOICECSS)
+o = rep(o, "'../world/?map=1'", "'../../world/?map=1'", 2)
+o = rep(o, "worldMark('dubai')", "worldMark('honolulu')")   # 到着の場所を全部あそんだら印(PLACES_AIR=PLACES_HARR)
+o = rep(o, "Snd.go(MODE==='city'?'city':'map')", "Snd.go(MODES[MODE].snd)")
+o = rep(o, "S.turns.forEach(function(T,i){T.ctx=ctxAt(d,i);T.pitch=", "S.turns.forEach(function(T,i){T.ctx=ctxAt(d,i);if(T.cx)T.ctx=Object.assign({},T.ctx,T.cx);T.pitch=")
+# 最後の場面(保安検査)が終わったら世界マップへ(次の寄港地シドニーへ向かう土台)。チェックモードは同じページにもどる
+o = rep(o, "if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}showMap()}",
+        "if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}if(S.vid==='hnl_dep_gate1'){worldMark('honolulu');Snd.go(null);location.href=window.__CHK?'./?check=1':'../../world/?map=1';return}showMap();/*HON_END*/}")
+# 音: 基本は静か。ゆっくりした、やわらかいウクレレ風のつま弾き(シャカシャカした高い音は使わない)
+o = rep(o, KBASE, KBASE +
+        "K.hon={bpm:function(){return 60},amb:function(){loopNoise(300,.5,.010,.06,.005,'lowpass')},"
+        "st:function(s,t,e){var KH=[67,64,60,64,69,65,62,64];if(s%4===0)pluck(hz(KH[(s>>2)%8]),t,e*3.2,ngt?.06:.09);"
+        "if(s%16===8)pluck(hz(KH[0]-12),t,e*5,.07);if(s%32===0)tone(hz(36),t,e*30,'sine',.05,.6)}};")
+o = rep(o, REC, record('ホノルルの'))
+o = trip_patches(o, 'honolulu')
+o = rep(o, "showMap();/*HON_END*/}", "showMap()})}")
+o = rep(o, "g.fillStyle='#143fb0';g.fillRect(0,0,5,ch);g.fillRect(cw-5,0,5,ch)", "g.fillStyle='#1f8a8a';g.fillRect(0,0,5,ch);g.fillRect(cw-5,0,5,ch)")
+o = rep(o, "setMode('arr');\nvar phoQ", main + "\nsetMode('arr');if(!/[?&]pho=/.test(location.search)&&!window.__CHK)TRIP.enter(function(){},'honolulu');\nvar phoQ")
+o = rep(o, '<head>', '<head><script>' + _rd('check_shim.js') + '</script>')   # タスク056
+os.makedirs(os.path.join(ROOT, 'tour', 'honolulu'), exist_ok=True)
+open(os.path.join(ROOT, 'tour', 'honolulu', 'index.html'), 'w', encoding='utf-8').write(o)
+print('honolulu built', len(o), 'bytes; dialogues', len(dh), 'words', sum(len(v['words']) for v in dh.values()))
+print('missing IPA (honolulu):', missing)
 
 # ---------- 終わりの場面(tour/ending/index.html): 旅の一か月後のリビングで、アルバムの白いページを埋める ----------
 import window_data
