@@ -49,6 +49,7 @@ function build(){
  pan.appendChild(el('h3','','ページ'));
  var r2=el('div','row'),a=el('a','b',OTHER_LABEL+'へ(点検モードのまま)');a.href=OTHER_HREF;r2.appendChild(a);
  var a2=el('a','b','通常モードで開く');a2.href=location.pathname;r2.appendChild(a2);
+ /*CHKX*/
  r2.appendChild(sbtn('専用の記録を消す',function(){if(window.__chkReset)window.__chkReset();location.reload()}));
  pan.appendChild(r2);
  Object.keys(MODES).forEach(function(k){

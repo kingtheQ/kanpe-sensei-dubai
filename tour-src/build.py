@@ -178,6 +178,23 @@ RDEP = [
  place('rgate', 'ゲート', 'hall', 28, 84, '🛫', ['出発ゲート', '雪の窓の前で'], ['rvn_gate1', 'rvn_gate2'])]
 RVN_IDS = [i for p in RARR + RSTAY + RDEP for i in p['v']]
 
+# アテネ(タスク090 到着・タスク091 街と出発)。到着は3か所(入国審査は2場面を順に=seq)、街は3か所、出発は3か所(順に開く=seq)。
+# 背景はどれも実画(art.js の athimm1 ほか。到着=athens-arrival / 街=athens-street・athens-hotel / 出発=athens-departure)。
+# ホテル・店の名前は指示書に無いので出さない(PM確認の点)。値段・便の時刻・ゲート番号は台詞にも説明にも出さない。
+AARR = [
+ place('aimmig', '入国審査', 'info', 24, 16, '🛂', ['入国審査', '窓口に並ぶ・帽子とサングラスをとる・顔と指'], ['ath_immig1', 'ath_immig2'], seq=1),
+ place('ataxi', 'タクシー乗り場', 'hall', 72, 46, '🚕', ['タクシー乗り場', '客引きを断って、正規の乗り場へ'], ['ath_taxi1']),
+ place('ametro', '地下鉄の切符', 'info', 28, 78, '🚇', ['地下鉄の券売機', '空港用の切符をえらぶ'], ['ath_transit1'])]
+ACITY = [
+ place('acafe', 'タベルナ', 'cafe', 24, 18, '🥙', ['タベルナ(ギリシャの食堂)', 'ギロを注文・持ち帰り'], ['ath_cafe1']),
+ place('ashop', 'おみやげ屋', 'souk', 72, 46, '🛍️', ['おみやげ屋', '革のサンダルとマスティハ'], ['ath_shop1']),
+ place('ahotel', 'ホテル', 'hotel', 28, 76, '🏨', ['ホテル', 'チェックインと朝食'], ['ath_hotel1'])]
+ADEP = [
+ place('acheck', 'チェックイン', 'info', 24, 16, '🎫', ['チェックイン', '荷物と席・早めに審査へ'], ['ath_checkin1'], seq=1),
+ place('adepimm', '出国審査の列', 'info', 72, 46, '🛂', ['出国審査の列', '出発30分前・優先をたのむ'], ['ath_depimmig1'], seq=1),
+ place('agate', '搭乗口', 'hall', 28, 78, '🛫', ['搭乗口', '時刻と搭乗口の変更を確かめる'], ['ath_gate1'], seq=1)]
+ATH_IDS = [i for p in AARR + ACITY + ADEP for i in p['v']]
+
 SPJS = r"""
 SP.sage={pitch:.8,m:[[trav({}),P(4,{o:'#5a3a8a',p:'#3a2a5a',h:'#d9d4c6'})]]};
 SP.desk_star={pitch:1.2,m:[[trav({hair:'long'}),P(1,{o:'#c8182a',p:'#2a2a33',h:'#241a14'})]]};
@@ -599,6 +616,53 @@ MODES={arr:{p:PLACES_RARR,b:'🛬 到着',h:'ロヴァニエミに到着<small>�
  stay:{p:PLACES_RSTAY,b:'🎅 滞在',h:'ロヴァニエミの滞在<small>サンタクロース村とホテルの夜</small>',snd:'rvn'},
  dep:{p:PLACES_RDEP,b:'🛫 出発',h:'ロヴァニエミから出発<small>チェックインからゲートまで</small>',snd:'rvn'}};
 worldAt('rovaniemi');
+"""
+
+# ---------- アテネ(タスク090・091)の話者・背景・ページの枠 ----------
+# 話者: 声が大きく、身ぶりが多く、率直だが世話好き(PM指示)。ピッチは ナイロビ・ドーハ・ロヴァニエミの係員とずらす。絵は art.js の athXXX(既存の人物素材を流用。アテネ専用の人物素材はまだ無い)
+SPA = r"""
+SP.a_officer={pitch:.86,m:[[trav({hair:'cap'}),P(5,{o:'#2b3a5a',p:'#2b2b33',h:'#241a14'})]]};
+SP.a_officer2={pitch:1.14,m:[[trav({hair:'long'}),P(4,{o:'#2b3a5a',p:'#2b2b33',h:'#5a3a24'})]]};
+SP.a_tout={pitch:.82,m:[[trav({hair:'curly'}),P(3,{o:'#d06a2a',p:'#2a2a33',h:'#241a14'})]]};
+SP.a_driver={pitch:.9,m:[[trav({hair:'cap'}),P(5,{o:'#e0a21a',p:'#14141a',h:'#3b2a1f'})]]};
+SP.a_metro={pitch:1.06,m:[[trav({hair:'long'}),P(4,{o:'#1f5a8a',p:'#2a2a33',h:'#a07a4a'})]]};
+SP.a_waiter={pitch:.93,m:[[trav({}),P(1,{o:'#e8e4d8',p:'#2a2a33',h:'#241a14'})]]};
+SP.a_shop={pitch:1.12,m:[[trav({hair:'curly'}),P(2,{o:'#a02a2a',p:'#2a2a33',h:'#5a3a24'})]]};
+SP.a_front={pitch:1.08,m:[[trav({hair:'long'}),P(5,{o:'#1b3a6a',p:'#2a2a33',h:'#c9a45a'})]]};
+SP.a_ck={pitch:1.16,m:[[trav({hair:'long'}),P(5,{o:'#143a8a',p:'#2a2a33',h:'#241a14'})]]};
+SP.a_dep={pitch:.9,m:[[trav({hair:'cap'}),P(4,{o:'#3a4a5a',p:'#2b2b33',h:'#5a3a24'})]]};
+SP.a_gate={pitch:1.02,m:[[trav({}),P(5,{o:'#1b3a6a',p:'#2a2a33',h:'#3b2a1f'})]]};
+"""
+# 背景のコード描画は、実画(art.js)が読めないときの保険だけ(色の面と場所の名前)
+BGA = r"""
+function aFlat(top,floor,txt){R(top,0,0,VW,98);R(floor,0,98,VW,52);T(txt,160,56,9,'#173a6a')}
+BGS.aimmig=function(){aFlat('#ece6d4','#d9cfb6','PASSPORT CONTROL')};
+BGS.ataxi=function(){aFlat('#ece6d4','#d9cfb6','TAXI')};
+BGS.ametro=function(){aFlat('#ece6d4','#d9cfb6','METRO')};
+BGS.acafe=function(){aFlat('#cfe3f4','#d3c7ad','TAVERNA')};
+BGS.ashop=function(){aFlat('#cfe3f4','#d3c7ad','SHOP')};
+BGS.ahotel=function(){aFlat('#f0e8d6','#a87b50','HOTEL')};
+BGS.acheck=function(){aFlat('#ece6d4','#d9cfb6','DEPARTURES')};
+BGS.adep=function(){aFlat('#ece6d4','#d9cfb6','DEPARTURES')};
+BGS.agate=function(){aFlat('#ece6d4','#d9cfb6','GATE')};
+"""
+MAIN_ATH = r"""
+/* ===== 世界一周編: アテネ(到着4場面=タスク090・街3場面と出発3場面=タスク091) ===== */
+var TOURDLG=%(dlg)s;
+for(var _k in TOURDLG)DLG[_k]=TOURDLG[_k];
+%(sp)s
+%(bg)s
+%(world)s
+%(voice)s
+%(ev)s
+var PLACES_AARR=%(arr)s,PLACES_ACITY=%(city)s,PLACES_ADEP=%(dep)s;
+PLACES_AIR=PLACES_AARR;   /* 世界マップのクリアの印: 到着の場所を全部(各1つ以上)あそんだら */
+PLACES_AARR.concat(PLACES_ACITY,PLACES_ADEP).forEach(function(p){PBY[p.id]=p});
+var TOUR_IDS=%(ids)s;
+MODES={arr:{p:PLACES_AARR,b:'🛬 到着',h:'アテネに到着<small>アテネ国際空港</small>',snd:'ath'},
+ city:{p:PLACES_ACITY,b:'🏛 街',h:'アテネの街<small>タベルナ・おみやげ屋・ホテル</small>',snd:'ath'},
+ dep:{p:PLACES_ADEP,b:'🛫 出発',h:'アテネから出発<small>チェックインから搭乗口まで</small>',snd:'ath'}};
+worldAt('athens');
 """
 
 # ---------- 窓口の地図(線を引く): 多角形から 92x16 の陸地ビットマップを作る ----------
@@ -1031,7 +1095,7 @@ print('missing IPA:', missing)
 # ---------- ロヴァニエミ(tour/rovaniemi/index.html。タスク065) ----------
 dr = sub('rvn_')
 main = MAIN_RVN % dict(dlg=J(dr), sp=SPR, bg=BGR, world=WORLDJS, voice=VOICEJS, ev=EVJS, arr=J(RARR), stay=J(RSTAY), dep=J(RDEP), ids=J(RVN_IDS))
-main += _rd('check.js').replace('__OTHER_HREF__', '../doha/?check=1').replace('__OTHER_LABEL__', 'ドーハ')
+main += _rd('check.js').replace('__OTHER_HREF__', '../doha/?check=1').replace('__OTHER_LABEL__', 'ドーハ').replace('/*CHKX*/', "var a3=el('a','b','アテネへ(点検モードのまま)');a3.href='../athens/?check=1';r2.appendChild(a3);")
 main += art_js('../assets/art/', "function artIdFor(S){var v=String(S&&S.vid||'');return /^rvn_lobby[12]$/.test(v)?'rvnlobby':/^rvn_village[12]$/.test(v)?'rvillage':/^rvn_post[12]$/.test(v)?'rpostoffice':null}")   # 実画: 到着ロビー(rovaniemi-arrivals-v1.png＋オーロラ strip)・村の広場(072。オーロラ・煙・きらめき)・郵便局(072。暖炉の炎)。ほかはコード描画
 o = ev_patches(common(src, 'Europe/Helsinki'))
 for _a, _b in SHARED: o = rep(o, _a, _b)
@@ -1060,6 +1124,41 @@ os.makedirs(os.path.join(ROOT, 'tour', 'rovaniemi'), exist_ok=True)
 open(os.path.join(ROOT, 'tour', 'rovaniemi', 'index.html'), 'w', encoding='utf-8').write(o)
 print('rovaniemi built', len(o), 'bytes; dialogues', len(dr), 'words', sum(len(v['words']) for v in dr.values()))
 print('missing IPA (all):', missing)
+
+# ---------- アテネ(tour/athens/index.html。タスク090 到着・タスク091 街と出発) ----------
+da = sub('ath_')
+main = MAIN_ATH % dict(dlg=J(da), sp=SPA, bg=BGA, world=WORLDJS, voice=VOICEJS, ev=EVJS, arr=J(AARR), city=J(ACITY), dep=J(ADEP), ids=J(ATH_IDS))
+main += _rd('check.js').replace('__OTHER_HREF__', '../rovaniemi/?check=1').replace('__OTHER_LABEL__', 'ロヴァニエミ')
+main += art_js('../assets/art/', "function artIdFor(S){var v=String(S&&S.vid||'');if(v==='ath_immig1')return'athimm1';if(v==='ath_immig2')return'athimm2';if(v==='ath_taxi1')return'athtaxi';if(v==='ath_transit1')return'athmetro';if(v==='ath_cafe1')return'athcafe';if(v==='ath_shop1')return'athshop';if(v==='ath_hotel1')return'athhotel';if(v==='ath_checkin1')return'athck';if(v==='ath_depimmig1'||v==='ath_gate1')return'athdep';return null}")   # 実画: 到着(athens-arrival)・街(athens-street / athens-hotel)・出発(athens-departure)。読めないときは BGA(コード描画)にもどる
+o = ev_patches(common(src, 'Europe/Athens'))
+for _a, _b in SHARED: o = rep(o, _a, _b)
+o = rep(o, " if(!G.camp)addHelp(T)}", " if(!G.camp&&!G.scene.d.nohelp)addHelp(T)}")
+o = rep(o, '<title>カンペ先生 ドバイ編</title>', '<title>空港えいご物語 世界一周編 アテネ</title>')
+o = rep(o, SNOTE_OLD, SNOTE_NEW)
+o = rep(o, ".cue .heard.live{color:#8a7b55}", ".cue .heard.live{color:#8a7b55}\n" + VOICECSS)
+o = rep(o, "'../world/?map=1'", "'../../world/?map=1'", 2)
+o = rep(o, "worldMark('dubai')", "worldMark('athens')")   # 到着の場所を全部あそんだら印(PLACES_AIR=PLACES_AARR)
+o = rep(o, "Snd.go(MODE==='city'?'city':'map')", "Snd.go(MODES[MODE].snd)")
+# 客引き→正規の運転手のように、番ごとに話す人を替える(T.cx。タスク089 の宣言と同じ部品。ナイロビ以外のページにも入れる)
+o = rep(o, "S.turns.forEach(function(T,i){T.ctx=ctxAt(d,i);T.pitch=", "S.turns.forEach(function(T,i){T.ctx=ctxAt(d,i);if(T.cx)T.ctx=Object.assign({},T.ctx,T.cx);T.pitch=")
+# 最後の場面(搭乗口)が終わったら世界マップへ(次の寄港地へ向かう土台)。チェックモードは同じページにもどる
+o = rep(o, "if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}showMap()}",
+        "if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}if(S.vid==='ath_gate1'){worldMark('athens');Snd.go(null);location.href=window.__CHK?'./?check=1':'../../world/?map=1';return}showMap();/*ATH_END*/}")
+# 音: 基本は静か。地中海ふうの、ゆっくりした つま弾き(ブズーキ風)。シャカシャカした高い音は使わない
+o = rep(o, KBASE, KBASE +
+        "K.ath={bpm:function(){return 60},amb:function(){loopNoise(300,.5,.012,.07,.006,'lowpass')},"
+        "st:function(s,t,e){var KA=[62,64,65,69,67,65,64,62];if(s%4===0)pluck(hz(KA[(s>>2)%8]),t,e*3.4,ngt?.07:.1);"
+        "if(s%16===8)pluck(hz(KA[0]-12),t,e*5,.08);if(s%32===0)tone(hz(38),t,e*30,'sine',.06,.6)}};")
+o = rep(o, REC, record('アテネの'))
+o = trip_patches(o, 'athens')
+o = rep(o, "showMap();/*ATH_END*/}", "showMap()})}")
+o = rep(o, "g.fillStyle='#143fb0';g.fillRect(0,0,5,ch);g.fillRect(cw-5,0,5,ch)", "g.fillStyle='#1f5aa8';g.fillRect(0,0,5,ch);g.fillRect(cw-5,0,5,ch)")
+o = rep(o, "setMode('arr');\nvar phoQ", main + "\nsetMode('arr');if(!/[?&]pho=/.test(location.search)&&!window.__CHK)TRIP.enter(function(){},'athens');\nvar phoQ")
+o = rep(o, '<head>', '<head><script>' + _rd('check_shim.js') + '</script>')   # タスク056
+os.makedirs(os.path.join(ROOT, 'tour', 'athens'), exist_ok=True)
+open(os.path.join(ROOT, 'tour', 'athens', 'index.html'), 'w', encoding='utf-8').write(o)
+print('athens built', len(o), 'bytes; dialogues', len(da), 'words', sum(len(v['words']) for v in da.values()))
+print('missing IPA (athens):', missing)
 
 # ---------- 終わりの場面(tour/ending/index.html): 旅の一か月後のリビングで、アルバムの白いページを埋める ----------
 import window_data

@@ -128,6 +128,143 @@
 - 実機（マイク・音・見え方）は未確認。`pages.yml` が `tour/assets/` を公開に入れていない件は未確認のまま報告のみ。
 - 参考にしたURL：なし（素材は同梱パックのみ）。
 
+## 今回（11/26）タスク090・091でやったこと（アテネ到着4＋街3＋出発3、マイク画像の差し替え）
+- **マイク**：`MICBIG_IMG` を同梱の `tour/assets/art/mic-large-v1.png` に差し替え（`window.js`）。表示のタイミング(`.on`)と箱の大きさ(84×119)は変更なし。正方形の絵は `object-fit:contain`(下そろえ)で収めた(`window.css`)。画像が読めないときは従来のコード描画(`declMicPix`)に戻る。
+- **アテネ10場面**（`tour-src/ath_data.py`、`data.py` の最後で `ath_data.add(D)`）。すべて新形式（flow2・conv・選択は場面に1回・カード式）。生成物は `tour/athens/index.html`（`build.py` の MAIN_ATH）。
+  - 到着(4): ath_immig1・ath_immig2(EES：顔写真と指紋、スタンプなし)・ath_taxi1(客引き→定額)・ath_transit1(地下鉄の空港用切符。**金額は台詞に出さない**)。背景 athens-arrival-v1。
+  - 街(3): ath_cafe1(タベルナ)・ath_shop1(おみやげ屋)・ath_hotel1(チェックインと朝食)。背景 athens-street-v1 / athens-hotel-v1。
+  - 出発(3): ath_checkin1・ath_depimmig1(出発30分前の優先)・ath_gate1(時刻変更)。背景 athens-departure-v1。**時刻・搭乗口番号・値段は台詞に入れていない**。
+  - 数字の例外は2つだけ：taxi の「forty euros」（PM指示の定額）と depimmig の「thirty minutes」（指示の場面設定）。
+  - 場所：aimmig/ataxi/ametro・acafe/ashop/ahotel・acheck/adepimm/agate。ロヴァニエミ(072)の次の都市として世界マップ(`world/index.html` の AP/NEI)・旅の骨組みの GROUPS/PLACEGRP/MODEGRP/HOUR/THEME・IMPL(ATH)に追加。
+  - チェックモード：`tour/athens/?check=1` から10場面すべて選べる。ロヴァニエミのチェック画面に「アテネへ」のリンクを追加(`check.js` の `/*CHKX*/`)。
+  - 人物の絵はアテネ専用がなく、既存の仮の絵を流用している（客引き・運転手は話者ごとに `cx` で切り替え）。ホテル名・店名は出していない。
+- **未決（PMへ）**：旅の骨組みの `LEGS`/`ROWS`（30日表）にアテネの便がまだない。旅モードから飛行機でアテネへ行く道はない（世界マップと点検モードから入る）。また `LEGS.star` は088の統一ルート（ロヴァニエミの次がアテネ）と食い違ったまま。既存テスト(13区間など)を壊さないため触っていない。決めてもらったら表を直す。
+- **参考にしたURL**（2026-11-26確認、`docs/sources.md` にも記載）：https://www.aia.gr/en/traveller/international-travellers ／ https://www.mfa.gr/ireland/en/new-eu-digital-entryexit-system-takes-full-effect-on-the-10th-of-april-2026/ ／ https://www.mfa.gr/missionsabroad/en/ireland-en/news/greece-to-start-using-eu-digital-entryexit-system-on-12-october-2025.html
+- **ルール**：既存場面の台詞・流れは変えていない。画面に「復習/テスト/測定」を出さない。未確認の数字は台詞に入れない。マイク・実機の見え方・実機の音は未確認。
+- テスト：`tour-src/tests/test_athens090.py` を追加。既存テストのうち、057系(flow2の場面数にアテネを含めない)・072(MODEGRPの文字列)・065(NEIの文字列)を、アテネ追加に合わせて直した。
+
+### 台詞全文（アテネ10場面）
+### ath_immig1
+- 係員: Hello, hello! A Japanese passport? No automatic gate for you today. Come to the window, please!
+  - ルル/キング: Hello. Thank you. Here I come.
+- 係員: Hat off, sunglasses off, please! I need to see your face. And the passport, open at the photo page!
+  - ルル/キング: Sorry. Here is my passport.
+- 係員: Good, good. Why are you visiting Greece?
+  - 選択: We are here for sightseeing. → 係員: Sightseeing! The best reason. We have a lot of old stones here, my friend!
+  - 選択: We are traveling around the world. → 係員: Around the world! Wonderful. Greece is a very good stop!
+- 係員: And how long will you stay in Athens?
+  - ルル/キング: We will stay for a few days.
+- 係員: Perfect! Enjoy the sun and the old stones. Welcome to Greece, my friends!
+  - ルル/キング: Thank you very much!
+### ath_immig2
+- 係員: Next, please! This is the new system. First, look at the camera. Straight, my friend, straight!
+  - ルル/キング: Like this? Okay.
+- 係員: Good photo! Now your fingers. Put them on the glass, please. Flat, flat!
+  - ルル/キング: Is this right?
+- 係員: Perfect. The machine is happy! Do you know the new system? It is called EES.
+  - 選択: No, I didn't know. What is it? → 係員: It keeps a digital record of your face and fingers when you come in. Easy!
+  - 選択: Yes, I read about it. → 係員: Smart traveler! Then you know the rule.
+- 係員: So, no stamp in your passport now. The computer keeps the record, not the paper.
+  - ルル/キング: No stamp? That is a little sad.
+- 係員: Ha! I know, I know. Many travelers say so. Maybe next time it will be faster. Welcome to Athens!
+  - ルル/キング: Thank you. See you!
+### ath_taxi1
+- 係員: Taxi, taxi, my friend! Good price, good price! Come, come with me!
+  - 選択: No, thank you. We will go to the taxi rank. → 係員: Okay, okay, no problem! Have a nice day!
+  - 選択: No, thank you. We only take the official taxi. → 係員: Okay, okay. You are smart! Have a nice day!
+- 係員: Welcome! This is the taxi rank, the real one. Where to, my friends?
+  - ルル/キング: To the city center, please.
+- 係員: No problem! Please get in. The luggage goes in the back.
+  - ルル/キング: Thank you. It is a fixed price of forty euros to the center, right?
+- 係員: Yes, yes, correct! Forty euros to the center, a fixed price. No surprise, my friend!
+  - ルル/キング: Good. Thank you for telling us.
+- 係員: Sit back and relax. Welcome to Athens!
+  - ルル/キング: Thank you. Efharisto!
+### ath_transit1
+- 係員: Hello, hello! You look lost, my friends. Can I help you?
+  - ルル/キング: Yes, please. We want to go to the city by metro.
+- 係員: Great choice! Look at the machine. There are many tickets. Which one do you want?
+  - 選択: Which one is the airport ticket? → 係員: This one! Many people choose the wrong one, so you are smart to ask!
+  - 選択: I want the cheapest ticket. → 係員: No, no, no! The cheap city ticket does not go to the airport. You need the airport ticket!
+- 係員: Press the button for the airport ticket here. Then pay, and take your ticket.
+  - ルル/キング: This button? Okay. Can I pay by card?
+- 係員: Yes, a card is fine. The machine will tell you what to do. Easy, easy!
+  - ルル/キング: Thank you. Which way is the train to the city?
+- 係員: Follow the signs for the metro! The train comes soon. Have a good trip, my friends!
+  - ルル/キング: Thank you very much. Bye!
+### ath_cafe1
+- 係員: Yia sas, my friends! Come, come! You look hungry!
+  - ルル/キング: Yes, we are. What do you recommend?
+- 係員: Gyros! Everybody loves it. Meat, tomato, onion, and pita, all together. Here, or to go?
+  - 選択: We'll eat here, please. → 係員: Wonderful! Fresh and hot, coming right up!
+  - 選択: To take away, please. Could you wrap it? → 係員: Of course! I wrap it nicely, no problem!
+- 係員: Anything else? Try the loukoumades! Little fried sweets with honey. Very good!
+  - ルル/キング: Sounds nice. We will try the loukoumades too.
+- 係員: Excellent choice! Everything is almost ready. Please wait just a little.
+  - ルル/キング: Thank you. It smells so good.
+- 係員: Enjoy, enjoy! Come back again, my friends!
+  - ルル/キング: We will. Thank you!
+### ath_shop1
+- 係員: Welcome, welcome! Look, touch, smell! Everything is made with love!
+  - ルル/キング: Thank you. We like your sandals. Can we try a pair?
+- 係員: Of course! Leather sandals, very comfortable. Try this pair. How do they feel?
+  - 選択: They fit well. This size is good. → 係員: Perfect! Greek feet, I think!
+  - 選択: They are a little tight. Do you have a bigger size? → 係員: Of course! Wait, wait, I bring the bigger ones!
+- 係員: Good, good. Now look here. Mastic soap, and natural cosmetics. Very Greek!
+  - ルル/キング: They smell nice. What is mastic?
+- 係員: Mastic comes from a tree on a Greek island. We use it in sweets, and in cosmetics. Very special!
+  - ルル/キング: Interesting. How much are the sandals?
+- 係員: The price is on the little tag, my friend. And for two pairs, I make you a better price. Okay?
+  - ルル/キング: Okay. We will think about it. Thank you!
+### ath_hotel1
+- 係員: Good evening, and welcome to Athens! Do you have a reservation?
+  - ルル/キング: Yes, we do. Here is my passport.
+- 係員: Perfect! I make your check-in, one moment! Please sign here.
+  - ルル/キング: Here you are. Thank you.
+- 係員: Done! Your room has a beautiful view of the Acropolis. You will love it, I promise!
+  - ルル/キング: Wonderful! What time is breakfast tomorrow?
+- 係員: Breakfast is in the restaurant, early in the morning. Do you prefer the restaurant, or your room?
+  - 選択: We'll have breakfast in the restaurant. → 係員: Good choice! Fresh bread, fresh fruit, and good coffee!
+  - 選択: Could we have breakfast in our room? → 係員: Of course! Just tell me tonight, and I arrange everything.
+- 係員: Enjoy your stay, my friends! If you need anything, call me!
+  - ルル/キング: Thank you. Good night!
+### ath_checkin1
+- 係員: Hello! Passport and ticket, please. Let's go, let's go!
+  - ルル/キング: Here you are.
+- 係員: Thank you. You want to check this bag, yes? Put it on the belt, please.
+  - ルル/キング: Yes. Just this one suitcase.
+- 係員: Good! Now, window seat, or aisle seat?
+  - 選択: A window seat, please. → 係員: Window! You will see the clouds!
+  - 選択: An aisle seat, please. → 係員: Aisle! Easy to stand up and walk!
+- 係員: Here is your boarding pass. Now listen to me, my friends: passport control takes time today. Please go early!
+  - ルル/キング: Is the line long today?
+- 係員: It can be very long! Don't take your time. Go now, go, go!
+  - ルル/キング: I see. We will go right now. Thank you!
+### ath_depimmig1
+- 係員: Next, next! Passport and boarding pass, please!
+  - ルル/キング: Here you are. Our flight leaves in thirty minutes.
+- 係員: Thirty minutes? Oh my! The line is long today. What do you need?
+  - 選択: Is there a priority lane, please? → 係員: A priority lane? Not always, my friend. But your flight is soon, so I help you. Come, come!
+  - 選択: We are in a hurry. Can we go first, please? → 係員: I understand, I understand. Okay, okay, come with me, quickly!
+- 係員: This way! Please stand here. Passport open at the photo page.
+  - ルル/キング: Thank you so much.
+- 係員: Camera, please. Then your fingers. Fast, fast! Good!
+  - ルル/キング: Okay. Is that all?
+- 係員: All done! Now walk fast, but don't fall! Go, go, go!
+  - ルル/キング: Thank you! Goodbye!
+### ath_gate1
+- 係員: Attention, my friends! Your flight has a change. The time is different now!
+  - ルル/キング: Oh no. What is the new time?
+- 係員: The flight leaves later than before. Please look at the screen. The new time is there. Very clear!
+  - ルル/キング: Thank you. And the gate? Is it the same?
+- 係員: The gate changed too! Please check the board. Do you want me to show you?
+  - 選択: Yes, please show us the way. → 係員: Of course! Come, I show you. Follow me!
+  - 選択: No, thank you. We will check the screen. → 係員: Good, good! The board is right there. You are very quick!
+- 係員: Don't worry. You have time. Sit, drink some water, relax!
+  - ルル/キング: Thank you. We will wait here.
+- 係員: I call everyone when we board. Please listen for the announcement!
+  - ルル/キング: Okay. Thank you very much!
+
 ## 未決・考え中
 - ナイロビ・ドーハまで遊んで「飽きてきた」。どの国も入国審査・手荷物受け取りなど同じ場面が続くため。対策案は 005。どうするかは未決定。
 - 強化合宿の作り直しの方向は未決定（006）。006 の e（開けない「発音教室」画面と古い合宿の整理）はキングの判断待ちで、まだやっていない。

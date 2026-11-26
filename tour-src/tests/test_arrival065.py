@@ -200,7 +200,7 @@ with sync_playwright() as pw:
     pg = newpage(br, seed(3, 9, 9), path='/world/index.html', hook=False); pg.mouse.click(215, 450); pg.wait_for_timeout(600)
     wm = pg.evaluate("(function(){return {ap:window.__AP?1:0}})()")
     html = open(os.path.join(ROOT, 'world/index.html'), encoding='utf-8').read()
-    chk('世界マップ: ロヴァニエミ(url ../tour/rovaniemi/)がドーハの隣', "rovaniemi:{n:'ロヴァニエミ'" in html and "url:'../tour/rovaniemi/'" in html and "doha:['nairobi','dubai','rovaniemi'],rovaniemi:['doha']" in html)
+    chk('世界マップ: ロヴァニエミ(url ../tour/rovaniemi/)がドーハの隣', "rovaniemi:{n:'ロヴァニエミ'" in html and "url:'../tour/rovaniemi/'" in html and "doha:['nairobi','dubai','rovaniemi'],rovaniemi:['doha'" in html)
     ch = pg.evaluate("(function(){var c=TRIP.chain('RVN');return c&&c.map(function(j){return TRIP.legInfo(j).fr+'>'+TRIP.legInfo(j).to})})()")
     chk('ドーハにいる10日目前: chain(RVN) = DOH>HEL→HEL>RVN(ヘルシンキは乗り継ぎだけ)', ch == ['DOH>HEL', 'HEL>RVN'], ch)
     chk('canFly(rovaniemi) が true・ヘルシンキ(場面なし)は飛べない', pg.evaluate("[TRIP.canFly('rovaniemi'),TRIP.canFly('helsinki')]") == [True, False])

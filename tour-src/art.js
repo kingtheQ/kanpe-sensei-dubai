@@ -237,6 +237,20 @@ ART.nsafari={bg:'nairobi-safari-v1.png',mode:'wide',dep:{shF:1,lulu:{n:'hall-lul
 ART.nmarket={bg:'nairobi-market-v1.png',mode:'wide',dep:{shF:'rgba(3,10,21,.4)',lulu:{n:'hall-lulu-back',x:716,by:884},king:{n:'hall-king-back',x:800,by:884},
  npcS:{market_vendor:{n:'t-maasai-front',x:900,by:596,sw:79}},
  fx:[{k:'strip',img:'nairobi-market-cloths-strip.png',x:704,y:326,fw:112,fh:168,n:2,every:1.4}]}};
+/* アテネ(タスク090 到着 / タスク091 街・出発): 人なしの背景(1536×960)。ふたりは後ろ姿(足もと y=884。ルルが左 x=700・キングが右 x=836。ロヴァニエミと同じ大きさ)。
+   相手の人物は既存の素材の流用(アテネ専用の人物素材はまだ無い)。画像が読めないときは build.py の BGA(コード描画)にもどる。
+   到着(athens-arrival-v1): 窓口は3つ(ガラス帯 y464〜648・中央の窓口 x=769)。入国審査の係官は窓口の中(頭〜カウンターの高さ y=648 で切る)。客引きと運転手・地下鉄の係員は、ふたりの右の床に立つ(客引き=話し相手が替わるので同じ画面に2人)。
+   街(athens-street-v1): 右にタベルナ(戸口 x1056〜1170)・左の家(戸口 x236〜306)。店員はその戸口の前の石畳。ホテル(athens-hotel-v1)は部屋の床(ラグの上)。
+   出発(athens-departure-v1): カウンターは3つ(中央 x=768・天板 y=612)。チェックインの係員はカウンターの向こう(y=612 で切る)。出国審査の列と搭乗口の係員は、ふたりの右に立つ。 */
+ART.athimm1={bg:'athens-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},clerk:{x:769,top:522,clip:648},npcS:{a_officer:'hexit-officer'},bubble:{x:769,y:480}}};
+ART.athimm2={bg:'athens-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},clerk:{x:769,top:512,clip:648},npcS:{a_officer2:'o-front-officer-blue'},bubble:{x:769,y:480}}};
+ART.athtaxi={bg:'athens-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},people:[{id:'tout',n:'w-front-safari',x:1040,by:890,sw:90},{id:'drv',n:'w-front-man-suit-1',x:1250,by:850,sw:70}],npcS:{a_tout:{p:'tout'},a_driver:{p:'drv'}}}};
+ART.athmetro={bg:'athens-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{a_metro:{n:'o-front-officer-blue',x:1040,by:890,sw:70}}}};
+ART.athcafe={bg:'athens-street-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{a_waiter:{n:'w-front-man-dashiki',x:1112,by:800,sw:90}}}};
+ART.athshop={bg:'athens-street-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{a_shop:{n:'t-woman-hijab-front',x:271,by:780,sw:79}}}};
+ART.athhotel={bg:'athens-hotel-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:640,by:900},king:{n:'hall-king-back',x:776,by:900},npcS:{a_front:{n:'w-front-man-suit-1',x:1010,by:900,sw:70}}}};
+ART.athck={bg:'athens-departure-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},clerk:{x:768,top:490,clip:612},npcS:{a_ck:'hexit-officer'},bubble:{x:768,y:450}}};
+ART.athdep={bg:'athens-departure-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{a_dep:{n:'o-front-officer-blue',x:1160,by:890,sw:70},a_gate:{n:'w-front-pilot-fa',x:1160,by:890,sw:80}}}};
 /* ロヴァニエミの到着ロビー(タスク065): 人なしの背景(1536×960。天窓の光が床に描く北極圏ラインが主役)に、オーロラの別素材(4コマ。1コマ1376×172)を左上(80,128)=窓帯の空の部分に重ねる。
    ふたりは後ろ姿で足もと y=884(ルルが左 x=700・キングが右 x=836。ラインの手前。配置の正本は同梱の rovaniemi-arrivals-preview.png)。
    話し相手(rvn_lobby1/2)は、ふたりの右(トロリーとウェルカム看板のあいだの床)に立つ。キャンバスの上から2番目の重ね(背景→オーロラ→人)。 */
@@ -663,10 +677,10 @@ var AMB={
  sea:{src:'',vol:.10,note:'海ぞい: 波'}};
 /* 場面の音の名前(場所の snd) → カテゴリ */
 var AMBSND={info:'airport',hall:'airport',tdesk:'airport',map:'airport',nbo:'airport',doh:'airport',cafe:'cafe',costa:'cafe',mall:'cafe',s34:'cafe',
- rvn:'airport',ahlan:'lounge',hotel:'hotel',room:'hotel',home:'hotel',sage:'hotel',vault:'hotel',mosque:'hotel',atop:'cabin',souk:'street',city:'street',dohc:'street',
+ rvn:'airport',ath:'airport',ahlan:'lounge',hotel:'hotel',room:'hotel',home:'hotel',sage:'hotel',vault:'hotel',mosque:'hotel',atop:'cabin',souk:'street',city:'street',dohc:'street',
  beach:'sea',marina:'sea',fountain:'outdoor',safari:'outdoor'};
 /* 背景の名前 → カテゴリ(場所の音と食いちがうとき、こちらが先) */
-var AMBBG={taxi:'outdoor',dtaxi:'outdoor',rbus:'outdoor',cabinQ:'cabin',cabin:'cabin',chotel:'hotel',cbreak:'hotel'};
+var AMBBG={taxi:'outdoor',dtaxi:'outdoor',rbus:'outdoor',ataxi:'outdoor',acafe:'street',ashop:'street',ahotel:'hotel',cabinQ:'cabin',cabin:'cabin',chotel:'hotel',cbreak:'hotel'};
 var ambEl=null,ambCat=null,ambDuck=false;
 function ambOn(){try{return localStorage.getItem('kd_snd')!=='off'}catch(e){return true}}
 function ambApply(){var c=ambCat&&AMB[ambCat];

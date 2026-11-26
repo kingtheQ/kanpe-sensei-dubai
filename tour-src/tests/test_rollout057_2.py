@@ -44,7 +44,7 @@ with contextlib.redirect_stdout(buf):
 print(json.dumps(g['dl'], ensure_ascii=False))
 """ % (os.path.join(ROOT, 'tour-src'), os.path.join(ROOT, 'tour-src/build.py'))], capture_output=True, text=True, cwd=ROOT)
 dl = json.loads(j.stdout.strip().split('\n')[-1])
-cnt_flow2 = sorted(k for k, v in dl.items() if v.get('flow2'))
+cnt_flow2 = sorted(k for k, v in dl.items() if v.get('flow2') and not k.startswith('ath_'))   # アテネ(090・091)は新形式の別の弾
 
 chk('S0 flow2 の場面は nbo_java1 + 第1弾28 + 第2弾11 = 40(ドーハ・ロヴァニエミ・イベントには付いていない)', cnt_flow2 == sorted(SCN + FIRST + ['nbo_java1']), len(cnt_flow2))
 for sid in SCN:

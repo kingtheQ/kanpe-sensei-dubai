@@ -116,3 +116,10 @@
 - Finavia 空港バス(Airport Express): https://finavia.fi/en/airports/rovaniemi/parking-access/public-transport
 - サンタクロース村 移動(8番・Airport Express の運行期間): https://santaclausvillage.info/info-and-tips/getting-here-and-moving-around/ ／ https://santaclausvillage.info/services/santas-express-airport-bus-rovaniemi/
 - Finavia Wi-Fi(他空港の名前の形式): https://www.finavia.fi/en/airports/oulu/services/oulu-airport-free-wi-fi
+
+## タスク090・091（アテネ、2026-11-26確認）
+- アテネ空港 国際線の旅客案内(帽子・サングラスを外す、写真のページを開く): https://www.aia.gr/en/traveller/international-travellers
+- ギリシャ外務省 EES(EU出入国システム)が2026-04-10に全面実施。顔写真と指紋を記録し、パスポートのスタンプに代わる: https://www.mfa.gr/ireland/en/new-eu-digital-entryexit-system-takes-full-effect-on-the-10th-of-april-2026/
+- 同 EES開始の案内(2025-10-12開始): https://www.mfa.gr/missionsabroad/en/ireland-en/news/greece-to-start-using-eu-digital-entryexit-system-on-12-october-2025.html
+- 定額タクシー(昼間の中心部まで40ユーロ)と「日本のパスポートは自動ゲートでなく窓口」はPMの指示書による(一次情報では未確認)。地下鉄の空港用切符の金額は資料が割れているため台詞に出さない。
+

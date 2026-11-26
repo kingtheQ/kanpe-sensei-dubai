@@ -127,7 +127,7 @@ with sync_playwright() as pw:
     tj = open(os.path.join(ROOT, 'tour-src/trip.js'), encoding='utf-8').read()
     mgl = [l for l in tj.splitlines() if 'var MODEGRP=' in l][0]
     chk('MODEGRP(ソース): stay に rovaniemi:[rvn_stay,rvn_night]・dep に rovaniemi:rvn_dep・arr はそのまま・ナイロビとドーハの対応は変わらない',
-        "stay:{tour:['nbo_market','nbo_safari'],rovaniemi:['rvn_stay','rvn_night']}" in mgl and "dep:{tour:'nbo_dep',doha:'doh_dep',rovaniemi:'rvn_dep'}" in mgl and "arr:{tour:'nbo_arr',doha:'doh_arr',rovaniemi:'rvn_arr'}" in mgl, mgl[:200])
+        "stay:{tour:['nbo_market','nbo_safari'],rovaniemi:['rvn_stay','rvn_night']}" in mgl and "dep:{tour:'nbo_dep',doha:'doh_dep',rovaniemi:'rvn_dep'" in mgl and "arr:{tour:'nbo_arr',doha:'doh_arr',rovaniemi:'rvn_arr'" in mgl, mgl[:200])
     chk('11日目(oneworld)のタブ: 滞在は開いて見え、到着(終わった日)は閉じず、出発は閉じている', r['mg']['stay'] == [False, False] and r['mg']['dep'] == [True, False], r['mg'])
     chk('場所の並び(動線順): 滞在=広場→郵便局→サンタ→トナカイ→ホテル・出発=チェックイン→保安→ギフト→Ahkio→ゲート', [p[0] for p in r['stay']] == ['rvil', 'rpost', 'rsanta', 'rrein', 'rhotel'] and [p[0] for p in r['dep']] == ['rchk', 'rsec', 'rshop', 'rahk', 'rgate'], (r['stay'], r['dep']))
     for nm, L in [('滞在', r['stay']), ('出発', r['dep']), ('到着', r['arr'])]:

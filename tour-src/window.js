@@ -115,14 +115,15 @@ function winRecBuild(){
 /* ---- 宣言のマイク(タスク089): プレイヤーが話す番になったら、ステージの右下に大きいマイクのドット絵を出す。
    「ルルが言う → 大きなマイクが出る → プレイヤーが言う」を目で見て分かるように。きいている間は、はねる。次の画面(clearPanel)で消える。
    素材: PM が新しいドット絵を用意する。MICBIG_IMG にファイル名を入れると、それに差しかわる(空のあいだは、下の仮のドット絵) ---- */
-var MICBIG_IMG='';
+var MICBIG_IMG='assets/art/mic-large-v1.png';   /* タスク090: PM作成の大きなマイク(240×240・透明PNG)。仮のドット絵(MICPIX)は、画像が読めないときの保険として残す */
 var MICPIX=["...XXXXXX...","..XhggggggX.",".XhgXgXgXggX",".XgXgXgXgXgX",".XgggggggggX",".XgXgXgXgXgX",".XgggggggggX",".XmmmmmmmmmX","..XmmmmmmmX.","...XrrrrrX..","....XmmmX...","....XmmmX...","....XmmmX...","....XmmmX...","..XXXmmmXXX.",".XmmmmmmmmmX",".XXXXXXXXXXX"];
+function declMicPix(box){var cv=document.createElement('canvas');cv.width=12;cv.height=17;var cx=cv.getContext('2d'),COL={X:'#3a2a1a',g:'#d8dce6',h:'#ffffff',m:'#8a8f9a',r:'#e8452c'};
+ MICPIX.forEach(function(row,y){for(var x=0;x<row.length;x++){var c=COL[row.charAt(x)];if(c){cx.fillStyle=c;cx.fillRect(x,y,1,1)}}});box.appendChild(cv)}
 function declMic(act){
  var st=document.querySelector('#sceneView .stage');if(!st)return;declMicOff();
  var box=el('div','declmic');box.setAttribute('aria-hidden','true');
- if(MICBIG_IMG){var im=new Image();im.src=MICBIG_IMG;im.alt='';box.appendChild(im)}
- else{var cv=document.createElement('canvas');cv.width=12;cv.height=17;var cx=cv.getContext('2d'),COL={X:'#3a2a1a',g:'#d8dce6',h:'#ffffff',m:'#8a8f9a',r:'#e8452c'};
-  MICPIX.forEach(function(row,y){for(var x=0;x<row.length;x++){var c=COL[row.charAt(x)];if(c){cx.fillStyle=c;cx.fillRect(x,y,1,1)}}});box.appendChild(cv)}
+ if(MICBIG_IMG){var im=new Image();im.alt='';im.onerror=function(){if(im.parentNode){box.removeChild(im);declMicPix(box)}};im.src=MICBIG_IMG;box.appendChild(im)}
+ else declMicPix(box);
  st.appendChild(box);G.dmic=box;
  function sync(){box.classList.toggle('on',act.classList.contains('down'))}
  try{var mo=new MutationObserver(sync);mo.observe(act,{attributes:true,attributeFilter:['class']});box._mo=mo}catch(e){}
