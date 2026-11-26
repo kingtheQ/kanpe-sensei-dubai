@@ -123,3 +123,11 @@
 - 同 EES開始の案内(2025-10-12開始): https://www.mfa.gr/missionsabroad/en/ireland-en/news/greece-to-start-using-eu-digital-entryexit-system-on-12-october-2025.html
 - 定額タクシー(昼間の中心部まで40ユーロ)と「日本のパスポートは自動ゲートでなく窓口」はPMの指示書による(一次情報では未確認)。地下鉄の空港用切符の金額は資料が割れているため台詞に出さない。
 
+
+## タスク097（フランクフルト、2026-11-26確認）
+- フランクフルト→ブリュッセルはICE、ブリュッセルでユーロスターに乗り換え(ロンドン直通なし): https://www.deutschebahn.com/en/presse/press_releases/Record-ridership-on-the-ICE-to-Brussels-over-1-million-passengers-to-be-transported-this-year--9140558
+- ユーロスター 乗り換え案内: https://www.eurostar.com/uk-en/train/germany/london-to-cologne ／ https://www.eurostar.com/us-en/travel-info/connecting-train
+- フランクフルト中央駅 DBレイゼツェントルム(窓口): https://www.bahnhof.de/en/frankfurt-main-hbf/travelling/db-reisezentrum
+- みやげ物(レーマー広場まわり): https://visitfrankfurt.travel/en/services/souvenirs
+- アップルワイン(Apfelwein)とベンベル(Bembel): https://www.glorious-food-glossary.com/cms/glossary/34-glossary-a/16483-apfelweinkrug.html
+- 運賃・商品の値段・時刻・ホーム番号は一次情報で確かめていないので、台詞と発車標の絵には入れていない。

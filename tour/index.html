@@ -1473,8 +1473,9 @@ var TRIP=(function(){
   ADD:{id:'addis',n:'アディスアベバ',en:'Addis Ababa',lon:38.80,lat:8.98},BOG:{id:'bogota',n:'ボゴタ',en:'Bogota',lon:-74.15,lat:4.70},
   IAH:{id:'houston',n:'ヒューストン',en:'Houston',lon:-95.34,lat:29.98},GUM:{id:'guam',n:'グアム',en:'Guam',lon:144.80,lat:13.48},
   NRT:{id:'narita',n:'成田',en:'Tokyo',lon:140.39,lat:35.77},
-  ATH:{id:'athens',n:'アテネ',en:'Athens',lon:23.94,lat:37.94}};   /* 090: アテネ(1周目ルートのロヴァニエミの次。窓口の地図 window_data.ROUTE_STOPS と同じ) */
- var IMPL={HND:1,NBO:1,DOH:1,RVN:1,ATH:1};   /* 065: ロヴァニエミ(到着まわり)。ヘルシンキは乗り継ぎだけ(chain が場面なしの区間をはさむ) */   /* 場面のある空港。ここ以外の行き先は、地図と券には出すが、行けない */
+  ATH:{id:'athens',n:'アテネ',en:'Athens',lon:23.94,lat:37.94},
+  FRA:{id:'frankfurt',n:'フランクフルト',en:'Frankfurt',lon:8.66,lat:50.11}};   /* 097: フランクフルト(1周目ルートのチューリッヒの次。鉄道の旅。座標は中央駅付近の公開座標) */   /* 090: アテネ(1周目ルートのロヴァニエミの次。窓口の地図 window_data.ROUTE_STOPS と同じ) */
+ var IMPL={HND:1,NBO:1,DOH:1,RVN:1,ATH:1,FRA:1};   /* 065: ロヴァニエミ(到着まわり)。ヘルシンキは乗り継ぎだけ(chain が場面なしの区間をはさむ) */   /* 場面のある空港。ここ以外の行き先は、地図と券には出すが、行けない */
  function codeOf(apId){for(var k in AIRP)if(AIRP[k].id===apId)return k;return null}
  /* ---------- 券ごとの区間(会社は docs/world-tour-design.md の便の表。別切符は会社を書かない)。[出発,到着,会社,表の日,別切符] ---------- */
  var LEGS={
@@ -1555,6 +1556,9 @@ var TRIP=(function(){
   ath_arr:[['ath_immig1','ath_immig2'],['ath_taxi1'],['ath_transit1']],   /* 090: アテネ到着(入国審査は2場面を順に。どちらか1本で場所は終わり) */
   ath_city:[['ath_cafe1'],['ath_shop1'],['ath_hotel1']],   /* 091: アテネの街(タベルナ・おみやげ屋・ホテル) */
   ath_dep:[['ath_checkin1'],['ath_depimmig1'],['ath_gate1']],   /* 091: アテネの出発(チェックイン→出国審査の列→搭乗口。順に開く) */
+  fra_arr:[['fra_arr1'],['fra_bakery1'],['fra_tram1'],['fra_info1']],   /* 097: フランクフルト到着(鉄道着。入国審査なし。最初の駅の場面→ベーカリー・市内切符・案内所) */
+  fra_city:[['fra_cafe1'],['fra_shop1'],['fra_hotel1']],   /* 097: フランクフルトの街(カフェ・おみやげ屋・ホテル) */
+  fra_dep:[['fra_dep_board1'],['fra_dep_ticket1'],['fra_dep_train1']],   /* 097: フランクフルトの出発(鉄道。発車標→窓口→ホームと車内。順に開く) */
   doh_dep:[['doh_dep_checkin','doh_dep_passport'],['doh_dep_bear'],['doh_dep_train'],['doh_dep_orchard','doh_dep_lounge'],['doh_dep_gate','doh_dep_plane']]};
  /* 場所の名前(各ページの place id) → まとまり。鍵(ロック)と、タブの開きに使う */
  var PLACEGRP={hreturn:'hnd_ret',hcheckin:'hnd_dep',hsec:'hnd_dep',hexit:'hnd_dep',hgate:'hnd_dep',hboard:'hnd_dep',hplane:'hnd_dep',immig:'nbo_arr',bag:'nbo_arr',sim:'nbo_arr',taxi:'nbo_arr',market:'nbo_market',safari:'nbo_safari',java:'nbo_air',art:'nbo_air',lounge:'nbo_air',duty:'nbo_air',
@@ -1563,8 +1567,9 @@ var TRIP=(function(){
   dcounter:'doh_dep',dsouth:'doh_dep',dtrain:'doh_dep',dnorth:'doh_dep',dgate:'doh_dep',
   rimmig:'rvn_arr',rbag:'rvn_arr',rlobby:'rvn_arr',rwifi:'rvn_arr',rbus:'rvn_arr',
   rvil:'rvn_stay',rpost:'rvn_stay',rsanta:'rvn_stay',rrein:'rvn_stay',rhotel:'rvn_night',rchk:'rvn_dep',rsec:'rvn_dep',rshop:'rvn_dep',rahk:'rvn_dep',rgate:'rvn_dep',
-  aimmig:'ath_arr',ataxi:'ath_arr',ametro:'ath_arr',acafe:'ath_city',ashop:'ath_city',ahotel:'ath_city',acheck:'ath_dep',adepimm:'ath_dep',agate:'ath_dep'};
- var MODEGRP={hret:{tour:'hnd_ret'},hdep:{tour:'hnd_dep'},arr:{tour:'nbo_arr',doha:'doh_arr',rovaniemi:'rvn_arr',athens:'ath_arr'},stay:{tour:['nbo_market','nbo_safari'],rovaniemi:['rvn_stay','rvn_night']},air:{tour:'nbo_air'},dep:{tour:'nbo_dep',doha:'doh_dep',rovaniemi:'rvn_dep',athens:'ath_dep'},city:{doha:'doh_city',athens:'ath_city'},sage:{tour:'hnd'}};
+  aimmig:'ath_arr',ataxi:'ath_arr',ametro:'ath_arr',acafe:'ath_city',ashop:'ath_city',ahotel:'ath_city',acheck:'ath_dep',adepimm:'ath_dep',agate:'ath_dep',
+  farr:'fra_arr',fbakery:'fra_arr',ftram:'fra_arr',finfo:'fra_arr',fcafe:'fra_city',fshop:'fra_city',fhotel:'fra_city',fboard:'fra_dep',fticket:'fra_dep',ftrain:'fra_dep'};
+ var MODEGRP={hret:{tour:'hnd_ret'},hdep:{tour:'hnd_dep'},arr:{tour:'nbo_arr',doha:'doh_arr',rovaniemi:'rvn_arr',athens:'ath_arr',frankfurt:'fra_arr'},stay:{tour:['nbo_market','nbo_safari'],rovaniemi:['rvn_stay','rvn_night']},air:{tour:'nbo_air'},dep:{tour:'nbo_dep',doha:'doh_dep',rovaniemi:'rvn_dep',athens:'ath_dep',frankfurt:'fra_dep'},city:{doha:'doh_city',athens:'ath_city',frankfurt:'fra_city'},sage:{tour:'hnd'}};
  /* お金の1行(場面の台詞に出る値段。円に直すレートは架空で固定)。タクシーとメトロは台詞に値段がないので、架空の値段 */
  var MONEY={nbo_sim1:['sim',1000,'KES'],nbo_taxi1:['taxi',3000,'KES'],nbo_java1:['coffee',800,'KES'],nbo_market:['gift',1500,'KES'],nbo_duty1:['duty',24,'USD'],
   doh_sim1:['sim',30,'QAR'],doh_taxi:['taxi',55,'QAR'],doh_metro:['metro',6,'QAR'],doh_city_t1:['tea',2,'QAR'],doh_city_s1:['gift',10,'QAR'],
@@ -1582,7 +1587,8 @@ var TRIP=(function(){
   calley:'souq',chotel:'hotel',csouq:'souq',crest:'souq',cbreak:'hotel',ccorn:'sea',night:'night',nap:'night',
   rimmig:'dair',rbag:'dair',rlobby:'dair',rwifi:'dair',rbus:'night',
   rvil:'street',rpost:'hotel',rsanta:'hotel',rrein:'street',rhotel:'night',rchk:'dair',rsec:'dair',rshop:'dair',rahk:'dair',rgate:'dair',
-  aimmig:'dair',ataxi:'street',ametro:'dair',acafe:'souq',ashop:'souq',ahotel:'hotel',acheck:'dair',adepimm:'dair',agate:'dair'};
+  aimmig:'dair',ataxi:'street',ametro:'dair',acafe:'souq',ashop:'souq',ahotel:'hotel',acheck:'dair',adepimm:'dair',agate:'dair',
+  farr:'dair',fbakery:'dair',ftram:'street',finfo:'dair',fcafe:'souq',fshop:'souq',fhotel:'hotel',fboard:'dair',fticket:'dair',ftrain:'dair'};
 
  /* ---------- 場面の現地時刻(タスク032 / 020-3) ----------
     旅の中の場面は、いまの本当の時計でなく「旅の中の現地時刻」で昼夜を決める。
@@ -1601,7 +1607,8 @@ var TRIP=(function(){
   rimmig:23,rbag:23,rlobby:23,rwifi:23,rbus:23,
   rvil:13,rpost:14,rsanta:15,rrein:16,rhotel:21,                /* ロヴァニエミの滞在(072): 村=昼すぎ・郵便局・サンタ・トナカイは午後(台本: Good afternoon)・ホテルは夜(台本: Good evening)。物語の時刻 */
   rchk:12,rsec:13,rshop:13,rahk:14,rgate:15,
-  aimmig:14,ataxi:15,ametro:15,acafe:13,ashop:16,ahotel:19,acheck:9,adepimm:10,agate:10};   /* アテネ(090・091。物語の時刻で、実在の便の時刻ではない。ホテルは夕方(台本: Good evening)・出発は翌朝) */
+  aimmig:14,ataxi:15,ametro:15,acafe:13,ashop:16,ahotel:19,acheck:9,adepimm:10,agate:10,
+  farr:15,fbakery:15,ftram:15,finfo:16,fcafe:14,fshop:16,fhotel:19,fboard:8,fticket:8,ftrain:9};   /* アテネ(090・091。物語の時刻で、実在の便の時刻ではない。ホテルは夕方(台本: Good evening)・出発は翌朝) */
  //                  /* ロヴァニエミの出発(072。台本: Good afternoon) */      /* ロヴァニエミ到着(065。物語の時刻で、実在の便の時刻ではない。夜の便・深夜の到着=021 の R1〜R4) */ /* ドーハ出発(台本: Good afternoon) */
  /* 券ごとの上書き: スターのナイロビ着は 01:25(夜)。台本のあいさつは朝のまま(夜版の台本は未作成) */
  var HOUR_TK={star:{immig:1,bag:2,sim:2,taxi:3}};
@@ -4957,6 +4964,21 @@ ART.dalley={bg:'doha-souq-alley-v1.png',mode:'wide',base:856,lulu:700,king:806,s
  strips:[{img:'doha-souq-alley-lanterns-strip.png',x:0,y:0,n:2,fw:1536,fh:960,step:1},{img:'doha-souq-alley-cloth-strip.png',x:0,y:0,n:2,fw:1536,fh:960,step:.8}]};
 ART.dsouq={bg:'doha-souq-square-v1.png',mode:'wide',base:836,lulu:660,king:770,suit:0,nosuit:1,npc:{x:980,px:9},fx:'',
  strips:[{img:'doha-souq-square-cloth-strip.png',x:0,y:452,n:2,fw:1536,fh:176,step:.8},{img:'doha-souq-square-birds-strip.png',x:0,y:36,n:2,fw:1536,fh:120,step:.4}]};
+/* フランクフルト(タスク097): 背景は PM 制作の v1(実写真を下絵に描き直した版。1536×960・人なし・2px粒)。ふたりは後ろ姿で足もと y=884(ルル x=700・キング x=836。アテネと同じ)。相手は、ふたりの近くの床に立つ。
+   到着=frankfurt-arrival-v1(Hbf大ホール。大発車標 x96〜1442・y224〜410、案内板 y436〜480、ベーカリー x352〜714・y600〜720、KIOSK x840〜1042、床 y≥720)。
+   frafbakery の店員はベーカリーの前(x560・足もと y800)、frafinfo は「ReiseZentrum」の案内板の下(x1000)、fraftram・frafarr・frafboard はふたりの右。
+   frafboard=大発車標の行の中身は背景に描いていないので、別素材 frankfurt-board-rows-strip.png(2コマ・1346×118・(96,224)・1秒ごと。ブリュッセル行きの2行目が光る。時刻とホームは「--:--」「-」=未確認の数字は出さない。作り方 tour-src/art/prep_frankfurt097.py)を重ねる。
+   街=frankfurt-street-v1(カフェ=左の黄色いパラソル x130〜300・おみやげ屋=「Souvenirs」の戸口 x585〜625)・frankfurt-hotel-v1(窓・ベッド y736〜・右のテーブル)。出発=frankfurt-departure-v1(トレインシェッド。ICE=左 x344〜630・赤い近郊列車=右 x1128〜1350)。 */
+ART.frafarr={bg:'frankfurt-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{f_guide:{n:'o-front-officer-blue',x:1100,by:890,sw:70}}}};
+ART.frafbakery={bg:'frankfurt-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{f_baker:{n:'t-woman-hijab-front',x:560,by:800,sw:79}}}};
+ART.fraftram={bg:'frankfurt-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{f_tram:{n:'t-man-dashiki-front',x:1100,by:890,sw:79}}}};
+ART.frafinfo={bg:'frankfurt-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{f_info:{n:'w-front-man-suit-1',x:1000,by:890,sw:70}}}};
+ART.frafboard={bg:'frankfurt-arrival-v1.png',mode:'wide',strips:[{img:'frankfurt-board-rows-strip.png',x:96,y:224,n:2,fw:1346,fh:118,step:1}],dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{f_board:{n:'o-front-officer-blue',x:1100,by:890,sw:70}}}};
+ART.frafcafe={bg:'frankfurt-street-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{f_waiter:{n:'w-front-man-suit-1',x:230,by:790,sw:70}}}};
+ART.frafshop={bg:'frankfurt-street-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{f_shop:{n:'t-woman-hijab-front',x:560,by:790,sw:79}}}};
+ART.frafhotel={bg:'frankfurt-hotel-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:640,by:884},king:{n:'hall-king-back',x:776,by:884},npcS:{f_front:{n:'w-front-man-suit-1',x:1010,by:884,sw:70}}}};
+ART.frafticket={bg:'frankfurt-departure-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{f_ticket:{n:'w-front-man-suit-1',x:1000,by:890,sw:70}}}};
+ART.fraftrain={bg:'frankfurt-departure-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{f_pax:{n:'t-backpacker-front',x:1010,by:890,sw:79},f_conductor:{n:'w-front-pilot-fa',x:1010,by:890,sw:80}}}};
 function artIdFor(S){var g=S&&S.d&&S.d.bg,h=S&&S.hub&&S.ctx&&S.ctx.bg,v=String(S&&S.vid||''),k=/2$/.test(v)?'2':'1';if(/^nbo_/.test(v)){if(g==='checkinQ')return'ncheckin'+k;if(g==='security')return'nsec'+k;if(g==='duty')return'nduty'+k;if(g==='lounge')return'nlounge'+k;if(g==='gate')return'ngate'+k;if(g==='cabinQ')return'cabinQ';if(g==='javaK')return'javaK';if(g==='artK')return'artK'}if(/^hnd_/.test(v)){if(g==='checkinT')return'hcheckin_st';if(g==='checkinQ')return'hcheckin_ow';if(g==='security')return'hsec';if(g==='immigH')return'hexit';if(/^hnd_plane_/.test(v)){if(g==='cabinQ')return'hcabin_ow';if(g==='cabinT')return'hcabin_st'}}if(/^doh_/.test(v)&&g==='dimmig')return v==='doh_immig2'?'dimmig2':'dimmig';if(/^hnd_ev_ca_/.test(v))return 'cabinseat';if(/^hnd_ev_meal_/.test(v))return 'cabinmeal';if(g==='eikaiK')return'eikai';if(g==='campK')return'camp';return g==='npool'?'npool':g==='npoolq'?'npoolq':g==='nbar'?'nbar':(h==='nlobby'||g==='nlobby')?'nlobby':g==='nsong'?'nsong':g==='safariK'?'nsafari':g==='marketK'?'nmarket':g==='nroom'?'nroom':g==='sim'?'simshop':(g==='sage'||h==='sage')?'sage':((g==='tdesk'||g==='rtmap')?'ticket':(g==='taxi'?'nairobi':(g==='immig'?'immig':(g==='baggage'?'bagclaim':(g==='hgateOW'?'hgate_ow':(g==='hgateST'?'hgate_st':null))))))}
 function artImg(n){var i=ARTI[n];if(!i){i=ARTI[n]=new Image();i.onerror=function(){i.bad=1};i.src=ARTBASE+n}return i}
 function artShow(on){if(ARTSHOW===on)return;ARTSHOW=on;cv.hidden=!!on;cvA.hidden=!on}
@@ -5364,7 +5386,7 @@ var AMBSND={info:'airport',hall:'airport',tdesk:'airport',map:'airport',nbo:'air
  rvn:'airport',ath:'airport',ahlan:'lounge',hotel:'hotel',room:'hotel',home:'hotel',sage:'hotel',vault:'hotel',mosque:'hotel',atop:'cabin',souk:'street',city:'street',dohc:'street',
  beach:'sea',marina:'sea',fountain:'outdoor',safari:'outdoor'};
 /* 背景の名前 → カテゴリ(場所の音と食いちがうとき、こちらが先) */
-var AMBBG={taxi:'outdoor',dtaxi:'outdoor',rbus:'outdoor',ataxi:'outdoor',acafe:'street',ashop:'street',ahotel:'hotel',cabinQ:'cabin',cabin:'cabin',chotel:'hotel',cbreak:'hotel'};
+var AMBBG={taxi:'outdoor',dtaxi:'outdoor',rbus:'outdoor',ataxi:'outdoor',acafe:'street',ashop:'street',ahotel:'hotel',fcafe:'street',fshop:'street',fhotel:'hotel',cabinQ:'cabin',cabin:'cabin',chotel:'hotel',cbreak:'hotel'};
 var ambEl=null,ambCat=null,ambDuck=false;
 function ambOn(){try{return localStorage.getItem('kd_snd')!=='off'}catch(e){return true}}
 function ambApply(){var c=ambCat&&AMB[ambCat];

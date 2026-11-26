@@ -403,3 +403,14 @@
 - 内容と決定は `docs/pm/DECISIONS.md` の2026-11-26。窓口の流れ・マイク・地図の区間番号・再訪の飛ばし方は `tour-src/window.js`（WSTEP・declMic）、台本は `tour-src/window_data.py`（win_decl・win_c1・win_route・win_back）、地図の絵は `tour-src/art.js`（ticket の route）。
 - 参考にしたURL：なし（スターアライアンスの決まりの数字は088で確認済みのものをそのまま使用。確認日2026-11-25）。
 - PMに確認したいこと：win_c8・win_rec も1周目から外した（流れの図に無かったため）。マイクの素材（PM作成）が来たら `MICBIG_IMG` に入れる。実機のマイクの動きは未確認。
+
+## 今回（11/26）タスク097でやったこと（フランクフルト10場面）
+- **10場面**（`tour-src/fra_data.py`、`data.py` で `fra_data.add(D)`）。新形式（flow2・conv・選択は場面に1回・カード式）。到着4(fra_arr1・fra_bakery1・fra_tram1・fra_info1)・街3(fra_cafe1・fra_shop1・fra_hotel1)・出発3(fra_dep_board1・fra_dep_ticket1・fra_dep_train1)。鉄道で着いて鉄道で出る。入国審査なし。
+- ロンドンは直通でなく、ブリュッセルまでICE→ユーロスターで乗り換え(info1・出発3場面)。りんご酒は聞くだけ、頼むのはりんごジュース(cafe1)。台詞に数字・€・$なし。
+- **発車標**：背景に中身がないので、別素材 `tour/assets/art/frankfurt-board-rows-strip.png`(2692×118・2コマ)を `tour-src/art/prep_frankfurt097.py` で作り、`ART.frafboard.strips` で重ねた。時刻は「--:--」、ホームは「-」(未確認の数字を入れない)。
+- 生成：`tour/frankfurt/`(`build.py`)。チェックモード `tour/frankfurt/?check=1` で10場面すべて選べる。アテネのチェック画面に「フランクフルトへ」のリンク。
+- **096との接続(未)**：チューリッヒ(096)がmainにないので、世界マップにフランクフルトの点だけ追加(`NEI frankfurt:[]`、道なし)。096が入ったら `zurich↔frankfurt` の道と旅の骨組み(`LEGS`/`ROWS`)を足す。
+- 人物の絵は既存の仮の絵の流用(話者ごとに `cx` で切り替え)。実機(マイク・音・見え方)は未確認。
+- テスト：`tour-src/tests/test_frankfurt097.py` を追加。`test_rollout057_3.py` のflow2場面数をフランクフルト10を含めて92に更新。
+- 参考にしたURL：`docs/sources.md` の「タスク097」。
+
