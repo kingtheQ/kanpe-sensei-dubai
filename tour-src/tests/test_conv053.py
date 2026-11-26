@@ -109,14 +109,15 @@ with sync_playwright() as pw:
     txt = q.evaluate("()=>window.__txt.join('\\n')")
     chk('B8 現金を選ぶと、相手の反応は "Cash is fine"', 'Cash is fine' in txt)
     chk('B9 制限時間をこえて選ぶと「時間切れ」(ms=制限時間)・物語は進んで終わる', why.get('shillings') == '時間切れ' and s['w']['shillings']['ms'] == 5000 and s['view'] == 'map' and s['seen'].get('nbo_java1') == 1, (why.get('shillings'), s['view']))
-    # 場面のスイッチ: conv のない場面は今までどおり Word Battle が出る(タスク057 第1弾でナイロビ・第2弾で羽田も新しい流れになったので、まだ変えていないドーハの doh_immig1(tour/doha/)で確かめる)
+    # 場面のスイッチ: conv のない場面は今までどおり Word Battle が出る(タスク057 第1弾でナイロビ・第2弾で羽田も新しい流れになったので、ドーハもタスク092で新しい流れになったので、doh_immig1 の写しから conv/flow2 を外した旧形式の場面を実行時に作って確かめる)
     q.close(); q = seed(ctx, 'kanpe-tour-save-v1', {'seen': {}, 'ticket': 'ow'}, tseed('ow', 7, 7, 'day')); q.route('**/tour/doha/index.html', hooked)
     q.goto(base + '/tour/doha/index.html'); q.wait_for_timeout(1800); q.evaluate(POLL)
-    q.evaluate("(v)=>{var T=__T;T.save.missed=[];T.save.wrec={};window.__ph.clear();var pl=null;for(var k in T.PBY){var p=T.PBY[k];if(p&&p.v&&p.v.indexOf(v)>=0){pl=p;break}} T.startVid(pl,v,null)}", 'doh_immig1'); q.wait_for_timeout(400); q.click('.btn.go')
+    q.evaluate("(v)=>{var T=__T;T.save.missed=[];T.save.wrec={};window.__ph.clear();var pl=null;for(var k in T.PBY){var p=T.PBY[k];if(p&&p.v&&p.v.indexOf(v)>=0){pl=p;break}}"
+               "var o=JSON.parse(JSON.stringify(T.DLG[v]));delete o.conv;delete o.flow2;o.lines.forEach(function(l,i){if(i%2&&l.opts){l.y=l.opts[0].y;l.jp=l.opts[0].jp;delete l.opts;delete l.fork;delete l.cards}});T.DLG['zz_old_fmt']=o;T.startVid(pl,'zz_old_fmt',null)}", 'doh_immig1'); q.wait_for_timeout(400); q.click('.btn.go')
     for i in range(60):
         q.wait_for_timeout(300)
         if 'words' in q.evaluate("()=>Array.from(window.__ph)"): break
-    chk('B10 場面ごとのスイッチ: 会話に溶かしていない doh_immig1(ドーハ・第3弾で変える予定)は今までどおり Word Battle へ進む', 'words' in q.evaluate("()=>Array.from(window.__ph)"))
+    chk('B10 場面ごとのスイッチ: conv のない場面(doh_immig1 から実行時に作った旧形式の写し)は今までどおり Word Battle へ進む', 'words' in q.evaluate("()=>Array.from(window.__ph)"))
     q.close()
     # ---------------- C. 夢 ----------------
     q = seed(ctx, 'kanpe-tour-save-v1', {'seen': {}, 'ticket': 'ow'}, tseed('ow', 6, 6, 'day')); q.route('**/tour/index.html', hooked)

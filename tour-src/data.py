@@ -385,62 +385,105 @@ W.OT("Of course. Chicken with rice, or vegetable pasta?","もちろんです。�
 # ---- 到着: ドーハ(ハマド国際空港) ----
 # 実在名: Hamad International Airport / Ooredoo(到着ロビーの売店) / Karwa(メーター制のタクシー) / Doha Metro Red Line / Msheireb(乗りかえ駅) / Souq Waqif
 # 2026-11-14 確認。値段・ベルト番号は架空。話し方は、ていねいで落ち着いた調子(ナイロビの明るさと変える)。
+# タスク057 第3弾(タスク092・2026-11-26): この8場面を新しい会話の流れ(061・flow2)へ。選ぶのは1場面に1回だけ=日本語の短い単語カード2枚(現地カードは自然に入る場面がなく、なし)。
+#   カードにしたターン(0始まり): immig1=2(スマホ/紙・次の航空券)・immig2=3(観光/休暇)・bag1=2(カートを使う/いらない)・bag2=0(名札を見て/いっしょに見る)・sim1=2(カード/現金)・sim2=0(ネット/地図)・taxi=2(カード/現金)・metro=3(1日乗車券/1回券)。
+#   immig1 の1番目(スマホ・紙の前)と bag2 の0番目は、持ち越し(event_data.VARIANTS)が相手の台詞を差しかえるターン。immig1 は差しかえが答え(y)も差しかえるので、そのターンにはカードを置かずカードは2番目にした。bag2 の差しかえは相手の台詞だけなので、そのまま0番目をカードにした。
 d('doh_immig1','入国審査の係官','dimmig','d_officer','ドーハのハマド国際空港に到着。広くてしずかな入国審査。係官は、短くていねいに話す。',[
 ("Good evening. Passport, please.","こんばんは。パスポートをお願いします。","*Good* *evening*. *Here* *you* *are*.","こんばんは。どうぞ。"),
 ("How long will you stay in Qatar?","カタールにはどのくらい滞在しますか。","*Only* *one* *night*. *We* *fly* *to* *Helsinki* *tomorrow*.","1泊だけです。明日ヘルシンキへ飛びます。"),
-("Do you have your onward ticket?","次の行き先への航空券はありますか。","*Yes*. *It* *is* *on* *my* *phone*. *Here*.","はい。スマホに入っています。これです。"),
+W.OT("Do you have your onward ticket?", "次の行き先への航空券はありますか。", [
+    W.O('phone', "Yes. It is on my phone. Here.", "はい。スマホに入っています。これです。", card='スマホ', ico='📱',
+      rep=("On your phone. Good.", "スマホですね。いいですね。")),
+    W.O('paper', "Yes. I have a paper ticket. Here.", "はい。紙の航空券があります。これです。", card='紙', ico='📄',
+      rep=("A paper ticket. Good.", "紙の航空券ですね。いいですね。"))],
+   cards=1, fork={'tw': ['onward ticket']}),
 ("Thank you. Please look at the camera, and do not smile.","ありがとうございます。カメラを見てください。笑わないでくださいね。","*Okay*. *Like* *this*?","はい。こうですか。"),
 ("Yes. You may go. Enjoy your stay in Qatar.","はい。お進みください。カタールでの滞在を楽しんで。","*Thank* *you* *very* *much*.","どうもありがとうございます。")],
-[("stay","滞在する"),("tomorrow","明日"),("onward ticket","次の行き先への航空券"),("smile","ほほえむ"),("enjoy","楽しむ")])
+[("stay","滞在する"),("tomorrow","明日"),("onward ticket","次の行き先への航空券"),("smile","ほほえむ"),("enjoy","楽しむ")], conv=1, flow2=1)
 d('doh_immig2','入国審査の係官','dimmig','d_officer2','別の窓口。ホテルの名前を聞かれて、頭がまっ白になった。',[
 ("Next, please. Where will you stay tonight?","次の方どうぞ。今夜はどこに泊まりますか。","*At* *a* *hotel* *near* *Souq* *Waqif*.","スーク・ワキーフの近くのホテルです。"),
 ("What is the name of the hotel?","ホテルの名前は何ですか。","*Sorry*, *I* *forgot* *the* *name*. *One* *moment*, *please*.","すみません、名前を忘れました。少し待ってください。"),
 ("Take your time. Do you have the booking?","ごゆっくりどうぞ。予約はありますか。","*Yes*! *Here* *is* *the* *booking* *on* *my* *phone*.","はい！スマホに予約があります。"),
-("I see it. Thank you. What is the purpose of your visit?","確認しました。ありがとうございます。訪問の目的は何ですか。","*Sightseeing*. *We* *want* *to* *see* *the* *old* *market*.","観光です。古い市場を見たいです。"),
+W.OT("I see it. Thank you. What is the purpose of your visit?", "確認しました。ありがとうございます。訪問の目的は何ですか。", [
+    W.O('sight', "Sightseeing. We want to see the old market.", "観光です。古い市場を見たいです。", card='観光', ico='📷',
+      rep=("The old market. Nice choice.", "古い市場ですね。いい選択です。")),
+    W.O('holiday', "A holiday. We are traveling around the world.", "休暇です。世界を旅しています。", card='休暇', ico='🏖️',
+      rep=("Around the world? Wonderful.", "世界一周ですか。すばらしい。"))],
+   cards=1, fork={'tw': ['sightseeing']}),
 ("Very good. Welcome to Qatar.","けっこうです。カタールへようこそ。","*Thank* *you*. *Have* *a* *good* *night*.","ありがとう。おやすみなさい。")],
-[("tonight","今夜"),("forgot","忘れた"),("booking","予約"),("sightseeing","観光"),("market","市場")])
+[("tonight","今夜"),("forgot","忘れた"),("booking","予約"),("sightseeing","観光"),("market","市場")], conv=1, flow2=1)
 d('doh_bag1','手荷物受け取りのスタッフ','dbag','d_bag','手荷物受け取り。制服のスタッフが、すぐに気づいて声をかけてくれた。',[
 ("Good evening, sir. May I help you?","こんばんは。お手伝いしましょうか。","*Yes*, *please*. *Where* *is* *the* *bag* *from* *Nairobi*?","お願いします。ナイロビからの荷物はどこですか。"),
 ("The flight from Nairobi is on belt number eight.","ナイロビからの便は8番のベルトです。","*Belt* *eight*. *Is* *it* *far* *from* *here*?","8番ですね。ここから遠いですか。"),
-("No, it is just over there, on your right.","いいえ、すぐあそこ、右側です。","*Thank* *you*. *May* *I* *use* *this* *trolley*?","ありがとう。このカートを使ってもいいですか。"),
-("Yes, of course. Please take one.","はい、もちろんです。お使いください。","*Great*. *How* *long* *will* *the* *bags* *take*?","よかった。荷物はどのくらいで出てきますか。"),
+W.OT("No, it is just over there, on your right. Do you want a trolley?", "いいえ、すぐあそこ、右側です。カートはいりますか。", [
+    W.O('trolley', "Thank you. May I use this trolley?", "ありがとう。このカートを使ってもいいですか。", card='カートを使う', ico='🛒',
+      rep=("Yes, of course. Please take one.", "はい、もちろんです。お使いください。")),
+    W.O('no', "No, thank you. It is only one suitcase.", "いいえ、けっこうです。スーツケース1つだけなので。", card='いらない', ico='🧳',
+      rep=("Okay. No problem.", "わかりました。大丈夫ですよ。"))],
+   cards=1, fork={'tw': ['trolley']}),
+("Please wait by the belt. The bags will come soon.", "ベルトのそばでお待ちください。荷物はもうすぐ出てきます。", "*Okay*. *How* *long* *will* *the* *bags* *take*?", "わかりました。荷物はどのくらいで出てきますか。"),
 ("About ten minutes. Thank you for waiting.","10分ほどです。お待ちいただきありがとうございます。","*No* *problem*. *Thank* *you*!","大丈夫です。ありがとう！")],
-[("belt","ベルト(荷物のレーン)"),("far","遠い"),("over there","あそこ"),("trolley","カート"),("waiting","待つこと")])
+[("belt","ベルト(荷物のレーン)"),("far","遠い"),("over there","あそこ"),("trolley","カート"),("waiting","待つこと")], conv=1, flow2=1)
 d('doh_bag2','となりの旅行者','dbag','d_traveler','ベルトの前。同じ青いスーツケースに、となりの人も手をのばした。',[
-("Excuse me, I think this blue suitcase is mine.","すみません、この青いスーツケースは私のだと思います。","*Sorry*, *but* *I* *think* *it* *is* *ours*. *Look* *at* *the* *name* *tag*.","すみません、私たちのだと思います。名札を見てください。"),
+W.OT("Excuse me, I think this blue suitcase is mine.", "すみません、この青いスーツケースは私のだと思います。", [
+    W.O('tag', "Sorry, but I think it is ours. Look at the name tag.", "すみません、私たちのだと思います。名札を見てください。", card='名札を見て', ico='🏷️',
+      rep=("A name tag? Let me see.", "名札？見てみます。")),
+    W.O('together', "Sorry, I think it is ours. Let's look at the name tag together.", "すみません、私たちのだと思います。いっしょに名札を見ましょう。", card='いっしょに見る', ico='🤝',
+      rep=("Together? Good idea.", "いっしょに？いい考えです。"))],
+   cards=1, fork={'tw': ['name tag']}),
 ("Oh! You are right. It is not my name. I am so sorry.","あっ！そのとおりです。私の名前ではありません。本当にごめんなさい。","*That's* *okay*. *They* *look* *the* *same*.","大丈夫です。そっくりですから。"),
 ("Mine has a red ribbon on the handle.","私のは、持ち手に赤いリボンがついています。","*A* *red* *ribbon*? *I* *see* *one* *over* *there*!","赤いリボン？あそこに1つ見えます！"),
 ("Yes, that is mine! Thank you so much.","そう、あれが私のです！本当にありがとう。","*You're* *welcome*. *Where* *are* *you* *from*?","どういたしまして。どちらからですか。"),
 ("I live in Doha now. I just came back from Nairobi. Welcome!","いまはドーハに住んでいます。ナイロビから帰ってきたところです。ようこそ！","*Thank* *you*! *Have* *a* *good* *night*.","ありがとう！おやすみなさい。")],
-[("mine","私のもの"),("name tag","名札"),("the same","同じ"),("ribbon","リボン"),("handle","持ち手")],kind='trav')
+[("mine","私のもの"),("name tag","名札"),("the same","同じ"),("ribbon","リボン"),("handle","持ち手")],kind='trav', conv=1, flow2=1)
 d('doh_sim1','Ooredooの店員','dsim','d_sim','到着ロビーのOoredoo。店員は手ぎわがよく、話もはやい。',[
 ("Welcome to Ooredoo. How can I help you today?","Ooredooへようこそ。ご用件は何でしょうか。","*Hello*. *I* *need* *a* *SIM* *card* *for* *one* *day*.","こんにちは。1日だけ使うSIMカードがほしいです。"),
 ("We have a visitor SIM. It is good for seven days.","旅行者用のSIMがあります。7日間使えます。","*Seven* *days* *is* *fine*. *How* *much* *is* *it*?","7日間でいいです。いくらですか。"),
-("It is thirty riyals. May I have your passport?","30リヤルです。パスポートをお借りできますか。","*Here* *you* *are*. *Can* *I* *pay* *by* *card*?","どうぞ。カードで払えますか。"),
-("Yes, card is fine. I will set it up for you.","はい、カードで大丈夫です。こちらで設定します。","*Thank* *you*. *Does* *it* *work* *now*?","ありがとう。もう使えますか。"),
+W.OT("It is thirty riyals. May I have your passport? How would you like to pay?", "30リヤルです。パスポートをお借りできますか。お支払いはどうされますか。", [
+    W.O('card', "Here you are. Can I pay by card?", "どうぞ。カードで払えますか。", card='カード', ico='💳',
+      rep=("Yes, card is fine.", "はい、カードで大丈夫です。")),
+    W.O('cash', "Here you are. I will pay in cash.", "どうぞ。現金で払います。", card='現金', ico='💵',
+      rep=("Cash is fine, too.", "現金も大丈夫ですよ。"))],
+   cards=1, fork={'tw': ['pay by card']}),
+("Thank you. I will set it up for you.", "ありがとうございます。こちらで設定します。", "*Thank* *you*. *Does* *it* *work* *now*?", "ありがとう。もう使えますか。"),
 ("Yes, it is ready. Enjoy your stay in Doha.","はい、準備できました。ドーハでの滞在を楽しんで。","*That* *was* *fast*! *Thank* *you*.","はやい！ありがとう。")],
-[("visitor","訪問者"),("riyal","リヤル(カタールのお金)"),("pay by card","カードで払う"),("set up","設定する"),("ready","準備ができた")])
+[("visitor","訪問者"),("riyal","リヤル(カタールのお金)"),("pay by card","カードで払う"),("set up","設定する"),("ready","準備ができた")], conv=1, flow2=1)
 d('doh_sim2','カウンターの列のとなりの人','dsim','d_sim2','SIMを入れたのに、地図が開かない。Ooredooのカウンターの列で、となりの人が声をかけてくれた。',[
-("You look worried. Is something wrong with your phone?","心配そうですね。スマホに何かありましたか。","*Yes*. *The* *internet* *does* *not* *work*.","はい。インターネットがつながりません。"),
+W.OT("You look worried. Is something wrong with your phone?", "心配そうですね。スマホに何かありましたか。", [
+    W.O('net', "Yes. The internet does not work.", "はい。インターネットがつながりません。", card='ネット', ico='📶',
+      rep=("Oh no. That is a problem.", "あら。それは困りましたね。")),
+    W.O('map', "Yes. The map does not open.", "はい。地図が開きません。", card='地図', ico='🗺️',
+      rep=("The map? Oh no.", "地図が？あら。"))],
+   cards=1, fork={'tw': ['internet']}),
 ("I had the same problem once. May I look at it?","私も前に同じことがありました。見てもいいですか。","*Sure*. *Here* *it* *is*.","はい。どうぞ。"),
 ("Ah. Mobile data is off. I will turn it on.","ああ。モバイルデータがオフです。オンにしますね。","*Oh*, *I* *see*. *Is* *it* *working* *now*?","そうだったんですね。もう動いていますか。"),
 ("Yes. Please open a map and try.","はい。地図を開いて試してください。","*It* *works*! *I* *can* *see* *the* *map*.","つながった！地図が見えます。"),
 ("Good. Next time, check that setting first.","よかったです。次は、まずその設定を見てくださいね。","*I* *will*. *Thank* *you* *for* *your* *help*.","そうします。助かりました。")],
-[("internet","インターネット"),("mobile data","モバイルデータ通信"),("turn on","オンにする"),("try","試す"),("setting","設定")],kind='trav')
+[("internet","インターネット"),("mobile data","モバイルデータ通信"),("turn on","オンにする"),("try","試す"),("setting","設定")],kind='trav', conv=1, flow2=1)
 d('doh_taxi','Karwaタクシーの係員','dtaxi','d_taxi','到着ロビーのはしにあるタクシー乗り場。係員が、しずかに手で列を案内している。',[
 ("Good evening. Taxi? This way, please.","こんばんは。タクシーですか。こちらへどうぞ。","*Yes*, *please*. *We* *are* *going* *to* *Souq* *Waqif*.","お願いします。スーク・ワキーフへ行きます。"),
 ("Souq Waqif. It takes about twenty minutes.","スーク・ワキーフですね。20分ほどです。","*Good*. *Does* *the* *taxi* *use* *a* *meter*?","よかった。タクシーはメーターを使いますか。"),
-("Yes, all Karwa taxis use a meter.","はい、Karwaのタクシーはすべてメーター制です。","*Can* *I* *pay* *by* *card*?","カードで払えますか。"),
-("Yes, card or cash. Please take the next taxi in line.","はい、カードでも現金でも。列の次のタクシーにお乗りください。","*The* *next* *one*? *Thank* *you*.","次のですね。ありがとう。"),
+W.OT("Yes, all Karwa taxis use a meter. How would you like to pay?", "はい、Karwaのタクシーはすべてメーター制です。お支払いはどうされますか。", [
+    W.O('card', "Can I pay by card?", "カードで払えますか。", card='カード', ico='💳',
+      rep=("Yes, card is fine.", "はい、カードで大丈夫です。")),
+    W.O('cash', "I will pay in cash.", "現金で払います。", card='現金', ico='💵',
+      rep=("Cash is fine, too.", "現金も大丈夫ですよ。"))],
+   cards=1, fork={'tw': ['cash']}),
+("Please take the next taxi in line.", "列の次のタクシーにお乗りください。", "*The* *next* *one*? *Thank* *you*.", "次のですね。ありがとう。"),
 ("Have a pleasant evening in Doha.","ドーハでよい夜をおすごしください。","*Thank* *you*. *Good* *night*!","ありがとう。おやすみなさい！")],
-[("this way","こちらへ"),("meter","メーター"),("cash","現金"),("in line","列にならんで"),("pleasant","心地よい")])
+[("this way","こちらへ"),("meter","メーター"),("cash","現金"),("in line","列にならんで"),("pleasant","心地よい")], conv=1, flow2=1)
 d('doh_metro','改札の前のとなりの乗客','dmetro','d_metrop','空港の下にあるDoha Metroの駅。ぴかぴかの改札の前で、となりの乗客が声をかけてくれた。',[
 ("Hello. Are you going into the city?","こんにちは。街へ行かれるのですか。","*Yes*. *To* *the* *city* *center*. *Which* *line* *do* *I* *take*?","はい。街の中心へ。どの路線に乗ればいいですか。"),
 ("Take the Red Line to Msheireb. It is the main station.","レッドラインでムシェイレブへ。中心の駅です。","*The* *Red* *Line* *to* *Msheireb*. *Got* *it*.","レッドラインでムシェイレブですね。わかりました。"),
 ("Do you have a travel card?","乗車カードはお持ちですか。","*No*, *not* *yet*. *Where* *can* *I* *buy* *one*?","いいえ、まだです。どこで買えますか。"),
-("At this machine. A day pass is good for all day.","この機械です。1日乗車券なら1日中使えます。","*A* *day* *pass*, *then*. *How* *long* *does* *it* *take*?","では1日乗車券にします。どのくらいかかりますか。"),
+W.OT("At this machine. Which ticket do you want? A day pass is good for all day.", "この機械です。どの券にしますか。1日乗車券なら1日中使えます。", [
+    W.O('day', "A day pass, then. How long does it take?", "では1日乗車券にします。どのくらいかかりますか。", card='1日乗車券', ico='🎫',
+      rep=("A day pass. Good choice.", "1日乗車券ですね。いい選択です。")),
+    W.O('single', "One single ticket, please. How long does it take?", "1回券を1枚お願いします。どのくらいかかりますか。", card='1回券', ico='🚇',
+      rep=("A single ticket. Okay.", "1回券ですね。わかりました。"))],
+   cards=1, fork={'tw': ['day pass']}),
 ("About twenty-five minutes. Trains come every few minutes.","25分ほどです。電車は数分おきに来ます。","*Perfect*. *Thank* *you* *for* *your* *help*!","完ぺきです。助かりました！")],
-[("line","路線"),("main station","中心の駅"),("travel card","乗車カード"),("day pass","1日乗車券"),("every few minutes","数分おきに")],kind='trav')
+[("line","路線"),("main station","中心の駅"),("travel card","乗車カード"),("day pass","1日乗車券"),("every few minutes","数分おきに")],kind='trav', conv=1, flow2=1)
 
 # ---- 窓口（タスク012）: 宣言・聞き取り5本・線を引く・値段・読み上げ確認・名前の確認 ----
 import window_data

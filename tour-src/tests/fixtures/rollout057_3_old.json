@@ -1,0 +1,983 @@
+{
+ "doh_immig1": {
+  "npc": [
+   "Good evening. Passport, ",
+   "How long will you stay i",
+   "Do you have your onward ",
+   "Thank you. Please look a",
+   "Yes. You may go. Enjoy y"
+  ],
+  "who": "入国審査の係官",
+  "bg": "dimmig",
+  "sp": "d_officer",
+  "intro": "ドーハのハマド国際空港に到着。広くてしずかな入国審査。係官は、短くていねいに話す。",
+  "kind": null,
+  "lvis": null,
+  "nohelp": null,
+  "inter": [],
+  "keep": null,
+  "words": [
+   "stay",
+   "tomorrow",
+   "onward ticket",
+   "smile",
+   "enjoy"
+  ],
+  "vr": [
+   [
+    1,
+    [
+     "nbo_checkin1"
+    ]
+   ]
+  ],
+  "conv": null,
+  "flow2": null
+ },
+ "doh_immig2": {
+  "npc": [
+   "Next, please. Where will",
+   "What is the name of the ",
+   "Take your time. Do you h",
+   "I see it. Thank you. Wha",
+   "Very good. Welcome to Qa"
+  ],
+  "who": "入国審査の係官",
+  "bg": "dimmig",
+  "sp": "d_officer2",
+  "intro": "別の窓口。ホテルの名前を聞かれて、頭がまっ白になった。",
+  "kind": null,
+  "lvis": null,
+  "nohelp": null,
+  "inter": [],
+  "keep": null,
+  "words": [
+   "tonight",
+   "forgot",
+   "booking",
+   "sightseeing",
+   "market"
+  ],
+  "vr": [],
+  "conv": null,
+  "flow2": null
+ },
+ "doh_bag1": {
+  "npc": [
+   "Good evening, sir. May I",
+   "The flight from Nairobi ",
+   "No, it is just over ther",
+   "Yes, of course. Please t",
+   "About ten minutes. Thank"
+  ],
+  "who": "手荷物受け取りのスタッフ",
+  "bg": "dbag",
+  "sp": "d_bag",
+  "intro": "手荷物受け取り。制服のスタッフが、すぐに気づいて声をかけてくれた。",
+  "kind": null,
+  "lvis": null,
+  "nohelp": null,
+  "inter": [],
+  "keep": null,
+  "words": [
+   "belt",
+   "far",
+   "over there",
+   "trolley",
+   "waiting"
+  ],
+  "vr": [],
+  "conv": null,
+  "flow2": null
+ },
+ "doh_bag2": {
+  "npc": [
+   "Excuse me, I think this ",
+   "Oh! You are right. It is",
+   "Mine has a red ribbon on",
+   "Yes, that is mine! Thank",
+   "I live in Doha now. I ju"
+  ],
+  "who": "となりの旅行者",
+  "bg": "dbag",
+  "sp": "d_traveler",
+  "intro": "ベルトの前。同じ青いスーツケースに、となりの人も手をのばした。",
+  "kind": "trav",
+  "lvis": null,
+  "nohelp": null,
+  "inter": [],
+  "keep": null,
+  "words": [
+   "mine",
+   "name tag",
+   "the same",
+   "ribbon",
+   "handle"
+  ],
+  "vr": [
+   [
+    0,
+    [
+     "nbo_ev_f1_ribbon"
+    ]
+   ]
+  ],
+  "conv": null,
+  "flow2": null
+ },
+ "doh_sim1": {
+  "npc": [
+   "Welcome to Ooredoo. How ",
+   "We have a visitor SIM. I",
+   "It is thirty riyals. May",
+   "Yes, card is fine. I wil",
+   "Yes, it is ready. Enjoy "
+  ],
+  "who": "Ooredooの店員",
+  "bg": "dsim",
+  "sp": "d_sim",
+  "intro": "到着ロビーのOoredoo。店員は手ぎわがよく、話もはやい。",
+  "kind": null,
+  "lvis": null,
+  "nohelp": null,
+  "inter": [],
+  "keep": null,
+  "words": [
+   "visitor",
+   "riyal",
+   "pay by card",
+   "set up",
+   "ready"
+  ],
+  "vr": [],
+  "conv": null,
+  "flow2": null
+ },
+ "doh_sim2": {
+  "npc": [
+   "You look worried. Is som",
+   "I had the same problem o",
+   "Ah. Mobile data is off. ",
+   "Yes. Please open a map a",
+   "Good. Next time, check t"
+  ],
+  "who": "カウンターの列のとなりの人",
+  "bg": "dsim",
+  "sp": "d_sim2",
+  "intro": "SIMを入れたのに、地図が開かない。Ooredooのカウンターの列で、となりの人が声をかけてくれた。",
+  "kind": "trav",
+  "lvis": null,
+  "nohelp": null,
+  "inter": [],
+  "keep": null,
+  "words": [
+   "internet",
+   "mobile data",
+   "turn on",
+   "try",
+   "setting"
+  ],
+  "vr": [],
+  "conv": null,
+  "flow2": null
+ },
+ "doh_taxi": {
+  "npc": [
+   "Good evening. Taxi? This",
+   "Souq Waqif. It takes abo",
+   "Yes, all Karwa taxis use",
+   "Yes, card or cash. Pleas",
+   "Have a pleasant evening "
+  ],
+  "who": "Karwaタクシーの係員",
+  "bg": "dtaxi",
+  "sp": "d_taxi",
+  "intro": "到着ロビーのはしにあるタクシー乗り場。係員が、しずかに手で列を案内している。",
+  "kind": null,
+  "lvis": null,
+  "nohelp": null,
+  "inter": [],
+  "keep": null,
+  "words": [
+   "this way",
+   "meter",
+   "cash",
+   "in line",
+   "pleasant"
+  ],
+  "vr": [
+   [
+    1,
+    [
+     "doh_immig2"
+    ]
+   ]
+  ],
+  "conv": null,
+  "flow2": null
+ },
+ "doh_metro": {
+  "npc": [
+   "Hello. Are you going int",
+   "Take the Red Line to Msh",
+   "Do you have a travel car",
+   "At this machine. A day p",
+   "About twenty-five minute"
+  ],
+  "who": "改札の前のとなりの乗客",
+  "bg": "dmetro",
+  "sp": "d_metrop",
+  "intro": "空港の下にあるDoha Metroの駅。ぴかぴかの改札の前で、となりの乗客が声をかけてくれた。",
+  "kind": "trav",
+  "lvis": null,
+  "nohelp": null,
+  "inter": [],
+  "keep": null,
+  "words": [
+   "line",
+   "main station",
+   "travel card",
+   "day pass",
+   "every few minutes"
+  ],
+  "vr": [],
+  "conv": null,
+  "flow2": null
+ },
+ "doh_city_t1": {
+  "npc": [
+   "Good evening! Tea? We ha",
+   "Milk, tea, and spices. I",
+   "Small cup or big cup?",
+   "Two riyals. Be careful, ",
+   "Thank you! Come back tom"
+  ],
+  "who": "お茶の屋台の人",
+  "bg": "calley",
+  "sp": "c_tea",
+  "intro": "路地の小さなお茶の屋台。湯気と、あまい香り。",
+  "kind": null,
+  "lvis": null,
+  "nohelp": null,
+  "inter": [],
+  "keep": null,
+  "words": [
+   "mint",
+   "spices",
+   "sweet",
+   "cup",
+   "careful"
+  ],
+  "vr": [],
+  "conv": null,
+  "flow2": null
+ },
+ "doh_city_t2": {
+  "npc": [
+   "Good evening, my friend.",
+   "Many hotels are near the",
+   "No problem. Please show ",
+   "Yes. Go straight, then t",
+   "You are welcome. Have so"
+  ],
+  "who": "地元の男性",
+  "bg": "calley",
+  "sp": "c_man",
+  "intro": "夜のスーク。ベンチにすわった男性が、地図を見ているキングに声をかけた。",
+  "kind": "trav",
+  "lvis": null,
+  "nohelp": null,
+  "inter": [],
+  "keep": null,
+  "words": [
+   "lost",
+   "straight",
+   "turn left",
+   "booking",
+   "near"
+  ],
+  "vr": [],
+  "conv": null,
+  "flow2": null
+ },
+ "doh_city_t3": {
+  "npc": [
+   "Are you okay? You look w",
+   "Don't worry. The souq is",
+   "Does your friend like sh",
+   "Then try the shops at th",
+   "Look! Is that your frien"
+  ],
+  "who": "地元の若者",
+  "bg": "calley",
+  "sp": "c_young",
+  "intro": "路地の角。ふり返ると、ルルがいない！",
+  "kind": "trav",
+  "lvis": 0,
+  "nohelp": 1,
+  "inter": [
+   {
+    "after": 3,
+    "anim": "fade",
+    "ms": 1200,
+    "swapAt": 600,
+    "set": {
+     "lvis": 1
+    }
+   }
+  ],
+  "keep": null,
+  "words": [
+   "worried",
+   "a minute ago",
+   "maze",
+   "shopping",
+   "waving"
+  ],
+  "vr": [],
+  "conv": null,
+  "flow2": null
+ },
+ "doh_city_h1": {
+  "npc": [
+   "Good evening, and welcom",
+   "Thank you. One night, ch",
+   "May I see your passports",
+   "Your room is on the four",
+   "On the first floor, next"
+  ],
+  "who": "ホテルのフロント係",
+  "bg": "chotel",
+  "sp": "c_front",
+  "intro": "ホテルのフロント。夜おそく、しずかなロビー。",
+  "kind": null,
+  "lvis": null,
+  "nohelp": null,
+  "inter": [],
+  "keep": null,
+  "words": [
+   "reservation",
+   "check out",
+   "floor",
+   "breakfast",
+   "key"
+  ],
+  "vr": [
+   [
+    1,
+    [
+     "doh_immig1"
+    ]
+   ]
+  ],
+  "conv": null,
+  "flow2": null
+ },
+ "doh_city_h2": {
+  "npc": [
+   "Hi. Are you staying here",
+   "Are you hungry? I know a",
+   "It is in the souq, near ",
+   "Not too expensive. But i",
+   "Have a nice dinner. Tell"
+  ],
+  "who": "同じホテルのお客さん",
+  "bg": "chotel",
+  "sp": "c_guest",
+  "intro": "ロビーのソファ。となりのお客さんが、地図をのぞきこんでいる。",
+  "kind": "trav",
+  "lvis": null,
+  "nohelp": null,
+  "inter": [],
+  "keep": null,
+  "words": [
+   "staying",
+   "hungry",
+   "dinner",
+   "expensive",
+   "early"
+  ],
+  "vr": [],
+  "conv": null,
+  "flow2": null
+ },
+ "doh_city_h3": {
+  "npc": [
+   "Good morning! Did you sl",
+   "Good. Is this your first",
+   "One night! Then you must",
+   "Yes. Walk along the Corn",
+   "Try the dates, too. They"
+  ],
+  "who": "朝食のとなりのお客さん",
+  "bg": "cbreak",
+  "sp": "c_break",
+  "intro": "ホテルの朝食の部屋。窓から朝の光。となりの人が、コーヒーを手にほほえんだ。",
+  "kind": "trav",
+  "lvis": null,
+  "nohelp": null,
+  "inter": [],
+  "keep": null,
+  "words": [
+   "sleep well",
+   "first time",
+   "sea",
+   "walk along",
+   "dates"
+  ],
+  "vr": [],
+  "conv": null,
+  "flow2": null
+ },
+ "doh_city_h4": {
+  "npc": [
+   "Good morning. How can I ",
+   "Of course. When will you",
+   "No problem. Is there any",
+   "I will put it on the top",
+   "Yes, please. Show it to "
+  ],
+  "who": "ホテルのフロント係",
+  "bg": "cbreak",
+  "sp": "c_front2",
+  "intro": "チェックアウトの時間。フロントの人が、にこやかに顔を上げた。",
+  "kind": null,
+  "lvis": null,
+  "nohelp": null,
+  "inter": [],
+  "keep": null,
+  "words": [
+   "keep",
+   "come back for",
+   "fragile",
+   "shelf",
+   "show"
+  ],
+  "vr": [
+   [
+    2,
+    [
+     "nbo_sec2"
+    ]
+   ]
+  ],
+  "conv": null,
+  "flow2": null
+ },
+ "doh_city_s1": {
+  "npc": [
+   "Welcome! Come in, come i",
+   "Cardamom. We put it in c",
+   "Of course. Try this mix ",
+   "Only a little! Which one",
+   "Ten riyals. It is a good"
+  ],
+  "who": "香辛料の店の人",
+  "bg": "csouq",
+  "sp": "c_spice",
+  "intro": "スークの香辛料の店。袋の山から、いろんな香りがする。",
+  "kind": null,
+  "lvis": null,
+  "nohelp": null,
+  "inter": [],
+  "keep": null,
+  "words": [
+   "smell",
+   "cardamom",
+   "taste",
+   "spicy",
+   "gift"
+  ],
+  "vr": [],
+  "conv": null,
+  "flow2": null
+ },
+ "doh_city_s2": {
+  "npc": [
+   "Good evening. Please, lo",
+   "Photos of the shop are f",
+   "Thank you. Are you looki",
+   "This one is light and so",
+   "No problem. Take your ti"
+  ],
+  "who": "布の店の人",
+  "bg": "csouq",
+  "sp": "c_cloth",
+  "intro": "布の店。色とりどりのスカーフが、天井までかかっている。",
+  "kind": null,
+  "lvis": null,
+  "nohelp": null,
+  "inter": [],
+  "keep": null,
+  "words": [
+   "look around",
+   "scarf",
+   "light",
+   "think about",
+   "take your time"
+  ],
+  "vr": [],
+  "conv": null,
+  "flow2": null
+ },
+ "doh_city_s3": {
+  "npc": [
+   "Hello, hello! Souvenirs ",
+   "How about this small woo",
+   "Thirty riyals. But for y",
+   "Twenty? Hmm... Okay, twe",
+   "Thank you, my friend. Co"
+  ],
+  "who": "みやげ物の店の人",
+  "bg": "csouq",
+  "sp": "c_souv",
+  "intro": "みやげ物の店。小さなランプや、木の箱がならんでいる。",
+  "kind": null,
+  "lvis": null,
+  "nohelp": null,
+  "inter": [],
+  "keep": null,
+  "words": [
+   "souvenir",
+   "made by hand",
+   "pretty",
+   "deal",
+   "last price"
+  ],
+  "vr": [
+   [
+    1,
+    [
+     "nbo_sec2"
+    ]
+   ]
+  ],
+  "conv": null,
+  "flow2": null
+ },
+ "doh_city_r1": {
+  "npc": [
+   "Good evening. A table fo",
+   "Sure, this way. Here is ",
+   "The grilled fish, and th",
+   "Good choice. Anything to",
+   "Coming soon. Enjoy your "
+  ],
+  "who": "レストランの店員",
+  "bg": "crest",
+  "sp": "c_waiter",
+  "intro": "スークの中のレストラン。外の席に、夜風がきもちいい。",
+  "kind": null,
+  "lvis": null,
+  "nohelp": null,
+  "inter": [],
+  "keep": null,
+  "words": [
+   "table for two",
+   "outside",
+   "lamb",
+   "anything to drink",
+   "coming soon"
+  ],
+  "vr": [],
+  "conv": null,
+  "flow2": null
+ },
+ "doh_city_r2": {
+  "npc": [
+   "Hello! Where are you fro",
+   "Japan! Welcome. Did you ",
+   "Nairobi! How was the foo",
+   "Here, please try our bre",
+   "Enjoy your time in Doha."
+  ],
+  "who": "となりの席の家族",
+  "bg": "crest",
+  "sp": "c_family",
+  "intro": "長いテーブル。となりの家族が、笑顔で話しかけてきた。",
+  "kind": "trav",
+  "lvis": null,
+  "nohelp": null,
+  "inter": [],
+  "keep": null,
+  "words": [
+   "food",
+   "a lot of",
+   "try",
+   "still",
+   "warm"
+  ],
+  "vr": [
+   [
+    2,
+    [
+     "nbo_java2"
+    ]
+   ]
+  ],
+  "conv": null,
+  "flow2": null
+ },
+ "doh_city_r3": {
+  "npc": [
+   "How was everything?",
+   "Of course. Here it is. N",
+   "Take your time.",
+   "Oh, you are right. I am ",
+   "Yes. Thank you for telli"
+  ],
+  "who": "レストランの店員",
+  "bg": "crest",
+  "sp": "c_waiter2",
+  "intro": "食べ終わった。お会計の紙が、テーブルにとどいた。",
+  "kind": null,
+  "lvis": null,
+  "nohelp": null,
+  "inter": [],
+  "keep": null,
+  "words": [
+   "bill",
+   "check",
+   "ours",
+   "right",
+   "pay by card"
+  ],
+  "vr": [],
+  "conv": null,
+  "flow2": null
+ },
+ "doh_city_c1": {
+  "npc": [
+   "Good morning! Beautiful ",
+   "Of course. With the boat",
+   "Okay. Please move a litt",
+   "Perfect. Smile! One, two",
+   "Sure. Done! You both loo"
+  ],
+  "who": "散歩中の人",
+  "bg": "ccorn",
+  "sp": "c_walker",
+  "intro": "コルニーシュ。三日月の形の湾にそって、遊歩道がつづく。",
+  "kind": "trav",
+  "lvis": null,
+  "nohelp": null,
+  "inter": [],
+  "keep": null,
+  "words": [
+   "beautiful day",
+   "picture",
+   "tall buildings",
+   "move",
+   "one more"
+  ],
+  "vr": [],
+  "conv": null,
+  "flow2": null
+ },
+ "doh_city_c2": {
+  "npc": [
+   "Hello! Boat ride? Thirty",
+   "Fifty riyals for two peo",
+   "In ten minutes. Please w",
+   "Yes, for everyone. Safet",
+   "Yes, the best view! Here"
+  ],
+  "who": "舟の人",
+  "bg": "ccorn",
+  "sp": "c_boat",
+  "intro": "湾に木の舟（ダウ）がならんでいる。舟の人が手まねきしている。",
+  "kind": null,
+  "lvis": null,
+  "nohelp": null,
+  "inter": [],
+  "keep": null,
+  "words": [
+   "boat ride",
+   "bay",
+   "next",
+   "life jacket",
+   "step in"
+  ],
+  "vr": [],
+  "conv": null,
+  "flow2": null
+ },
+ "doh_city_c3": {
+  "npc": [
+   "Hello! May I practice my",
+   "That's okay! Where are y",
+   "Wow! How long is your tr",
+   "Your English is good! Wh",
+   "Me too! Thank you for ta"
+  ],
+  "who": "英語を練習している学生",
+  "bg": "ccorn",
+  "sp": "c_student",
+  "intro": "ベンチの学生が、ノートを閉じて話しかけてきた。",
+  "kind": "trav",
+  "lvis": null,
+  "nohelp": null,
+  "inter": [],
+  "keep": null,
+  "words": [
+   "practice",
+   "second",
+   "month",
+   "favorite",
+   "good luck"
+  ],
+  "vr": [
+   [
+    2,
+    [
+     "nbo_art2"
+    ]
+   ]
+  ],
+  "conv": null,
+  "flow2": null
+ },
+ "doh_dep_checkin": {
+  "npc": [
+   "Good afternoon. Where ar",
+   "Helsinki. May I see your",
+   "Thank you. Is this suitc",
+   "It is a little heavy, bu",
+   "Very good. Here are your"
+  ],
+  "who": "チェックインの係員",
+  "bg": "dcheck",
+  "sp": "d_ck",
+  "intro": "ハマド国際空港の出発カウンター。天井が高く、しずかで広い。",
+  "kind": null,
+  "lvis": null,
+  "nohelp": null,
+  "inter": [],
+  "keep": null,
+  "words": [
+   "pack",
+   "yourself",
+   "inside",
+   "passport control",
+   "on the left"
+  ],
+  "vr": [],
+  "conv": null,
+  "flow2": null
+ },
+ "doh_dep_passport": {
+  "npc": [
+   "Good afternoon. Passport",
+   "You arrived yesterday. Y",
+   "What did you see in Doha",
+   "Good. Please look at the",
+   "Thank you. Have a safe f"
+  ],
+  "who": "出国審査の係官",
+  "bg": "dimmig",
+  "sp": "d_exit",
+  "intro": "出国審査。係官は、きのうと同じように短くていねいに話す。",
+  "kind": null,
+  "lvis": null,
+  "nohelp": null,
+  "inter": [],
+  "keep": null,
+  "words": [
+   "already",
+   "short stay",
+   "loved",
+   "one more time",
+   "come back"
+  ],
+  "vr": [],
+  "conv": null,
+  "flow2": null
+ },
+ "doh_dep_bear": {
+  "npc": [
+   "Excuse me. Could you tak",
+   "Yes, please! We want the",
+   "Like this? Can you see a",
+   "Thank you! Let me see. O",
+   "We are going home. And y"
+  ],
+  "who": "写真をたのむ旅行者",
+  "bg": "dsouth",
+  "sp": "d_photo",
+  "intro": "南の広場。大きなクマの前で、旅行者がスマホを手にこまっている。",
+  "kind": "trav",
+  "lvis": null,
+  "nohelp": null,
+  "inter": [],
+  "keep": null,
+  "words": [
+   "take a photo",
+   "closer",
+   "all of us",
+   "perfect",
+   "going home"
+  ],
+  "vr": [],
+  "conv": null,
+  "flow2": null
+ },
+ "doh_dep_train": {
+  "npc": [
+   "Excuse me. Is this the t",
+   "Good. Is your gate far f",
+   "The ride is very short. ",
+   "Please hold on to the ba",
+   "Here we are. This is the"
+  ],
+  "who": "乗りあわせた人",
+  "bg": "dtrain",
+  "sp": "d_trainp",
+  "intro": "空港の中の列車の乗り場。となりの人が、案内の表示を見上げている。",
+  "kind": "trav",
+  "lvis": null,
+  "nohelp": null,
+  "inter": [],
+  "keep": null,
+  "words": [
+   "north",
+   "sign",
+   "short",
+   "hold on",
+   "bar"
+  ],
+  "vr": [],
+  "conv": null,
+  "flow2": null
+ },
+ "doh_dep_orchard": {
+  "npc": [
+   "Is anyone sitting here?",
+   "Thank you. It is nice he",
+   "How long is your wait?",
+   "Five hours! I will sleep",
+   "It is okay. This is a go"
+  ],
+  "who": "ベンチの旅行者",
+  "bg": "dorch",
+  "sp": "d_bench",
+  "intro": "北の広場。空港の中に、本物の木がならんでいる。ベンチで休もう。",
+  "kind": "trav",
+  "lvis": null,
+  "nohelp": null,
+  "inter": [],
+  "keep": null,
+  "words": [
+   "anyone",
+   "real",
+   "feels like",
+   "wait",
+   "rest"
+  ],
+  "vr": [],
+  "conv": null,
+  "flow2": null
+ },
+ "doh_dep_lounge": {
+  "npc": [
+   "Hello. You look a little",
+   "Many people cannot find ",
+   "No, it is close. Where a",
+   "Helsinki! It is cold the",
+   "Good. Here is the door. "
+  ],
+  "who": "ラウンジの前の旅行者",
+  "bg": "dlng",
+  "sp": "lounge_guest",
+  "intro": "ラウンジの前。オレンジの上着の人が、こちらを見て手をふった。",
+  "kind": "trav",
+  "lvis": null,
+  "nohelp": null,
+  "inter": [],
+  "keep": null,
+  "words": [
+   "lost",
+   "follow",
+   "close",
+   "warm coat",
+   "safe travels"
+  ],
+  "vr": [
+   [
+    0,
+    [
+     "nbo_lounge2"
+    ]
+   ],
+   [
+    1,
+    [
+     "nbo_lounge2"
+    ]
+   ],
+   [
+    4,
+    [
+     "nbo_lounge2"
+    ]
+   ]
+  ],
+  "conv": null,
+  "flow2": null
+ },
+ "doh_dep_gate": {
+  "npc": [
+   "Good afternoon. This is ",
+   "There is a small change.",
+   "Thank you for waiting. Y",
+   "Yes, just behind the gat",
+   "Please listen for the an"
+  ],
+  "who": "搭乗ゲートの係員",
+  "bg": "dgate",
+  "sp": "d_gate",
+  "intro": "ヘルシンキ行きのゲート。大きな窓の外に、飛行機が見える。",
+  "kind": null,
+  "lvis": null,
+  "nohelp": null,
+  "inter": [],
+  "keep": null,
+  "words": [
+   "change",
+   "later",
+   "restroom",
+   "behind",
+   "announcement"
+  ],
+  "vr": [],
+  "conv": null,
+  "flow2": null
+ },
+ "doh_dep_plane": {
+  "npc": [
+   "Hello. I think you are i",
+   "It is the aisle seat. Lo",
+   "No problem. Are you goin",
+   "Around the world! Where ",
+   "Lovely. Helsinki will be"
+  ],
+  "who": "となりの席のお客さん",
+  "bg": "dcabin",
+  "sp": "d_seat",
+  "intro": "機内。ヘルシンキへ。自分の席にすわろうとしたら、となりの人が声をかけてきた。",
+  "kind": "trav",
+  "lvis": null,
+  "nohelp": null,
+  "inter": [],
+  "keep": null,
+  "words": [
+   "seat number",
+   "middle",
+   "holiday",
+   "last stop",
+   "stayed"
+  ],
+  "vr": [],
+  "conv": null,
+  "flow2": null
+ }
+}

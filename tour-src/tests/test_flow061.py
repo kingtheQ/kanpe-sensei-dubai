@@ -141,7 +141,7 @@ with sync_playwright() as pw:
     q.add_init_script("localStorage.setItem('kanpe-tour-save-v1',%s);localStorage.setItem('kanpe-trip-v1',%s);" % (json.dumps(json.dumps({'seen': {}, 'ticket': 'ow'})), json.dumps(json.dumps(tseed()))))
     q.route('**/tour/doha/index.html', hooked); q.goto(base + '/tour/doha/index.html'); q.wait_for_timeout(1700); q.evaluate(POLL)
     q.evaluate("()=>{window.__bad=0}")
-    q.evaluate("(v)=>{var T=__T;T.save.missed=[];T.save.wrec={};T.save.seen={};window.__btn.clear();window.__pan.length=0;var pl=null;for(var k in T.PBY){var p=T.PBY[k];if(p&&p.v&&p.v.indexOf(v)>=0){pl=p;break}} T.startVid(pl,v,null)}", 'doh_immig1'); q.wait_for_timeout(500); q.click('.btn.go')
+    q.evaluate("(v)=>{var T=__T;T.save.missed=[];T.save.wrec={};T.save.seen={};window.__btn.clear();window.__pan.length=0;var pl=null;for(var k in T.PBY){var p=T.PBY[k];if(p&&p.v&&p.v.indexOf(v)>=0){pl=p;break}} var o=JSON.parse(JSON.stringify(T.DLG[v]));delete o.conv;delete o.flow2;o.lines.forEach(function(l,i){if(i%2&&l.opts){l.y=l.opts[0].y;l.jp=l.opts[0].jp;delete l.opts;delete l.fork;delete l.cards}});T.DLG['zz_old_fmt']=o;T.startVid(pl,'zz_old_fmt',null)}", 'doh_immig1'); q.wait_for_timeout(500); q.click('.btn.go')
     for i in range(60):
         q.wait_for_timeout(150)
         if q.evaluate("()=>__T.G.phase") == 'cue': break

@@ -148,7 +148,11 @@ def dlg_of(txt):
     m = re.search(r'var TOURDLG=(\{.*?\});\n', txt, re.S); d = json.loads(m.group(1)); return {v: d[v] for v in VIDS}
 before = subprocess.run(['git', 'show', 'HEAD:tour/doha/index.html'], cwd=ROOT, capture_output=True, text=True).stdout
 now = open(os.path.join(ROOT, 'tour/doha/index.html'), encoding='utf-8').read()
-chk('4場面の台詞・単語は変わっていない(HEAD と同一)', dlg_of(before) == dlg_of(now))
+# タスク092(057 第3弾)で街の c1〜c3 は新形式に変換した。ここでは「この任務(コルニーシュの絵)で台詞を変えていない」ことを、
+# 変換の前後で変わらないもの(words の5語・ターン数)と、変換していない doh_ev_j_ask の完全一致で確かめる
+_b, _n = dlg_of(before), dlg_of(now)
+chk('4場面の台詞・単語は変わっていない(c1〜c3 は words とターン数が同じ・doh_ev_j_ask は HEAD と同一)',
+    all(_b[v]['words'] == _n[v]['words'] and len(_b[v]['lines']) == len(_n[v]['lines']) for v in VIDS[:3]) and _b['doh_ev_j_ask'] == _n['doh_ev_j_ask'])
 chk('素材の大きさ(背景1536×960・舟1024×256・きらめき6144×192)', img('doha-corniche-v1.png').size == (1536, 960) and dh.size == (1024, 256) and sp.size == (6144, 192))
 print('\nNG:', bad if bad else 'なし')
 sys.exit(1 if bad else 0)
