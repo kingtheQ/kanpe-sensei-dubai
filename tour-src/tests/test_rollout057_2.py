@@ -46,7 +46,8 @@ print(json.dumps(g['dl'], ensure_ascii=False))
 dl = json.loads(j.stdout.strip().split('\n')[-1])
 cnt_flow2 = sorted(k for k, v in dl.items() if v.get('flow2') and not k.startswith('ath_'))   # アテネ(090・091)は新形式の別の弾
 
-chk('S0 flow2 の場面は nbo_java1 + 第1弾28 + 第2弾11 = 40(ドーハ・ロヴァニエミ・イベントには付いていない)', cnt_flow2 == sorted(SCN + FIRST + ['nbo_java1']), len(cnt_flow2))
+DOH3 = ['doh_immig1','doh_immig2','doh_bag1','doh_bag2','doh_sim1','doh_sim2','doh_taxi','doh_metro','doh_city_t1','doh_city_t2','doh_city_t3','doh_city_h1','doh_city_h2','doh_city_h3','doh_city_h4','doh_city_s1','doh_city_s2','doh_city_s3','doh_city_r1','doh_city_r2','doh_city_r3','doh_city_c1','doh_city_c2','doh_city_c3','doh_dep_checkin','doh_dep_passport','doh_dep_bear','doh_dep_train','doh_dep_orchard','doh_dep_lounge','doh_dep_gate','doh_dep_plane']   # タスク092(第3弾)
+chk('S0 flow2 の場面は nbo_java1 + 第1弾28 + 第2弾11 + 第3弾のドーハ32 = 72(ロヴァニエミ・イベントには付いていない)', cnt_flow2 == sorted(SCN + FIRST + ['nbo_java1'] + DOH3), len(cnt_flow2))
 for sid in SCN:
     d_ = dl[sid]; L = d_['lines']; cards = [i for i, l in enumerate(L) if l.get('cards')]
     opts = L[cards[0]]['opts'] if cards else []
@@ -66,7 +67,7 @@ for sid in SCN:
 chk('S3d hnd_return: 分かれ目(カード)は1か所だけ・木の飛行機の側は固定文(opts なし)・rep つき・keep なし', bool(dl['hnd_return']['lines'][3].get('rep')) and not dl['hnd_return']['lines'][3].get('opts') and bool(dl['hnd_return']['lines'][7].get('cards')) and dl['hnd_return'].get('keep') is None, dl['hnd_return']['lines'][3].get('rep'))
 import event_data, doha_data
 chk('S3e VARIANTS(持ち越しの差しかえ)が参照する場面は羽田にない・参照が壊れていない(build.py の assert が通っている)', not any(v[0].startswith('hnd_') for v in event_data.VARIANTS + doha_data.VARIANTS) and all(v[0] in dl and 'n' in dl[v[0]]['lines'][2 * v[1]] for v in event_data.VARIANTS + doha_data.VARIANTS))
-chk('S4 窓口・ドーハ・羽田のイベント・ロヴァニエミ・ナイロビのイベントの場面は変えていない(flow2 なし)', not any(dl[k].get('flow2') for k in dl if k.startswith(('win_', 'ticket_', 'doh_', 'hnd_ev_', 'rvn_', 'nbo_ev_', 'nbo_eikaiwa'))))
+chk('S4 窓口・ドーハのイベント・羽田のイベント・ロヴァニエミ・ナイロビのイベントの場面は変えていない(flow2 なし)', not any(dl[k].get('flow2') for k in dl if k.startswith(('win_', 'ticket_', 'doh_ev_', 'hnd_ev_', 'rvn_', 'nbo_ev_', 'nbo_eikaiwa'))))
 # ---------------- 動作 ----------------
 HOOK = "requestAnimationFrame(frame);\n})();"
 def hooked(route):

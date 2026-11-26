@@ -70,7 +70,7 @@ d = git('diff', '--stat', 'HEAD', '--', 'tour-src/data.py', 'tour-src/doha_data.
 
 # ---------------- 動作 ----------------
 HOOK = "requestAnimationFrame(frame);\n})();"
-EXPOSE = "window.__T={G:G,save:save,PREF:PREF,get luHelp(){return luHelp},prefSave:prefSave};"
+EXPOSE = "window.__T={DLG:DLG,startVid:startVid,PBY:PBY,G:G,save:save,PREF:PREF,get luHelp(){return luHelp},prefSave:prefSave};"
 def hooked(route):
     r = route.fetch(); body = r.text(); assert HOOK in body
     route.fulfill(response=r, body=body.replace(HOOK, EXPOSE + HOOK, 1))
@@ -91,11 +91,14 @@ def newctx(br, prefs=None, vp=(390, 780), nomic=False):
     ctx.add_init_script("try{localStorage.setItem('kanpe-set-v1',JSON.stringify({v:1,vmode:'pick'}))}catch(e){}")
     if prefs is not None: ctx.add_init_script("try{if(!sessionStorage.getItem('__pf')){sessionStorage.setItem('__pf','1');localStorage.setItem('chk1:kd_prefs_v1',%s)}}catch(e){}" % json.dumps(json.dumps(prefs)))   # チェックモードの保存は専用の名前(chk1:)
     return ctx
-def open_scene(ctx, base, vid='doh_immig1'):   # タスク057 第2弾で羽田(hnd_sec)も新しい流れ(おてほんボタンなし)になったので、まだ変えていないドーハの doh_immig1 を使う
+def open_scene(ctx, base, vid='doh_immig1'):   # タスク092でドーハも新しい流れになったので、旧形式の確認は doh_immig1 の写しから conv/flow2 を外した場面(zz_old_fmt)を実行時に作って使う
     q = ctx.new_page(); errs = []; q.on('pageerror', lambda e: errs.append(str(e)[:160])); q.route('**/tour/index.html*', hooked); q.route('**/tour/doha/index.html*', hooked)
     q.goto(base + ('/tour/doha/index.html?check=1' if vid.startswith('doh_') else '/tour/index.html?check=1')); q.wait_for_timeout(1500); q.mouse.click(215, 450); q.wait_for_timeout(500)
-    q.evaluate("()=>document.getElementById('chkBtn').click()"); q.wait_for_timeout(150)
-    q.evaluate("(v)=>{[].filter.call(document.querySelectorAll('#chkPan button'),function(b){return b.textContent===v})[0].click()}", vid); q.wait_for_timeout(600)
+    if vid == 'doh_immig1':   # 旧形式の写しを作って、チェックモードを通さず直接始める
+        q.evaluate("()=>{var T=__T,o=JSON.parse(JSON.stringify(T.DLG.doh_immig1));delete o.conv;delete o.flow2;o.lines.forEach(function(l,i){if(i%2&&l.opts){l.y=l.opts[0].y;l.jp=l.opts[0].jp;delete l.opts;delete l.fork;delete l.cards}});T.DLG.zz_old_fmt=o;var pl=null;for(var k in T.PBY){var p=T.PBY[k];if(p&&p.v&&p.v.indexOf('doh_immig1')>=0){pl=p;break}} T.startVid(pl,'zz_old_fmt',null)}"); q.wait_for_timeout(600)
+    else:
+        q.evaluate("()=>document.getElementById('chkBtn').click()"); q.wait_for_timeout(150)
+        q.evaluate("(v)=>{[].filter.call(document.querySelectorAll('#chkPan button'),function(b){return b.textContent===v})[0].click()}", vid); q.wait_for_timeout(600)
     q.click('.btn.go'); q.errs = errs
     return q
 def wait_phase(q, ph, n=300):

@@ -51,7 +51,8 @@ print(json.dumps(g['dl'], ensure_ascii=False))
 dl = json.loads(j.stdout.strip().split('\n')[-1])
 cnt_flow2 = sorted(k for k, v in dl.items() if v.get('flow2'))
 
-chk('S0 flow2 の場面は nbo_java1 + 第1弾28 + 第2弾11 + 第3弾32 = 72(ロヴァニエミ・イベント・窓口には付いていない)', cnt_flow2 == sorted(SCN + FIRST + SECOND + ['nbo_java1']), len(cnt_flow2))
+ATH10 = ['ath_cafe1','ath_checkin1','ath_depimmig1','ath_gate1','ath_hotel1','ath_immig1','ath_immig2','ath_shop1','ath_taxi1','ath_transit1']   # タスク090・091(アテネ・main で変換済み)
+chk('S0 flow2 の場面は nbo_java1 + 第1弾28 + 第2弾11 + 第3弾32 + アテネ10 = 82(ロヴァニエミ・イベント・窓口には付いていない)', cnt_flow2 == sorted(SCN + FIRST + SECOND + ['nbo_java1'] + ATH10), len(cnt_flow2))
 for sid in SCN:
     d_ = dl[sid]; L = d_['lines']; cards = [i for i, l in enumerate(L) if l.get('cards')]
     opts = L[cards[0]]['opts'] if cards else []
