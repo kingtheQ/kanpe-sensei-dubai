@@ -52,9 +52,11 @@ dl = json.loads(j.stdout.strip().split('\n')[-1])
 cnt_flow2 = sorted(k for k, v in dl.items() if v.get('flow2') and not k.startswith('rvn_'))   # ロヴァニエミ(095=057第4弾)は test_rollout057_4.py
 
 FRA10 = ['fra_arr1','fra_bakery1','fra_tram1','fra_info1','fra_cafe1','fra_shop1','fra_hotel1','fra_dep_board1','fra_dep_ticket1','fra_dep_train1']   # タスク097(フランクフルト)
+ZUR10 = ['zur_arr1','zur_locker1','zur_tram1','zur_info1','zur_cafe1','zur_shop1','zur_hotel1','zur_dep_board1','zur_dep_ticket1','zur_dep_train1']   # タスク096(チューリッヒ。新形式で作成)
+SYD10 = ['syd_immig1','syd_immig2','syd_quarantine1','syd_train1','syd_cafe1','syd_shop1','syd_hotel1','syd_dep_checkin1','syd_dep_exit1','syd_dep_gate1']   # タスク102(シドニー。新形式で作成)
 ATH10 = ['ath_cafe1','ath_checkin1','ath_depimmig1','ath_gate1','ath_hotel1','ath_immig1','ath_immig2','ath_shop1','ath_taxi1','ath_transit1']   # タスク090・091(アテネ・main で変換済み)
 ROM10 = ['rom_bag1','rom_info1','rom_taxi1','rom_train1','rom_cafe1','rom_shop1','rom_hotel1','rom_dep_ticket1','rom_dep_platform1','rom_dep_train1']   # タスク094(ローマ・新形式で作成)
-chk('S0 flow2 の場面は nbo_java1 + 第1弾28 + 第2弾11 + 第3弾32 + アテネ10 + ローマ10 + フランクフルト10 = 102(イベント・窓口には付いていない。ロヴァニエミ30場面は第4弾=095でこの一覧の外)', cnt_flow2 == sorted(SCN + FIRST + SECOND + ['nbo_java1'] + ATH10 + ROM10 + FRA10), len(cnt_flow2))
+chk('S0 flow2 の場面は nbo_java1 + 第1弾28 + 第2弾11 + 第3弾32 + アテネ10 + ローマ10 + フランクフルト10 + チューリッヒ10 + シドニー10 = 122(イベント・窓口には付いていない。ロヴァニエミ30場面は第4弾=095でこの一覧の外)', cnt_flow2 == sorted(SCN + FIRST + SECOND + ['nbo_java1'] + ATH10 + ROM10 + FRA10 + ZUR10 + SYD10), len(cnt_flow2))
 for sid in SCN:
     d_ = dl[sid]; L = d_['lines']; cards = [i for i, l in enumerate(L) if l.get('cards')]
     opts = L[cards[0]]['opts'] if cards else []

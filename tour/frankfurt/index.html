@@ -1416,8 +1416,9 @@ var TRIP=(function(){
   ATH:{id:'athens',n:'アテネ',en:'Athens',lon:23.94,lat:37.94},
   FCO:{id:'rome',n:'ローマ',en:'Rome',lon:12.25,lat:41.80},
   ZRH:{id:'zurich',n:'チューリッヒ',en:'Zurich',lon:8.54,lat:47.38},
-  FRA:{id:'frankfurt',n:'フランクフルト',en:'Frankfurt',lon:8.66,lat:50.11}};   /* 096: チューリッヒ(中央駅。ローマからミラノ乗り換えの鉄道で着き、フランクフルトへ直通ICE) */   /* 097: フランクフルト(1周目ルートのチューリッヒの次。鉄道の旅。座標は中央駅付近の公開座標) */   /* 090: アテネ(1周目ルートのロヴァニエミの次。窓口の地図 window_data.ROUTE_STOPS と同じ) */
- var IMPL={HND:1,NBO:1,DOH:1,RVN:1,ATH:1,FCO:1,ZRH:1,FRA:1};   /* 065: ロヴァニエミ(到着まわり)。ヘルシンキは乗り継ぎだけ(chain が場面なしの区間をはさむ) */   /* 場面のある空港。ここ以外の行き先は、地図と券には出すが、行けない */
+  FRA:{id:'frankfurt',n:'フランクフルト',en:'Frankfurt',lon:8.66,lat:50.11},
+  SYD:{id:'sydney',n:'シドニー',en:'Sydney',lon:151.18,lat:-33.94}};   /* 102: シドニー(1周目ルートのホノルルの次。空港の座標は公開座標。ホノルル(101)がmainに入ったら、道(NEI)と旅のつなぎを足す) */   /* 096: チューリッヒ(中央駅。ローマからミラノ乗り換えの鉄道で着き、フランクフルトへ直通ICE) */   /* 097: フランクフルト(1周目ルートのチューリッヒの次。鉄道の旅。座標は中央駅付近の公開座標) */   /* 090: アテネ(1周目ルートのロヴァニエミの次。窓口の地図 window_data.ROUTE_STOPS と同じ) */
+ var IMPL={HND:1,NBO:1,DOH:1,RVN:1,ATH:1,FCO:1,ZRH:1,FRA:1,SYD:1};   /* 065: ロヴァニエミ(到着まわり)。ヘルシンキは乗り継ぎだけ(chain が場面なしの区間をはさむ) */   /* 場面のある空港。ここ以外の行き先は、地図と券には出すが、行けない */
  function codeOf(apId){for(var k in AIRP)if(AIRP[k].id===apId)return k;return null}
  /* ---------- 券ごとの区間(会社は docs/world-tour-design.md の便の表。別切符は会社を書かない)。[出発,到着,会社,表の日,別切符] ---------- */
  var LEGS={
@@ -1501,6 +1502,9 @@ var TRIP=(function(){
   fra_arr:[['fra_arr1'],['fra_bakery1'],['fra_tram1'],['fra_info1']],   /* 097: フランクフルト到着(鉄道着。入国審査なし。最初の駅の場面→ベーカリー・市内切符・案内所) */
   fra_city:[['fra_cafe1'],['fra_shop1'],['fra_hotel1']],   /* 097: フランクフルトの街(カフェ・おみやげ屋・ホテル) */
   fra_dep:[['fra_dep_board1'],['fra_dep_ticket1'],['fra_dep_train1']],   /* 097: フランクフルトの出発(鉄道。発車標→窓口→ホームと車内。順に開く) */
+  syd_arr:[['syd_immig1'],['syd_immig2'],['syd_quarantine1'],['syd_train1']],   /* 102: シドニー到着(入国の機械→ゲートと窓口→検疫→空港の駅。順に開く) */
+  syd_city:[['syd_cafe1'],['syd_shop1'],['syd_hotel1']],
+  syd_dep:[['syd_dep_checkin1'],['syd_dep_exit1'],['syd_dep_gate1']],   /* 102: シドニーの出発(チェックイン→保安と出国→搭乗口) */
   rom_arr:[['rom_bag1'],['rom_info1'],['rom_taxi1'],['rom_train1']],   /* 094: ローマ到着(入国審査なし=シェンゲン圏内。荷物・客引き・タクシー・空港電車) */
   rom_city:[['rom_cafe1'],['rom_shop1'],['rom_hotel1']],   /* 094: ローマの街(ジェラテリア・おみやげ屋・ホテル) */
   rom_dep:[['rom_dep_ticket1'],['rom_dep_platform1'],['rom_dep_train1']],   /* 094: ローマの出発(鉄道。切符の窓口→発車標とホーム→車内。順に開く。ミラノで1回乗り換え) */
@@ -1517,9 +1521,10 @@ var TRIP=(function(){
   rvil:'rvn_stay',rpost:'rvn_stay',rsanta:'rvn_stay',rrein:'rvn_stay',rhotel:'rvn_night',rchk:'rvn_dep',rsec:'rvn_dep',rshop:'rvn_dep',rahk:'rvn_dep',rgate:'rvn_dep',
   aimmig:'ath_arr',ataxi:'ath_arr',ametro:'ath_arr',acafe:'ath_city',ashop:'ath_city',ahotel:'ath_city',acheck:'ath_dep',adepimm:'ath_dep',agate:'ath_dep',
   farr:'fra_arr',fbakery:'fra_arr',ftram:'fra_arr',finfo:'fra_arr',fcafe:'fra_city',fshop:'fra_city',fhotel:'fra_city',fboard:'fra_dep',fticket:'fra_dep',ftrain:'fra_dep',
+  simmig1:'syd_arr',simmig2:'syd_arr',squar:'syd_arr',strain:'syd_arr',scafe:'syd_city',sshop:'syd_city',shotel:'syd_city',scheck:'syd_dep',sexit:'syd_dep',sgate:'syd_dep',
   mbag:'rom_arr',minfo:'rom_arr',mtaxi:'rom_arr',mtrain:'rom_arr',mcafe:'rom_city',mshop:'rom_city',mhotel:'rom_city',mdtick:'rom_dep',mdplat:'rom_dep',mdtrain:'rom_dep',
   zarr:'zur_arr',zlock:'zur_arr',ztram:'zur_arr',zinfo:'zur_arr',zcafe:'zur_city',zshop:'zur_city',zhotel:'zur_city',zboard:'zur_dep',zticket:'zur_dep',ztrain:'zur_dep'};
- var MODEGRP={hret:{tour:'hnd_ret'},hdep:{tour:'hnd_dep'},arr:{tour:'nbo_arr',doha:'doh_arr',rovaniemi:'rvn_arr',athens:'ath_arr',rome:'rom_arr',zurich:'zur_arr',frankfurt:'fra_arr'},stay:{tour:['nbo_market','nbo_safari'],rovaniemi:['rvn_stay','rvn_night']},air:{tour:'nbo_air'},dep:{tour:'nbo_dep',doha:'doh_dep',rovaniemi:'rvn_dep',athens:'ath_dep',rome:'rom_dep',zurich:'zur_dep',frankfurt:'fra_dep'},city:{doha:'doh_city',athens:'ath_city',rome:'rom_city',zurich:'zur_city',frankfurt:'fra_city'},sage:{tour:'hnd'}};
+ var MODEGRP={hret:{tour:'hnd_ret'},hdep:{tour:'hnd_dep'},arr:{tour:'nbo_arr',doha:'doh_arr',rovaniemi:'rvn_arr',athens:'ath_arr',rome:'rom_arr',zurich:'zur_arr',frankfurt:'fra_arr',sydney:'syd_arr'},stay:{tour:['nbo_market','nbo_safari'],rovaniemi:['rvn_stay','rvn_night']},air:{tour:'nbo_air'},dep:{tour:'nbo_dep',doha:'doh_dep',rovaniemi:'rvn_dep',athens:'ath_dep',rome:'rom_dep',zurich:'zur_dep',frankfurt:'fra_dep',sydney:'syd_dep'},city:{doha:'doh_city',athens:'ath_city',rome:'rom_city',zurich:'zur_city',frankfurt:'fra_city',sydney:'syd_city'},sage:{tour:'hnd'}};
  /* お金の1行(場面の台詞に出る値段。円に直すレートは架空で固定)。タクシーとメトロは台詞に値段がないので、架空の値段 */
  var MONEY={nbo_sim1:['sim',1000,'KES'],nbo_taxi1:['taxi',3000,'KES'],nbo_java1:['coffee',800,'KES'],nbo_market:['gift',1500,'KES'],nbo_duty1:['duty',24,'USD'],
   doh_sim1:['sim',30,'QAR'],doh_taxi:['taxi',55,'QAR'],doh_metro:['metro',6,'QAR'],doh_city_t1:['tea',2,'QAR'],doh_city_s1:['gift',10,'QAR'],
@@ -1562,7 +1567,8 @@ var TRIP=(function(){
   aimmig:14,ataxi:15,ametro:15,acafe:13,ashop:16,ahotel:19,acheck:9,adepimm:10,agate:10,
   farr:15,fbakery:15,ftram:15,finfo:16,fcafe:14,fshop:16,fhotel:19,fboard:8,fticket:8,ftrain:9,
   mbag:11,minfo:11,mtaxi:12,mtrain:12,mcafe:15,mshop:16,mhotel:19,mdtick:9,mdplat:10,mdtrain:11,
-  zarr:14,zlock:14,ztram:15,zinfo:15,zcafe:16,zshop:17,zhotel:19,zboard:9,zticket:9,ztrain:10};   /* チューリッヒ(096。物語の時刻で、実在の便の時刻ではない。ホテルは夕方(台本: Good evening)・出発は翌朝) */   /* ローマ(094。物語の時刻で、実在の便・電車の時刻ではない。ホテルは夕方(台本: Buonasera)・出発は翌朝) */   /* アテネ(090・091。物語の時刻で、実在の便の時刻ではない。ホテルは夕方(台本: Good evening)・出発は翌朝) */
+  zarr:14,zlock:14,ztram:15,zinfo:15,zcafe:16,zshop:17,zhotel:19,zboard:9,zticket:9,ztrain:10,
+  simmig1:7,simmig2:7,squar:8,strain:8,scafe:10,sshop:14,shotel:16,scheck:10,sexit:10,sgate:11};   /* シドニー(102。物語の時刻で、実在の便の時刻ではない) */   /* チューリッヒ(096。物語の時刻で、実在の便の時刻ではない。ホテルは夕方(台本: Good evening)・出発は翌朝) */   /* ローマ(094。物語の時刻で、実在の便・電車の時刻ではない。ホテルは夕方(台本: Buonasera)・出発は翌朝) */   /* アテネ(090・091。物語の時刻で、実在の便の時刻ではない。ホテルは夕方(台本: Good evening)・出発は翌朝) */
  //                  /* ロヴァニエミの出発(072。台本: Good afternoon) */      /* ロヴァニエミ到着(065。物語の時刻で、実在の便の時刻ではない。夜の便・深夜の到着=021 の R1〜R4) */ /* ドーハ出発(台本: Good afternoon) */
  /* 券ごとの上書き: スターのナイロビ着は 01:25(夜)。台本のあいさつは朝のまま(夜版の台本は未作成) */
  var HOUR_TK={star:{immig:1,bag:2,sim:2,taxi:3}};
@@ -4301,7 +4307,7 @@ function build(){
  pan.appendChild(el('h3','','ページ'));
  var r2=el('div','row'),a=el('a','b',OTHER_LABEL+'へ(点検モードのまま)');a.href=OTHER_HREF;r2.appendChild(a);
  var a2=el('a','b','通常モードで開く');a2.href=location.pathname;r2.appendChild(a2);
- /*CHKX*/
+ var a3=el('a','b','シドニーへ(点検モードのまま)');a3.href='../sydney/?check=1';r2.appendChild(a3);
  r2.appendChild(sbtn('専用の記録を消す',function(){if(window.__chkReset)window.__chkReset();location.reload()}));
  pan.appendChild(r2);
  Object.keys(MODES).forEach(function(k){
@@ -4645,6 +4651,20 @@ ART.frafshop={bg:'frankfurt-street-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-b
 ART.frafhotel={bg:'frankfurt-hotel-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:640,by:884},king:{n:'hall-king-back',x:776,by:884},npcS:{f_front:{n:'w-front-man-suit-1',x:1010,by:884,sw:70}}}};
 ART.frafticket={bg:'frankfurt-departure-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{f_ticket:{n:'w-front-man-suit-1',x:1000,by:890,sw:70}}}};
 ART.fraftrain={bg:'frankfurt-departure-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{f_pax:{n:'t-backpacker-front',x:1010,by:890,sw:79},f_conductor:{n:'w-front-pilot-fa',x:1010,by:890,sw:80}}}};
+/* シドニー(タスク102): 背景は PM 制作の v1(1536×960・人なし)。ふたりは後ろ姿(ルル左・キング右)。到着=sydney-arrival-v1(左=SmartGateのキオスク x140〜890・y250〜600、中央に青い列の仕切り、右=Assistance Desk x950〜1180・BIOSECURITY の机と申告箱 x1130〜1400・y640〜860。床 y≥600)。
+   街=sydney-street-v1(左の遊歩道だけが地面。右は海なので、ふたりは x520/656 に寄せる。カフェ=左下の赤白の日よけ x20〜260)・sydney-hotel-v1(窓・テーブル・右の木の壁。床の足もとは y925)。出発=sydney-departure-v1(左=出発案内板 x192〜528・y336〜516、右=チェックインの列 x620〜1500・y520〜640。床 y≥650)。
+   syddgate=出発案内板の行の中身は背景に描いていないので、別素材 sydney-board-sin-strip.png(2コマ・620×114・(206,396)・1秒ごと。メルボルン/シンガポール/オークランド/ロサンゼルスの4行。シンガポール行きの行が2コマ目で光る。時刻と搭乗口は「--:--」「-」=未確認の数字は出さない。作り方 tour-src/art/prep_sydney102.py)を重ねる。
+   探知犬(別素材。まだ無い): 検疫の場面 sydquar は係員との会話だけで成り立つ。犬の絵が届いたら、sydquar の strips に1行足すだけ(例: {img:'sydney-dog-strip.png',x:..,y:..,n:..,fw:..,fh:..,step:..})。strips は絵が読めなくても場面を落とさない(ARTFAIL にならない)。台詞は犬の絵に頼らない。 */
+ART.sydimm1={bg:'sydney-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{s_smart:{n:'o-front-officer-green-1',x:1100,by:890,sw:70}}}};
+ART.sydimm2={bg:'sydney-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{s_abf:{n:'o-front-officer-blue',x:1000,by:890,sw:70}}}};
+ART.sydquar={bg:'sydney-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{s_quar:{n:'o2-front-officer-blue',x:1040,by:890,sw:70}}}};
+ART.sydtrain={bg:'sydney-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{s_train:{n:'t-man-dashiki-front',x:1100,by:890,sw:79}}}};
+ART.sydcafe={bg:'sydney-street-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:520,by:884},king:{n:'hall-king-back',x:656,by:884},npcS:{s_barista:{n:'t-backpacker-front',x:230,by:790,sw:79}}}};
+ART.sydshop={bg:'sydney-street-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:520,by:884},king:{n:'hall-king-back',x:656,by:884},npcS:{s_shop:{n:'t-woman-hijab-front',x:380,by:790,sw:79}}}};
+ART.sydhotel={bg:'sydney-hotel-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:470,by:925},king:{n:'hall-king-back',x:606,by:925},npcS:{s_front:{n:'w-front-man-suit-1',x:1010,by:925,sw:70}}}};
+ART.sydcheck={bg:'sydney-departure-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{s_check:{n:'o-front-woman-blonde-suit',x:1000,by:890,sw:70}}}};
+ART.sydexit={bg:'sydney-departure-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{s_sec:{n:'o-front-officer-green-1',x:1000,by:890,sw:70},s_pcheck:{n:'o-front-officer-blue',x:1000,by:890,sw:70}}}};
+ART.syddgate={bg:'sydney-departure-v1.png',mode:'wide',strips:[{img:'sydney-board-sin-strip.png',x:206,y:396,n:2,fw:310,fh:114,step:1}],dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{s_board:{n:'o2-front-officer-blue',x:1000,by:890,sw:70}}}};
 function artIdFor(S){var v=String(S&&S.vid||'');var m={fra_arr1:'frafarr',fra_bakery1:'frafbakery',fra_tram1:'fraftram',fra_info1:'frafinfo',fra_cafe1:'frafcafe',fra_shop1:'frafshop',fra_hotel1:'frafhotel',fra_dep_board1:'frafboard',fra_dep_ticket1:'frafticket',fra_dep_train1:'fraftrain'};return m[v]||null}
 function artImg(n){var i=ARTI[n];if(!i){i=ARTI[n]=new Image();i.onerror=function(){i.bad=1};i.src=ARTBASE+n}return i}
 function artShow(on){if(ARTSHOW===on)return;ARTSHOW=on;cv.hidden=!!on;cvA.hidden=!on}
@@ -5052,7 +5072,7 @@ var AMBSND={info:'airport',hall:'airport',tdesk:'airport',map:'airport',nbo:'air
  rvn:'airport',ath:'airport',zur:'airport',ahlan:'lounge',hotel:'hotel',room:'hotel',home:'hotel',sage:'hotel',vault:'hotel',mosque:'hotel',atop:'cabin',souk:'street',city:'street',dohc:'street',
  beach:'sea',marina:'sea',fountain:'outdoor',safari:'outdoor'};
 /* 背景の名前 → カテゴリ(場所の音と食いちがうとき、こちらが先) */
-var AMBBG={taxi:'outdoor',dtaxi:'outdoor',rbus:'outdoor',ataxi:'outdoor',acafe:'street',ashop:'street',ahotel:'hotel',ztram:'outdoor',zcafe:'street',zshop:'street',zhotel:'hotel',fcafe:'street',fshop:'street',fhotel:'hotel',cabinQ:'cabin',cabin:'cabin',chotel:'hotel',cbreak:'hotel'};
+var AMBBG={taxi:'outdoor',dtaxi:'outdoor',rbus:'outdoor',ataxi:'outdoor',acafe:'street',ashop:'street',ahotel:'hotel',ztram:'outdoor',zcafe:'street',zshop:'street',zhotel:'hotel',fcafe:'street',fshop:'street',fhotel:'hotel',scafe:'street',sshop:'street',shotel:'hotel',cabinQ:'cabin',cabin:'cabin',chotel:'hotel',cbreak:'hotel'};
 var ambEl=null,ambCat=null,ambDuck=false;
 function ambOn(){try{return localStorage.getItem('kd_snd')!=='off'}catch(e){return true}}
 function ambApply(){var c=ambCat&&AMB[ambCat];

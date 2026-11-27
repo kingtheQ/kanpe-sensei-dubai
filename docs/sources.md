@@ -141,3 +141,12 @@
 - 実機(マイク・音・見え方)は未確認。ホームの番号が出る正確なタイミングは資料により分数が違うため台詞に入れていない。
 
 - チューリッヒ→フランクフルトの直通ICE（約4時間）: 時刻表サイト2つ（Omio・Trainline）の一致による。PM確認日2026-11-26（zurich-prep.md）。SBB／DBの公式ページは未確認のため、正確な時刻は台詞・表示に出さない（タスク096）。
+
+## タスク102（シドニー、2026-11-27確認）
+- SmartGate(到着)は2段階: キオスクでパスポートを読み取り(写真のページを下にして差し込む)→質問に答える→チケットが出る→ゲートで顔を認証。通れなければ係員(ABF)へ。チケット・パスポート・入国カードは手元に持つ: https://www.abf.gov.au/entering-and-leaving-australia/smartgate/arrivals/overview ／ https://www.abf.gov.au/entering-and-leaving-australia/smartgate/arrivals/how-to-use-smartgates ／ https://www.abf.gov.au/entering-and-leaving-australia/smartgate/arrivals
+- 入国カード(Incoming Passenger Card)は紙。デジタル申告(Australia Travel Declaration)はシドニー空港へ試行を広げる計画の段階(ABF公式ニュース): https://www.abf.gov.au:443/newsroom-subsite/Pages/Increased-eligibility-at-Australian-Arrivals-SmartGates-from-this-week.aspx
+- 検疫(農業・水産・林業省 DAFF): 食べ物・動植物・木製品はすべて申告。全部申告して見せれば、持ち込めない物でも生物安全法の罰はない(不合格の物は処理・廃棄になる)。荷物はX線・探知犬・目視で調べる: https://www.agriculture.gov.au/sites/default/files/documents/travelling-returning-australia-english.pdf ／ https://www.agriculture.gov.au/travelling/to-australia ／ https://www.agriculture.gov.au/biosecurity-trade/travelling/to-australia/advice-to-travellers
+- チョコレート・ビスケット・焼いたケーキは持ち込める(肉を含まないこと): https://www.agriculture.gov.au/biosecurity-trade/travelling/exhibitions-sporting-cultural-other-events/cultural-seasonal ／ https://www.agriculture.gov.au/biosecurity-trade/travelling/bringing-mailing-goods
+- 空港の駅(Opal): Opalカードもコンタクトレスも、空港駅の「駅アクセス料」が加わる。空港の駅でOpalカードを買う・チャージするときは最低額がある。台詞には金額を出さない: https://transportnsw.info/node/8200 ／ https://transportnsw.info/tickets-opal/opal/best-ways-to-pay ／ https://transportnsw.info/tickets-opal/opal/top-up-your-opal-card
+- 出発(T1国際線): 保安検査が出国(パスポート)より先に並ぶ配置に変更(2025年第4四半期に完了予定→「15レーン完了」の掲載あり)。CTスキャナのレーンではノートパソコン・液体をかばんに入れたままにできる場合がある。ただし液体の量の制限は残り、レーンで違う: https://sydneyairport.com.au/investor/planning-and-projects/faster-security-screening-at-international ／ https://www.sydneyairport.com.au/july ／ https://m.sydneyairport.com.au/corporate/planning-and-projects/faster-security-screening-at-international
+- 台詞に出していないもの(未確認・指示書どおり): 航空会社名・便名・運賃・罰金額・商品の値段・時刻・搭乗口の番号・駅アクセス料や最低チャージの金額。出発案内板の絵の時刻は「--:--」、搭乗口は「-」。

@@ -318,6 +318,20 @@ ART.frafshop={bg:'frankfurt-street-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-b
 ART.frafhotel={bg:'frankfurt-hotel-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:640,by:884},king:{n:'hall-king-back',x:776,by:884},npcS:{f_front:{n:'w-front-man-suit-1',x:1010,by:884,sw:70}}}};
 ART.frafticket={bg:'frankfurt-departure-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{f_ticket:{n:'w-front-man-suit-1',x:1000,by:890,sw:70}}}};
 ART.fraftrain={bg:'frankfurt-departure-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{f_pax:{n:'t-backpacker-front',x:1010,by:890,sw:79},f_conductor:{n:'w-front-pilot-fa',x:1010,by:890,sw:80}}}};
+/* シドニー(タスク102): 背景は PM 制作の v1(1536×960・人なし)。ふたりは後ろ姿(ルル左・キング右)。到着=sydney-arrival-v1(左=SmartGateのキオスク x140〜890・y250〜600、中央に青い列の仕切り、右=Assistance Desk x950〜1180・BIOSECURITY の机と申告箱 x1130〜1400・y640〜860。床 y≥600)。
+   街=sydney-street-v1(左の遊歩道だけが地面。右は海なので、ふたりは x520/656 に寄せる。カフェ=左下の赤白の日よけ x20〜260)・sydney-hotel-v1(窓・テーブル・右の木の壁。床の足もとは y925)。出発=sydney-departure-v1(左=出発案内板 x192〜528・y336〜516、右=チェックインの列 x620〜1500・y520〜640。床 y≥650)。
+   syddgate=出発案内板の行の中身は背景に描いていないので、別素材 sydney-board-sin-strip.png(2コマ・620×114・(206,396)・1秒ごと。メルボルン/シンガポール/オークランド/ロサンゼルスの4行。シンガポール行きの行が2コマ目で光る。時刻と搭乗口は「--:--」「-」=未確認の数字は出さない。作り方 tour-src/art/prep_sydney102.py)を重ねる。
+   探知犬(別素材。まだ無い): 検疫の場面 sydquar は係員との会話だけで成り立つ。犬の絵が届いたら、sydquar の strips に1行足すだけ(例: {img:'sydney-dog-strip.png',x:..,y:..,n:..,fw:..,fh:..,step:..})。strips は絵が読めなくても場面を落とさない(ARTFAIL にならない)。台詞は犬の絵に頼らない。 */
+ART.sydimm1={bg:'sydney-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{s_smart:{n:'o-front-officer-green-1',x:1100,by:890,sw:70}}}};
+ART.sydimm2={bg:'sydney-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{s_abf:{n:'o-front-officer-blue',x:1000,by:890,sw:70}}}};
+ART.sydquar={bg:'sydney-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{s_quar:{n:'o2-front-officer-blue',x:1040,by:890,sw:70}}}};
+ART.sydtrain={bg:'sydney-arrival-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{s_train:{n:'t-man-dashiki-front',x:1100,by:890,sw:79}}}};
+ART.sydcafe={bg:'sydney-street-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:520,by:884},king:{n:'hall-king-back',x:656,by:884},npcS:{s_barista:{n:'t-backpacker-front',x:230,by:790,sw:79}}}};
+ART.sydshop={bg:'sydney-street-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:520,by:884},king:{n:'hall-king-back',x:656,by:884},npcS:{s_shop:{n:'t-woman-hijab-front',x:380,by:790,sw:79}}}};
+ART.sydhotel={bg:'sydney-hotel-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:470,by:925},king:{n:'hall-king-back',x:606,by:925},npcS:{s_front:{n:'w-front-man-suit-1',x:1010,by:925,sw:70}}}};
+ART.sydcheck={bg:'sydney-departure-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{s_check:{n:'o-front-woman-blonde-suit',x:1000,by:890,sw:70}}}};
+ART.sydexit={bg:'sydney-departure-v1.png',mode:'wide',dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{s_sec:{n:'o-front-officer-green-1',x:1000,by:890,sw:70},s_pcheck:{n:'o-front-officer-blue',x:1000,by:890,sw:70}}}};
+ART.syddgate={bg:'sydney-departure-v1.png',mode:'wide',strips:[{img:'sydney-board-sin-strip.png',x:206,y:396,n:2,fw:310,fh:114,step:1}],dep:{lulu:{n:'hall-lulu-back',x:700,by:884},king:{n:'hall-king-back',x:836,by:884},npcS:{s_board:{n:'o2-front-officer-blue',x:1000,by:890,sw:70}}}};
 /*ARTSEL*/
 function artImg(n){var i=ARTI[n];if(!i){i=ARTI[n]=new Image();i.onerror=function(){i.bad=1};i.src=ARTBASE+n}return i}
 function artShow(on){if(ARTSHOW===on)return;ARTSHOW=on;cv.hidden=!!on;cvA.hidden=!on}
@@ -725,7 +739,7 @@ var AMBSND={info:'airport',hall:'airport',tdesk:'airport',map:'airport',nbo:'air
  rvn:'airport',ath:'airport',zur:'airport',ahlan:'lounge',hotel:'hotel',room:'hotel',home:'hotel',sage:'hotel',vault:'hotel',mosque:'hotel',atop:'cabin',souk:'street',city:'street',dohc:'street',
  beach:'sea',marina:'sea',fountain:'outdoor',safari:'outdoor'};
 /* 背景の名前 → カテゴリ(場所の音と食いちがうとき、こちらが先) */
-var AMBBG={taxi:'outdoor',dtaxi:'outdoor',rbus:'outdoor',ataxi:'outdoor',acafe:'street',ashop:'street',ahotel:'hotel',ztram:'outdoor',zcafe:'street',zshop:'street',zhotel:'hotel',fcafe:'street',fshop:'street',fhotel:'hotel',cabinQ:'cabin',cabin:'cabin',chotel:'hotel',cbreak:'hotel'};
+var AMBBG={taxi:'outdoor',dtaxi:'outdoor',rbus:'outdoor',ataxi:'outdoor',acafe:'street',ashop:'street',ahotel:'hotel',ztram:'outdoor',zcafe:'street',zshop:'street',zhotel:'hotel',fcafe:'street',fshop:'street',fhotel:'hotel',scafe:'street',sshop:'street',shotel:'hotel',cabinQ:'cabin',cabin:'cabin',chotel:'hotel',cbreak:'hotel'};
 var ambEl=null,ambCat=null,ambDuck=false;
 function ambOn(){try{return localStorage.getItem('kd_snd')!=='off'}catch(e){return true}}
 function ambApply(){var c=ambCat&&AMB[ambCat];

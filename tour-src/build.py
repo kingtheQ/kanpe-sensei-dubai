@@ -246,6 +246,22 @@ FDEP = [
  place('fticket', '窓口', 'info', 72, 46, '🎫', ['窓口(ReiseZentrum)', '切符の鉄道区間・座席・乗りかえ'], ['fra_dep_ticket1'], seq=1),
  place('ftrain', 'ホームと車内', 'hall', 28, 78, '🚆', ['ホームと車内', '席を探す・荷物・車掌に切符を見せる'], ['fra_dep_train1'], seq=1)]
 FRA_IDS = [i for p in FARR + FCITY + FDEP for i in p['v']]
+# シドニー(タスク102 到着4場面＋街3場面＋出発3場面)。到着は入国(SmartGate→ゲートと窓口)→検疫→空港の駅。出発は保安→出国の順(実際のT1国際線の並びに合わせた)。
+# 背景は実画4枚(art.js の sydimm1 ほか)。ホテル・店の名前は出さない。値段・時刻・搭乗口の番号は台詞にも説明にも出さない。出発案内板の中身は別素材(sydney-board-sin-strip.png)。探知犬は別素材で後から足す(場面は係員との会話だけで成立)。
+SARR = [
+ place('simmig1', 'SmartGate', 'info', 24, 16, '🛂', ['SmartGate', 'キオスクでパスポートを読み取り、チケットでゲートへ'], ['syd_immig1'], seq=1),
+ place('simmig2', 'ゲートと窓口', 'info', 72, 30, '🚪', ['ゲートと窓口', 'ゲートが開かないとき・入国の質問'], ['syd_immig2']),
+ place('squar', '検疫', 'hall', 28, 56, '🧳', ['検疫の申告', '食べ物は全部ことばで伝える'], ['syd_quarantine1']),
+ place('strain', '空港の駅', 'info', 72, 78, '🚆', ['空港の駅', '街への電車・カードでタッチ'], ['syd_train1'])]
+SCITY = [
+ place('scafe', 'カフェ', 'cafe', 24, 18, '☕', ['街角のカフェ', 'フラット・ホワイトとホットチョコレート'], ['syd_cafe1']),
+ place('sshop', 'おみやげ屋', 'souk', 72, 46, '🐨', ['おみやげ屋', 'コアラとカンガルーのぬいぐるみ'], ['syd_shop1']),
+ place('shotel', 'ホテル', 'hotel', 28, 76, '🏨', ['ホテル', 'チェックインと部屋えらび'], ['syd_hotel1'])]
+SDEP = [
+ place('scheck', 'チェックイン', 'info', 24, 16, '🎫', ['チェックイン', '荷物と席・シンガポール行き'], ['syd_dep_checkin1'], seq=1),
+ place('sexit', '保安と出国', 'info', 72, 46, '🛂', ['保安検査と出国の確認', 'トレイ・液体・パスポート'], ['syd_dep_exit1'], seq=1),
+ place('sgate', '搭乗口', 'hall', 28, 78, '🛫', ['出発案内板と搭乗口', 'シンガポール行きの行を探す'], ['syd_dep_gate1'], seq=1)]
+SYD_IDS = [i for p in SARR + SCITY + SDEP for i in p['v']]
 
 SPJS = r"""
 SP.sage={pitch:.8,m:[[trav({}),P(4,{o:'#5a3a8a',p:'#3a2a5a',h:'#d9d4c6'})]]};
@@ -863,6 +879,54 @@ MODES={arr:{p:PLACES_FARR,b:'🚉 到着',h:'フランクフルトに到着<smal
 worldAt('frankfurt');
 """
 
+# ---------- シドニー(タスク102)の話者・背景・ページの枠 ----------
+# 話者: 明るく気さく(No worries)。検疫の係員だけは、やさしいが決まりにはきびしい(ピッチを落とす)。絵は art.js の syd〜(既存の人物素材を流用)。
+SPS = r"""
+SP.s_smart={pitch:1.08,m:[[trav({hair:'cap'}),P(5,{o:'#2a5a8a',p:'#2b2b33',h:'#3b2a1f'})]]};
+SP.s_abf={pitch:1.0,m:[[trav({}),P(5,{o:'#1f3a6a',p:'#2a2a33',h:'#241a14'})]]};
+SP.s_quar={pitch:.94,m:[[trav({hair:'cap'}),P(4,{o:'#3a5a2a',p:'#2b2b33',h:'#5a3a24'})]]};
+SP.s_train={pitch:1.04,m:[[trav({}),P(3,{o:'#e0a020',p:'#2a2a33',h:'#241a14'})]]};
+SP.s_barista={pitch:1.14,m:[[trav({hair:'long'}),P(2,{o:'#3a3a42',p:'#2a2a33',h:'#a07a4a'})]]};
+SP.s_shop={pitch:1.12,m:[[trav({hair:'long'}),P(1,{o:'#2a8a8a',p:'#2a2a33',h:'#241a14'})]]};
+SP.s_front={pitch:1.05,m:[[trav({}),P(5,{o:'#2a2a33',p:'#2a2a33',h:'#5a3a24'})]]};
+SP.s_check={pitch:1.1,m:[[trav({hair:'long'}),P(5,{o:'#e0a020',p:'#2a2a33',h:'#c9a45a'})]]};
+SP.s_sec={pitch:.98,m:[[trav({hair:'cap'}),P(4,{o:'#2a5a8a',p:'#2b2b33',h:'#241a14'})]]};
+SP.s_pcheck={pitch:1.02,m:[[trav({}),P(5,{o:'#1f3a6a',p:'#2a2a33',h:'#3b2a1f'})]]};
+SP.s_board={pitch:1.06,m:[[trav({hair:'cap'}),P(5,{o:'#2a5a8a',p:'#2b2b33',h:'#5a3a24'})]]};
+"""
+# 背景のコード描画は、実画(art.js)が読めないときの保険だけ(色の面と場所の名前)
+BGS_SYD = r"""
+function sFlat(top,floor,txt){R(top,0,0,VW,98);R(floor,0,98,VW,52);T(txt,160,56,9,'#1a4a8a')}
+BGS.simmig1=function(){sFlat('#e4e2da','#b9b7ae','SMARTGATE')};
+BGS.simmig2=function(){sFlat('#e4e2da','#b9b7ae','ASSISTANCE')};
+BGS.squar=function(){sFlat('#e4e2da','#b9b7ae','BIOSECURITY')};
+BGS.strain=function(){sFlat('#e4e2da','#b9b7ae','TRAINS')};
+BGS.scafe=function(){sFlat('#9fd0ee','#c8b49a','CAFE')};
+BGS.sshop=function(){sFlat('#9fd0ee','#c8b49a','SOUVENIRS')};
+BGS.shotel=function(){sFlat('#d9c8ae','#f0ede6','HOTEL')};
+BGS.scheck=function(){sFlat('#e9e9ec','#c0c0c8','CHECK-IN')};
+BGS.sexit=function(){sFlat('#e9e9ec','#c0c0c8','SECURITY')};
+BGS.sgate=function(){sFlat('#e9e9ec','#c0c0c8','DEPARTURES')};
+"""
+MAIN_SYD = r"""
+/* ===== 世界一周編: シドニー(到着4場面・街3場面・出発3場面=タスク102。入国(SmartGate)と検疫の申告つき) ===== */
+var TOURDLG=%(dlg)s;
+for(var _k in TOURDLG)DLG[_k]=TOURDLG[_k];
+%(sp)s
+%(bg)s
+%(world)s
+%(voice)s
+%(ev)s
+var PLACES_SARR=%(arr)s,PLACES_SCITY=%(city)s,PLACES_SDEP=%(dep)s;
+PLACES_AIR=PLACES_SARR;   /* 世界マップのクリアの印: 到着の場所を全部(各1つ以上)あそんだら */
+PLACES_SARR.concat(PLACES_SCITY,PLACES_SDEP).forEach(function(p){PBY[p.id]=p});
+var TOUR_IDS=%(ids)s;
+MODES={arr:{p:PLACES_SARR,b:'🛬 到着',h:'シドニーに到着<small>入国・検疫・空港の駅</small>',snd:'syd'},
+ city:{p:PLACES_SCITY,b:'🏛 街',h:'シドニーの街<small>カフェ・おみやげ屋・ホテル</small>',snd:'syd'},
+ dep:{p:PLACES_SDEP,b:'🛫 出発',h:'シドニーから出発<small>チェックインから搭乗口まで</small>',snd:'syd'}};
+worldAt('sydney');
+"""
+
 # ---------- 窓口の地図(線を引く): 多角形から 92x16 の陸地ビットマップを作る ----------
 def wmap_rows():
     polys = [
@@ -1432,7 +1496,7 @@ print('missing IPA (zurich):', missing)
 # ---------- フランクフルト(tour/frankfurt/index.html。タスク097 到着・街・出発) ----------
 df = sub('fra_')
 main = MAIN_FRA % dict(dlg=J(df), sp=SPF, bg=BGF, world=WORLDJS, voice=VOICEJS, ev=EVJS, arr=J(FARR), city=J(FCITY), dep=J(FDEP), ids=J(FRA_IDS))
-main += _rd('check.js').replace('__OTHER_HREF__', '../zurich/?check=1').replace('__OTHER_LABEL__', 'チューリッヒ')
+main += _rd('check.js').replace('__OTHER_HREF__', '../zurich/?check=1').replace('__OTHER_LABEL__', 'チューリッヒ').replace('/*CHKX*/', "var a3=el('a','b','シドニーへ(点検モードのまま)');a3.href='../sydney/?check=1';r2.appendChild(a3);")
 main += art_js('../assets/art/', "function artIdFor(S){var v=String(S&&S.vid||'');var m={fra_arr1:'frafarr',fra_bakery1:'frafbakery',fra_tram1:'fraftram',fra_info1:'frafinfo',fra_cafe1:'frafcafe',fra_shop1:'frafshop',fra_hotel1:'frafhotel',fra_dep_board1:'frafboard',fra_dep_ticket1:'frafticket',fra_dep_train1:'fraftrain'};return m[v]||null}")   # 実画: 到着=frankfurt-arrival-v1(発車標の中身は別素材)・街=frankfurt-street-v1 / frankfurt-hotel-v1・出発=frankfurt-departure-v1。読めないときは BGF(コード描画)にもどる
 o = ev_patches(common(src, 'Europe/Berlin'))
 for _a, _b in SHARED: o = rep(o, _a, _b)
@@ -1463,6 +1527,41 @@ os.makedirs(os.path.join(ROOT, 'tour', 'frankfurt'), exist_ok=True)
 open(os.path.join(ROOT, 'tour', 'frankfurt', 'index.html'), 'w', encoding='utf-8').write(o)
 print('frankfurt built', len(o), 'bytes; dialogues', len(df), 'words', sum(len(v['words']) for v in df.values()))
 print('missing IPA (frankfurt):', missing)
+
+# ---------- シドニー(tour/sydney/index.html。タスク102 到着・街・出発) ----------
+ds = sub('syd_')
+main = MAIN_SYD % dict(dlg=J(ds), sp=SPS, bg=BGS_SYD, world=WORLDJS, voice=VOICEJS, ev=EVJS, arr=J(SARR), city=J(SCITY), dep=J(SDEP), ids=J(SYD_IDS))
+main += _rd('check.js').replace('__OTHER_HREF__', '../frankfurt/?check=1').replace('__OTHER_LABEL__', 'フランクフルト')
+main += art_js('../assets/art/', "function artIdFor(S){var v=String(S&&S.vid||'');var m={syd_immig1:'sydimm1',syd_immig2:'sydimm2',syd_quarantine1:'sydquar',syd_train1:'sydtrain',syd_cafe1:'sydcafe',syd_shop1:'sydshop',syd_hotel1:'sydhotel',syd_dep_checkin1:'sydcheck',syd_dep_exit1:'sydexit',syd_dep_gate1:'syddgate'};return m[v]||null}")   # 実画: 到着=sydney-arrival-v1・街=sydney-street-v1 / sydney-hotel-v1・出発=sydney-departure-v1(案内板の中身は別素材)。読めないときは BGS_SYD(コード描画)にもどる
+o = ev_patches(common(src, 'Australia/Sydney'))
+for _a, _b in SHARED: o = rep(o, _a, _b)
+o = rep(o, " if(!G.camp)addHelp(T)}", " if(!G.camp&&!G.scene.d.nohelp)addHelp(T)}")
+o = rep(o, '<title>カンペ先生 ドバイ編</title>', '<title>空港えいご物語 世界一周編 シドニー</title>')
+o = rep(o, SNOTE_OLD, SNOTE_NEW)
+o = rep(o, ".cue .heard.live{color:#8a7b55}", ".cue .heard.live{color:#8a7b55}\n" + VOICECSS)
+o = rep(o, "'../world/?map=1'", "'../../world/?map=1'", 2)
+o = rep(o, "worldMark('dubai')", "worldMark('sydney')")   # 到着の場所を全部あそんだら印(PLACES_AIR=PLACES_SARR)
+o = rep(o, "Snd.go(MODE==='city'?'city':'map')", "Snd.go(MODES[MODE].snd)")
+# 番ごとに話す人を替える(T.cx。保安検査の係→出国の係。アテネ・フランクフルトと同じ部品)
+o = rep(o, "S.turns.forEach(function(T,i){T.ctx=ctxAt(d,i);T.pitch=", "S.turns.forEach(function(T,i){T.ctx=ctxAt(d,i);if(T.cx)T.ctx=Object.assign({},T.ctx,T.cx);T.pitch=")
+# 最後の場面(搭乗口)が終わったら世界マップへ(次の寄港地シンガポールへ向かう土台。つなぎはあとの課題)。チェックモードは同じページにもどる
+o = rep(o, "if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}showMap()}",
+        "if(S.from==='hub'&&!S.pl.hubMap){enterHub(S.pl);return}if(S.vid==='syd_dep_gate1'){worldMark('sydney');Snd.go(null);location.href=window.__CHK?'./?check=1':'../../world/?map=1';return}showMap();/*SYD_END*/}")
+# 音: 基本は静か。明るく、ゆったりした つま弾き(港の風の低い音。シャカシャカした高い音は使わない)
+o = rep(o, KBASE, KBASE +
+        "K.syd={bpm:function(){return 60},amb:function(){loopNoise(300,.5,.011,.06,.006,'lowpass')},"
+        "st:function(s,t,e){var KS=[60,64,67,69,67,64,62,64];if(s%4===0)pluck(hz(KS[(s>>2)%8]),t,e*3.4,ngt?.065:.095);"
+        "if(s%16===8)pluck(hz(KS[0]-12),t,e*5,.08);if(s%32===0)tone(hz(36),t,e*30,'sine',.06,.6)}};")
+o = rep(o, REC, record('シドニーの'))
+o = trip_patches(o, 'sydney')
+o = rep(o, "showMap();/*SYD_END*/}", "showMap()})}")
+o = rep(o, "g.fillStyle='#143fb0';g.fillRect(0,0,5,ch);g.fillRect(cw-5,0,5,ch)", "g.fillStyle='#1a6a8a';g.fillRect(0,0,5,ch);g.fillRect(cw-5,0,5,ch)")
+o = rep(o, "setMode('arr');\nvar phoQ", main + "\nsetMode('arr');if(!/[?&]pho=/.test(location.search)&&!window.__CHK)TRIP.enter(function(){},'sydney');\nvar phoQ")
+o = rep(o, '<head>', '<head><script>' + _rd('check_shim.js') + '</script>')   # タスク056
+os.makedirs(os.path.join(ROOT, 'tour', 'sydney'), exist_ok=True)
+open(os.path.join(ROOT, 'tour', 'sydney', 'index.html'), 'w', encoding='utf-8').write(o)
+print('sydney built', len(o), 'bytes; dialogues', len(ds), 'words', sum(len(v['words']) for v in ds.values()))
+print('missing IPA (sydney):', missing)
 
 # ---------- 終わりの場面(tour/ending/index.html): 旅の一か月後のリビングで、アルバムの白いページを埋める ----------
 import window_data
