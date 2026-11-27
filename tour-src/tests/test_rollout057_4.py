@@ -21,6 +21,7 @@ THIRD = "doh_immig1 doh_immig2 doh_bag1 doh_bag2 doh_sim1 doh_sim2 doh_taxi doh_
 ROM10 = ['rom_bag1','rom_info1','rom_taxi1','rom_train1','rom_cafe1','rom_shop1','rom_hotel1','rom_dep_ticket1','rom_dep_platform1','rom_dep_train1']   # タスク094(ローマ・新形式で作成)
 FRA10 = ['fra_arr1','fra_bakery1','fra_tram1','fra_info1','fra_cafe1','fra_shop1','fra_hotel1','fra_dep_board1','fra_dep_ticket1','fra_dep_train1']   # タスク097(フランクフルト)
 ZUR10 = ['zur_arr1','zur_locker1','zur_tram1','zur_info1','zur_cafe1','zur_shop1','zur_hotel1','zur_dep_board1','zur_dep_ticket1','zur_dep_train1']   # タスク096(チューリッヒ。新形式で作成)
+HNL10 = ['hnl_form1','hnl_bag1','hnl_lei1','hnl_trolley1','hnl_cafe1','hnl_shop1','hnl_hotel1','hnl_dep_board1','hnl_dep_ticket1','hnl_dep_gate1']   # タスク101(ホノルル)
 SYD10 = ['syd_immig1','syd_immig2','syd_quarantine1','syd_train1','syd_cafe1','syd_shop1','syd_hotel1','syd_dep_checkin1','syd_dep_exit1','syd_dep_gate1']   # タスク102(シドニー。新形式で作成)
 SECOND = """hnd_checkin_ow hnd_checkin_star hnd_sec hnd_exit hnd_gate_ow hnd_gate_star hnd_board_ow hnd_board_star hnd_plane_ow hnd_plane_star hnd_return""".split()   # 第2弾(test_rollout057_2.py)
 OLD = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'rollout057_4_old.json'), encoding='utf-8'))   # 変換前(56b8d04)の台本の基準
@@ -49,7 +50,7 @@ dl = json.loads(j.stdout.strip().split('\n')[-1])
 cnt_flow2 = sorted(k for k, v in dl.items() if v.get('flow2'))
 
 ATH10 = ['ath_cafe1','ath_checkin1','ath_depimmig1','ath_gate1','ath_hotel1','ath_immig1','ath_immig2','ath_shop1','ath_taxi1','ath_transit1']   # タスク090・091(アテネ・main で変換済み)
-chk('S0 flow2 の場面は nbo_java1 + 第1弾28 + 第2弾11 + 第3弾32 + アテネ10 + ローマ10 + フランクフルト10 + チューリッヒ10 + シドニー10 + 第4弾30 = 152(イベント・窓口・英会話カフェには付いていない)', cnt_flow2 == sorted(SCN + THIRD + FIRST + SECOND + ['nbo_java1'] + ATH10 + ROM10 + FRA10 + ZUR10 + SYD10), len(cnt_flow2))
+chk('S0 flow2 の場面は nbo_java1 + 第1弾28 + 第2弾11 + 第3弾32 + アテネ10 + ローマ10 + フランクフルト10 + チューリッヒ10 + ホノルル10 + シドニー10 + 第4弾30 = 162(イベント・窓口・英会話カフェには付いていない)', cnt_flow2 == sorted(SCN + THIRD + FIRST + SECOND + ['nbo_java1'] + ATH10 + ROM10 + FRA10 + ZUR10 + HNL10 + SYD10), len(cnt_flow2))
 for sid in SCN:
     d_ = dl[sid]; L = d_['lines']; cards = [i for i, l in enumerate(L) if l.get('cards')]
     opts = L[cards[0]]['opts'] if cards else []

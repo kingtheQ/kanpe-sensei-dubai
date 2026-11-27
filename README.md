@@ -23,6 +23,7 @@
 - `tour/` : 世界一周編 賢者・窓口・ナイロビ(到着・空港・出発)。機内の会話を終えると、世界マップの飛ぶ画面をはさんでドーハへ。
 - `tour/doha/` : 世界一周編 ドーハ(到着)。
 - `tour/rovaniemi/` : 世界一周編 ロヴァニエミ(到着)。
+- `tour/honolulu/` : 世界一周編 ホノルル(到着4・街3・出発3の10場面。到着は国内線で入国審査なし・出発はシドニー行き)。`tour/frankfurt/` の次(ニューヨーク100との接続は未)。
 - `tour/frankfurt/` : 世界一周編 フランクフルト(鉄道の到着・街・出発の10場面。入国審査なし)。`tour/athens/` の次。
 - `tour/sydney/` : 世界一周編 シドニー(到着4=SmartGate・ゲートと窓口・検疫・空港の駅／街3／出発3の10場面)。出発案内板の中身は別素材(`tour/assets/art/sydney-board-sin-strip.png`、作り方 `tour-src/art/prep_sydney102.py`)。探知犬は別素材で後から足す。ホノルル(101)の次。
 - `tour/rome/` : 世界一周編 ローマ(到着4・街3・出発3の10場面。入国審査なし、出発は鉄道)。発車標の中身は背景に描かず別素材(`tour/assets/art/rome-departure-board-strip.png`、`python3 -I tour-src/art/prep_rome_board.py` で生成)を重ねる。点検: `tour/rome/?check=1`、テスト: `tour-src/tests/test_rome094.py`。

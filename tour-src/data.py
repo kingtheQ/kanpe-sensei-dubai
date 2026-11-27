@@ -522,6 +522,8 @@ ath_data.add(D)
 # ---- フランクフルト(タスク097 到着4場面・街3場面・出発3場面): 新形式(flow2・日本語カード)。鉄道の旅(入国審査なし) ----
 import fra_data
 fra_data.add(D)
+import hon_data
+hon_data.add(D)
 # ---- シドニー(タスク102 到着4場面・街3場面・出発3場面): 新形式(flow2・日本語カード)。入国(SmartGate)と検疫の申告つき ----
 import syd_data
 syd_data.add(D)
