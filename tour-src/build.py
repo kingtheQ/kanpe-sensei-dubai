@@ -1283,7 +1283,7 @@ o = rep(o, "function onPass(){\n var Td=G.scene&&G.scene.turns[G.ti];if(Td&&Td.d
 o = rep(o, "function onFail(){\n", "function onFail(){\n if(G.scene&&G.scene.d&&G.scene.d.camp78){gsFail();return}\n")   # 083: 合宿の失敗は専用の流れ(自分の声→お手本→言い直し)
 o = rep(o, "try{Snd.duck(1);r.start();listening=true;", "try{Snd.duck(1);if(G.scene&&G.scene.d&&G.scene.d.camp78)gsRecOn();r.start();listening=true;")   # 083: 聞き取りと同時に、自分の声を端末のメモリにだけ録る
 o = rep(o, "function npcHide(){if(!(PREF.mode>=1)||G.camp||!G.scene)return false;", "function npcHide(){if(!(PREF.mode>=1)||G.camp||!G.scene||(G.scene.d&&G.scene.d.camp78))return false;")
-o = rep(o, "function cueBlind(T){return (PREF.mode===2||(PREF.mode===3&&G.tries<2))&&!G.camp&&", "function cueBlind(T){return (PREF.mode===2||(PREF.mode===3&&G.tries<2))&&!G.camp&&!(G.scene&&G.scene.d&&G.scene.d.camp78)&&")
+o = rep(o, "function cueBlind(T){return (PREF.mode===2||(PREF.mode===3&&G.tries<2)||(PREF.mode===4&&G.tries<1))&&!G.camp&&", "function cueBlind(T){return (PREF.mode===2||(PREF.mode===3&&G.tries<2)||(PREF.mode===4&&G.tries<1))&&!G.camp&&!(G.scene&&G.scene.d&&G.scene.d.camp78)&&")
 o = rep(o, "function showMap(){\n G.view='map';", "function showMap(){\n if(typeof gsOff==='function')gsOff();\n G.view='map';")
 # 羽田の機内の会話が終わったとき、ほかの出来事より先に差しこむ(最初の長距離便で1回)
 o = rep(o, "if(evGate('after',S.pl.id,function(){G.scene=S;finishScene()}))return}",

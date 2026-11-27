@@ -1482,10 +1482,10 @@ function startScene(){
  var b=el('button','btn go','GO！');b.type='button';panel.appendChild(b);setTimeout(function(){if(b.isConnected)b.classList.add('shake')},3000);
  b.addEventListener('click',function(){if(S.d.story)playInter(-1,npcTurn);else npcTurn()})}
 /* ---------- 3つのモード(タスク074): 会話の文字の出し方だけを変える。台本データは3モード共通 ----------
-   PREF.mode 0=カンペ(現行) / 1=耳学＆カンペ(相手の台詞の文字を出さない) / 2=耳学(自分のカンペも出さず、お手本が先に流れる) / 3=耳学(サポートカンペ付き。087: 2回つまずいたら3回目だけカンペを出す)
+   PREF.mode 0=カンペ(現行) / 1=耳学＆カンペ(相手の台詞の文字を出さない) / 2=耳学(自分のカンペも出さず、お手本が先に流れる) / 3=耳学(サポートカンペ付き。087: 2回つまずいたら3回目だけカンペを出す) / 4=耳学(サポートカンペ付き)2(106: 1回つまずいたら2回目からカンペ、3回目も出したまま)
    対象外: 宣言・読み返しの診断ターン(T.diag)、強化合宿(G.camp)。単語パート・場面の導入文は npcTurn/showCue を通らない */
 function npcHide(){if(!(PREF.mode>=1)||G.camp||!G.scene)return false;var T=G.scene.turns&&G.scene.turns[G.ti];return !(T&&T.diag)}
-function cueBlind(T){return (PREF.mode===2||(PREF.mode===3&&G.tries<2))&&!G.camp&&!(T&&T.diag)}   /* 087: 3=耳学(サポートカンペ付き)。2回つまずいたあとの3回目(G.tries===2)だけカンペを出す */
+function cueBlind(T){return (PREF.mode===2||(PREF.mode===3&&G.tries<2)||(PREF.mode===4&&G.tries<1))&&!G.camp&&!(T&&T.diag)}   /* 087: 3=耳学(サポートカンペ付き)。2回つまずいたあとの3回目(G.tries===2)だけカンペを出す。106: 4=耳学(サポートカンペ付き)2。1回つまずいたあとの2回目・3回目(G.tries>=1)はカンペを出したまま */
 function npcMsg(text,w){if(npcHide()){clearInterval(G.typeTimer);who.textContent=w||'';msgText.textContent='';return}setMsg(text,w)}
 function hideNum(){return !G.camp}   /* 数字のスコア・失敗回数は出さない(タスク074)。強化合宿だけ従来どおり */
 function npcTurn(){
@@ -1783,7 +1783,7 @@ function onFail(){
 /* 失敗ルール(タスク074・全モード共通): 失敗→相手の聞き返し→おてほんが自動で流れて言い直し(ボタンなし)→3回目の失敗でルルが代わりに言って物語が進む。
    自動救済は save.help を減らさない。救済された文も noteWeak で弱点メモに残る。数字のスコア・失敗回数は出さない。強化合宿(G.camp)だけ従来の流れ */
 function failDemo(){var T=G.scene&&G.scene.turns[G.ti];if(G.phase!=='retry'||!T)return;if(G.mute)G.mute();say(cueText(T.cue),.8,1,gd(function(){later(400,function(){if(G.phase!=='retry')return;
-  if(PREF.mode===3&&G.tries===2&&!G.camp&&!T.diag){showCue();return}   /* 087: 耳学(サポートカンペ付き)は、2回つまずいたあとの3回目にカンペを出して聞く(カードを作り直す。おてほんはいま流したので自動では流さない) */
+  if(((PREF.mode===3&&G.tries===2)||(PREF.mode===4&&G.tries>=1))&&!G.camp&&!T.diag){showCue();return}   /* 087: 耳学(サポートカンペ付き)は、2回つまずいたあとの3回目にカンペを出して聞く(カードを作り直す。おてほんはいま流したので自動では流さない) */
   if(G.kick)G.kick()})}))}
 function autoRescue(){
  var T=G.scene.turns[G.ti];G.phase='help';G.tries=0;noteWeak(T);
@@ -1834,9 +1834,9 @@ function campDone(){
  showCue();var st=panel.querySelector('.stat');if(st){st.className='stat ok';st.textContent='強化合宿おわり！ ヘルプが '+HELPMAX+'回 ふっかつ'}}
 
 /* ---------- せってい(どのページからでも ひらける) ---------- */
-var PREF={bgm:70,beat:80,voice:100,rate:1,silent:0,big:0,pitch:1.6,mode:0},PREFKEY='kd_prefs_v1';   /* mode(タスク074): 0=カンペ(既定) 1=耳学＆カンペ 2=耳学 3=耳学(サポートカンペ付き・087) */
+var PREF={bgm:70,beat:80,voice:100,rate:1,silent:0,big:0,pitch:1.6,mode:0},PREFKEY='kd_prefs_v1';   /* mode(タスク074): 0=カンペ(既定) 1=耳学＆カンペ 2=耳学 3=耳学(サポートカンペ付き・087) 4=耳学(サポートカンペ付き)2(106) */
 try{var p0=JSON.parse(localStorage.getItem(PREFKEY)||'null');if(p0&&typeof p0==='object')Object.keys(PREF).forEach(function(k){if(typeof p0[k]==='number'&&isFinite(p0[k]))PREF[k]=p0[k]})}catch(e){}
-if(PREF.mode!==1&&PREF.mode!==2&&PREF.mode!==3)PREF.mode=0;
+if(PREF.mode!==1&&PREF.mode!==2&&PREF.mode!==3&&PREF.mode!==4)PREF.mode=0;
 function prefSave(){try{localStorage.setItem(PREFKEY,JSON.stringify(PREF))}catch(e){}}
 function prefApply(){Snd.setBgm(PREF.bgm);Snd.setBeat(PREF.beat);document.body.classList.toggle('big',!!PREF.big)}
 var SETICON='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f4f1e8" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="2.4" fill="#05070f"/><circle cx="15" cy="12" r="2.4" fill="#05070f"/><circle cx="8" cy="17" r="2.4" fill="#05070f"/></svg>';
@@ -1851,9 +1851,9 @@ function sSlider(t,key){var l=el('label','srow');l.appendChild(document.createTe
 function sSeg(items,key){var d=el('div','sseg'),bs=[];items.forEach(function(it){var b=el('button',null,it[0]);b.type='button';bs.push([b,it[1]]);b.addEventListener('click',function(){PREF[key]=it[1];prefSave();prefApply();sync()});d.appendChild(b)});
  function sync(){bs.forEach(function(x){x[0].setAttribute('aria-pressed',PREF[key]===x[1]?'true':'false')})}sync();return d}
 /* モード名と1行の説明(タイトル画面 world/index.html と同じ文言) */
-var MODES74=[['カンペモード','文字のカンペを見て言う'],['耳学＆カンペモード','相手は音だけ。自分の答えはカンペあり'],['耳学モード','全部、音だけ。耳と口だけで旅する'],['耳学（サポートカンペ付き）','耳学モード。2回つまずいたら、3回目だけ文字']];
+var MODES74=[['カンペモード','文字のカンペを見て言う'],['耳学＆カンペモード','相手は音だけ。自分の答えはカンペあり'],['耳学モード','全部、音だけ。耳と口だけで旅する'],['耳学（サポートカンペ付き）','耳学モード。2回つまずいたら、3回目だけ文字'],['耳学（サポートカンペ付き）2','耳学モード。1回つまずいたら、2回目から文字']];
 /* モードの説明(087・キング確認済みの文言。タイトル画面 world/index.html と同じ) */
-var MODEHELP=[['カンペモード','相手の言葉も、自分の言葉も、文字を見ながら言えます。'],['耳学＆カンペモード','相手の言葉は音だけ。自分の言葉は文字を見て言えます。'],['耳学モード','ぜんぶ音だけ。文字は出ません。ルルが代わりに言うときだけ、文字が出ます。'],['耳学（サポートカンペ付き）','基本は耳学モード。2回つまずいたら、3回目だけ文字が出ます。']];
+var MODEHELP=[['カンペモード','相手の言葉も、自分の言葉も、文字を見ながら言えます。'],['耳学＆カンペモード','相手の言葉は音だけ。自分の言葉は文字を見て言えます。'],['耳学モード','ぜんぶ音だけ。文字は出ません。ルルが代わりに言うときだけ、文字が出ます。'],['耳学（サポートカンペ付き）','基本は耳学モード。2回つまずいたら、3回目だけ文字が出ます。'],['耳学（サポートカンペ付き）2','基本は耳学モード。1回つまずいたら、2回目から文字が出ます。']];
 function openSettings(){
  $m('setCtx').textContent='いま ひらいている ところ：'+viewName()+' ・ もどると つづきから';
  var b=$m('setBody');b.textContent='';

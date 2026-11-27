@@ -138,6 +138,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .mopt[hidden]{display:none}
 .mhbtn{display:block;margin:4px 0 2px 32px;background:none;border:2px solid #5b6690;border-radius:4px;color:#c8d0ea;font:inherit;font-size:13px;font-weight:700;padding:5px 12px;min-height:34px}
 .mhbtn:focus-visible{outline:2px solid #ffc72c;outline-offset:2px}
+.sbox{max-height:min(46vh,330px);overflow-y:auto;padding:4px 2px;margin:2px 0 4px;-webkit-overflow-scrolling:touch}.sl{font-size:17px;line-height:1.35;padding:2px 8px;color:#9aa6c4;border-left:4px solid transparent}.sl.on{color:#ffc72c;font-weight:800;border-left-color:#ffc72c;background:#0f1630}
 .mhelp{margin:6px 0 2px;padding:8px 10px;border:2px solid #2a3358;border-radius:4px;background:#0f1630}
 .mhelp dl{margin:0}.mhelp dt{font-size:14px;font-weight:800;color:#ffc72c;margin-top:6px}.mhelp dt:first-child{margin-top:0}.mhelp dd{margin:1px 0 0;font-size:13px;line-height:1.45;color:#e6ebff}
 .mopt:focus-visible{outline:2px solid #ffc72c;outline-offset:-2px}
@@ -181,12 +182,14 @@ button{font:inherit;color:inherit;cursor:pointer}
    <button type="button" class="copt" id="cNew"><span class="cur">▶</span>はじめから</button>
    <button type="button" class="copt" id="cCont"><span class="cur">▶</span>つづきから</button>
    <button type="button" class="copt" id="cNarr"><span class="cur">▶</span>せつめいを きく</button>
+   <button type="button" class="copt" id="cSong"><span class="cur">▶</span>うたを うたう</button>
    <div class="msec" id="mSel" role="radiogroup" aria-label="あそびかた">
     <div class="cinfo">あそびかた</div>
     <button type="button" class="mopt" role="radio" data-m="0"><span class="cur">▶</span><span><b>カンペモード</b><small>文字のカンペを見て言う</small></span></button>
     <button type="button" class="mopt" role="radio" data-m="1"><span class="cur">▶</span><span><b>耳学＆カンペモード</b><small>相手は音だけ。自分の答えはカンペあり</small></span></button>
     <button type="button" class="mopt" role="radio" data-m="2"><span class="cur">▶</span><span><b>耳学モード</b><small>全部、音だけ。耳と口だけで旅する</small></span></button>
     <button type="button" class="mopt" role="radio" data-m="3"><span class="cur">▶</span><span><b>耳学（サポートカンペ付き）</b><small>耳学モード。2回つまずいたら、3回目だけ文字</small></span></button>
+    <button type="button" class="mopt" role="radio" data-m="4"><span class="cur">▶</span><span><b>耳学（サポートカンペ付き）2</b><small>耳学モード。1回つまずいたら、2回目から文字</small></span></button>
     <button type="button" class="mhbtn" id="mHelpBtn" aria-expanded="false" aria-controls="mHelp">モードの説明</button>
     <div class="mhelp" id="mHelp" hidden>
      <dl>
@@ -194,6 +197,7 @@ button{font:inherit;color:inherit;cursor:pointer}
       <dt>耳学＆カンペモード</dt><dd>相手の言葉は音だけ。自分の言葉は文字を見て言えます。</dd>
       <dt>耳学モード</dt><dd>ぜんぶ音だけ。文字は出ません。ルルが代わりに言うときだけ、文字が出ます。</dd>
       <dt>耳学（サポートカンペ付き）</dt><dd>基本は耳学モード。2回つまずいたら、3回目だけ文字が出ます。</dd>
+      <dt>耳学（サポートカンペ付き）2</dt><dd>基本は耳学モード。1回つまずいたら、2回目から文字が出ます。</dd>
      </dl>
      <button type="button" class="mhbtn" id="mHelpClose">とじる</button>
     </div>
@@ -202,6 +206,11 @@ button{font:inherit;color:inherit;cursor:pointer}
   <div class="cmdwin" id="cmdNarr" hidden>
    <div class="cinfo" aria-hidden="true">🔊</div>
    <button type="button" class="copt" id="cGo"><span class="cur">▶</span>すすむ</button>
+  </div>
+  <div class="cmdwin" id="cmdSong" hidden>
+   <div class="cinfo" aria-hidden="true">♪</div>
+   <div class="sbox" id="sBox"></div>
+   <button type="button" class="copt" id="cSongClose"><span class="cur">▶</span>とじる</button>
   </div>
   <div class="cmdwin" id="cmdAsk" hidden>
    <div class="ask">せかいマップと せかいいっしゅうの きろくを けして、はじめます。いいですか？</div>
@@ -954,7 +963,7 @@ var CHANT=(function(){
  }
  /* オープニングの語り(タスク074)のあいだは一時停止し、終わったら続きから(タイトルにいる間だけ。止まったあとは再開しない) */
  function narr(on){st.narr=on?1:0;sync()}
- return {start:start,stop:stop,sync:sync,narr:narr,arm:arm,leave:leave,resume:resume,has:function(){return !!st.el},
+ return {start:start,stop:stop,sync:sync,narr:narr,arm:arm,leave:leave,resume:resume,has:function(){return !!st.el},time:function(){return st.el?st.el.currentTime:-1},   /* 106: 歌詞パネル用。再生位置(秒)。鳴っていなければ -1 */
   playing:function(){return !!(st.el&&!st.el.paused&&!st.el.ended)},set hook(h){st.hook=h},get hook(){return st.hook}}
 })();
 window.CHANT=CHANT;
@@ -1545,9 +1554,9 @@ function tone(f,t0,d,type,vol){var a=AC;if(!a)return;var o=a.createOscillator(),
 function jingle(){if(!ac())return;[[523.25,0],[659.25,.12],[783.99,.24],[1046.5,.36]].forEach(function(n){tone(n[0],n[1],.22,'square',.04)});[523.25,783.99,1046.5].forEach(function(f){tone(f,.36,.8,'triangle',.045)})}
 function blip(){if(!ac())return;tone(880,0,.08,'square',.035);tone(1318.5,.06,.1,'square',.035)}
 
-/* ---------- 3つのモード(タスク074): 保存は既存の kd_prefs_v1 の中の数値キー mode だけ(0=カンペ 1=耳学＆カンペ 2=耳学 3=耳学(サポートカンペ付き。タスク087))。他のキーは触らない ---------- */
+/* ---------- 3つのモード(タスク074): 保存は既存の kd_prefs_v1 の中の数値キー mode だけ(0=カンペ 1=耳学＆カンペ 2=耳学 3=耳学(サポートカンペ付き。タスク087) 4=耳学(サポートカンペ付き)2(タスク106))。他のキーは触らない ---------- */
 var PREFKEY='kd_prefs_v1';
-function modeLoad(){try{var p=JSON.parse(localStorage.getItem(PREFKEY)||'null');var m=(p&&typeof p==='object')?p.mode:0;return (m===1||m===2||m===3)?m:0}catch(e){return 0}}
+function modeLoad(){try{var p=JSON.parse(localStorage.getItem(PREFKEY)||'null');var m=(p&&typeof p==='object')?p.mode:0;return (m===1||m===2||m===3||m===4)?m:0}catch(e){return 0}}
 function modeSave(m){var p=null;try{p=JSON.parse(localStorage.getItem(PREFKEY)||'null')}catch(e){}
  if(!p||typeof p!=='object'||Array.isArray(p))p={};p.mode=m;try{localStorage.setItem(PREFKEY,JSON.stringify(p))}catch(e){}}
 function modeShow(){var m=modeLoad();[].forEach.call(document.querySelectorAll('#mSel .mopt'),function(b){b.setAttribute('aria-checked',+b.getAttribute('data-m')===m?'true':'false')})}
@@ -1584,6 +1593,30 @@ function stopOpeningNarration(){
  if(was){try{CHANT.narr(false)}catch(e){}}}
 window.addEventListener('pagehide',stopOpeningNarration);
 
+/* ---------- うたを うたう(タスク106): タイトルで流れているチャント(song-chant.mp3・51秒)の歌詞パネル ----------
+   歌詞表 SONG_LYRICS は [開始秒, 行] の表。時刻は初版の近似(節のまとまりで51秒に配分)。キングが実機で聞いて直すのは、この表の秒だけ(拍表 beats と同じ流儀)。
+   再生位置 CHANT.time()(currentTime)に合わせて1行ずつ強調する。チャントは止めない・頭出ししない。発音課題・採点・マイクはなし。 */
+var SONG_LEN=51;
+var SONG_LYRICS=[
+[0,'Hey, Lulu! (Hey, Lulu!)'],[2,'Are you ready? (I am ready!)'],[4,'One, two, three, go!'],
+[6.5,'Pack my bag (Pack my bag!)'],[8.5,'Sky is blue (Sky is blue!)'],[10.5,'Every airport (Every airport!)'],[12.5,'Waits for you (Waits for you!)'],
+[15,'This is my promise, Lulu'],[18,'We will travel around the world together'],[21.5,'And have fun every day'],
+[24.5,'My body is healthy, my mind is calm'],[28,'I eat good food, sleep well'],[31,'And never push too hard'],
+[34,'When I feel afraid'],[36.5,'I breathe and think of you'],[39.5,'We both help each other'],
+[42,"Let's see every village"],[44,'Hear every voice'],[45.5,'Share every little treasure'],[47.5,'Thank you for being here'],[49.5,"Let's go, let's go, let's go!"]];
+window.SONG_LYRICS=SONG_LYRICS;
+var SONGP={on:0,timer:0,cur:-2};
+function songIdx(t){if(!(t>=0))return -1;var k=-1;for(var i=0;i<SONG_LYRICS.length;i++){if(SONG_LYRICS[i][0]<=t)k=i;else break}return k}
+function songTick(){var k=songIdx(CHANT.time());if(k===SONGP.cur)return;SONGP.cur=k;
+ var ls=$('sBox').children;for(var i=0;i<ls.length;i++){ls[i].className=i===k?'sl on':'sl'}
+ if(k>=0){var e=ls[k],b=$('sBox');b.scrollTop=Math.max(0,e.offsetTop-b.offsetTop-(b.clientHeight-e.offsetHeight)/2)}}
+function songOpen(){var b=$('sBox');b.textContent='';SONG_LYRICS.forEach(function(r){var d=document.createElement('div');d.className='sl';d.textContent=r[1];b.appendChild(d)});
+ SONGP.cur=-2;$('cmdMain').hidden=true;$('cmdSong').hidden=false;$('cSongClose').focus({preventScroll:true});
+ if(!CHANT.has()){try{CHANT.start(0,true)}catch(e){}}   /* まだ鳴っていないとき(最初のタッチ前)は、このタッチをきっかけに先頭から始める。鳴っていれば何もしない(止めない・頭出ししない) */
+ SONGP.on=1;clearInterval(SONGP.timer);SONGP.timer=setInterval(songTick,100);songTick()}
+function songClose(){SONGP.on=0;clearInterval(SONGP.timer);$('cmdSong').hidden=true;$('cmdMain').hidden=false;$('cSong').focus({preventScroll:true})}
+window.addEventListener('pagehide',function(){clearInterval(SONGP.timer)});
+
 /* ---------- はじめから / つづきから ---------- */
 function hasSave(s){return s.at!=='haneda'||Object.keys(s.cleared).length>1||Object.keys(s.seen).length>1}
 /* 085-A: ゲーム開始(場面に入る)の時点でタイトルの音楽を止める。続きを tour/ へ渡さない(kw-chant も消す) */
@@ -1600,13 +1633,14 @@ function openCmd(){
  var info=$('cInfo');info.hidden=!hs;
  if(hs)info.textContent=(TRIP.inTrip()?'区間　'+TRIP.landed()+' / '+TRIP.total():'スタンプ　'+TRIP.stamps())+'　いま '+AP[S.at].n;
  var cc=$('cCont');cc.setAttribute('aria-disabled',hs?'false':'true');
- modeShow();$('cmdNarr').hidden=true;$('cmdMain').hidden=false;$('cmdAsk').hidden=true;$('cmd').hidden=false;$('startBtn').hidden=true;
+ modeShow();clearInterval(SONGP.timer);$('cmdSong').hidden=true;$('cmdNarr').hidden=true;$('cmdMain').hidden=false;$('cmdAsk').hidden=true;$('cmd').hidden=false;$('startBtn').hidden=true;
  (hs?cc:$('cNew')).focus({preventScroll:true})}
 $('startBtn').addEventListener('click',function(){jingle();openCmd()});
 function hasTour(){try{return localStorage.getItem('kanpe-tour-save-v1')!==null}catch(e){return false}}
 $('cNew').addEventListener('click',function(){blip();S=load();if(hasSave(S)||hasTour()){$('cmdMain').hidden=true;$('cmdAsk').hidden=false;$('cNo').focus({preventScroll:true})}else beginNew()});
 $('cCont').addEventListener('click',function(){if($('cCont').getAttribute('aria-disabled')==='true')return;blip();enterMap()});
 $('cNarr').addEventListener('click',function(){blip();playOpeningNarration()});
+$('cSong').addEventListener('click',function(){blip();songOpen()});$('cSongClose').addEventListener('click',function(){blip();songClose()});
 $('cGo').addEventListener('click',function(){blip();enterTour()});
 $('cNo').addEventListener('click',function(){blip();$('cmdAsk').hidden=true;$('cmdMain').hidden=false;$('cNew').focus({preventScroll:true})});
 $('cYes').addEventListener('click',function(){blip();try{localStorage.removeItem(KEY)}catch(e){}try{localStorage.removeItem('kanpe-tour-save-v1')}catch(e){}TRIP.reset();beginNew()});  /* 世界一周編の記録も消す(タスク022)。旅のメモ kanpe-tour-memo-v1 と 声の記録 kanpe-voice-v1 は残す */
