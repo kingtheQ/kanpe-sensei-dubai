@@ -65,7 +65,7 @@ var CHANT=(function(){
  }
  /* オープニングの語り(タスク074)のあいだは一時停止し、終わったら続きから(タイトルにいる間だけ。止まったあとは再開しない) */
  function narr(on){st.narr=on?1:0;sync()}
- return {start:start,stop:stop,sync:sync,narr:narr,arm:arm,leave:leave,resume:resume,has:function(){return !!st.el},
+ return {start:start,stop:stop,sync:sync,narr:narr,arm:arm,leave:leave,resume:resume,has:function(){return !!st.el},time:function(){return st.el?st.el.currentTime:-1},   /* 106: 歌詞パネル用。再生位置(秒)。鳴っていなければ -1 */
   playing:function(){return !!(st.el&&!st.el.paused&&!st.el.ended)},set hook(h){st.hook=h},get hook(){return st.hook}}
 })();
 window.CHANT=CHANT;
